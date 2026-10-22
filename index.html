@@ -1672,13 +1672,47 @@ const World = (function () {
   function pickBody() { const r = Math.random(); return r < 0.15 ? 'jacked' : r < 0.3 ? 'obese' : 'normal'; }
   function bodyR(b) { return b === 'obese' ? 0.85 : b === 'jacked' ? 0.8 : 0.575; }
   function slotPos(i, c) { const s = SLOTS[Math.min(i, SLOTS.length - 1)]; return new T.Vector3(s[0] + (c ? c.jx : 0), 0, s[1] + (c ? c.jz : 0)); }
+  function rollEvt() { const k = B.eventRoll(); if (k === 'inspector' || k === 'driver') { spawnVisitor(k); return null; } return k; }
+  /* inspector and delivery driver: walk in, go behind the counter and wait to be clicked */
+  let visitor = null; const VIS_AT = [2.4, -2.1];
+  function spawnVisitor(kind) {
+    if (!api.ok || !custGroup) return false;
+    if (visitor) custGroup.remove(visitor.g);
+    const seed = Math.floor(Math.random() * 100000), p = person(seed, false, false, false, 'normal', evtOpts(kind, seed));
+    p.position.set(5, 0, 9.6); custGroup.add(p);
+    const V = (x, z) => new T.Vector3(x, 0, z);
+    visitor = { g: p, kind, seed, r: 0.5, wp: [V(5, 6.2), V(5, 1.5), V(5, -2.1), V(VIS_AT[0], VIS_AT[1])], phase: 0, state: 'in', dy: 3.0, speed: 2.5, sayT: 0, heading: 0 };
+    return true;
+  }
+  function visitorTick(dt) {
+    const v = visitor; if (!v) return;
+    const w = moveTo(v, v.speed, dt, queue.concat(leaving, extras, cops, staff)); v.phase += dt; walkAnim(v.g, v.phase, w, dt);
+    const P = v.g.userData.P, p = v.g.position;
+    if (!w && !v.wp.length) {
+      if (v.state === 'in') { v.state = 'wait'; v.sayT = 0; if (B.onVisitorArrive) B.onVisitorArrive(v.kind); }
+      else if (v.state === 'out') { custGroup.remove(v.g); visitor = null; return; }
+    }
+    if (v.state === 'wait') {
+      v.g.rotation.y = lerpAngle(v.g.rotation.y, Math.atan2(PZ.x - p.x, PZ.z - p.z), Math.min(1, dt * 4));
+      P.arms[0].rotation.x = -2.2 + Math.sin(time * 6) * 0.25; p.y = Math.abs(Math.sin(time * 3)) * 0.05;
+      v.sayT -= dt; if (v.sayT <= 0) { v.sayT = 2.4; say(v, v.kind === 'driver' ? '\uD83D\uDCE6' : '\uD83D\uDCCB', 'emo'); }
+    } else p.y = 0;
+  }
+  api.visitorInfo = function () { return visitor ? { kind: visitor.kind, seed: visitor.seed, state: visitor.state } : null; };
+  api.visitorLeave = function () {
+    const v = visitor; if (!v || v.state === 'out') return;
+    const V = (x, z) => new T.Vector3(x, 0, z); v.state = 'out'; v.g.position.y = 0;
+    v.wp = [V(5, -2.1), V(5, 1.5), V(5, 6.2), V(5, 10.8)];
+  };
+  api.visitorReact = function (ok) { if (visitor) say(visitor, ok ? '\uD83D\uDC4D' : '\uD83D\uDE20', 'emo'); };
+  api.visitorClick = function () { if (B.onVisitor) B.onVisitor(); };
   function evtOpts(k, seed) {
-    if (k === 'inspector') return { inspector: true, shirt: '#4B5563', scrub: '#1F2937', gender: seed % 2 === 0 ? 'f' : 'm' };
-    if (k === 'driver') return { driver: true, shirt: '#8B5A2B', scrub: '#4B3621', gender: 'm' };
+    if (k === 'inspector') return { inspector: true, shirt: '#4B5563', scrub: '#1F2937', gender: seed % 2 === 0 ? 'f' : 'm', tag: { vis: true } };
+    if (k === 'driver') return { driver: true, shirt: '#8B5A2B', scrub: '#4B3621', gender: 'm', tag: { vis: true } };
     return undefined;
   }
   function spawnCustomer(instant, i) {
-    const seed = Math.floor(Math.random() * 100000), special = queue.some(q => q.karen || q.sweaty || q.elder || q.evt), karen = !instant && !special && !!B.karenRoll(), sweaty = !instant && !special && !karen && !!B.sweatyRoll(), elder = !instant && !special && !karen && !sweaty && !!(B.elderRoll && B.elderRoll()), evt = !instant && !special && !karen && !sweaty && !elder && !!(B.eventRoll) ? B.eventRoll() : null, body = karen || sweaty || elder || evt ? 'normal' : pickBody(), p = person(seed, false, karen, sweaty, body, elder ? { elder: true, gender: seed % 2 === 0 ? 'f' : 'm' } : evtOpts(evt, seed));
+    const seed = Math.floor(Math.random() * 100000), special = queue.some(q => q.karen || q.sweaty || q.elder || q.evt), karen = !instant && !special && !!B.karenRoll(), sweaty = !instant && !special && !karen && !!B.sweatyRoll(), elder = !instant && !special && !karen && !sweaty && !!(B.elderRoll && B.elderRoll()), evt = !instant && !special && !karen && !sweaty && !elder && !visitor && !!(B.eventRoll) ? rollEvt() : null, body = karen || sweaty || elder || evt ? 'normal' : pickBody(), p = person(seed, false, karen, sweaty, body, elder ? { elder: true, gender: seed % 2 === 0 ? 'f' : 'm' } : evtOpts(evt, seed));
     const c = { g: p, seed, wp: [], mood: null, moodT: 0, phase: Math.random() * 6, hop: 0, face: 0, karen, sweaty, elder, evt, body, r: bodyR(body), angry: karen, puffT: 0, dripT: 0, jx: (Math.random() - 0.5) * 0.3, jz: (Math.random() - 0.5) * 0.3, faceJit: (Math.random() - 0.5) * 0.8, wait: 0, emoteT: 3 + Math.random() * 8 };
     custGroup.add(p);
     if (instant) { const s = slotPos(i, c); p.position.set(s.x, 0, s.z); p.rotation.y = PI + c.faceJit; }
@@ -1723,6 +1757,7 @@ const World = (function () {
     p.position.copy(old.position); p.rotation.y = old.rotation.y; custGroup.remove(old); custGroup.add(p); c.g = p; c.elder = true; c.body = 'normal'; c.r = bodyR('normal'); return true;
   };
   api.devEvent = function (kind) {
+    if (kind === 'inspector' || kind === 'driver') return spawnVisitor(kind);
     if (!api.ok || !queue.length) return false;
     if (queue.length < 2) { queue.push(spawnCustomer(false, 0)); assignSlots(); }
     const c = queue[1]; c.karen = c.sweaty = c.elder = c.angry = false; c.evt = null;
@@ -2115,7 +2150,7 @@ const World = (function () {
     ndc.x = ((e.clientX - r.left) / r.width) * 2 - 1; ndc.y = -((e.clientY - r.top) / r.height) * 2 + 1;
     raycaster.setFromCamera(ndc, camera);
     const hits = raycaster.intersectObjects([].concat(CLICK.map(i => ug[i]), [staffGroup, custGroup, petG, pharmG], phoneG ? [phoneG] : []), true);
-    for (const h of hits) { let o = h.object; while (o) { if (o.userData && (o.userData.up || o.userData.cust || o.userData.pet || o.userData.pharm)) { pickObj = h.object; return o.userData; } o = o.parent; } }
+    for (const h of hits) { let o = h.object; while (o) { if (o.userData && (o.userData.up || o.userData.cust || o.userData.pet || o.userData.pharm || o.userData.vis)) { pickObj = h.object; return o.userData; } o = o.parent; } }
     return null;
   }
   function setHover(up) {
@@ -2165,12 +2200,13 @@ const World = (function () {
       if (e.pointerType !== 'mouse' || (drag && drag.on)) return;
       if (fpT) { setFpHover(fpPick(e)); return; }
       const h = pick(e); setHover(h && h.up ? h.up : null);
-      if (!hovered) canvas.style.cursor = h && (h.cust || h.pet || h.pharm) ? 'pointer' : 'default';
+      if (!hovered) canvas.style.cursor = h && (h.cust || h.pet || h.pharm || h.vis) ? 'pointer' : 'default';
     });
     canvas.addEventListener('click', e => {
       if (noClick) { noClick = false; return; }
       if (fpT) { const id = fpPick(e); if (id && B.onFp) B.onFp(id); return; }
       const h = pick(e); dismissHint();
+      if (h && h.vis) { if (B.onVisitor) B.onVisitor(); return; }
       if (h && h.up) { if (h.up === 'notes') B.onNotes(); else if (h.up === 'phone') { if (B.onPhone) B.onPhone(); } else B.onBuy(h.up); }
       else if (h && (h.cust || h.pet || h.pharm)) {
         let o = pickObj; while (o && o.parent && o.parent !== custGroup && o.parent !== petG && o.parent !== pharmG) o = o.parent;
@@ -2427,7 +2463,7 @@ const World = (function () {
   api.fpActive = function () { return fpT === 1; };
   let paused = false;
   api.setPaused = function (p) { paused = !!p; if (!paused && !running && api.ok && !document.hidden) { running = true; last = performance.now(); requestAnimationFrame(frame); } };
-  api._dbg = function () { return { fpEye: fpEyeV, shelfN: shelfN, gth: gth, gph: gph, grad: grad, bodies, cops, copJob, queue, staff, fpK, fpT, cam: camera.position.clone(), pharmVis: pharm && pharm.g.visible, bottles: !!fpG, ids: fpItems.map(i => i.id + (i.off ? '*' : '')) }; };
+  api._dbg = function () { return { visitor: visitor, fpEye: fpEyeV, shelfN: shelfN, gth: gth, gph: gph, grad: grad, bodies, cops, copJob, queue, staff, fpK, fpT, cam: camera.position.clone(), pharmVis: pharm && pharm.g.visible, bottles: !!fpG, ids: fpItems.map(i => i.id + (i.off ? '*' : '')) }; };
   api._click = function (id) { if (B.onFp) B.onFp(id); };
   // Wrong bottle: a random waiting patient collapses (X eyes). Police come in and drag the body out.
   function xEyes(g) {
@@ -2547,7 +2583,7 @@ const World = (function () {
     requestAnimationFrame(frame);
     const dt = Math.min(0.05, (now - last) / 1000 || 0.016); last = now; time += dt;
     // customers
-    const crowd = queue.concat(leaving, extras, pets, cops), stf = pharm ? staff.concat([pharm]) : staff;
+    const crowd = queue.concat(leaving, extras, pets, cops, visitor ? [visitor] : []), stf = pharm ? staff.concat([pharm]) : staff;
     queue.forEach((c, i) => {
       const w = moveTo(c, c.speed || 2.6, dt, crowd); c.phase += dt;
       walkAnim(c.g, c.phase, w, dt);
@@ -2598,7 +2634,7 @@ const World = (function () {
       if (e.leaving && !e.wp.length) { custGroup.remove(e.g); extras.splice(i, 1); }
     }
     if (queue.length) { arriveT -= dt; if (arriveT <= 0) { arriveT = rushOn ? 5 + Math.random() * 4 : (15 + Math.random() * 9) * (slowOn ? 2.4 : 1); arrive(); } }
-    const all = queue.concat(leaving, extras, pets, cops.filter(c => copJob && copJob.phase === 'in'));
+    const all = queue.concat(leaving, extras, pets, cops.filter(c => copJob && copJob.phase === 'in'), visitor ? [visitor] : []);
     if (lineEl && queue.length !== lineN) { lineN = queue.length; lineEl.textContent = 'Line ' + lineN + '/' + MAXQ; lineEl.className = 'line3d' + (lineN >= MAXQ ? ' full' : lineN >= MAXQ - 2 ? ' busy' : ''); }
     Crowd.separate(all, 1.15, onBump); Crowd.separate(stf, 1.0, onBump);
     Crowd.pushOut(all, 0.55); Crowd.pushOut(stf, 0.5);
@@ -2608,6 +2644,7 @@ const World = (function () {
       if (m.t > 1.1) { m.el.remove(); says.splice(i, 1); } else place(m.el, q.x, q.y + (m.o.dy || 3.0), q.z);
     }
     if (fishG) fishTick(dt);
+    visitorTick(dt);
     pets.forEach(pt => {
       const w = moveTo(pt, pt.speed, dt, crowd); pt.phase += dt;
       if (!pt.fx) { pt.g.position.y = w ? Math.abs(Math.sin(pt.phase * (pt.kind === 'bunny' ? 10 : 13))) * (pt.kind === 'bunny' ? 0.16 : 0.05) : 0; pt.g.rotation.z = w ? Math.sin(pt.phase * 9) * 0.05 : 0; }
@@ -3128,7 +3165,7 @@ const World = (function () {
     shiftNote(q, ok, pay, ok || idx < 0 ? '' : o.t);
     save();
     checkAwards();
-    World.react(ok, pay);
+    if (cur.visit) World.visitorReact(ok); else World.react(ok, pay);
     const correctText = cur.opts.find(o2 => o2.ok).t;
     cur.resHTML = `<div class="result ${ok ? 'good' : 'fail'}" id="result"><h3>${esc(head)}</h3>
       ${ok ? '' : `<p><b>Answer:</b> ${esc(correctText)}</p>`}${!ok && idx >= 0 && whyNot(o.t) ? '<p class="whynot"><b>Why not \u201C' + esc(o.t) + '\u201D?</b> ' + whyNot(o.t) + '</p>' : ''}${extra}
@@ -4357,7 +4394,33 @@ const World = (function () {
     return '<div class="awp ' + (have ? 'on' : '') + '"><span aria-hidden="true">' + FC_PET.emoji + '</span><div><b>' + FC_PET.name + '</b><small>' + (have ? 'Swimming in its tank by the left wall.' : fcPetProgress() + '/' + FC_PET.n + ' flashcard kinds with a medal') + '</small><span class="awbar pbar"><i style="width:' + (have ? 100 : Math.round(100 * fcPetProgress() / FC_PET.n)) + '%"></i></span></div></div>';
   }
 
-  const GAME_VERSION = 42;
+  /* inspector and driver wait behind the counter. Click them to start; the patient at the counter waits (frozen) until you are done. */
+  let visitSaved = null;
+  function visitArrive(kind) {
+    toast(kind === 'inspector' ? 'The health inspector is waiting behind the counter. Click them!' : 'A delivery driver is waiting behind the counter. Click them!');
+    SFX.play(kind === 'inspector' ? 'siren' : 'thud');
+  }
+  function visitClick() {
+    if (!World.ok || !World.visitorInfo) return;
+    const v = World.visitorInfo(); if (!v) return;
+    if (v.state !== 'wait') { toast(v.state === 'in' ? 'They are still walking in.' : 'They are leaving.'); return; }
+    if (cur && cur.visit) return;
+    if (view !== 'q' || !cur) { toast('Finish what you are doing first, then click them.'); return; }
+    if (cur.elder && cur.elderStage < 2) { toast('Finish saying hello to the patient first.'); return; }
+    visitSaved = cur;
+    if (!cur.done && !cur.empty && !cur.pausedAt) cur.pausedAt = Date.now();
+    endInterrupt();
+    const q = evQuestion(v.kind), opts = shuffle([q.a, ...q.w].map((t, i) => ({ t, ok: i === 0 })));
+    cur = { q: q, wasMissed: S.missed.indexOf(q.k) >= 0, opts: opts, t0: Date.now(), done: false, hint: false, karen: false, sweaty: false, elder: false, elderStage: 2, ask: '', caller: false, name: pick(EV_NAME[v.kind]), flavor: pick(EV_FLAVOR[v.kind]), seed: v.seed, num: S.served + 1, picked: -1, ok: false, resHTML: '', interrupt: null, evt: v.kind, insp: v.kind === 'inspector' ? { n: 1, of: 3, ok: 0, used: [q.k] } : null, review: false, visit: true };
+    SFX.play('bell'); qExpand(); renderPanel();
+  }
+  function endVisit() {
+    if (World.ok && World.visitorLeave) World.visitorLeave();
+    const s = visitSaved; visitSaved = null;
+    if (s) { cur = s; resumeTimers(); view = 'q'; renderPanel(); } else newCard();
+  }
+
+  const GAME_VERSION = 43;
   const b64u = (u8) => { let s = ''; for (let i = 0; i < u8.length; i += 0x8000) s += String.fromCharCode.apply(null, u8.subarray(i, i + 0x8000)); return btoa(s).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); };
   const unb64u = (t) => { const s = atob(t.replace(/-/g, '+').replace(/_/g, '/')), u = new Uint8Array(s.length); for (let i = 0; i < s.length; i++) u[i] = s.charCodeAt(i); return u; };
   const chk = (t) => { let h = 2166136261; for (let i = 0; i < t.length; i++) { h ^= t.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36); };
@@ -4443,7 +4506,7 @@ const World = (function () {
       case 'fc-flip': if (!fcs.flip) { fcs.flip = true; SFX.play('flip'); renderPanel(); } return;
       case 'fc-got': return fcRate(true);
       case 'fc-no': return fcRate(false);
-      case 'dev-insp': case 'dev-mumble': case 'dev-driver': { const k = { 'dev-insp': 'inspector', 'dev-mumble': 'mumble', 'dev-driver': 'driver' }[a]; learnOff(); if (!(World.ok && World.devEvent && World.devEvent(k))) forceEvt = k; toast('A visitor is next in line. Use "Test: skip to next patient".'); return; }
+      case 'dev-insp': case 'dev-mumble': case 'dev-driver': { const k = { 'dev-insp': 'inspector', 'dev-mumble': 'mumble', 'dev-driver': 'driver' }[a]; learnOff(); if (!(World.ok && World.devEvent && World.devEvent(k))) forceEvt = k; toast(k === 'mumble' || !World.ok ? 'A visitor is next in line. Use "Test: skip to next patient".' : 'The visitor is walking in. Wait for them behind the counter, then click them.'); return; }
       case 'tour': return showTour();
       case 'shop-save': { const el = $('#shopname2'); const v = el ? el.value.replace(/\s+/g, ' ').trim().slice(0, 24) : ''; if (v) { S.shop = v; save(); syncBrand(); toast('Your pharmacy is now ' + v + '.'); renderPanel(); } return; }
       case 'tour-next': if (tourStep >= TOUR.length - 1) endTour(); else { tourStep++; drawTour(); } return;
@@ -4494,7 +4557,7 @@ const World = (function () {
     if (t.id === 'retirebtn') { if (S.cash >= RETIRE_AT) openView('retire'); return; }
     if (t.id === 'hangbtn') return hangUp();
     if (t.classList.contains('opt')) return answer(+t.dataset.i);
-    if (t.id === 'nextbtn') { if (cur && cur.insp && cur.insp.n < cur.insp.of) return inspContinue(); if (shiftDue()) return openShift(); return newCard(); }
+    if (t.id === 'nextbtn') { if (cur && cur.insp && cur.insp.n < cur.insp.of) return inspContinue(); if (cur && cur.visit) return endVisit(); if (shiftDue()) return openShift(); return newCard(); }
     if (t.id === 'hintbtn') return useHint();
     if (t.dataset.buy) { buyUp(t.dataset.buy); return; }
     if (t.id === 'frbtn') {
@@ -4555,7 +4618,7 @@ const World = (function () {
   setInterval(() => { if (window.__rxLoading) return; try { localStorage.setItem(SAVE_KEY, JSON.stringify(S)); } catch (e) { /* ignore */ } }, 5000);
 
   { const sc = $('#savecard'); if (sc) sc.innerHTML = saveBoxHTML(); }
-  World.init({ host: $('#stage'), getS: () => S, tagInfo: tagInfo, onBuy: buyUp, onNotes: () => openView('studies'), notesInfo: customCount, karenRoll: karenRoll, sweatyRoll: sweatyRoll, elderRoll: elderRoll, eventRoll: eventRoll, onPhone: openPhone, onPolice: policeCome, onFp: fpClick, sign: () => shopName() + '|' + tierName() + ' #' + (S.franchises + 1) });
+  World.init({ host: $('#stage'), getS: () => S, tagInfo: tagInfo, onBuy: buyUp, onNotes: () => openView('studies'), notesInfo: customCount, karenRoll: karenRoll, sweatyRoll: sweatyRoll, elderRoll: elderRoll, eventRoll: eventRoll, onVisitor: visitClick, onVisitorArrive: visitArrive, onPhone: openPhone, onPolice: policeCome, onFp: fpClick, sign: () => shopName() + '|' + tierName() + ' #' + (S.franchises + 1) });
   window.__rxDbg = () => ({ fp: fp, S: S, view: view, rush: rush, phoneR: phone.ringing, TOPQ: TOPQ, pool: poolQs, cur: cur });
   if (!World.ok) $('#stage').classList.add('flat');
   else { document.body.classList.add('fx'); World.setPharmacist(meSpec()); World.setAwards(S.awards); World.setCalendar(Math.min(4, S.awards.calW || 0), false, S.awards.calW || 0); }
