@@ -1,4 +1,3 @@
-<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Corner Rx</title>
 <meta name="claude:viewport-fit-sides" content="cover">
@@ -163,6 +162,7 @@ button { font: inherit; color: inherit; cursor: pointer; }
 @keyframes jimin { from { transform: translateX(24px); opacity: 0; } }
 .mepv { display: grid; place-items: center; }
 .mepv-svg { width: 132px; height: 132px; }
+.mepv-img { width: 190px; height: auto; border-radius: 22px; background: var(--surface2); border: 1.5px solid var(--line); }
 .swatch { width: 34px; height: 34px; border-radius: 50%; border: 2px solid var(--line); padding: 0; cursor: pointer; }
 .swatch[aria-pressed="true"] { border-color: var(--ink); box-shadow: 0 0 0 3px var(--amber); }
 .aw { display: grid; gap: 6px; padding: 10px 12px; border: 1.5px solid var(--line); border-radius: 14px; background: var(--surface); }
@@ -482,7 +482,8 @@ body.fx .menu { position: fixed; z-index: 40; top: calc(var(--tb) - 2px); right:
 body.fx.menuopen .menu { transform: none; opacity: 1; visibility: visible; transition: transform .18s, opacity .18s; }
 .menu button { display: flex; align-items: center; gap: 12px; width: 100%; min-height: 48px; padding: 8px 12px; border: 0; border-radius: 12px; background: transparent; text-align: left; font: 700 15px/1.2 var(--f-display); }
 .menu button:hover, .menu button:active { background: var(--surface2); }
-.menu button i { font-style: normal; font-size: 20px; width: 28px; text-align: center; flex: none; }
+.menu button i { display: grid; place-items: center; width: 28px; height: 28px; flex: none; color: var(--teal-ink, var(--ink)); }
+.menu button i svg { display: block; }
 .menu hr { border: 0; border-top: 1px solid var(--line); margin: 3px 6px; }
 body.fx.menuopen .scrim { opacity: 1; pointer-events: auto; background: rgba(5,15,18,.28); z-index: 39; }
 .awbtn { width: 100%; padding: 14px; font-size: 15px; }
@@ -609,7 +610,6 @@ body.fx.focus .qpanel.min #counter { display: block; }
     <div class="rush3d" id="rush3d" role="status" hidden></div>
     <button type="button" class="phonebtn" id="phonebtn" data-act="phone" hidden></button>
     <div class="toast3d" id="toast3d" role="status" aria-live="polite"></div>
-    <div class="hud"><button type="button" data-z="in" aria-label="Zoom in">+</button><button type="button" data-z="out" aria-label="Zoom out">&minus;</button><button type="button" data-z="reset" aria-label="Reset view">&#8634;</button><button type="button" data-z="fs" aria-label="Full screen" id="fsbtn">&#9974;</button></div>
     <div class="hint3d">Drag to look around. Pinch to zoom. Tap glowing spots to build.</div>
     <div class="fpq" id="fpq" hidden></div>
     <button type="button" class="fpleave" id="fpleave" data-act="fp-leave" aria-label="Leave this task">&#10005; Leave</button>
@@ -618,16 +618,16 @@ body.fx.focus .qpanel.min #counter { display: block; }
 
   <button type="button" class="scrim" data-act="drawer-close" aria-label="Close"></button>
   <nav class="menu" id="menu" aria-label="Game menu">
-    <button type="button" data-act="sheet-ups"><i aria-hidden="true">&#128200;</i><span>Upgrades</span></button>
-    <button type="button" data-act="sheet-prog"><i aria-hidden="true">&#127942;</i><span>Progress &amp; awards</span></button>
-    <button type="button" data-act="settings"><i aria-hidden="true">&#128211;</i><span>Study hub</span></button>
-    <button type="button" id="focusbtn" data-act="focus" aria-pressed="false"><i aria-hidden="true">&#127919;</i><span id="focuslab">Focus mode</span></button>
+    <button type="button" data-act="sheet-ups"><i aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg></i><span>Upgrades</span></button>
+    <button type="button" data-act="sheet-prog"><i aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 4h8v5a4 4 0 0 1-8 0zM8 6H4v1a3 3 0 0 0 4 3M16 6h4v1a3 3 0 0 1-4 3M12 13v4M8 20h8"/></svg></i><span>Progress &amp; awards</span></button>
+    <button type="button" data-act="settings"><i aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5.5A1.5 1.5 0 0 1 5.5 4H12v16H5.5A1.5 1.5 0 0 1 4 18.5zM12 4h6.5A1.5 1.5 0 0 1 20 5.5v13a1.5 1.5 0 0 1-1.5 1.5H12"/></svg></i><span>Study hub</span></button>
+    <button type="button" id="focusbtn" data-act="focus" aria-pressed="false"><i aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="2.5"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg></i><span id="focuslab">Focus mode</span></button>
     <hr>
-    <button type="button" data-act="create"><i aria-hidden="true">&#129489;&#8205;&#9877;&#65039;</i><span>Pharmacist</span></button>
-    <button type="button" data-act="ref"><i aria-hidden="true">&#128218;</i><span>Drug reference</span></button>
-    <button type="button" data-act="shelve"><i aria-hidden="true">&#128230;</i><span>Restock shelves</span></button>
+    <button type="button" data-act="create"><i aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="3.6"/><path d="M5 20c0-4 3-6.5 7-6.5s7 2.5 7 6.5"/></svg></i><span>Pharmacist</span></button>
+    <button type="button" data-act="ref"><i aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 4h11a3 3 0 0 1 3 3v13H8a3 3 0 0 1-3-3zM5 17a3 3 0 0 1 3-3h11"/></svg></i><span>Drug reference</span></button>
+    <button type="button" data-act="shelve"><i aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8l9-4 9 4-9 4zM3 8v8l9 4 9-4V8M12 12v8"/></svg></i><span>Restock shelves</span></button>
     <hr>
-    <button type="button" class="menuclose" data-act="drawer-close"><i aria-hidden="true">&#10005;</i><span>Close menu</span></button>
+    <button type="button" class="menuclose" data-act="drawer-close"><i aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></i><span>Close menu</span></button>
   </nav>
   <div class="drawerhead"><b id="sheettitle">Your pharmacy</b><button type="button" class="btn go" data-act="drawer-close">Close</button></div>
   <main class="below" id="drawer">
@@ -2130,7 +2130,7 @@ const World = (function () {
     fpBegin({ x: p.x, y: 2.05, z: p.z + 0.12 }, { x: p.x, y: 1.2, z: p.z + 6 }, port ? 90 : 64);
     [[a, 'A', port ? -0.36 : -0.55], [b, 'B', port ? 0.36 : 0.55]].forEach((q, i) => {
       const it = fpItem('b' + i, port ? 0.62 : 0.7, 1.05, port ? 0.62 : 0.7, p.x + q[2], 1.78, 0.15, -1);
-      const bt = makeBottle(q[0], q[1], -1); bt.scale.set(1.8, 1.8, 1.8); bt.position.y = -0.52; it.grp.add(bt); addSilhouette(it, bt, 0x000000, 0.95);
+      const bt = makeBottle(q[0], q[1], -1); bt.scale.set(1.8, 1.8, 1.8); bt.position.y = -0.52; it.grp.add(bt); addSilhouette(it, bt, 0x000000, 0.9);
     });
   };
   // Put-away drill on the real shelves: brand-name gaps open up in the stocked shelving.
@@ -2242,6 +2242,31 @@ const World = (function () {
     } catch (e) { url = null; try { renderer.setRenderTarget(null); } catch (_) { /* ignore */ } }
     try { if (rt) rt.dispose(); if (p) p.traverse(o => { if (o.geometry) o.geometry.dispose(); if (o.material) o.material.dispose(); }); } catch (_) { /* ignore */ }
     portraitCache[key] = url; return url;
+  };
+  /* the pharmacist editor preview: the same 3D model as the shop, full length */
+  const meCache = {};
+  api.pharmPortrait = function (me) {
+    if (!api.ok || !renderer) return null;
+    const key = JSON.stringify(me); if (key in meCache) return meCache[key];
+    let url = null, rt = null, p = null;
+    try {
+      const W = 240, H = 300, ps = new T.Scene(), pc = new T.PerspectiveCamera(27, W / H, 0.1, 40);
+      ps.add(new T.HemisphereLight(0xffffff, 0x8899aa, 0.95)); const dl = new T.DirectionalLight(0xffffff, 0.75); dl.position.set(2.5, 4, 5); ps.add(dl);
+      p = person(1, false, false, false, me.body === 'normal' ? undefined : me.body, { skin: me.skin, hair: me.hairCol, shirt: '#F7FBFB', hairStyle: HAIR_MAP[me.hair] === undefined ? 0 : HAIR_MAP[me.hair], gender: me.gender, coat: true, scrub: me.scrub, acc: me.acc || 0, tag: { pharm: true } });
+      p.rotation.y = -0.35; ps.add(p); pc.position.set(0, 1.35, 6.6); pc.lookAt(0, 1.2, 0);
+      rt = new T.WebGLRenderTarget(W, H, { samples: 4 });
+      const oldRT = renderer.getRenderTarget(), oc = renderer.getClearColor(new T.Color()), oa = renderer.getClearAlpha();
+      renderer.setRenderTarget(rt); renderer.setClearColor(0x000000, 0); renderer.clear(); renderer.render(ps, pc);
+      const buf = new Uint8Array(W * H * 4); renderer.readRenderTargetPixels(rt, 0, 0, W, H, buf);
+      renderer.setRenderTarget(oldRT); renderer.setClearColor(oc, oa);
+      let seen = 0; for (let i = 3; i < buf.length; i += 16) if (buf[i]) { seen++; if (seen > 20) break; }
+      if (seen <= 20) throw new Error('empty preview');
+      const cv = document.createElement('canvas'); cv.width = W; cv.height = H; const cx = cv.getContext('2d'), id = cx.createImageData(W, H);
+      for (let y = 0; y < H; y++) id.data.set(buf.subarray((H - 1 - y) * W * 4, (H - y) * W * 4), y * W * 4);
+      cx.putImageData(id, 0, 0); url = cv.toDataURL('image/png');
+    } catch (e) { url = null; try { renderer.setRenderTarget(null); } catch (_) { /* ignore */ } }
+    try { if (rt) rt.dispose(); if (p) p.traverse(o => { if (o.geometry) o.geometry.dispose(); if (o.material) o.material.dispose(); }); } catch (_) { /* ignore */ }
+    meCache[key] = url; return url;
   };
   api.fpPrior = function () {
     if (!api.ok) return;
@@ -3070,13 +3095,17 @@ const World = (function () {
     const face = `<circle cx="60" cy="62" r="22" fill="${skin}"/>${hs[m.hair] || ''}<circle cx="51" cy="62" r="2.4" fill="#2b1b12"/><circle cx="69" cy="62" r="2.4" fill="#2b1b12"/>${f ? '<path d="M46 57l5-2M74 57l-5-2" stroke="#2b1b12" stroke-width="1.6" stroke-linecap="round"/><path d="M54 73q6 4 12 0" stroke="#D9677A" stroke-width="3" fill="none" stroke-linecap="round"/>' : '<path d="M54 72q6 4 12 0" stroke="#3a1f12" stroke-width="2.2" fill="none" stroke-linecap="round"/>'}`;
     return `<svg viewBox="0 0 120 120" class="mepv-svg" role="img" aria-label="Preview of your pharmacist"><rect width="120" height="120" rx="22" style="fill:var(--surface2)"/>${body}${face}</svg>`;
   }
+  function mePreview() {
+    const url = World.ok && World.pharmPortrait ? World.pharmPortrait(meSpec()) : null;
+    return url ? '<img class="mepv-img" alt="Preview of your pharmacist" src="' + url + '">' : meSVG();
+  }
   function createHTML() {
     const m = S.me;
     const chips = (k, list) => list.map(o => `<button type="button" class="chip" data-act="me" data-k="${k}" data-v="${o[0]}" aria-pressed="${m[k] === o[0]}">${o[1]}</button>`).join('');
     const hairChips = ME_HAIRS.map((n, i) => `<button type="button" class="chip" data-act="me" data-k="hair" data-v="${i}" aria-pressed="${m.hair === i}">${n}</button>`).join('');
     const sw = (k, arr, label) => arr.map((c, i) => `<button type="button" class="swatch" data-act="me" data-k="${k}" data-v="${i}" style="background:${c}" aria-pressed="${m[k] === i}" aria-label="${label} ${i + 1}"></button>`).join('');
     return `<div class="pane"><h3>Your pharmacist</h3><p class="sub">You always stand at the counter. Changes appear in the shop right away.</p>
-      <div class="mepv">${meSVG()}</div>
+      <div class="mepv">${mePreview()}</div>
       <div class="grp"><b>Gender</b><div class="chips">${chips('gender', ME_GENDERS)}</div></div>
       <div class="grp"><b>Body type</b><div class="chips">${chips('body', ME_BODIES)}</div></div>
       <div class="grp"><b>Hair style</b><div class="chips">${hairChips}</div></div>
@@ -3749,7 +3778,7 @@ const World = (function () {
     if (World.ok) World.sync();
   }
   /* ---- save code: the whole save as one long code, to move progress between devices or keep a backup ---- */
-  const GAME_VERSION = 34;
+  const GAME_VERSION = 35;
   const b64u = (u8) => { let s = ''; for (let i = 0; i < u8.length; i += 0x8000) s += String.fromCharCode.apply(null, u8.subarray(i, i + 0x8000)); return btoa(s).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); };
   const unb64u = (t) => { const s = atob(t.replace(/-/g, '+').replace(/_/g, '/')), u = new Uint8Array(s.length); for (let i = 0; i < s.length; i++) u[i] = s.charCodeAt(i); return u; };
   const chk = (t) => { let h = 2166136261; for (let i = 0; i < t.length; i++) { h ^= t.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36); };
@@ -3932,5 +3961,3 @@ const World = (function () {
   if (!S.me.done) openView('create');
 })();
 </script>
-
-</body></html>
