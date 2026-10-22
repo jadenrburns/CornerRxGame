@@ -128,6 +128,7 @@ button { font: inherit; color: inherit; cursor: pointer; }
 .hud { position: absolute; left: 10px; top: 10px; display: flex; gap: 6px; }
 .hud button { width: 34px; height: 34px; border-radius: 10px; border: 1.5px solid var(--ink); background: var(--surface); font: 700 15px/1 var(--f-mono); display: grid; place-items: center; padding: 0; }
 .hud button:hover { background: var(--surface2); }
+.hud button svg { display: block; }
 .hint3d { position: absolute; left: 12px; bottom: 12px; max-width: min(420px, calc(100% - 520px)); background: var(--surface); border: 1.5px solid var(--ink); border-radius: 12px; padding: 7px 11px; font: 500 12px/1.3 var(--f-mono); transition: opacity .6s; pointer-events: none; }
 .hint3d.gone { opacity: 0; }
 @media (max-width: 560px) { .tag3d span { display: none; } .tag3d { padding-left: 8px; } }
@@ -557,6 +558,29 @@ body.fx .stat.rep .repbar i { border-radius: 0; }
 
 .savebox .sctext { width: 100%; min-height: 64px; font: 11px/1.3 var(--f-mono); word-break: break-all; resize: vertical; }
 .scmsg { min-height: 1.2em; margin: 6px 0 0; font-size: 12.5px; color: var(--teal-ink); } .scmsg.bad { color: var(--coral); }
+
+/* first-run tour */
+.tour { position: fixed; inset: 0; z-index: 90; display: flex; align-items: center; justify-content: center; padding: 18px; background: rgba(5,15,18,.55); }
+.tourcard { width: min(360px, 100%); background: var(--surface); border: 2px solid var(--ink); border-radius: 20px; box-shadow: 0 6px 0 var(--ink); padding: 18px 18px 14px; }
+.tourcard h3 { margin: 0 0 6px; font: 800 19px/1.2 var(--f-display); }
+.tourcard p { margin: 0 0 8px; font-size: 14px; line-height: 1.45; color: var(--ink); }
+.tourcard ul { margin: 0 0 8px; padding: 0; list-style: none; display: grid; gap: 7px; }
+.tourcard li { display: flex; gap: 10px; align-items: flex-start; font-size: 13.5px; line-height: 1.35; } .tourcard li b { white-space: nowrap; }
+.tourdots { display: flex; gap: 6px; margin: 10px 0 12px; } .tourdots i { width: 8px; height: 8px; border-radius: 50%; background: var(--line); } .tourdots i.on { background: var(--teal); }
+.tourbtns { display: flex; gap: 8px; align-items: center; } .tourbtns .btn { min-height: 44px; } .tourbtns .skip { margin-left: auto; border: 0; background: transparent; color: var(--muted); font: 600 13px var(--f-body); text-decoration: underline; padding: 10px 6px; }
+
+/* hard-of-hearing patient */
+.q3d { position: absolute; z-index: 7; pointer-events: none; font: 800 30px/1 var(--f-display); color: #fff; -webkit-text-stroke: 2px #10292C; paint-order: stroke fill; text-shadow: 0 2px 0 #10292C; transform: translate(-50%, 0); animation: floatq 1.7s ease-out forwards; }
+@keyframes floatq { 0% { opacity: 0; transform: translate(-50%, 0) scale(.5); } 15% { opacity: 1; } 100% { opacity: 0; transform: translate(calc(-50% + var(--dx, 0px)), -90px) scale(1.25) rotate(var(--rot, 0deg)); } }
+.rx.elder .rx-head { background: var(--surface2); }
+.patient.hear { position: relative; }
+.patient.hear .avatar { animation: hearshake .35s infinite alternate; }
+@keyframes hearshake { to { transform: rotate(-4deg) scale(1.06); } }
+.cmarks { position: absolute; left: 6px; top: -14px; width: 64px; height: 30px; pointer-events: none; }
+.cmarks i { position: absolute; bottom: 0; font: 800 20px/1 var(--f-display); font-style: normal; color: var(--coral); -webkit-text-stroke: 1.5px var(--ink); paint-order: stroke fill; animation: cmark 1.2s ease-out infinite; }
+.cmarks i:nth-child(1) { left: 2px; } .cmarks i:nth-child(2) { left: 22px; animation-delay: .35s; } .cmarks i:nth-child(3) { left: 42px; animation-delay: .7s; }
+@keyframes cmark { 0% { opacity: 0; transform: translateY(8px) scale(.6); } 25% { opacity: 1; } 100% { opacity: 0; transform: translateY(-22px) scale(1.2) rotate(12deg); } }
+.gift { margin: 8px 0; padding: 8px 12px; border-radius: 12px; background: var(--teal-soft); border: 1.5px solid var(--teal); font-size: 13.5px; line-height: 1.4; } .gift.sad { background: var(--surface2); border-color: var(--line); }
 /* unlock cards, Karen countdown */
 .unlock { position: fixed; left: 0; right: 0; top: 0; bottom: 0; z-index: 70; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; pointer-events: none; text-align: center; padding: 0 20px; background: radial-gradient(circle at 50% 46%, rgba(255,214,107,.28), transparent 62%); }
 .ubadge { position: relative; width: 150px; height: 150px; display: grid; place-items: center; }
@@ -610,6 +634,7 @@ body.fx.focus .qpanel.min #counter { display: block; }
     <div class="rush3d" id="rush3d" role="status" hidden></div>
     <button type="button" class="phonebtn" id="phonebtn" data-act="phone" hidden></button>
     <div class="toast3d" id="toast3d" role="status" aria-live="polite"></div>
+    <div class="hud"><button type="button" data-z="fs" aria-label="Full screen" id="fsbtn"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg></button></div>
     <div class="hint3d">Drag to look around. Pinch to zoom. Tap glowing spots to build.</div>
     <div class="fpq" id="fpq" hidden></div>
     <button type="button" class="fpleave" id="fpleave" data-act="fp-leave" aria-label="Leave this task">&#10005; Leave</button>
@@ -623,7 +648,6 @@ body.fx.focus .qpanel.min #counter { display: block; }
     <button type="button" data-act="settings"><i aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5.5A1.5 1.5 0 0 1 5.5 4H12v16H5.5A1.5 1.5 0 0 1 4 18.5zM12 4h6.5A1.5 1.5 0 0 1 20 5.5v13a1.5 1.5 0 0 1-1.5 1.5H12"/></svg></i><span>Study hub</span></button>
     <button type="button" id="focusbtn" data-act="focus" aria-pressed="false"><i aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="2.5"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg></i><span id="focuslab">Focus mode</span></button>
     <hr>
-    <button type="button" data-act="create"><i aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="3.6"/><path d="M5 20c0-4 3-6.5 7-6.5s7 2.5 7 6.5"/></svg></i><span>Pharmacist</span></button>
     <button type="button" data-act="ref"><i aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 4h11a3 3 0 0 1 3 3v13H8a3 3 0 0 1-3-3zM5 17a3 3 0 0 1 3-3h11"/></svg></i><span>Drug reference</span></button>
     <button type="button" data-act="shelve"><i aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8l9-4 9 4-9 4zM3 8v8l9 4 9-4V8M12 12v8"/></svg></i><span>Restock shelves</span></button>
     <hr>
@@ -1242,6 +1266,7 @@ const World = (function () {
     o = o || {};
     const g = new T.Group();
     let skin = karen ? '#E8745F' : sweaty ? '#D4DAAE' : SKIN[seed % 6], hair = karen ? '#E8C766' : sweaty ? '#2E2420' : HAIR[(seed >> 3) % 6], shirt = karen ? '#D9467A' : sweaty ? '#8A97A8' : isStaff ? '#F4FAFA' : SHIRT[(seed >> 5) % 6], style = karen ? 3 : sweaty ? 4 : (seed >> 7) % 3;
+    if (o.elder) { hair = '#E6E6EE'; shirt = o.gender === 'f' ? '#B79CD6' : '#7C9CB8'; style = o.gender === 'f' ? 6 : 8; }
     if (o.skin) skin = o.skin; if (o.hair) hair = o.hair; if (o.shirt) shirt = o.shirt; if (o.hairStyle !== undefined) style = o.hairStyle;
     const own = (c) => new T.MeshStandardMaterial({ color: c, flatShading: true, roughness: 0.85 });
     const P = { legs: [], arms: [], shirtM: own(shirt), skinM: own(skin) }, pants = own(o.scrub || '#27384F'), hairM = own(hair), dark = own('#1b1b24');
@@ -1273,6 +1298,11 @@ const World = (function () {
       if (style === 1) put(new T.IcosahedronGeometry(0.15, 0), hairM, 0, 2.28, -0.12);
     }
     P.dark = dark; P.eyes = [put(new T.BoxGeometry(0.07, 0.07, 0.04), dark, -0.11, 1.88, 0.29), put(new T.BoxGeometry(0.07, 0.07, 0.04), dark, 0.11, 1.88, 0.29)];
+    if (o.elder) {
+      const fr = own('#6B6B78'); [-0.11, 0.11].forEach(x => put(new T.TorusGeometry(0.08, 0.014, 4, 10), fr, x, 1.88, 0.3)); put(new T.BoxGeometry(0.08, 0.015, 0.02), fr, 0, 1.9, 0.3);
+      P.scl = [-0.11, 0.11].map(x => { const m = put(new T.BoxGeometry(0.15, 0.15, 0.03), own('#FFFFFF'), x, 1.88, 0.272); m.visible = false; return m; });
+      if (o.gender !== 'f') { put(new T.BoxGeometry(0.1, 0.24, 0.2), hairM, -0.3, 1.82, -0.02); put(new T.BoxGeometry(0.1, 0.24, 0.2), hairM, 0.3, 1.82, -0.02); put(new T.BoxGeometry(0.2, 0.04, 0.04), hairM, 0, 1.79, 0.31); }
+    }
     if (o.cap) {
       const capM = own('#1C2F5A'), gold = own('#F2C94C');
       put(new T.CylinderGeometry(0.36, 0.4, 0.17, 8), capM, 0, 2.12, 0); put(new T.BoxGeometry(0.52, 0.04, 0.3), own('#0E1A36'), 0, 2.03, 0.3); put(new T.BoxGeometry(0.1, 0.1, 0.03), gold, 0, 2.12, 0.4);
@@ -1312,10 +1342,11 @@ const World = (function () {
       put(new T.BoxGeometry(0.15, 0.62, 0.16), jacked ? P.skinM : P.shirtM, 0, -0.3, 0, arm);
       put(new T.IcosahedronGeometry(0.09, 0), P.skinM, 0, -0.66, 0, arm); P.arms.push(arm);
       if (A >= 3) put(new T.BoxGeometry(0.2, 0.09, 0.13), goldM, 0, -0.7, 0.02, arm);
-      if (A >= 6 && s === 1) { put(new T.CylinderGeometry(0.025, 0.025, 1.05, 5), own('#5B3A21'), 0, -1.02, 0.06, arm); put(new T.IcosahedronGeometry(0.07, 0), goldM, 0, -0.5, 0.06, arm); }
+      if ((A >= 6 || o.elder) && s === 1) { put(new T.CylinderGeometry(0.025, 0.025, 1.05, 5), own('#5B3A21'), 0, -1.02, 0.06, arm); put(new T.IcosahedronGeometry(0.07, 0), goldM, 0, -0.5, 0.06, arm); }
       if (karen && s === 1) put(new T.BoxGeometry(0.34, 0.27, 0.13), own('#8A63C9'), 0, -0.82, 0.06, arm);
     });
     if (isStaff || o.cap) put(new T.BoxGeometry(0.13, 0.13, 0.04), own(o.cap ? '#F2C94C' : '#0E9A8E'), 0.17, 1.35, 0.36);
+    if (o.elder) g.scale.set(0.95, 0.9, 0.95);
     if (karen) g.scale.set(1.08, 1.08, 1.08);
     if (sweaty) g.scale.set(0.66, 1.1, 0.66);
     P.waddle = obese; g.rotation.order = 'YXZ'; g.userData.P = P; return g;
@@ -1415,8 +1446,11 @@ const World = (function () {
     x.fillStyle = '#0E9A8E'; x.fillRect(0, 0, 1024, 256);
     x.fillStyle = '#0B7D73'; x.fillRect(0, 196, 1024, 60);
     x.fillStyle = '#FFFFFF'; x.font = '800 118px "Bricolage Grotesque", Trebuchet MS, sans-serif'; x.textAlign = 'center';
-    x.fillText('CORNER Rx', 512, 140);
-    x.fillStyle = '#FDEBC4'; x.font = '700 40px "JetBrains Mono", monospace'; x.fillText(txt.toUpperCase(), 512, 240);
+    const parts = String(txt).split('|'), nm = (parts.length > 1 ? parts[0] : 'Corner Rx'), sub = parts.length > 1 ? parts[1] : parts[0];
+    let fs = 118; x.font = '800 ' + fs + 'px "Bricolage Grotesque", Trebuchet MS, sans-serif';
+    while (x.measureText(nm).width > 940 && fs > 40) { fs -= 4; x.font = '800 ' + fs + 'px "Bricolage Grotesque", Trebuchet MS, sans-serif'; }
+    x.fillText(nm, 512, 128 + (118 - fs) * 0.12);
+    x.fillStyle = '#FDEBC4'; x.font = '700 40px "JetBrains Mono", monospace'; x.fillText(sub.toUpperCase(), 512, 240);
     sign.tex.needsUpdate = true;
   }
 
@@ -1586,8 +1620,8 @@ const World = (function () {
   function bodyR(b) { return b === 'obese' ? 0.85 : b === 'jacked' ? 0.8 : 0.575; }
   function slotPos(i, c) { const s = SLOTS[Math.min(i, SLOTS.length - 1)]; return new T.Vector3(s[0] + (c ? c.jx : 0), 0, s[1] + (c ? c.jz : 0)); }
   function spawnCustomer(instant, i) {
-    const seed = Math.floor(Math.random() * 100000), special = queue.some(q => q.karen || q.sweaty), karen = !instant && !special && !!B.karenRoll(), sweaty = !instant && !special && !karen && !!B.sweatyRoll(), body = karen || sweaty ? 'normal' : pickBody(), p = person(seed, false, karen, sweaty, body);
-    const c = { g: p, seed, wp: [], mood: null, moodT: 0, phase: Math.random() * 6, hop: 0, face: 0, karen, sweaty, body, r: bodyR(body), angry: karen, puffT: 0, dripT: 0, jx: (Math.random() - 0.5) * 0.3, jz: (Math.random() - 0.5) * 0.3, faceJit: (Math.random() - 0.5) * 0.8, wait: 0, emoteT: 3 + Math.random() * 8 };
+    const seed = Math.floor(Math.random() * 100000), special = queue.some(q => q.karen || q.sweaty || q.elder), karen = !instant && !special && !!B.karenRoll(), sweaty = !instant && !special && !karen && !!B.sweatyRoll(), elder = !instant && !special && !karen && !sweaty && !!(B.elderRoll && B.elderRoll()), body = karen || sweaty || elder ? 'normal' : pickBody(), p = person(seed, false, karen, sweaty, body, elder ? { elder: true, gender: seed % 2 === 0 ? 'f' : 'm' } : undefined);
+    const c = { g: p, seed, wp: [], mood: null, moodT: 0, phase: Math.random() * 6, hop: 0, face: 0, karen, sweaty, elder, body, r: bodyR(body), angry: karen, puffT: 0, dripT: 0, jx: (Math.random() - 0.5) * 0.3, jz: (Math.random() - 0.5) * 0.3, faceJit: (Math.random() - 0.5) * 0.8, wait: 0, emoteT: 3 + Math.random() * 8 };
     custGroup.add(p);
     if (instant) { const s = slotPos(i, c); p.position.set(s.x, 0, s.z); p.rotation.y = PI + c.faceJit; }
     else { p.position.set(5, 0, 9.6); c.wp.push(new T.Vector3(5, 0, 6.2)); }
@@ -1605,9 +1639,32 @@ const World = (function () {
       assignSlots();
     }
     cur = queue[0]; cur.mood = null; if (cur.karen) setBubble('!', 'kar'); else setBubble('?', '');
-    return { seed: cur.seed, karen: !!cur.karen, sweaty: !!cur.sweaty, caller: !!cur.caller };
+    return { seed: cur.seed, karen: !!cur.karen, sweaty: !!cur.sweaty, elder: !!cur.elder, caller: !!cur.caller };
   };
-  let arriveT = 9, rushOn = false;
+  /* hard-of-hearing patient: eyes widen and question marks float off her head */
+  function floatQ(c) {
+    if (!host || !camera || paused || !c || !c.g) return;
+    tmp.set(c.g.position.x + (Math.random() - 0.5) * 0.7, 2.55, c.g.position.z).project(camera); if (tmp.z > 1 || tmp.z < -1) return;
+    const e = document.createElement('span'); e.className = 'q3d'; e.textContent = Math.random() < 0.3 ? '?!' : '?';
+    e.style.left = Math.round((tmp.x * 0.5 + 0.5) * host.clientWidth) + 'px'; e.style.top = Math.round((-tmp.y * 0.5 + 0.5) * host.clientHeight) + 'px';
+    e.style.setProperty('--dx', Math.round((Math.random() - 0.5) * 70) + 'px'); e.style.setProperty('--rot', Math.round((Math.random() - 0.5) * 50) + 'deg');
+    host.appendChild(e); setTimeout(() => { if (e.parentNode) e.parentNode.removeChild(e); }, 1800);
+  }
+  api.elderConfuse = function (on) {
+    const c = queue[0]; if (!api.ok || !c || !c.elder) return;
+    const P = c.g.userData.P; if (P.scl) P.scl.forEach(m => { m.visible = !!on; }); P.eyes.forEach(m => m.scale.set(on ? 1.5 : 1, on ? 1.5 : 1, 1));
+    if (on) { setBubble('??', 'kar'); for (let k = 0; k < 7; k++) setTimeout(() => floatQ(queue[0]), k * 320); }
+    else setBubble('?', '');
+  };
+  // test helper: turn the next patient in line into the hard-of-hearing visitor
+  api.devElder = function () {
+    if (!api.ok || !queue.length) return false;
+    const c = queue[Math.min(1, queue.length - 1)]; if (c.elder || c.karen || c.sweaty) return false;
+    const old = c.g, p = person(c.seed, false, false, false, 'normal', { elder: true, gender: c.seed % 2 === 0 ? 'f' : 'm' });
+    p.position.copy(old.position); p.rotation.y = old.rotation.y; custGroup.remove(old); custGroup.add(p); c.g = p; c.elder = true; c.body = 'normal'; c.r = bodyR('normal'); return true;
+  };
+  let arriveT = 9, rushOn = false, slowOn = false;
+  api.setSlow = function (on) { slowOn = !!on; };
   api.setRush = function (on) { rushOn = !!on; if (on) arriveT = Math.min(arriveT, 1.5); };
   function arrive() {
     if (queue.length >= MAXQ) { spawnRejected(); return; }
@@ -2147,9 +2204,9 @@ const World = (function () {
     const asp = camera.aspect || 1, port = asp < 0.85;
     const hideCrowd = () => { [staffGroup, custGroup, petG].forEach(g => { if (g && g.visible) { g.visible = false; fpHiddenG.push(g); } }); };
     const wide = !port || shelfN >= 3; // with 3+ shelf units (level 6+) face the two left-hand units, centred between the two columns of spots
-    if (port && wide) { const D = Math.max(4.4, 2.4 / (asp * 1.0355)), cxm = (ux[0] + ux[1]) / 2; fpBegin({ x: cxm, y: 2.05, z: sz + D }, { x: cxm, y: 2.3, z: sz }, Math.min(95, 2 * Math.atan(2.4 / (D * asp)) * 180 / PI)); }
+    if (port && wide) { const D = Math.max(4.4, 2.4 / (asp * 1.0355)), cxm = (ux[0] + ux[1]) / 2 - 0.24; fpBegin({ x: cxm, y: 2.05, z: sz + D }, { x: cxm, y: 2.3, z: sz }, Math.min(95, 2 * Math.atan(2.4 / (D * asp)) * 180 / PI)); }
     else if (port) fpBegin({ x: ux[0], y: 2.05, z: sz + 4.0 }, { x: ux[0], y: 2.3, z: sz }, Math.max(64, Math.min(92, 2 * Math.atan(1.5 / (4.0 * asp)) * 180 / PI)));
-    else fpBegin({ x: p.x, y: 2.05, z: p.z + 0.12 }, { x: (ux[0] + ux[1]) / 2, y: 2.35, z: sz }, 64);
+    else { const zc = (ux[0] + ux[1]) / 2 - 0.24; fpBegin({ x: zc, y: 2.05, z: p.z + 0.12 }, { x: zc, y: 2.35, z: sz }, 64); } // centred on the two columns of spots, so the held bottle never sits over one
     hideCrowd(); // staff stand at the spot the camera uses, so nobody may block a gap
     // on a tall phone screen both columns of spots sit side by side on the first shelf unit so nothing is cut off
     const zones = brands.map((nm, i) => ({ x: !wide ? ux[0] + (i % 2 ? 0.58 : -0.62) : ux[i % 2] - 0.24, y: rows[Math.floor(i / 2)] + 0.06 }));
@@ -2180,8 +2237,8 @@ const World = (function () {
   api.fpHold = function (name) {
     if (!fpG) return;
     if (fpHeld) { fpG.remove(fpHeld.grp); fpItems.splice(fpItems.indexOf(fpHeld), 1); fpHeld = null; }
-    const port = (camera.aspect || 1) < 0.85, p = pharmPos(), wideP = port && shelfN >= 3, s = wideP ? 0.9 : port ? 1.05 : 2.0;
-    const tx = port ? fpLookV.x : p.x, ty = port ? fpEyeV.y - (wideP ? 1.42 : 1.02) : 1.55, tz = port ? fpEyeV.z - 1.8 : p.z - 1.7;
+    const port = (camera.aspect || 1) < 0.85, p = pharmPos(), wideP = port && shelfN >= 3, s = wideP ? 1.1 : port ? 1.05 : 1.3;
+    const tx = fpLookV.x, ty = port ? fpEyeV.y - (wideP ? 0.75 : 1.02) : 1.4, tz = port ? fpEyeV.z - 1.8 : p.z - 1.7;
     const it = fpItem('held', 0.75, 1.1, 0.75, tx, ty - 0.9, tz, 1); it.off = true;
     const bt = makeBottle(name, 'GENERIC', 1); bt.scale.set(s, s, s); bt.position.y = -0.275 * s; it.grp.add(bt); fpHeld = it;
     let t = 0; it.home = { x: tx, y: ty, z: tz, s };
@@ -2218,15 +2275,15 @@ const World = (function () {
   };
   /* A low-poly head-and-shoulders portrait of a patient, rendered from the same model the 3D world uses. */
   const portraitCache = {};
-  api.portrait = function (seed, karen, sweaty) {
+  api.portrait = function (seed, karen, sweaty, elder) {
     if (!api.ok || !renderer) return null;
-    const key = seed + '|' + (karen ? 1 : 0) + (sweaty ? 1 : 0);
+    const key = seed + '|' + (karen ? 1 : 0) + (sweaty ? 1 : 0) + (elder ? 1 : 0);
     if (key in portraitCache) return portraitCache[key];
     let url = null, rt = null, p = null;
     try {
       const S = 256, ps = new T.Scene(), pc = new T.PerspectiveCamera(28, 1, 0.1, 30);
       ps.add(new T.HemisphereLight(0xffffff, 0x8899aa, 0.95)); const dl = new T.DirectionalLight(0xffffff, 0.75); dl.position.set(2.5, 4, 5); ps.add(dl);
-      p = person(seed, false, !!karen, !!sweaty, 'normal'); p.rotation.y = -0.4; ps.add(p);
+      p = person(seed, false, !!karen, !!sweaty, 'normal', elder ? { elder: true, gender: seed % 2 === 0 ? 'f' : 'm' } : undefined); p.rotation.y = -0.4; ps.add(p);
       const ty = (karen || sweaty ? 2.0 : 1.82) - 0.02;
       pc.position.set(0, ty + 0.12, 2.9); pc.lookAt(0, ty, 0);
       rt = new T.WebGLRenderTarget(S, S, { samples: 4 });
@@ -2447,7 +2504,7 @@ const World = (function () {
       if (!w && !e.leaving) e.g.rotation.y = lerpAngle(e.g.rotation.y, PI, Math.min(1, dt * 6));
       if (e.leaving && !e.wp.length) { custGroup.remove(e.g); extras.splice(i, 1); }
     }
-    if (queue.length) { arriveT -= dt; if (arriveT <= 0) { arriveT = rushOn ? 5 + Math.random() * 4 : 15 + Math.random() * 9; arrive(); } }
+    if (queue.length) { arriveT -= dt; if (arriveT <= 0) { arriveT = rushOn ? 5 + Math.random() * 4 : (15 + Math.random() * 9) * (slowOn ? 2.4 : 1); arrive(); } }
     const all = queue.concat(leaving, extras, pets, cops.filter(c => copJob && copJob.phase === 'in'));
     if (lineEl && queue.length !== lineN) { lineN = queue.length; lineEl.textContent = 'Line ' + lineN + '/' + MAXQ; lineEl.className = 'line3d' + (lineN >= MAXQ ? ' full' : lineN >= MAXQ - 2 ? ' busy' : ''); }
     Crowd.separate(all, 1.15, onBump); Crowd.separate(stf, 1.0, onBump);
@@ -2615,6 +2672,8 @@ const World = (function () {
       up: { shelf: 0, tech: 0, counsel: 0, library: 0, robot: 0 } };
   }
   let S = load();
+  if (S.playSec === undefined) S.playSec = S.served > 0 ? 300 : 0; // people who already play skip the slow start
+  if (S.tutDone === undefined && S.served > 0) S.tutDone = true;
   function load() {
     const f = defaults();
     try {
@@ -2729,6 +2788,7 @@ const World = (function () {
   const hintCap = () => 2 * S.up.library;
   const upTotal = () => Object.keys(S.up).reduce((a, k) => a + S.up[k], 0);
   const customCount = () => S.decks.reduce((a, d) => a + d.items.length, 0);
+  const shopName = () => (S.shop && S.shop.trim()) || 'Corner Rx';
   function tierName() { const n = upTotal(); return n < 3 ? 'Corner shop' : n < 8 ? 'Neighborhood pharmacy' : n < 15 ? 'Community pharmacy' : n < 25 ? 'Hospital pharmacy' : 'Pharmacy campus'; }
   function rankInfo() {
     let i = 0; for (let k = 0; k < RANKS.length; k++) if (S.correct >= RANKS[k][0]) i = k;
@@ -2740,13 +2800,13 @@ const World = (function () {
   const JIM_LINES = ['Sorry, sorry, can I ask something quick? *mops forehead*', 'It is a little warm in here, right? Anyway, question...', 'I am not nervous. You are nervous. Okay, question:'];
   const JIM_BREAK = ['Hey, uh, is my prescription ready yet?', 'Is my prescription ready? I have been here forever.', 'Excuse me, quick thing, is my prescription done?'];
   const CALLER_LINES = ['I TRIED TO CALL and nobody picked up!', 'I called three times! Where is the manager?', 'Your phone just rang and rang. Unacceptable!'];
-  function avatar(seed, mood, karen, sweaty) {
-    const url = World.ok && World.portrait ? World.portrait(seed, karen, sweaty) : null;
+  function avatar(seed, mood, karen, sweaty, elder) {
+    const url = World.ok && World.portrait ? World.portrait(seed, karen, sweaty, elder) : null;
     if (url) return '<img class="avatar lp ' + (karen ? 'k' : sweaty ? 's' : '') + ' ' + (mood || '') + '" src="' + url + '" alt="" width="64" height="64" aria-hidden="true">';
     const skins = ['#F2C9A5', '#E0A97E', '#C48A5E', '#8D5A3B', '#F6D7BD', '#6F4429'];
     const hairs = ['#2B1B12', '#6B3A1E', '#B5651D', '#D9B25A', '#A8A8A8', '#1E1E2E'];
     const shirts = ['#0E9A8E', '#F1A20E', '#E04F3A', '#5B7FD1', '#8A63C9', '#3E8E41'];
-    const s = seed, skin = karen ? '#E8745F' : sweaty ? '#D4DAAE' : skins[s % 6], hair = karen ? '#E8C766' : sweaty ? '#2E2420' : hairs[(s >> 3) % 6], shirt = karen ? '#D9467A' : sweaty ? '#8A97A8' : shirts[(s >> 5) % 6], style = karen ? 3 : sweaty ? 4 : (s >> 7) % 3;
+    const s = seed, skin = karen ? '#E8745F' : sweaty ? '#D4DAAE' : skins[s % 6], hair = elder ? '#E6E6EE' : karen ? '#E8C766' : sweaty ? '#2E2420' : hairs[(s >> 3) % 6], shirt = karen ? '#D9467A' : sweaty ? '#8A97A8' : shirts[(s >> 5) % 6], style = karen ? 3 : sweaty ? 4 : (s >> 7) % 3;
     const hairSvg = style === 4 ? `<path d="M18 28c0-10 6-15 14-15s14 5 14 15c-3-4-8-6-14-6s-11 2-14 6z" fill="${hair}"/><path d="M22 14l-2-7 6 5M32 11v-8l4 7M40 14l5-6-1 8" stroke="${hair}" stroke-width="3" fill="${hair}" stroke-linecap="round"/>`
       : style === 3 ? `<path d="M15 40c-3-18 6-28 17-28s20 10 17 28h-6c1-9-3-14-11-14s-12 5-11 14z" fill="${hair}"/>`
       : style === 0 ? `<path d="M17 30c0-12 7-18 15-18s15 6 15 18c-4-6-10-8-15-8s-11 2-15 8z" fill="${hair}"/>`
@@ -2785,6 +2845,7 @@ const World = (function () {
     return arr;
   }
   const focusOn = () => !!S.set.focus;
+  const LEARN_SEC = 300, learning = () => (S.playSec || 0) < LEARN_SEC; // the first five minutes: slower line, no surprise events
   const timerOn = () => S.set.timer && !S.set.focus;
   const calcOn = () => S.set.topics.CALC && S.set.mode !== 'missed';
   const retry = [];
@@ -2813,14 +2874,47 @@ const World = (function () {
   }
   const KAREN_SEC = 25;
   function karenRoll() {
-    if (focusOn()) return false;
+    if (focusOn() || learning()) return false;
     if (S.karenCd > 0) { S.karenCd--; return false; }
     if (S.served < 6 || upTotal() < 2) return false;
     if (Math.random() < 0.25) { S.karenCd = 8; save(); return true; }
     return false;
   }
+  /* the hard-of-hearing visitor: a greeting nobody can hear, then a bonus question that pays out a free upgrade */
+  function elderRoll() {
+    if (focusOn() || learning()) return false;
+    if (S.elderCd > 0) { S.elderCd--; return false; }
+    if (S.served < 8) return false;
+    if (Math.random() < 0.16) { S.elderCd = 10; save(); return true; }
+    return false;
+  }
+  const ELDER_F = ['Mrs. Gable', 'Gladys', 'Miss Penny', 'Mrs. Whitfield'], ELDER_M = ['Mr. Albright', 'Harold', 'Mr. Lindqvist', 'Grandpa Walt'];
+  const ELDER_ASK = ["I'm here to pick up my prescription.", "Hello, dear. I'm here to pick up my prescription.", "Good morning. I've come to pick up my prescription."];
+  const ELDER_GREET = [['Yes, how can I help?', 'Who is the prescription for?'], ['Sure, what name is it under?', 'Of course, how can I help you?'], ['Welcome in. How can I help?', 'Who is the prescription for?']];
+  function learnOff() { S.playSec = Math.max(S.playSec || 0, LEARN_SEC); save(); }
+  function elderPick() {
+    if (!cur || !cur.elder || cur.elderStage !== 0) return;
+    cur.elderStage = 1; World.elderConfuse(true); renderPanel();
+    setTimeout(() => { if (cur && cur.elder && cur.elderStage === 1) { cur.elderStage = 2; cur.t0 = Date.now(); cur.flavor = pick(['Oh, never mind, dear. Maybe you can help me with this instead.', 'Hmm? Oh, forget it. Tell me something, will you?', 'Nevermind that. My grandson says you know all about medicine:']); World.elderConfuse(false); renderPanel(); } }, 2300);
+  }
+  function elderHTML() {
+    const stage = cur.elderStage, hear = stage === 1;
+    const opts = ELDER_GREET[cur.seed % ELDER_GREET.length].map((t, i) => `<button type="button" class="opt" style="grid-row:${i + 1};grid-column:1" data-elder="${i}" ${hear ? 'disabled' : ''}><kbd>${i + 1}</kbd><span>${esc(t)}</span></button>`).join('');
+    return `<article class="rx elder"><div class="rx-head"><span class="rx-sym" aria-hidden="true">&#8478;</span><div class="rx-meta"><b>${esc(cur.name.toUpperCase())} \u00B7 prescription pick-up</b><span>Say hello</span></div></div>
+      <div class="rx-body"><div class="patient ${hear ? 'hear' : ''}">${avatar(cur.seed, 'idle', false, false, true)}${hear ? '<span class="cmarks" aria-hidden="true"><i>?</i><i>?</i><i>?!</i></span>' : ''}<div class="bubble"><em>${hear ? '*cups a hand to her ear*' : esc(cur.name)}</em><p>${hear ? 'WHAT?? I can\u2019t hear you!' : esc(cur.ask)}</p></div></div>
+      <div class="opts" role="group" aria-label="Greeting choices">${opts}</div>
+      <div class="tools"><span class="keyhint">${hear ? 'She leans in closer...' : 'Pick a greeting.'}</span></div></div></article>`;
+  }
+  function elderGift() {
+    const open = UPS.filter(u => S.up[u.id] < u.max);
+    if (!open.length) { const bonus = Math.round(120 * franchiseMult()); S.cash += bonus; S.earned += bonus; return '<p class="gift"><b>' + esc(cur.name) + ' is delighted.</b> Everything is already maxed, so she tips ' + money(bonus) + '.</p>'; }
+    const u = pick(open); S.up[u.id]++;
+    if (u.id === 'library') S.hintsLeft += 2;
+    save(); renderStats(); renderStore(); renderUpgrades(); renderFranchise();
+    return '<p class="gift"><b>' + esc(cur.name) + ' tells all her friends about you.</b> Free upgrade: ' + esc(u.name || u.short) + ' is now level ' + S.up[u.id] + '.</p>';
+  }
   function sweatyRoll() {
-    if (focusOn()) return false;
+    if (focusOn() || learning()) return false;
     if (S.sweatyCd > 0) { S.sweatyCd--; return false; }
     if (S.served < 3) return false;
     if (Math.random() < 0.22) { S.sweatyCd = 5; save(); return true; }
@@ -2843,11 +2937,12 @@ const World = (function () {
       if (phone.pending && !focusOn()) { phone.pending = false; info.karen = true; info.caller = true; }
       if (!info.karen) info.sweaty = sweatyRoll();
     }
-    const karen = !!info.karen, sweaty = !!info.sweaty && !karen, q = chooseQ(karen);
+    if (!World.ok && !info.karen && !info.sweaty) info.elder = elderRoll();
+    const karen = !!info.karen, sweaty = !!info.sweaty && !karen, elder = !!info.elder && !karen && !sweaty, q = chooseQ(karen);
     view = 'q';
     if (!q) { cur = { empty: true, seed: info.seed, karen: false }; renderPanel(); return; }
     const opts = shuffle([q.a, ...q.w].map((t, i) => ({ t, ok: i === 0 })));
-    cur = { q, wasMissed: S.missed.indexOf(q.k) >= 0, opts, t0: Date.now(), done: false, hint: false, karen, sweaty, caller: !!info.caller, name: karen ? 'Karen' : sweaty ? 'Jittery Jim' : pick(NAMES), flavor: info.caller ? pick(CALLER_LINES) : karen ? pick(KAREN_LINES) : sweaty ? pick(JIM_LINES) : pick(FLAVOR[q.c] || FLAVOR.MY), seed: info.seed, num: S.served + 1, picked: -1, ok: false, resHTML: '', interrupt: null };
+    cur = { q, wasMissed: S.missed.indexOf(q.k) >= 0, opts, t0: Date.now(), done: false, hint: false, karen, sweaty, elder, elderStage: elder ? 0 : 2, ask: pick(ELDER_ASK), caller: !!info.caller, name: karen ? 'Karen' : sweaty ? 'Jittery Jim' : elder ? pick(info.seed % 2 === 0 ? ELDER_F : ELDER_M) : pick(NAMES), flavor: info.caller ? pick(CALLER_LINES) : karen ? pick(KAREN_LINES) : sweaty ? pick(JIM_LINES) : pick(FLAVOR[q.c] || FLAVOR.MY), seed: info.seed, num: S.served + 1, picked: -1, ok: false, resHTML: '', interrupt: null };
     if (sweatyOwed) { sweatyOwed = false; cur.interrupt = { t0: Date.now(), dur: 7000, a: Math.floor(Math.random() * 3), dismissed: false, line: pick(JIM_BREAK) }; World.interrupt(true); }
     renderPanel();
   }
@@ -2866,6 +2961,7 @@ const World = (function () {
   }
   function answer(idx) {
     if (!cur || cur.empty || cur.done || view !== 'q') return;
+    if (cur.elder && cur.elderStage < 2) { if (idx >= 0 && idx < 2 && cur.elderStage === 0) elderPick(); return; }
     const q = cur.q, o = cur.opts[idx];
     if (idx >= 0 && (!o || o.gone || isBlocked(idx))) return;
     endInterrupt();
@@ -2912,6 +3008,7 @@ const World = (function () {
         else extra = '<p class="karen-loss">Karen stormed out. You had nothing she could take.</p>';
       }
     }
+    if (cur.elder) extra += ok ? elderGift() : '<p class="gift sad">She pats your hand anyway and shuffles off. No upgrade this time.</p>';
     if (!q.gen) {
       const m = S.mastery[q.k] || { box: 0, seen: 0, ok: 0 };
       m.seen++;
@@ -2969,7 +3066,6 @@ const World = (function () {
     const n = customCount();
     return `<div class="qbar"><button type="button" class="qset ${view === 'set' ? 'on' : ''}" data-act="settings" aria-label="Question settings: ${esc(summary())}">${ICON_GEAR}<span>${esc(summary())}</span></button>
       <button type="button" class="${view === 'studies' ? 'on' : ''}" data-act="studies">${ICON_BOOK}<span>My studies${n ? ' (' + n + ')' : ''}</span></button>
-      <button type="button" class="${view === 'create' ? 'on' : ''}" data-act="create"><span>\uD83E\uDDD1\u200D\u2695\uFE0F Pharmacist</span></button>
       <button type="button" class="${view === 'awards' ? 'on' : ''}" data-act="awards"><span>\uD83C\uDFC6 Awards ${S.awards.frames.length}/27</span></button>
       <button type="button" class="${view === 'ref' ? 'on' : ''}" data-act="ref"><span>\uD83D\uDCDA Drug reference</span></button>
       ${World.ok && view === 'q' ? '<button type="button" class="restock" data-act="shelve" title="Put brand and generic drugs away. Patients keep waiting."><span>\uD83D\uDCE6 Restock</span></button>' : ''}
@@ -2982,6 +3078,7 @@ const World = (function () {
   }
   function cardHTML() {
     if (cur.empty) return `<div class="empty-q"><h3>No questions match your settings</h3><p>Loosen the topics, level or mode, or add your own studies.</p><div class="btnrow"><button class="btn go" type="button" data-act="settings">Open settings</button><button class="btn" type="button" data-act="studies">Add my studies</button></div></div>`;
+    if (cur.elder && cur.elderStage < 2) return elderHTML();
     const q = cur.q, pad = String(cur.num).padStart(5, '0'), keys = ['1', '2', '3', '4'];
     const dots = [1, 2, 3].map(i => `<i class="${i <= q.d ? 'on' : ''}"></i>`).join('');
     const opts = cur.opts.map((o, i) => {
@@ -2989,7 +3086,7 @@ const World = (function () {
       if (cur.done) { if (o.ok) c = 'ok'; else if (i === cur.picked) c = 'bad'; }
       return `<button type="button" class="opt ${c}" style="grid-row:${i + 1};grid-column:1" data-i="${i}" ${o.gone || cur.done || isBlocked(i) ? 'disabled' : ''}><kbd>${keys[i]}</kbd><span>${esc(o.t)}</span></button>`;
     }).join('');
-    const label = cur.caller ? 'KAREN · "I tried to call"' : cur.karen ? 'KAREN · wants the manager' : cur.sweaty ? 'JITTERY JIM · sweating buckets' : CATNAME[q.c] + (q.t ? ' · ' + q.t : '');
+    const label = cur.elder ? cur.name.toUpperCase() + ' \u00B7 free upgrade if right' : cur.caller ? 'KAREN · "I tried to call"' : cur.karen ? 'KAREN · wants the manager' : cur.sweaty ? 'JITTERY JIM · sweating buckets' : CATNAME[q.c] + (q.t ? ' · ' + q.t : '');
     const isK = cur.karen || cur.caller, showTimer = !isK && timerOn();
     return `<article class="rx ${cur.karen ? 'karen' : cur.sweaty ? 'sweaty' : ''}">
       <div class="rx-head"><span class="rx-sym" aria-hidden="true">&#8478;</span>
@@ -2999,7 +3096,7 @@ const World = (function () {
         ${showTimer ? '<div class="timer" aria-hidden="true"><i id="timerbar"></i></div>' : ''}</div>
       ${isK ? `<div class="ktimer" role="timer" aria-label="Time before Karen leaves"><div class="timer"><i id="timerbar"></i></div><b id="tcount">${KAREN_SEC}</b><small>sec</small></div>` : ''}
       <div class="rx-body">
-        <div class="patient">${avatar(cur.seed, cur.done ? (cur.ok ? 'ok' : 'bad') : 'idle', cur.karen, cur.sweaty)}<div class="bubble"><em>${esc(cur.flavor)}</em><p>${esc(q.q)}</p></div></div>
+        <div class="patient">${avatar(cur.seed, cur.done ? (cur.ok ? 'ok' : 'bad') : 'idle', cur.karen, cur.sweaty, cur.elder)}<div class="bubble"><em>${esc(cur.flavor)}</em><p>${esc(q.q)}</p></div></div>
         <div class="opts" role="group" aria-label="Answer choices">${opts}${jimHTML()}</div>
         <div class="tools"><button type="button" class="btn" id="hintbtn" ${S.hintsLeft < 1 || cur.hint || cur.done ? 'disabled' : ''}>Ask the pharmacist (${S.hintsLeft})</button>
           <span class="keyhint">${isK ? 'Karen leaves in ' + KAREN_SEC + ' s. A wrong answer costs an upgrade.' : timerOn() ? 'Speed bonus fades over 20 s' : focusOn() ? 'Focus mode: no timer' : 'Timer bonus is off'}</span></div>
@@ -3036,6 +3133,7 @@ const World = (function () {
     const modes = MODES.map(m => `<button type="button" class="chip" data-act="mode" data-v="${m[0]}" aria-pressed="${st.mode === m[0]}">${m[1]}</button>`).join('');
     const n = poolQs().length;
     return `<div class="pane nbk ${nbClosing ? 'closing' : ''}"><div class="nbcover"><span class="nbtitle">Study hub</span></div><div class="nbsheet">${hubTabs('set')}<h3>Question settings</h3><p class="sub">Changes apply to the next patient.</p>
+      ${S.shop ? '' : '<div class="grp"><b>Name your pharmacy</b><div class="btnrow"><input id="shopname2" class="field" type="text" maxlength="24" autocomplete="off" placeholder="Corner Rx" aria-label="Pharmacy name"><button type="button" class="btn go" data-act="shop-save">Save name</button></div><p class="note">Shown on the sign above your shelves. Set once.</p></div>'}
       <div class="grp"><b>Focus mode</b><div class="chips"><button type="button" class="chip" data-act="focus" aria-pressed="${!!st.focus}">Focus mode ${st.focus ? 'on' : 'off'}</button></div><p class="note">Hides the 3D pharmacy and turns off the timer, patient events, phone calls, Karen and Jim, so it is only questions.</p></div>
       <div class="grp"><b>Topics <span><button type="button" class="link" data-act="topics-all">All</button> &middot; <button type="button" class="link" data-act="topics-none">None</button></span></b><div class="chips">${topics}</div></div>
       <div class="grp"><b>Difficulty</b><div class="chips">${diffs}</div></div>
@@ -3043,7 +3141,7 @@ const World = (function () {
       <div class="grp"><b>Weekly drugs</b><div class="chips"><button type="button" class="chip" data-act="wkonly" aria-pressed="${!!st.wkOnly}">This week only</button><button type="button" class="chip" data-act="ahead" aria-pressed="${!!st.ahead}">Study ahead</button></div><p class="note">${weekNote()}</p></div>
       <div class="grp"><b>Speed bonus</b><div class="chips"><button type="button" class="chip" data-act="timer" aria-pressed="${st.timer}">Timer bonus ${st.timer ? 'on' : 'off'}</button></div><p class="note">Turn it off to study without time pressure. Karen still has a limit.</p></div>
       <p class="count">${n} question${n === 1 ? '' : 's'} match${calcOn() ? ' + endless calculations' : ''}</p>
-      <div class="btnrow"><button type="button" class="btn go nbback" data-act="back">Close notebook and return to counter</button><button type="button" class="btn" data-act="reset-set">Reset settings</button></div></div></div>`;
+      <div class="btnrow"><button type="button" class="btn go nbback" data-act="back">Close notebook and return to counter</button><button type="button" class="btn" data-act="tour">Replay tour</button><button type="button" class="btn" data-act="reset-set">Reset settings</button></div></div></div>`;
   }
   function lockNote(d) {
     const t = todayStr(), l = d.items.filter(q => q.from && q.from > t); if (!l.length) return '';
@@ -3106,6 +3204,7 @@ const World = (function () {
     const sw = (k, arr, label) => arr.map((c, i) => `<button type="button" class="swatch" data-act="me" data-k="${k}" data-v="${i}" style="background:${c}" aria-pressed="${m[k] === i}" aria-label="${label} ${i + 1}"></button>`).join('');
     return `<div class="pane"><h3>Your pharmacist</h3><p class="sub">You always stand at the counter. Changes appear in the shop right away.</p>
       <div class="mepv">${mePreview()}</div>
+      <div class="grp"><b>Name your pharmacy</b><input id="shopname" class="field" type="text" maxlength="24" autocomplete="off" placeholder="Corner Rx" value="${esc(S.shop || '')}" aria-label="Pharmacy name"><p class="note">It goes on the sign above your shelves. You can only set it here, once.</p></div>
       <div class="grp"><b>Gender</b><div class="chips">${chips('gender', ME_GENDERS)}</div></div>
       <div class="grp"><b>Body type</b><div class="chips">${chips('body', ME_BODIES)}</div></div>
       <div class="grp"><b>Hair style</b><div class="chips">${hairChips}</div></div>
@@ -3436,7 +3535,7 @@ const World = (function () {
   const rush = { on: false, left: 0, next: Date.now() + 600000 };
   function rushBadge() { const el = $('#rush3d'); if (!el) return; el.hidden = !rush.on; if (rush.on) el.textContent = 'RUSH HOUR \u00B7 +50% pay \u00B7 ' + Math.ceil(rush.left) + 's'; }
   function rushTick() {
-    if (!World.ok || focusOn()) return;
+    if (!World.ok || focusOn() || learning()) return;
     if (rush.on) {
       if (!fp.on && view === 'q') rush.left -= 0.25;
       if (rush.left <= 0) { rush.on = false; rush.next = Date.now() + (480 + Math.random() * 240) * 1000; World.setRush(false); toast('Rush hour is over. The line thins out.'); }
@@ -3446,7 +3545,7 @@ const World = (function () {
     rush.on = true; rush.left = 45; World.setRush(true); toast('Rush hour! Patients are pouring in. Everything pays +50% for 45 seconds.'); rushBadge();
   }
   function eventTick() {
-    if (focusOn() || fp.on || !World.ok || Date.now() < fp.cool) return;
+    if (focusOn() || learning() || fp.on || !World.ok || Date.now() < fp.cool) return;
     if (view !== 'q' || !cur || cur.empty || cur.done || phone.ringing || phone.open || S.served < 6 || !S.me.done) return;
     const now = Date.now();
     if (S.served - (S.lastShelve || 0) >= 20) { startShelve(true); return; }
@@ -3568,7 +3667,7 @@ const World = (function () {
       '<div class="tools"><span class="keyhint">The patient at the counter is waiting. Their timer is paused during the call.</span></div></div>' + (c.resHTML || '') + '</article>';
   }
   function phoneTick() {
-    if (focusOn()) return;
+    if (focusOn() || learning()) return;
     const now = Date.now();
     if (phone.ringing) { if (now >= phone.until) missCall(); else updatePhoneBtn(); }
     else if (!phone.open && !fp.on && now >= phone.nextAt && cur && !cur.empty && S.served >= 4) startRing();
@@ -3675,7 +3774,7 @@ const World = (function () {
     if (World.ok) World.sync();
     const rk = rankInfo(), prog = rk.to ? Math.min(100, (S.correct - rk.from) / (rk.to - rk.from) * 100) : 100;
     $('#store').innerHTML = `<h2>Your pharmacy <small>${S.correct} correct &middot; ${S.wrong} missed</small></h2>
-      <div class="store-name"><b>${tierName()}</b><span>Location #${S.franchises + 1}</span></div>
+      <div class="store-name"><b>${esc(shopName())}</b><span>${tierName()} \u00B7 Location #${S.franchises + 1}</span></div>
       ${World.ok ? '' : sceneSVG()}
       <div class="rank"><div class="rank-row"><b>${rk.name}</b><span>${rk.to ? (rk.to - S.correct) + ' correct to promotion' : 'Top rank reached'}</span></div><div class="bar amber"><i style="width:${prog}%"></i></div></div>
       <p class="note" style="margin-top:12px">Karens calmed: ${S.karenWin} &middot; Refunds paid: ${S.karenLoss}<br>Jim helped: ${S.jimWin} &middot; Jim interruptions: ${S.jimLoss}<br>Calls answered: ${S.phoneOK} &middot; Wrong: ${S.phoneBad} &middot; Missed: ${S.phoneMiss}<br>Bottle checks: ${S.bottleOK || 0} right &middot; ${S.bottleBad || 0} wrong &middot; Police visits: ${S.polLoss || 0}</p>`;
@@ -3746,6 +3845,8 @@ const World = (function () {
 
   /* ---- study decks ---- */
   function findDeck(name) { const n = name.trim().toLowerCase(); return S.decks.find(d => d.name.toLowerCase() === n); }
+  function syncBrand() { const h = document.querySelector('.brand h1'); if (h) h.textContent = shopName(); }
+  function readShop() { const el = $('#shopname'); if (el && !S.me.done) { S.shop = el.value.replace(/\s+/g, ' ').trim().slice(0, 24); save(); } }
   function readDraft() {
     const t = $('#studytext'), n = $('#deckname');
     if (t) draft.text = t.value; if (n) draft.name = n.value; const dd = $('#deckdate'); if (dd) draft.from = dd.value;
@@ -3777,8 +3878,31 @@ const World = (function () {
     draft.text = ''; renderPanel(); renderMastery(); renderReview();
     if (World.ok) World.sync();
   }
+  /* ---- first-run tour (menus only; events stay a surprise) ---- */
+  let tourEl = null, tourStep = 0, tourPaused = 0;
+  const TOUR = [
+    { t: 'Welcome to Corner Rx', p: 'You are the pharmacist at the counter. Each patient asks one question. Pick the right answer to earn cash and reputation, and read the explanation when you miss one. Take your time at first.' },
+    { t: 'The menu', p: 'Tap the menu button in the top right.', l: [['Upgrades', 'spend your cash on the pharmacy'], ['Progress & awards', 'mastery, photos, pets and the weekly calendar'], ['Study hub', 'choose topics and weekly drugs, or add your own questions'], ['Focus mode', 'just the questions, no 3D world'], ['Drug reference', 'the weekly drug lists']] },
+    { t: 'Look around', p: 'Drag to look around the pharmacy and pinch to zoom. Tap glowing spots to build upgrades. The corner button makes the game full screen, and the bar above the question card hides it so you can see the shop.' },
+    { t: 'Your progress', p: 'Everything saves in this browser. To back up or move to another device, open Progress and copy your save code. Good luck out there.' }
+  ];
+  function drawTour() {
+    const s = TOUR[tourStep], last = tourStep === TOUR.length - 1;
+    tourEl.innerHTML = '<div class="tourcard" role="dialog" aria-modal="true" aria-label="Quick tour"><h3>' + esc(s.t) + '</h3><p>' + esc(s.p) + '</p>' +
+      (s.l ? '<ul>' + s.l.map(x => '<li><b>' + esc(x[0]) + '</b><span>' + esc(x[1]) + '</span></li>').join('') + '</ul>' : '') +
+      '<div class="tourdots">' + TOUR.map((x, i) => '<i class="' + (i === tourStep ? 'on' : '') + '"></i>').join('') + '</div>' +
+      '<div class="tourbtns">' + (tourStep ? '<button type="button" class="btn" data-act="tour-back">Back</button>' : '') + '<button type="button" class="btn go" data-act="tour-next">' + (last ? 'Start serving' : 'Next') + '</button>' + (last ? '' : '<button type="button" class="skip" data-act="tour-skip">Skip tour</button>') + '</div></div>';
+  }
+  function showTour() { if (tourEl) return; tourStep = 0; tourPaused = Date.now(); tourEl = document.createElement('div'); tourEl.className = 'tour'; document.body.appendChild(tourEl); drawTour(); }
+  function endTour() {
+    if (tourEl) { tourEl.remove(); tourEl = null; }
+    S.tutDone = true; save();
+    if (cur && !cur.done && !cur.empty && tourPaused) cur.t0 += Date.now() - tourPaused;
+    tourPaused = 0;
+  }
+  function maybeTour() { if (S.me.done && !S.tutDone && !tourEl) showTour(); }
   /* ---- save code: the whole save as one long code, to move progress between devices or keep a backup ---- */
-  const GAME_VERSION = 35;
+  const GAME_VERSION = 41;
   const b64u = (u8) => { let s = ''; for (let i = 0; i < u8.length; i += 0x8000) s += String.fromCharCode.apply(null, u8.subarray(i, i + 0x8000)); return btoa(s).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); };
   const unb64u = (t) => { const s = atob(t.replace(/-/g, '+').replace(/_/g, '/')), u = new Uint8Array(s.length); for (let i = 0; i < s.length; i++) u[i] = s.charCodeAt(i); return u; };
   const chk = (t) => { let h = 2166136261; for (let i = 0; i < t.length; i++) { h ^= t.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36); };
@@ -3833,11 +3957,11 @@ const World = (function () {
     switch (a) {
       case 'settings': openView(view === 'set' ? 'q' : 'set'); if (view === 'q') { resumeTimers(); renderPanel(); } return;
       case 'studies': openView(view === 'studies' ? 'q' : 'studies'); if (view === 'q') { resumeTimers(); renderPanel(); } return;
-      case 'create': openView(view === 'create' ? 'q' : 'create'); if (view === 'q') { resumeTimers(); renderPanel(); } return;
+      case 'create': if (S.me.done) return; openView(view === 'create' ? 'q' : 'create'); if (view === 'q') { resumeTimers(); renderPanel(); } return;
       case 'awards': openView(view === 'awards' ? 'q' : 'awards'); if (view === 'q') { resumeTimers(); renderPanel(); } return;
-      case 'me': { const k = t.dataset.k, v = t.dataset.v; S.me[k] = (k === 'hair' || k === 'hairColor' || k === 'skin' || k === 'scrub') ? +v : v; save(); World.setPharmacist(meSpec()); renderPanel(); return; }
-      case 'me-done': S.me.done = true; save(); return backToQ();
-      case 'back': readDraft(); if (view === 'create' && !S.me.done) { S.me.done = true; save(); } return backToQ();
+      case 'me': { readShop(); const k = t.dataset.k, v = t.dataset.v; S.me[k] = (k === 'hair' || k === 'hairColor' || k === 'skin' || k === 'scrub') ? +v : v; save(); World.setPharmacist(meSpec()); renderPanel(); return; }
+      case 'me-done': readShop(); S.me.done = true; save(); syncBrand(); backToQ(); maybeTour(); return;
+      case 'back': readDraft(); const wasC = view === 'create' && !S.me.done; if (view === 'create') readShop(); if (wasC) { S.me.done = true; save(); } backToQ(); if (wasC) maybeTour(); return;
       case 'phone': return openPhone();
       case 'menu': document.body.classList.remove('drawer'); document.body.classList.toggle('menuopen'); return;
       case 'sheet-ups': case 'sheet-prog': {
@@ -3847,6 +3971,18 @@ const World = (function () {
       }
       case 'drawer-close': document.body.classList.remove('drawer', 'menuopen'); return;
       case 'sc-copy': case 'sc-load': return saveCodeAct(t, a);
+      case 'dev-elder': { const ok = World.ok && World.devElder(); toast(ok ? 'An elder patient is next in line. Use "Test: skip to next patient".' : 'No patient could be swapped right now.'); return; }
+      case 'dev-next': if (view === 'q') newCard(); return;
+      case 'dev-bottle': learnOff(); fp.cool = 0; return startBottles();
+      case 'dev-shelve': learnOff(); return startShelve(false);
+      case 'dev-prior': learnOff(); return startPrior();
+      case 'dev-rush': learnOff(); rush.next = 0; if (!rush.on) { rush.on = true; rush.left = 45; World.setRush(true); toast('Rush hour!'); rushBadge(); } return;
+      case 'dev-fast': learnOff(); toast('Slow start skipped. Events can happen now.'); return;
+      case 'tour': return showTour();
+      case 'shop-save': { const el = $('#shopname2'); const v = el ? el.value.replace(/\s+/g, ' ').trim().slice(0, 24) : ''; if (v) { S.shop = v; save(); syncBrand(); toast('Your pharmacy is now ' + v + '.'); renderPanel(); } return; }
+      case 'tour-next': if (tourStep >= TOUR.length - 1) endTour(); else { tourStep++; drawTour(); } return;
+      case 'tour-back': if (tourStep > 0) { tourStep--; drawTour(); } return;
+      case 'tour-skip': return endTour();
       case 'fp-leave': return fpLeave();
       case 'fp-tip': return;
       case 'shelve': return startShelve(false);
@@ -3884,6 +4020,7 @@ const World = (function () {
   }
   document.addEventListener('click', (e) => {
     const t = e.target.closest('button'); if (!t) return;
+    if (t.dataset.elder !== undefined) return elderPick();
     if (t.dataset.act) return act(t);
     if (t.dataset.ph !== undefined) return phoneAnswer(+t.dataset.ph);
     if (t.dataset.pa !== undefined) return paAnswer(+t.dataset.pa);
@@ -3931,6 +4068,8 @@ const World = (function () {
     document.querySelectorAll('[data-buy]').forEach(b => { const max = b.textContent === 'MAX'; b.disabled = max || S.cash < +b.dataset.cost; });
     const fb = $('#frbtn'); if (fb) fb.disabled = S.cash < frCost();
     const rb = $('#retirebtn'); if (rb) rb.disabled = S.cash < RETIRE_AT;
+    if (!document.hidden && !tourEl) S.playSec = (S.playSec || 0) + 0.25;
+    World.setSlow(learning());
     World.refreshTags(); phoneTick(); rushTick(); eventTick();
     const uh = document.querySelector('#ups h2 small'); if (uh) uh.textContent = money(S.cash) + ' on hand';
   }, 250);
@@ -3950,14 +4089,25 @@ const World = (function () {
   setInterval(() => { if (window.__rxLoading) return; try { localStorage.setItem(SAVE_KEY, JSON.stringify(S)); } catch (e) { /* ignore */ } }, 5000);
 
   { const sc = $('#savecard'); if (sc) sc.innerHTML = saveBoxHTML(); }
-  World.init({ host: $('#stage'), getS: () => S, tagInfo: tagInfo, onBuy: buyUp, onNotes: () => openView('studies'), notesInfo: customCount, karenRoll: karenRoll, sweatyRoll: sweatyRoll, onPhone: openPhone, onPolice: policeCome, onFp: fpClick, sign: () => tierName() + ' #' + (S.franchises + 1) });
-  window.__rxDbg = () => ({ fp: fp, S: S, view: view, rush: rush, phoneR: phone.ringing, TOPQ: TOPQ, pool: poolQs });
+  World.init({ host: $('#stage'), getS: () => S, tagInfo: tagInfo, onBuy: buyUp, onNotes: () => openView('studies'), notesInfo: customCount, karenRoll: karenRoll, sweatyRoll: sweatyRoll, elderRoll: elderRoll, onPhone: openPhone, onPolice: policeCome, onFp: fpClick, sign: () => shopName() + '|' + tierName() + ' #' + (S.franchises + 1) });
+  window.__rxDbg = () => ({ fp: fp, S: S, view: view, rush: rush, phoneR: phone.ringing, TOPQ: TOPQ, pool: poolQs, cur: cur });
   if (!World.ok) $('#stage').classList.add('flat');
   else { document.body.classList.add('fx'); World.setPharmacist(meSpec()); World.setAwards(S.awards); World.setCalendar(Math.min(4, S.awards.calW || 0), false, S.awards.calW || 0); }
-  applyFocus();
+  applyFocus(); syncBrand();
+  /* test tools: open the game with ?dev=1 on the end of the link to get extra menu buttons for trying events quickly */
+  if (/[?&]dev=1/.test(location.search)) {
+    const menu = $('#menu'), close = menu && menu.querySelector('.menuclose');
+    if (menu && close) {
+      const hr = document.createElement('hr'); menu.insertBefore(hr, close);
+      [['dev-elder', 'Test: elder patient next'], ['dev-next', 'Test: skip to next patient'], ['dev-bottle', 'Test: bottle check'], ['dev-shelve', 'Test: restock'], ['dev-prior', 'Test: prior auth'], ['dev-rush', 'Test: rush hour'], ['dev-fast', 'Test: skip slow start']].forEach(b => {
+        const el = document.createElement('button'); el.type = 'button'; el.dataset.act = b[0]; el.innerHTML = '<i aria-hidden="true">\u2699</i><span>' + b[1] + '</span>'; menu.insertBefore(el, close);
+      });
+    }
+  }
   checkAwards(true);
   renderAll();
   newCard();
   if (!S.me.done) openView('create');
+  maybeTour();
 })();
 </script>
