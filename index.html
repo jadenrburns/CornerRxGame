@@ -127,6 +127,8 @@ button { font: inherit; color: inherit; cursor: pointer; }
 @keyframes kar { to { scale: 1.18; } }
 .hud { position: absolute; left: 10px; top: 10px; display: flex; gap: 6px; }
 .hud button { width: 34px; height: 34px; border-radius: 10px; border: 1.5px solid var(--ink); background: var(--surface); font: 700 15px/1 var(--f-mono); display: grid; place-items: center; padding: 0; }
+.hud button.hudtxt { width: auto; padding: 0 12px 0 10px; gap: 6px; grid-auto-flow: column; font: 700 13px/1 var(--f-display); }
+body.fx .hud button.hudtxt { width: auto; }
 .hud button:hover { background: var(--surface2); }
 .hud button svg { display: block; }
 .hint3d { position: absolute; left: 12px; bottom: 12px; max-width: min(420px, calc(100% - 520px)); background: var(--surface); border: 1.5px solid var(--ink); border-radius: 12px; padding: 7px 11px; font: 500 12px/1.3 var(--f-mono); transition: opacity .6s; pointer-events: none; }
@@ -328,7 +330,7 @@ details.how > summary { cursor: pointer; font: 600 13px var(--f-body); color: va
 .fpq .pips i.on { background: #3FD07F; }
 .fpq .pips i.bad { background: var(--coral); }
 .fpq.portal { left: 50%; top: 50%; transform: translate(-50%, -50%); width: 720px; height: 440px; max-width: none; display: flex; flex-direction: column; background: #EEF3F7; color: #17202A; border-color: #17202A; border-radius: 10px; padding: 0; overflow: hidden; transform-origin: center; }
-.portal .pbar { background: #2B3A67; color: #fff; padding: 7px 14px; font: 700 13px/1.2 var(--f-display); display: flex; justify-content: space-between; gap: 10px; }
+.portal .pbar { height: auto; margin-top: 0; background: #2B3A67; color: #fff; padding: 7px 14px; font: 700 13px/1.2 var(--f-display); display: flex; justify-content: space-between; gap: 10px; }
 .portal .pbody { flex: 1; min-height: 0; display: flex; flex-direction: column; padding: 8px 14px 8px; overflow: hidden; }
 .portal .pbar { flex: none; }
 .portal .pwarn { flex: none; }
@@ -641,6 +643,27 @@ body.fx.focus .qpanel.min #counter { display: block; }
 .sharebox a.btn { text-decoration: none; display: inline-flex; align-items: center; }
 .rx.evt-inspector { border-color: #475569; } .rx.evt-driver { border-color: #8B5A2B; } .rx.evt-mumble { border-color: var(--amber); }
 .rx.evt .rx-sym { color: var(--amber); }
+
+/* compounding pharmacy */
+body.lab .tags, body.lab .line3d, body.lab .bub3d, body.lab .rush3d, body.lab .phonebtn, body.lab .hint3d, body.lab #restockhud, body.lab .qbar .restock, body.lab #menu [data-act="shelve"], body.lab #menu [data-act="dev-elder"], body.lab #menu [data-act="dev-next"], body.lab #menu [data-act="dev-bottle"], body.lab #menu [data-act="dev-shelve"], body.lab #menu [data-act="dev-prior"], body.lab #menu [data-act="dev-rush"], body.lab #menu [data-act="dev-insp"], body.lab #menu [data-act="dev-mumble"], body.lab #menu [data-act="dev-driver"] { display: none !important; }
+.capdots { display: flex; gap: 8px; margin: 6px 0; }
+.capdot { width: 38px; height: 38px; border-radius: 50%; display: grid; place-items: center; border: 2px dashed var(--ink); font-size: 18px; opacity: .55; }
+.capdot.on { border-style: solid; opacity: 1; background: var(--surface); }
+.capnotes { padding-left: 18px; }
+.rx.labq { border-color: #0E6B7F; }
+.rx.labq .rx-head { background: linear-gradient(90deg, #0E6B7F, #1B8CA3); color: #fff; }
+.labtools { margin-top: 12px; border: 1.5px solid var(--ink); border-radius: 12px; background: var(--surface); padding: 0 10px; }
+.labtools > summary { cursor: pointer; padding: 9px 2px; font: 800 13px/1.2 var(--f-body, inherit); list-style: none; }
+.labtools > summary::-webkit-details-marker { display: none; }
+.labtools > summary small { font-weight: 600; opacity: .7; margin-left: 6px; }
+.labcalc { padding-bottom: 10px; display: grid; gap: 8px; }
+.labcalc .lrow { display: flex; gap: 8px; align-items: center; }
+.labcalc .lrow .field { flex: 1; min-width: 0; font: 600 15px/1.2 var(--f-mono, monospace); }
+.labcalc .lout { min-width: 96px; text-align: right; font: 800 16px/1.2 var(--f-mono, monospace); color: #0E6B7F; }
+.lkeys { display: flex; flex-wrap: wrap; gap: 5px; }
+.lbtn { padding: 7px 10px; border-radius: 9px; border: 1.5px solid var(--ink); background: var(--surface); color: var(--ink); font: 700 13px/1 var(--f-mono, monospace); cursor: pointer; min-height: 34px; }
+.lbtn:active { transform: translateY(1px); }
+.labcalc textarea.field { width: 100%; resize: vertical; font: 500 14px/1.35 var(--f-body, inherit); }
 </style>
 
 <div class="shell">
@@ -660,7 +683,7 @@ body.fx.focus .qpanel.min #counter { display: block; }
     <div class="rush3d" id="rush3d" role="status" hidden></div>
     <button type="button" class="phonebtn" id="phonebtn" data-act="phone" hidden></button>
     <div class="toast3d" id="toast3d" role="status" aria-live="polite"></div>
-    <div class="hud"><button type="button" data-z="fs" aria-label="Full screen" id="fsbtn"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg></button></div>
+    <div class="hud"><button type="button" data-z="fs" aria-label="Full screen" id="fsbtn"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg></button><button type="button" class="hudtxt" data-act="shelve" id="restockhud" aria-label="Restock the shelves" title="Put brand and generic drugs away. Patients keep waiting."><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8l9-4 9 4-9 4zM3 8v8l9 4 9-4V8M12 12v8"/></svg><span>Restock</span></button></div>
     <div class="hint3d">Drag to look around. Pinch to zoom. Tap glowing spots to build.</div>
     <div class="fpq" id="fpq" hidden></div>
     <button type="button" class="fpleave" id="fpleave" data-act="fp-leave" aria-label="Leave this task">&#10005; Leave</button>
@@ -674,6 +697,7 @@ body.fx.focus .qpanel.min #counter { display: block; }
     <button type="button" data-act="settings"><i aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5.5A1.5 1.5 0 0 1 5.5 4H12v16H5.5A1.5 1.5 0 0 1 4 18.5zM12 4h6.5A1.5 1.5 0 0 1 20 5.5v13a1.5 1.5 0 0 1-1.5 1.5H12"/></svg></i><span>Study hub</span></button>
     <button type="button" data-act="flash"><i aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="6" width="14" height="12" rx="2"/><path d="M7 3h12a2 2 0 0 1 2 2v10"/></svg></i><span>Flashcards</span></button>
     <button type="button" id="sfxbtn" data-act="sfx" aria-pressed="true"><i aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9zM16 9a4 4 0 0 1 0 6M18.5 6.5a8 8 0 0 1 0 11"/></svg></i><span id="sfxlab">Sound: on</span></button>
+    <button type="button" id="labbtn" data-act="lab" aria-pressed="false"><i aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 3h6M10 3v6L4.5 19a1.6 1.6 0 0 0 1.4 2.4h12.2a1.6 1.6 0 0 0 1.4-2.4L14 9V3M7.5 15h9"/></svg></i><span id="lablab">Switch to compounding</span></button>
     <button type="button" id="focusbtn" data-act="focus" aria-pressed="false"><i aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="2.5"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg></i><span id="focuslab">Focus mode</span></button>
     <hr>
     <button type="button" data-act="ref"><i aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 4h11a3 3 0 0 1 3 3v13H8a3 3 0 0 1-3-3zM5 17a3 3 0 0 1 3-3h11"/></svg></i><span>Drug reference</span></button>
@@ -955,6 +979,259 @@ Q("SIG",2,"What does checking the prescription drug monitoring program (PDMP) he
 Q("SIG",1,"Which waste belongs in a sharps container?","Needles and lancets",["Expired tablets","Empty paper boxes","Ointment tubes"],"Needles, syringes with needles and lancets go in a puncture-resistant sharps container. Expired drugs follow separate disposal rules.");
 Q("SIG",1,"What is a medication 'near miss'?","An error caught before it reaches the patient",["An error that harmed a patient","A late delivery","A refused prescription"],"Near misses are reported and reviewed too, because they reveal weak points in the workflow before someone is hurt.");
 Q("SIG",2,"What is the best check for a high-alert medication such as insulin?","An independent double check",["A single quick check","Checking only the label color","Asking the patient to read the label"],"High-alert drugs get an independent double check by a second person, because errors with them cause the most harm.");
+/* ---------- Compounding pharmacy: calculation + kinetics generators ---------- */
+function fmtS(n) { return String(Number(Number(n).toPrecision(3))); }
+function mkL(kind, d, q, correct, cands, unit, steps) {
+  const cs = fmtS(correct), out = [];
+  cands.forEach(c => { if (!(c > 0) || !isFinite(c) || c > correct * 40 || c < correct / 40) return; const s = fmtS(c); if (s !== cs && out.indexOf(s) < 0) out.push(s); });
+  const spare = [2, 0.5, 10, 0.1, 1.5, 0.75, 4, 0.25, 3];
+  for (let i = 0; out.length < 3 && i < spare.length; i++) { const s = fmtS(correct * spare[i]); if (s !== cs && out.indexOf(s) < 0) out.push(s); }
+  const u = unit ? ' ' + unit : '';
+  const round = Number(cs) !== correct && Math.abs(Number(cs) - correct) > 1e-9 * Math.max(1, Math.abs(correct)) ? ' Round to 3 significant figures.' : '';
+  return { c: 'CALC', lab: kind, d, q: q + round, a: cs + u, w: out.slice(0, 3).map(s => s + u), e: steps, gen: true };
+}
+const LAB_GENS = {
+  comp: [
+    function alligation() {
+      let H, L, W, Z, g;
+      do { H = pick([10, 20, 5, 50, 25]); L = pick([0, 1, 2, 5]); W = pick([2, 2.5, 3, 4, 5, 8, 10, 12.5, 15]); Z = pick([100, 120, 200, 240, 300, 400]); g = Z * (W - L) / (H - L); } while (!(W > L && W < H) || Math.abs(g * 4 - Math.round(g * 4)) > 1e-9);
+      const gl = Z - g, base = L === 0 ? 'petrolatum base' : L + '% ointment';
+      return mkL('comp', 2, `How many grams of ${H}% ointment and how many of ${base} are needed to make ${Z} g of ${W}% ointment? Give the grams of the ${H}% ointment.`, g,
+        [gl, Z * W / H, Z / 2, Z * (H - W) / (H - L) * 1.0],
+        'g', `Alligation: parts of ${H}% = ${W} - ${L} = ${fmtS(W - L)}; parts of ${base} = ${H} - ${W} = ${fmtS(H - W)}. Total parts = ${fmtS(H - L)}. ${H}% ointment = ${Z} g x ${fmtS(W - L)}/${fmtS(H - L)} = ${fmtS(g)} g (the other ${fmtS(gl)} g is ${base}).`);
+    },
+    function weightedAvg() {
+      const a = pick([100, 150, 200, 250]), b = pick([200, 300, 400, 150]), pa = pick([1, 2, 5, 10]), pb = pick([10, 15, 20, 25]);
+      const f = (a * pa + b * pb) / (a + b);
+      return mkL('comp', 2, `You mix ${a} g of a ${pa}% cream with ${b} g of a ${pb}% cream. What is the final percentage strength?`, f,
+        [(pa + pb) / 2, (pa + pb), f * 2, pb - pa], '%', `Total drug = ${a} x ${pa}% + ${b} x ${pb}% = ${fmtS(a * pa / 100)} + ${fmtS(b * pb / 100)} = ${fmtS((a * pa + b * pb) / 100)} g in ${a + b} g. ${fmtS((a * pa + b * pb) / 100)} / ${a + b} x 100 = ${fmtS(f)}%. It is not the plain average because the amounts differ.`);
+    },
+    function stockDilution() {
+      const t = pick([[70, 20, 500], [95, 70, 400], [50, 25, 200], [90, 30, 300], [20, 5, 400], [10, 0.5, 600]]);
+      const v1 = t[1] * t[2] / t[0], dil = t[2] - v1;
+      const askDil = Math.random() < 0.5;
+      return mkL('comp', 2, `You have ${t[0]}% stock. How many mL of ${askDil ? 'diluent (water)' : 'stock'} are needed to compound ${t[2]} mL of ${t[1]}% solution?`, askDil ? dil : v1,
+        [askDil ? v1 : dil, t[0] * t[2] / t[1], t[2] * t[1] / 100, askDil ? t[2] : v1 * 2], 'mL', `C1V1 = C2V2, so V1 = (${t[1]} x ${t[2]}) / ${t[0]} = ${fmtS(v1)} mL of stock. Diluent = ${t[2]} - ${fmtS(v1)} = ${fmtS(dil)} mL.`);
+    },
+    function weighMg() {
+      const t = pick([[60, 0.25], [120, 0.5], [30, 2], [250, 0.1], [90, 1.5], [480, 0.05]]), mg = t[0] * t[1] / 100 * 1000;
+      return mkL('comp', 2, `The order is ${t[0]} mL of a ${t[1]}% w/v solution. How many mg of drug do you weigh out?`, mg,
+        [mg / 1000, mg * 10, mg / 10, t[0] * t[1]], 'mg', `${t[1]}% w/v = ${t[1]} g in 100 mL. ${t[0]} mL x ${t[1]} g / 100 mL = ${fmtS(mg / 1000)} g = ${fmtS(mg)} mg.`);
+    },
+    function ratioStrength() {
+      const r = pick([1000, 2000, 5000, 10000, 500, 250]), v = pick([100, 250, 500, 1000]), mgml = 1000 / r, g = v / r;
+      const askC = Math.random() < 0.5;
+      return mkL('comp', 1, askC ? `A solution is labeled 1:${r}. How many mg of drug per mL?` : `How many grams of drug are in ${v} mL of a 1:${r} w/v solution?`, askC ? mgml : g,
+        askC ? [mgml * 10, mgml / 10, r / 1000 * 100, 100 / r] : [g * 10, g / 10, v / 100, v * r], askC ? 'mg/mL' : 'g',
+        `1:${r} w/v means 1 g in ${r} mL. ${askC ? '1000 mg / ' + r + ' mL = ' + fmtS(mgml) + ' mg/mL.' : v + ' mL / ' + r + ' = ' + fmtS(g) + ' g.'}`);
+    },
+    function pctFromMgml() {
+      const c = pick([5, 10, 12.5, 20, 25, 40, 50, 2.5]);
+      return mkL('comp', 1, `A solution contains ${c} mg of drug per mL. What is its % w/v strength?`, c / 10,
+        [c, c * 10, c / 100, c / 1000], '%', `${c} mg/mL = ${fmtS(c / 1000)} g/mL = ${fmtS(c / 10)} g per 100 mL = ${fmtS(c / 10)}% w/v.`);
+    },
+    function triturate() {
+      const r = pick([10, 100, 1000]), tot = pick([10, 20, 50, 100]), need = pick([0.5, 1, 2, 5]);
+      const askMg = Math.random() < 0.5;
+      if (askMg) { const mg = need * r; return mkL('comp', 3, `A 1:${r} (w/w) trituration of a potent drug is made in lactose. How many mg of the trituration provide ${need} mg of the drug?`, mg, [need / r, mg * 10, mg / 10, need * r / 10], 'mg', `1:${r} means 1 part drug in ${r} parts mix, so ${need} mg drug needs ${need} x ${r} = ${mg} mg of trituration.`); }
+      const g = tot / r;
+      return mkL('comp', 2, `How many grams of drug are needed to make ${tot} g of a 1:${r} trituration (w/w) in lactose?`, g, [g * 10, g / 10, tot * r, tot - g], 'g', `${tot} g / ${r} = ${fmtS(g)} g of drug. The rest (${fmtS(tot - g)} g) is lactose, added by geometric dilution.`);
+    },
+    function capsules() {
+      const n = pick([24, 30, 36, 40, 60]), dose = pick([25, 50, 75, 125, 150, 250]), over = pick([10, 15, 20]);
+      const mg = n * dose * (1 + over / 100);
+      return mkL('comp', 2, `Compound ${n} capsules, ${dose} mg drug each, and weigh out ${over}% overage to cover losses. How many mg of drug do you weigh out in total?`, mg, [n * dose, n * dose * over / 100, n * dose * (1 - over / 100), n * (dose + over)], 'mg', `${n} x ${dose} mg = ${n * dose} mg. Add ${over}%: ${n * dose} x ${(1 + over / 100).toFixed(2)} = ${fmtS(mg)} mg.`);
+    },
+    function suppository() {
+      let n, dose, df, cb;
+      do { n = pick([6, 12, 24]); dose = pick([0.15, 0.2, 0.3, 0.45, 0.6]); df = pick([1.5, 2, 3]); cb = n * (2 - dose / df); } while (cb <= 0);
+      return mkL('comp', 3, `A suppository mold holds 2 g of cocoa butter. You are making ${n} suppositories with ${dose} g of drug each (density factor ${df}). How many grams of cocoa butter do you need?`, cb,
+        [n * 2, n * (2 - dose), n * (2 - dose * df), n * dose / df], 'g', `Displacement = ${dose} / ${df} = ${fmtS(dose / df)} g of cocoa butter per suppository. Each needs ${fmtS(2 - dose / df)} g. ${n} x ${fmtS(2 - dose / df)} = ${fmtS(cb)} g.`);
+    },
+    function isotonic() {
+      const v = pick([30, 60, 100, 15]), c = pick([0.5, 1, 2]), E = pick([0.14, 0.18, 0.22, 0.3, 0.12]);
+      const mg = (0.9 * v / 100 - c / 100 * v * E) * 1000;
+      if (mg <= 0) return LAB_GENS.comp[9]();
+      return mkL('comp', 3, `Make ${v} mL of ${c}% drug solution isotonic with NaCl. The drug's sodium chloride equivalent is ${E}. How many mg of NaCl must be added?`, mg,
+        [0.9 * v * 10, c / 100 * v * E * 1000, mg / 10, (0.9 * v / 100 + c / 100 * v * E) * 1000], 'mg', `Isotonic needs 0.9% NaCl: ${v} x 0.009 = ${fmtS(v * 9)} mg NaCl equivalent. Drug supplies ${v} mL x ${c}% = ${fmtS(c * v * 10)} mg, x ${E} = ${fmtS(c * v * 10 * E)} mg. NaCl to add = ${fmtS(v * 9)} - ${fmtS(c * v * 10 * E)} = ${fmtS(mg)} mg.`);
+    },
+    function meq() {
+      const s = pick([['KCl', 74.5, 1], ['NaCl', 58.5, 1], ['CaCl2 (anhydrous, MW 111)', 111, 2], ['MgSO4 (anhydrous, MW 120)', 120, 2]]), k = pick([1, 2, 4]);
+      const mg = s[1] * k * 10 / s[2], meq = mg * s[2] / s[1];
+      return mkL('comp', 3, `How many mEq are in ${fmtS(mg)} mg of ${s[0]}? (MW ${s[1]}, valence ${s[2]})`, meq,
+        [mg / s[1], mg * s[1] / s[2], meq * s[2], mg / s[1] / s[2]], 'mEq', `mEq = (mg x valence) / MW = (${fmtS(mg)} x ${s[2]}) / ${s[1]} = ${fmtS(meq)} mEq.`);
+    },
+    function specificGravity() {
+      const sg = pick([1.2, 1.25, 0.9, 1.1, 0.8, 1.5]), v = pick([50, 100, 200, 250]);
+      if (Math.random() < 0.5) return mkL('comp', 1, `A liquid has a specific gravity of ${sg}. What is the weight of ${v} mL?`, v * sg, [v / sg, v * sg * 10, v + sg, v - sg], 'g', `Weight = volume x SG = ${v} x ${sg} = ${fmtS(v * sg)} g.`);
+      const g = pick([30, 50, 60, 75, 120]);
+      return mkL('comp', 2, `The formula needs ${g} g of a liquid with specific gravity ${sg}. How many mL do you measure?`, g / sg, [g * sg, g / sg / 10, g + sg, g - sg], 'mL', `Volume = weight / SG = ${g} / ${sg} = ${fmtS(g / sg)} mL.`);
+    },
+    function pctWW() {
+      const g = pick([30, 60, 90, 120, 240]), p = pick([0.5, 1, 2, 2.5, 5, 10]);
+      return mkL('comp', 1, `How many grams of hydrocortisone powder are needed to compound ${g} g of a ${p}% (w/w) ointment?`, g * p / 100,
+        [g * p / 10, g * p, g / p, g * p / 1000], 'g', `${p}% w/w = ${p} g per 100 g. ${g} g x ${p} / 100 = ${fmtS(g * p / 100)} g of drug; fill the rest with base to ${g} g total.`);
+    },
+    function reconstitute() {
+      const mgml = pick([[125, 5], [250, 5], [400, 5], [200, 5]]), vol = pick([60, 100, 150, 200]), tot = mgml[0] / mgml[1] * vol;
+      const dose = pick([200, 300, 400, 500, 600]).valueOf();
+      if (Math.random() < 0.5) return mkL('comp', 2, `A powder reconstitutes to ${mgml[0]} mg/${mgml[1]} mL. The ${vol} mL bottle holds how many mg of drug?`, tot, [tot / 1000, tot * 5, mgml[0] * vol, mgml[0] / mgml[1]], 'mg', `${mgml[0]} mg / ${mgml[1]} mL = ${fmtS(mgml[0] / mgml[1])} mg/mL x ${vol} mL = ${fmtS(tot)} mg.`);
+      const ml = dose / (mgml[0] / mgml[1]);
+      return mkL('comp', 2, `A suspension is ${mgml[0]} mg per ${mgml[1]} mL. How many mL give a ${dose} mg dose?`, ml, [dose * mgml[0] / mgml[1], ml / 10, dose / mgml[0], ml * 2], 'mL', `Concentration = ${fmtS(mgml[0] / mgml[1])} mg/mL. ${dose} mg / ${fmtS(mgml[0] / mgml[1])} mg/mL = ${fmtS(ml)} mL.`);
+    },
+    function serialDilution() {
+      const f = pick([10, 5, 2]), n = pick([3, 4, 5]), conc = pick([100, 1000, 500]);
+      const tot = Math.pow(f, n);
+      return mkL('comp', 3, `A ${conc} mg/mL stock is diluted 1:${f} in each of ${n} serial steps. What is the final concentration in mg/mL?`, conc / tot,
+        [conc / f / n, conc / (f * n), conc * tot, conc / (f * (n - 1))], 'mg/mL', `Total dilution factor = ${f}^${n} = ${tot}. ${conc} / ${tot} = ${fmtS(conc / tot)} mg/mL.`);
+    }
+  ],
+  pk: [
+    function halfLifeFromK() {
+      const t = pick([[10, 0.0693], [6, 0.1155], [8, 0.0866], [4, 0.173], [12, 0.0578], [3, 0.231], [24, 0.0289]]);
+      return mkL('pk', 1, `A drug follows first-order elimination with k = ${t[1]} per hour. What is the half-life in hours? (t1/2 = 0.693 / k)`, 0.693 / t[1],
+        [t[1] / 0.693, 0.693 * t[1], 1 / t[1], 0.693 / t[1] * 2], 'h', `t1/2 = 0.693 / k = 0.693 / ${t[1]} = ${fmtS(0.693 / t[1])} h.`);
+    },
+    function kFromHalfLife() {
+      const t = pick([2, 3, 4, 6, 8, 12, 24, 36]);
+      return mkL('pk', 1, `A drug has a half-life of ${t} hours. What is its elimination rate constant k in h^-1?`, 0.693 / t,
+        [t / 0.693, 0.693 * t, 1 / t, 0.693 / t / 2], 'h^-1', `k = 0.693 / t1/2 = 0.693 / ${t} = ${fmtS(0.693 / t)} h^-1.`);
+    },
+    function halfLifeFromLevels() {
+      const n = pick([1, 2, 3, 4]), dt = pick([4, 6, 8, 12]) * n, c1 = pick([80, 100, 160, 200]), c2 = c1 / Math.pow(2, n);
+      return mkL('pk', 2, `A serum level falls from ${c1} mg/L to ${fmtS(c2)} mg/L over ${dt} hours (first-order). What is the half-life in hours?`, dt / n,
+        [dt, dt * n, dt / (n + 1), dt / n * 2], 'h', `${c1} to ${fmtS(c2)} is a ${Math.pow(2, n)}-fold fall = ${n} half-life${n > 1 ? 's' : ''}. ${dt} h / ${n} = ${fmtS(dt / n)} h.`);
+    },
+    function kFromLevels() {
+      const c1 = pick([40, 60, 80, 100]), r = pick([2, 4, 5, 10]), dt = pick([4, 6, 8]), c2 = c1 / r, k = Math.log(r) / dt;
+      return mkL('pk', 3, `Two levels: ${c1} mg/L at the start and ${fmtS(c2)} mg/L ${dt} hours later (first-order elimination). Calculate k in h^-1.`, k,
+        [Math.log10(r) / dt, r / dt, Math.log(r) * dt, (c1 - c2) / c1 / dt], 'h^-1', `k = ln(C1/C2) / t = ln(${r}) / ${dt} = ${fmtS(Math.log(r))} / ${dt} = ${fmtS(k)} h^-1.`);
+    },
+    function concAfterHalfLives() {
+      const n = pick([2, 3, 4, 5]), t = pick([4, 6, 8, 12]), c0 = pick([64, 80, 96, 160, 200]), c = c0 / Math.pow(2, n);
+      return mkL('pk', 1, `A drug with a half-life of ${t} h starts at ${c0} mg/L. What is the concentration after ${n * t} hours?`, c,
+        [c0 / n, c0 / (n * t), c0 / Math.pow(2, n + 1), c0 / Math.pow(2, n - 1)], 'mg/L', `${n * t} h / ${t} h = ${n} half-lives. ${c0} x (1/2)^${n} = ${fmtS(c)} mg/L.`);
+    },
+    function concExp() {
+      const c0 = pick([50, 80, 100, 120]), k = pick([0.1, 0.2, 0.15, 0.05]), t = pick([4, 6, 8, 10]), c = c0 * Math.exp(-k * t);
+      return mkL('pk', 3, `C0 = ${c0} mg/L and k = ${k} h^-1 (IV bolus, one compartment). What is the concentration at ${t} hours? (C = C0 x e^(-kt))`, c,
+        [c0 * Math.exp(-k) , c0 * (1 - k * t), c0 * Math.exp(k * t) / 10, c0 - k * t], 'mg/L', `C = ${c0} x e^(-${k} x ${t}) = ${c0} x e^(-${fmtS(k * t)}) = ${c0} x ${fmtS(Math.exp(-k * t))} = ${fmtS(c)} mg/L.`);
+    },
+    function pctEliminated() {
+      const n = pick([1, 2, 3, 4, 5]), p = 100 * (1 - Math.pow(0.5, n));
+      return mkL('pk', 2, `What percent of a dose has been eliminated after ${n} half-life${n > 1 ? 's' : ''}?`, p, [100 / Math.pow(2, n), 100 - p / 2, 100 / n, 100 * (1 - Math.pow(0.5, n + 1))], '%', `After ${n} half-life${n > 1 ? 's' : ''}, ${fmtS(100 / Math.pow(2, n))}% remains, so ${fmtS(p)}% is eliminated.`);
+    },
+    function vdBolus() {
+      const t = pick([[500, 10], [300, 6], [250, 5], [1000, 20], [600, 15], [400, 8]]);
+      return mkL('pk', 1, `An IV bolus of ${t[0]} mg gives an extrapolated initial concentration (C0) of ${t[1]} mg/L. What is the volume of distribution in L?`, t[0] / t[1],
+        [t[0] * t[1], t[1] / t[0], t[0] / t[1] * 70, t[0] / t[1] / 70], 'L', `Vd = Dose / C0 = ${t[0]} / ${t[1]} = ${fmtS(t[0] / t[1])} L.`);
+    },
+    function c0FromVd() {
+      const w = pick([60, 70, 80, 100]), vd = pick([0.25, 0.5, 0.7, 1.0]), dose = pick([2, 4, 5, 10]) * w, c0 = dose / (vd * w);
+      return mkL('pk', 2, `A ${w} kg patient receives ${dose} mg IV. Vd = ${vd} L/kg. What is the initial concentration C0 in mg/L?`, c0,
+        [dose / vd, dose * vd / w, vd * w / dose, dose / w], 'mg/L', `Vd = ${vd} x ${w} = ${fmtS(vd * w)} L. C0 = ${dose} / ${fmtS(vd * w)} = ${fmtS(c0)} mg/L.`);
+    },
+    function clFromKVd() {
+      const k = pick([0.05, 0.1, 0.2, 0.15, 0.08]), vd = pick([20, 40, 50, 70, 100]);
+      return mkL('pk', 2, `A drug has k = ${k} h^-1 and Vd = ${vd} L. What is its clearance in L/h?`, k * vd, [vd / k, k / vd, 0.693 * vd / k, k * vd * 60 / 1000 * 10], 'L/h', `CL = k x Vd = ${k} x ${vd} = ${fmtS(k * vd)} L/h.`);
+    },
+    function halfLifeFromClVd() {
+      const cl = pick([3, 4, 5, 7, 10]), vd = pick([40, 50, 70, 100, 140]);
+      return mkL('pk', 3, `A drug has clearance ${cl} L/h and Vd ${vd} L. What is its half-life in hours?`, 0.693 * vd / cl, [cl / vd, 0.693 * cl / vd, vd / cl, 0.693 * cl * vd], 'h', `k = CL / Vd = ${cl} / ${vd} = ${fmtS(cl / vd)} h^-1. t1/2 = 0.693 / k = 0.693 x ${vd} / ${cl} = ${fmtS(0.693 * vd / cl)} h.`);
+    },
+    function loadingDose() {
+      const cp = pick([5, 10, 15, 20, 25]), vd = pick([20, 32, 40, 50, 70]), F = pick([1, 1, 0.8, 0.75, 0.5]);
+      return mkL('pk', 2, `Target a plasma concentration of ${cp} mg/L. Vd = ${vd} L, bioavailability F = ${F}. What loading dose (mg) is needed?`, cp * vd / F,
+        [cp * vd, cp * vd * F, cp / vd / F, cp * vd / F / 2], 'mg', `Loading dose = (Cp x Vd) / F = (${cp} x ${vd}) / ${F} = ${fmtS(cp * vd / F)} mg.`);
+    },
+    function maintenanceDose() {
+      const cl = pick([2, 3, 4, 5, 6]), css = pick([5, 10, 15, 20]), tau = pick([6, 8, 12, 24]), F = pick([1, 1, 0.8, 0.5]);
+      return mkL('pk', 3, `Clearance is ${cl} L/h, F = ${F}. To hit Css avg ${css} mg/L, what dose (mg) is given every ${tau} hours?`, cl * css * tau / F,
+        [cl * css / F, cl * css * tau, cl * css * tau * F, cl * css * tau / F / 2], 'mg', `Dose = (CL x Css x tau) / F = (${cl} x ${css} x ${tau}) / ${F} = ${fmtS(cl * css * tau / F)} mg every ${tau} h.`);
+    },
+    function cssAvg() {
+      const dose = pick([200, 300, 400, 500, 600]), tau = pick([6, 8, 12]), cl = pick([2, 4, 5, 8]), F = pick([1, 0.8, 0.5]);
+      return mkL('pk', 3, `${dose} mg is given every ${tau} h (F = ${F}) and CL = ${cl} L/h. What is the average steady-state concentration in mg/L?`, F * dose / (cl * tau),
+        [dose / (cl * tau), F * dose / cl, F * dose * tau / cl, F * dose / (cl * tau) * 2], 'mg/L', `Css avg = (F x Dose) / (CL x tau) = (${F} x ${dose}) / (${cl} x ${tau}) = ${fmtS(F * dose / (cl * tau))} mg/L.`);
+    },
+    function timeToSS() {
+      const t = pick([2, 3, 4, 6, 8, 12, 24]);
+      return mkL('pk', 1, `A drug has a half-life of ${t} h. About how many hours until steady state is reached (roughly 5 half-lives, about 97%)?`, 5 * t, [t, 2 * t, 3 * t, 10 * t], 'h', `Steady state is reached in about 4 to 5 half-lives. 5 x ${t} h = ${5 * t} h.`);
+    },
+    function aucCalc() {
+      const dose = pick([100, 200, 300, 500, 800]), F = pick([1, 0.8, 0.5, 0.25]), cl = pick([5, 10, 20, 4, 8]);
+      return mkL('pk', 2, `A ${dose} mg dose (F = ${F}) is given. CL = ${cl} L/h. What is the AUC in mg*h/L?`, F * dose / cl, [dose / cl, F * dose * cl, cl / (F * dose), F * dose / cl * 2], 'mg*h/L', `AUC = (F x Dose) / CL = (${F} x ${dose}) / ${cl} = ${fmtS(F * dose / cl)} mg*h/L.`);
+    },
+    function bioavail() {
+      const f = pick([0.8, 0.5, 0.6, 0.25, 0.4]), aiv = pick([50, 80, 100, 120]), div = pick([100, 200]), dpo = pick([100, 200, 400]);
+      const apo = f * aiv * dpo / div;
+      return mkL('pk', 3, `AUC after ${div} mg IV is ${aiv} mg*h/L. AUC after ${dpo} mg orally is ${fmtS(apo)} mg*h/L. What is the oral bioavailability as a percent?`, f * 100,
+        [apo / aiv * 100, apo / aiv * 100 * dpo / div, (1 - f) * 100, f * 10], '%', `F = (AUCpo / Dosepo) / (AUCiv / Doseiv) = (${fmtS(apo)}/${dpo}) / (${aiv}/${div}) = ${fmtS(f)} = ${fmtS(f * 100)}%.`);
+    },
+    function infusionCss() {
+      const k0 = pick([20, 30, 40, 50, 60, 100]), cl = pick([2, 4, 5, 10]);
+      if (Math.random() < 0.5) return mkL('pk', 2, `A drug is infused continuously at ${k0} mg/h. CL = ${cl} L/h. What is the steady-state concentration in mg/L?`, k0 / cl, [k0 * cl, cl / k0, k0 / cl * 2, k0 / cl / 2], 'mg/L', `At steady state, rate in = rate out. Css = k0 / CL = ${k0} / ${cl} = ${fmtS(k0 / cl)} mg/L.`);
+      const css = pick([5, 10, 15, 20]);
+      return mkL('pk', 2, `You want Css = ${css} mg/L with an infusion. CL = ${cl} L/h. What infusion rate (mg/h) is needed?`, css * cl, [css / cl, css * cl * 24, css * cl / 2, css + cl], 'mg/h', `k0 = CL x Css = ${cl} x ${css} = ${css * cl} mg/h.`);
+    },
+    function doseInterval() {
+      const t = pick([[4, 20, 5], [6, 16, 4], [8, 8, 2], [3, 12, 3], [12, 40, 10]]), k = 0.693 / t[0], tau = Math.log(t[1] / t[2]) / k;
+      return mkL('pk', 3, `A drug has t1/2 = ${t[0]} h. You want the peak ${t[1]} mg/L to fall to a trough of ${t[2]} mg/L before the next dose. What is the dosing interval in hours? (tau = ln(Cpeak/Ctrough) / k, k = 0.693/t1/2)`, tau,
+        [Math.log10(t[1] / t[2]) / k, t[1] / t[2] / k, tau * 2, tau / 2], 'h', `k = 0.693 / ${t[0]} = ${fmtS(k)} h^-1. tau = ln(${t[1]}/${t[2]}) / k = ${fmtS(Math.log(t[1] / t[2]))} / ${fmtS(k)} = ${fmtS(tau)} h.`);
+    },
+    function aminoglycosideDose() {
+      const w = pick([60, 70, 80, 90]), vd = 0.25, rise = pick([6, 8, 10, 12]);
+      return mkL('pk', 2, `Gentamicin Vd is ${vd} L/kg. A ${w} kg patient needs the peak raised by ${rise} mg/L. What dose in mg?`, rise * vd * w, [rise * w / vd, rise * vd, w * vd, rise / vd / w], 'mg', `Vd = ${vd} x ${w} = ${fmtS(vd * w)} L. Dose = rise x Vd = ${rise} x ${fmtS(vd * w)} = ${fmtS(rise * vd * w)} mg.`);
+    },
+    function renalProportion() {
+      const d = pick([600, 800, 1200, 2000]), n = pick([100, 120]), p = pick([20, 30, 40, 60]), ad = d * p / n;
+      return mkL('pk', 2, `A drug cleared mostly by the kidney: usual dose ${d} mg/day at CrCl ${n} mL/min. A patient has CrCl ${p} mL/min. Using a simple CrCl ratio, what is the adjusted daily dose in mg?`, ad, [d * n / p, d * (1 - p / n), d - p, ad * 2], 'mg/day', `Adjusted = usual x (patient CrCl / normal CrCl) = ${d} x ${p}/${n} = ${fmtS(ad)} mg/day. (Real drugs need their own renal dosing table; this tests the proportion.)`);
+    },
+    function michaelisMenten() {
+      const km = pick([4, 5, 6, 10]), vmax = pick([400, 500, 600]), R = pick([300, 350, 400, 450].filter(r => r < vmax)), css = km * R / (vmax - R);
+      return mkL('pk', 3, `Phenytoin-style saturable elimination: Km = ${km} mg/L, Vmax = ${vmax} mg/day. At a daily dose of ${R} mg (F = 1), what is Css in mg/L? (Css = Km x R / (Vmax - R))`, css,
+        [km * R / vmax, R / (vmax - R), km * (vmax - R) / R, (km + R) / vmax], 'mg/L', `Css = ${km} x ${R} / (${vmax} - ${R}) = ${km * R} / ${vmax - R} = ${fmtS(css)} mg/L. Small dose changes cause big Css changes when you are near Vmax.`);
+    }
+  ]
+};
+function genLab(kinds, diffs) {
+  const ks = (kinds && kinds.length ? kinds : ['comp', 'pk']);
+  for (let i = 0; i < 40; i++) {
+    const k = pick(ks), q = pick(LAB_GENS[k])();
+    if (!diffs || diffs.indexOf(q.d) >= 0 || i > 25) return q;
+  }
+  return pick(LAB_GENS[ks[0]])();
+}
+/* safe calculator (no eval): + - * / ^ ( ), ln log exp sqrt abs, pi, e, ans */
+function labEval(src, ans) {
+  const s = String(src).replace(/×/g, '*').replace(/÷/g, '/').replace(/π/g, 'pi').replace(/,/g, '').toLowerCase();
+  let i = 0;
+  const ws = () => { while (s[i] === ' ') i++; };
+  const fail = () => { throw new Error('bad'); };
+  function expr() { let v = term(); for (;;) { ws(); if (s[i] === '+') { i++; v += term(); } else if (s[i] === '-') { i++; v -= term(); } else return v; } }
+  function term() { let v = unary(); for (;;) { ws(); if (s[i] === '*') { i++; v *= unary(); } else if (s[i] === '/') { i++; v /= unary(); } else return v; } }
+  function unary() { ws(); if (s[i] === '-') { i++; return -unary(); } if (s[i] === '+') { i++; return unary(); } return pow(); }
+  function pow() { const b = atom(); ws(); if (s[i] === '^') { i++; return Math.pow(b, unary()); } return b; }
+  function atom() {
+    ws();
+    if (s[i] === '(') { i++; const v = expr(); ws(); if (s[i] !== ')') fail(); i++; return v; }
+    let m = /^(\d+\.?\d*|\.\d+)(e[+-]?\d+)?/.exec(s.slice(i));
+    if (m) { i += m[0].length; return parseFloat(m[0]); }
+    m = /^[a-z]+/.exec(s.slice(i));
+    if (!m) fail();
+    i += m[0].length; const id = m[0];
+    if (id === 'pi') return Math.PI;
+    if (id === 'e') return Math.E;
+    if (id === 'ans') return ans || 0;
+    const fn = { ln: Math.log, log: Math.log10, exp: Math.exp, sqrt: Math.sqrt, abs: Math.abs }[id];
+    if (!fn) fail();
+    ws(); if (s[i] !== '(') fail(); i++; const v = expr(); ws(); if (s[i] !== ')') fail(); i++; return fn(v);
+  }
+  const r = expr(); ws(); if (i < s.length) fail();
+  if (!isFinite(r)) fail();
+  return r;
+}
+if (typeof module !== 'undefined') module.exports = { LAB_GENS, genLab, labEval };
 /* Drug -> primary indication, used by the first-person bottle check.
    g = therapeutic group (the wrong bottle always comes from a different group); ex = groups that must never be paired with it. */
 const IND = [
@@ -1257,7 +1534,7 @@ const World = (function () {
   const BOT = ['#0E9A8E', '#F2A516', '#E04F3A', '#4C7BD9', '#8A63C9', '#F4F7F7'];
   // Loose waiting crowd, front of the line first. Up to MAXQ people.
   const SLOTS = [[-1.5, 1.9], [0.1, 2.6], [-1.9, 3.2], [1.5, 3.3], [-0.3, 4.0], [2.9, 2.6], [3.0, 4.2], [1.2, 5.0], [-1.4, 5.0], [4.4, 5.0]];
-  const MAXQ = SLOTS.length;
+  const maxq = () => (rushOn ? 8 : 5);
   const OBST = [
     { x0: -9.6, x1: 4.15, z0: -1.0, z1: 1.05 },    // counter, wall to wall, with the computer stations
     { x0: -7.8, x1: -4.6, z0: 1.8, z1: 5.0 },      // counseling room
@@ -1287,7 +1564,7 @@ const World = (function () {
   }
   function add(parent, geo, color, x, y, z, up, extra) {
     const m = new T.Mesh(geo, mat(color, up, extra));
-    m.position.set(x, y, z); m.castShadow = true; m.receiveShadow = true;
+    m.position.set(x, y, z); m.castShadow = !(extra && extra.transparent); m.receiveShadow = true;
     if (up) m.userData.up = up;
     parent.add(m); return m;
   }
@@ -1461,7 +1738,12 @@ const World = (function () {
     // porch rug, plants
     bx(g, 2.4, 0.04, 3.6, '#F2A516', 5, 0.08, 6.9);
     bx(g, 2.9, 0.12, 0.2, '#0E9A8E', 5, 0.18, 5.2);
-    [[8.4, 4.5], [-8.6, 5]].forEach(p => { cy(g, 0.4, 0.3, 0.6, 6, '#E04F3A', p[0], 0.3, p[1]); ico(g, 0.65, '#3E8E41', p[0], 1.1, p[1]); ico(g, 0.45, '#56A85A', p[0] + 0.2, 1.6, p[1]); });
+    [[8.4, 4.5], [-8.6, 5]].forEach((p, pi) => { cy(g, 0.4, 0.3, 0.6, 6, '#E04F3A', p[0], 0.3, p[1]); const l1 = ico(g, 0.65, '#3E8E41', p[0], 1.1, p[1]), l2 = ico(g, 0.45, '#56A85A', p[0] + 0.2, 1.6, p[1]); if (pi === 1) { l1.userData.x0 = l1.position.x; l2.userData.x0 = l2.position.x; plantL = [l1, l2]; } });
+    // waiting room seating: a bench along the right wall and two chairs near the door
+    bx(g, 0.75, 0.12, 2.7, '#8A5A3B', 9.0, 0.5, 2.2); bx(g, 0.6, 0.1, 2.55, '#0E9A8E', 8.98, 0.6, 2.2); bx(g, 0.12, 0.8, 2.7, '#8A5A3B', 9.4, 0.95, 2.2);
+    [[0.9, 1.0], [0.9, 3.4]].forEach(l => { bx(g, 0.6, 0.45, 0.1, '#6D4630', 9.0, 0.22, l[0] + (l[1] > 3 ? 0.0 : 0.4)); });
+    [6.6, 7.7].forEach(x => { bx(g, 0.75, 0.1, 0.75, '#F2A516', x, 0.5, 5.45); bx(g, 0.75, 0.75, 0.1, '#F2A516', x, 0.9, 5.82); [[-0.3, -0.3], [0.3, -0.3], [-0.3, 0.3], [0.3, 0.3]].forEach(o => bx(g, 0.08, 0.45, 0.08, '#6D4630', x + o[0], 0.22, 5.45 + o[1])); });
+    bx(g, 0.6, 0.05, 0.6, '#F4F9F9', 7.15, 0.6, 6.7); cy(g, 0.05, 0.05, 0.55, 6, '#6D4630', 7.15, 0.3, 6.7);
     // scenery
     [[-12.5, -2, 1.1], [13, -4, 1.4], [-12, 7, 0.9], [13.5, 6, 1]].forEach(p => {
       cy(g, 0.25 * p[2], 0.3 * p[2], 1.2 * p[2], 5, '#6C4C3A', p[0], 0.6 * p[2], p[1]);
@@ -1477,20 +1759,20 @@ const World = (function () {
     UPIDS.forEach(id => { const u = new T.Group(); u.position.set(BASE[id][0], BASE[id][1], BASE[id][2]); scene.add(u); ug[id] = u; });
     staffGroup = new T.Group(); scene.add(staffGroup);
     pharmG = new T.Group(); scene.add(pharmG); awardsG = new T.Group(); scene.add(awardsG); petG = new T.Group(); scene.add(petG);
-    custGroup = new T.Group(); scene.add(custGroup);
+    custGroup = new T.Group(); scene.add(custGroup); capG = new T.Group(); scene.add(capG);
     // floor receives shadow only on tiles via meshes already
     // coin pool
     for (let i = 0; i < 36; i++) {
       const m = new T.Mesh(new T.CylinderGeometry(0.2, 0.2, 0.07, 8), new T.MeshStandardMaterial({ color: 0xF2A516, flatShading: true, roughness: 0.5, metalness: 0.3, transparent: true }));
-      m.visible = false; scene.add(m); coins.push({ m, v: new T.Vector3(), life: 0 });
+      m.visible = false; m.userData.fx = true; scene.add(m); coins.push({ m, v: new T.Vector3(), life: 0 });
     }
     for (let i = 0; i < 30; i++) {
       const m = new T.Mesh(new T.OctahedronGeometry(0.14, 0), new T.MeshStandardMaterial({ color: 0xFFFFFF, flatShading: true, roughness: 1, transparent: true }));
-      m.visible = false; scene.add(m); puffs.push({ m, life: 0, vx: 0, vz: 0 });
+      m.visible = false; m.userData.fx = true; scene.add(m); puffs.push({ m, life: 0, vx: 0, vz: 0 });
     }
     for (let i = 0; i < 40; i++) {
       const m = new T.Mesh(new T.OctahedronGeometry(0.075, 0), new T.MeshStandardMaterial({ color: 0x8FD8FF, flatShading: true, roughness: 0.2, metalness: 0.1, transparent: true }));
-      m.scale.set(0.8, 1.4, 0.8); m.visible = false; scene.add(m); drops.push({ m, life: 0, vx: 0, vz: 0, vy: 0 });
+      m.scale.set(0.8, 1.4, 0.8); m.visible = false; m.userData.fx = true; scene.add(m); drops.push({ m, life: 0, vx: 0, vz: 0, vy: 0 });
     }
     ug.notes = new T.Group(); ug.notes.position.set(BASE.notes[0], BASE.notes[1], BASE.notes[2]); scene.add(ug.notes); buildNotes();
   }
@@ -1671,7 +1953,7 @@ const World = (function () {
   }
   function pickBody() { const r = Math.random(); return r < 0.15 ? 'jacked' : r < 0.3 ? 'obese' : 'normal'; }
   function bodyR(b) { return b === 'obese' ? 0.85 : b === 'jacked' ? 0.8 : 0.575; }
-  function slotPos(i, c) { const s = SLOTS[Math.min(i, SLOTS.length - 1)]; return new T.Vector3(s[0] + (c ? c.jx : 0), 0, s[1] + (c ? c.jz : 0)); }
+  function slotPos(i, c) { if (rushOn) { if (i <= 2) return new T.Vector3(-1.5 + (c ? c.jx * 0.2 : 0), 0, 1.9 + i * 1.2); if (i <= 4) return new T.Vector3(-0.3 + (i - 3) * 1.25, 0, 4.3 + (c ? c.jz * 0.2 : 0)); const k = Math.min(i - 5, SEATS.length - 1); return new T.Vector3(SEATS[k][0], 0, SEATS[k][1]); } const s = SLOTS[Math.min(i, SLOTS.length - 1)]; return new T.Vector3(s[0] + (c ? c.jx : 0), 0, s[1] + (c ? c.jz : 0)); }
   function rollEvt() { const k = B.eventRoll(); if (k === 'inspector' || k === 'driver') { spawnVisitor(k); return null; } return k; }
   /* inspector and delivery driver: walk in, go behind the counter and wait to be clicked */
   let visitor = null; const VIS_AT = [2.4, -2.1];
@@ -1719,7 +2001,40 @@ const World = (function () {
     else { p.position.set(5, 0, 9.6); c.wp.push(new T.Vector3(5, 0, 6.2)); }
     return c;
   }
-  function assignSlots() { queue.forEach((c, i) => { c.wp = c.wp.filter(w => w.z > 6); c.wp.push(slotPos(i, c)); }); }
+  /* ---- waiting room: seats, and a few people who sit or wander while they wait ---- */
+  const SEATS = [[8.8, 1.35, -PI / 2], [8.8, 2.2, -PI / 2], [8.8, 3.05, -PI / 2], [6.6, 5.45, PI], [7.7, 5.45, PI]];
+  const IDLE_PTS = [[-2.8, 4.6], [3.4, 3.4], [6.0, 3.2], [6.9, 4.4], [0.9, 6.0], [-3.0, 6.1], [5.4, 2.0], [2.2, 5.6]];
+  const idleCap = () => 3 + (Math.floor(time / 35) % 2);
+  function endIdle(c) { c.idl = null; c.sit = false; c.seat = -1; }
+  function idleTick(c, i, w, dt) {
+    const special = c.karen || c.sweaty || c.elder || c.evt || c.caller || c.pusher;
+    const P = c.g.userData.P;
+    if (rushOn && i >= 5 && !special) {
+      const k = Math.min(i - 5, SEATS.length - 1);
+      if (!c.idl || c.idl.type !== 'sit' || c.seat !== k) { c.seat = k; c.sit = false; c.idl = { type: 'sit', seat: SEATS[k], t: 999 }; c.wp = [new T.Vector3(SEATS[k][0], 0, SEATS[k][1])]; }
+      if (!c.sit && !w && !c.wp.length) c.sit = true;
+      if (c.sit) { c.idl.t = 999; P.legs[0].rotation.x = P.legs[1].rotation.x = -1.45; P.arms[0].rotation.x = P.arms[1].rotation.x = -0.6; c.g.rotation.y = lerpAngle(c.g.rotation.y, SEATS[k][2], Math.min(1, dt * 6)); }
+      return;
+    }
+    if (i === 0 || special || rushOn) { if (c.idl) { endIdle(c); c.wp = [slotPos(i, c)]; } return; }
+    if (c.idl) {
+      const d = c.idl;
+      if (d.type === 'sit') {
+        if (!c.sit && !w && !c.wp.length) { c.sit = true; d.t = 7 + Math.random() * 14; }
+        if (c.sit) { P.legs[0].rotation.x = P.legs[1].rotation.x = -1.45; P.arms[0].rotation.x = P.arms[1].rotation.x = -0.6; c.g.rotation.y = lerpAngle(c.g.rotation.y, d.seat[2], Math.min(1, dt * 6)); d.t -= dt; }
+      } else if (!w && !c.wp.length) { d.t -= dt; c.g.rotation.y = lerpAngle(c.g.rotation.y, d.yaw + Math.sin(time * 0.8 + c.phase) * 0.9, Math.min(1, dt * 3)); }
+      if (d.t <= 0) { endIdle(c); c.wp = [slotPos(i, c)]; }
+      return;
+    }
+    c.idleCd = (c.idleCd === undefined ? 2 + Math.random() * 5 : c.idleCd) - dt;
+    if (c.idleCd > 0 || c.wp.length || w || c.wait < 3) return;
+    c.idleCd = 3 + Math.random() * 7;
+    if (queue.filter(q => q.idl).length >= idleCap()) return;
+    const free = SEATS.map((s, k) => k).filter(k => !queue.some(q => q.seat === k));
+    if (free.length && Math.random() < 0.55) { const k = free[Math.floor(Math.random() * free.length)]; c.seat = k; c.idl = { type: 'sit', seat: SEATS[k], t: 999 }; c.wp = [new T.Vector3(SEATS[k][0], 0, SEATS[k][1])]; }
+    else { const q = IDLE_PTS[Math.floor(Math.random() * IDLE_PTS.length)]; c.idl = { type: 'walk', t: 5 + Math.random() * 7, yaw: Math.random() * 6.28 }; c.wp = [new T.Vector3(q[0], 0, q[1])]; }
+  }
+  function assignSlots() { queue.forEach((c, i) => { if (c.idl && i > 0) return; c.wp = c.wp.filter(w => w.z > 6); c.wp.push(slotPos(i, c)); }); }
   function setBubble(ch, cls) { if (!bubEl) return; bubEl.textContent = ch; bubEl.className = 'bub3d' + (cls ? ' ' + cls : ''); }
   api.nextCustomer = function () {
     if (!api.ok) return { seed: Math.floor(Math.random() * 100000), karen: false, sweaty: false };
@@ -1766,9 +2081,9 @@ const World = (function () {
   };
   let arriveT = 9, rushOn = false, slowOn = false;
   api.setSlow = function (on) { slowOn = !!on; };
-  api.setRush = function (on) { rushOn = !!on; if (on) arriveT = Math.min(arriveT, 1.5); };
+  api.setRush = function (on) { rushOn = !!on; if (on) arriveT = Math.min(arriveT, 1.5); if (api.ok && queue.length) assignSlots(); };
   function arrive() {
-    if (queue.length >= MAXQ) { spawnRejected(); return; }
+    if (queue.length >= maxq()) { spawnRejected(); return; }
     queue.push(spawnCustomer(false, 0)); assignSlots();
   }
   // The line is full: the newest patient takes one look and walks out frustrated.
@@ -1924,6 +2239,7 @@ const World = (function () {
     if (pharm) pharmG.remove(pharm.g);
     const g = person(1, false, false, false, me.body === 'normal' ? undefined : me.body, { skin: me.skin, hair: me.hairCol, shirt: '#F7FBFB', hairStyle: HAIR_MAP[me.hair] === undefined ? 0 : HAIR_MAP[me.hair], gender: me.gender, coat: true, scrub: me.scrub, acc: me.acc || 0, tag: { pharm: true } });
     g.position.set(-1.5, 0, -1.85); pharmG.add(g);
+    lastMe = me; if (labOn) buildLabPerson();
     pharm = { g, wp: [], r: 0.5, phase: 0, dy: 3.1 };
     startFx(pharm, 'wave');
   };
@@ -2149,8 +2465,8 @@ const World = (function () {
     const r = canvas.getBoundingClientRect();
     ndc.x = ((e.clientX - r.left) / r.width) * 2 - 1; ndc.y = -((e.clientY - r.top) / r.height) * 2 + 1;
     raycaster.setFromCamera(ndc, camera);
-    const hits = raycaster.intersectObjects([].concat(CLICK.map(i => ug[i]), [staffGroup, custGroup, petG, pharmG], phoneG ? [phoneG] : []), true);
-    for (const h of hits) { let o = h.object; while (o) { if (o.userData && (o.userData.up || o.userData.cust || o.userData.pet || o.userData.pharm || o.userData.vis)) { pickObj = h.object; return o.userData; } o = o.parent; } }
+    const hits = raycaster.intersectObjects(labOn ? labItems : [].concat(CLICK.map(i => ug[i]), [staffGroup, custGroup, petG, pharmG], phoneG ? [phoneG] : [], capG ? [capG] : []), true);
+    for (const h of hits) { let o = h.object; while (o) { if (o.userData && (o.userData.up || o.userData.cust || o.userData.pet || o.userData.pharm || o.userData.vis || o.userData.cap || o.userData.lab)) { pickObj = h.object; return o.userData; } o = o.parent; } }
     return null;
   }
   function setHover(up) {
@@ -2200,12 +2516,14 @@ const World = (function () {
       if (e.pointerType !== 'mouse' || (drag && drag.on)) return;
       if (fpT) { setFpHover(fpPick(e)); return; }
       const h = pick(e); setHover(h && h.up ? h.up : null);
-      if (!hovered) canvas.style.cursor = h && (h.cust || h.pet || h.pharm || h.vis) ? 'pointer' : 'default';
+      if (!hovered) canvas.style.cursor = h && (h.cust || h.pet || h.pharm || h.vis || h.cap || h.lab) ? 'pointer' : 'default';
     });
     canvas.addEventListener('click', e => {
       if (noClick) { noClick = false; return; }
       if (fpT) { const id = fpPick(e); if (id && B.onFp) B.onFp(id); return; }
       const h = pick(e); dismissHint();
+      if (h && h.lab) { labClick(h); return; }
+      if (h && h.cap) { capClick(); return; }
       if (h && h.vis) { if (B.onVisitor) B.onVisitor(); return; }
       if (h && h.up) { if (h.up === 'notes') B.onNotes(); else if (h.up === 'phone') { if (B.onPhone) B.onPhone(); } else B.onBuy(h.up); }
       else if (h && (h.cust || h.pet || h.pharm)) {
@@ -2582,16 +2900,17 @@ const World = (function () {
     if (paused) { running = false; return; }
     requestAnimationFrame(frame);
     const dt = Math.min(0.05, (now - last) / 1000 || 0.016); last = now; time += dt;
+    if (labOn) labTick(dt);
     // customers
     const crowd = queue.concat(leaving, extras, pets, cops, visitor ? [visitor] : []), stf = pharm ? staff.concat([pharm]) : staff;
     queue.forEach((c, i) => {
       const w = moveTo(c, c.speed || 2.6, dt, crowd); c.phase += dt;
       walkAnim(c.g, c.phase, w, dt);
-      c.wait += dt;
-      if (!w) { const gp = c.g.position, face = Math.atan2(-1.5 - gp.x, 0.4 - gp.z) + c.faceJit + Math.sin(time * 0.5 + c.phase) * 0.12; c.g.rotation.y = lerpAngle(c.g.rotation.y, face, Math.min(1, dt * 6)); }
+      c.wait += dt; idleTick(c, i, w, dt);
+      if (!w && !c.idl) { const gp = c.g.position, face = Math.atan2(-1.5 - gp.x, 0.4 - gp.z) + c.faceJit + Math.sin(time * 0.5 + c.phase) * 0.12; c.g.rotation.y = lerpAngle(c.g.rotation.y, face, Math.min(1, dt * 6)); }
       c.emoteT -= dt;
       if (c.emoteT <= 0) { c.emoteT = 6 + Math.random() * 8; if (!c.karen && !c.sweaty && !c.fx && !c.mood && says.length < 4) idleEmote(c); }
-      c.g.position.y = w ? Math.abs(Math.sin(c.phase * 9)) * 0.06 : 0;
+      c.g.position.y = c.sit ? -0.3 : w ? Math.abs(Math.sin(c.phase * 9)) * 0.06 : 0;
       if (c.mood) {
         c.moodT += dt; const P = c.g.userData.P;
         if (c.mood === 'happy') { c.g.position.y = Math.abs(Math.sin(c.moodT * 7)) * 0.4 * Math.max(0, 1 - c.moodT / 1.6); P.arms[0].rotation.x = P.arms[1].rotation.x = -2.6 + Math.sin(c.moodT * 14) * 0.3; P.shirtM.emissive.setHex(0x1a1200); }
@@ -2608,7 +2927,8 @@ const World = (function () {
     cops.forEach(c => { if (copJob && copJob.phase === 'in') { const w = moveTo(c, c.speed, dt, crowd); c.phase += dt; walkAnim(c.g, c.phase, w, dt); } });
     ragStep(dt); copStep(dt);
     // staff
-    staffGroup.visible = !(fpT || fpK > 0.25);
+    staffGroup.visible = !labOn && !(fpT || fpK > 0.25);
+    capTick(dt);
     staff.forEach(s => {
       if (fpT || fpK > 0) return;
       keepOffPharm(s); const w = moveTo(s, 1.7, dt, stf); keepOffPharm(s); s.phase += dt; walkAnim(s.g, s.phase, w, dt);
@@ -2635,7 +2955,7 @@ const World = (function () {
     }
     if (queue.length) { arriveT -= dt; if (arriveT <= 0) { arriveT = rushOn ? 5 + Math.random() * 4 : (15 + Math.random() * 9) * (slowOn ? 2.4 : 1); arrive(); } }
     const all = queue.concat(leaving, extras, pets, cops.filter(c => copJob && copJob.phase === 'in'), visitor ? [visitor] : []);
-    if (lineEl && queue.length !== lineN) { lineN = queue.length; lineEl.textContent = 'Line ' + lineN + '/' + MAXQ; lineEl.className = 'line3d' + (lineN >= MAXQ ? ' full' : lineN >= MAXQ - 2 ? ' busy' : ''); }
+    if (lineEl && queue.length !== lineN) { lineN = queue.length; lineEl.textContent = 'Line ' + lineN + '/' + maxq(); lineEl.className = 'line3d' + (lineN >= maxq() ? ' full' : lineN >= maxq() - 2 ? ' busy' : ''); }
     Crowd.separate(all, 1.15, onBump); Crowd.separate(stf, 1.0, onBump);
     Crowd.pushOut(all, 0.55); Crowd.pushOut(stf, 0.5);
     all.concat(stf).forEach(o => { if (o.bumpCd > 0) o.bumpCd -= dt; fxPass(o, dt); });
@@ -2699,6 +3019,7 @@ const World = (function () {
     scene.background = new T.Color(col);
     const c = new T.Color(col), dark = (c.r + c.g + c.b) / 3 < 0.35;
     hemi.intensity = dark ? 0.5 : 0.85; sun.intensity = dark ? 0.55 : 0.8;
+    if (labOn) { scene.background = new T.Color(dark ? '#16282F' : '#E7F0F3'); hemi.intensity = dark ? 0.9 : 1.1; sun.intensity = 0.7; }
   }
   let insR = 0, insB = 0;
   function resize() {
@@ -2713,6 +3034,274 @@ const World = (function () {
   }
   api.setInset = function (r, b) { insR = Math.round(r); insB = Math.round(b); if (api.ok) resize(); };
 
+  /* ---- compounding pharmacy: a separate white lab room ---- */
+  let labG = null, labOn = false, labHid = [], labBub = [], labPerson = null, lastMe = null, labT = 0, labBoil = 0; const labItems = [];
+  const GLS = { transparent: true, opacity: 0.28, roughness: 0.1, metalness: 0.1, side: 2, depthWrite: false };
+  const LQ = (o) => ({ transparent: true, opacity: o || 0.78, roughness: 0.2, depthWrite: false });
+  const LSCRUB = ['#BFE3F0', '#F3E7A6', '#CDEFC9', '#F2C2D4', '#D9CCF2', '#FFD9A8'];
+  const WORDS = { mortar: ['Ground fine!', 'Levigating...', 'Geometric mix'], beaker: ['Swirl...', 'Dissolved!', 'Mixing'], flask: ['Bubbling', 'Reaction!', 'Fizz'], round: ['Reflux...', 'Warming up', 'Stirring'], cyl: ['Meniscus!', 'Read at eye level', 'Measured'], bottle: ['Label check!', 'Keep capped', 'Stock bottle'], balance: ['Tared', 'Weighing...', 'Stable'], hood: ['Sash up!', 'Airflow OK', 'Hood on'], plate: ['Heating', 'Stirring', 'Warm'], ext: ['Class ABC', 'Pull the pin', 'In date'] };
+  function lg(p, x, y, z, kind) { const G = new T.Group(); G.position.set(x, y, z); G.userData.lab = kind; G.userData.g = G; G.userData.busy = 0; p.add(G); labItems.push(G); return G; }
+  function glRim(p, r, x, y, z) { const m = add(p, new T.TorusGeometry(r, 0.012, 4, 14), '#D4E9EE', x, y, z); m.rotation.x = PI / 2; return m; }
+  function beaker(p, x, y, z, r, h, col, f) {
+    const G = lg(p, x, y, z, 'beaker'); p = G; x = y = z = 0;
+    cy(p, r, r * 0.94, h, 14, '#DDF2F7', 0, h / 2, 0, null, GLS);
+    if (f > 0) G.userData.liq = cy(p, r * 0.93, r * 0.88, h * f, 14, col, 0, h * f / 2 + 0.01, 0, null, LQ());
+    glRim(p, r, 0, h, 0); G.userData.h = h * f;
+    for (let i = 1; i < 4; i++) bx(p, 0.05, 0.008, 0.01, '#8AA7B0', r * 0.78, h * i / 4.3, r * 0.62);
+    return G;
+  }
+  function flask(p, x, y, z, s, col, f) {
+    const G = lg(p, x, y, z, 'flask'); p = G; x = y = z = 0;
+    cy(p, 0.07 * s, 0.24 * s, 0.34 * s, 14, '#DDF2F7', 0, 0.17 * s, 0, null, GLS);
+    cy(p, 0.07 * s, 0.07 * s, 0.24 * s, 12, '#DDF2F7', 0, 0.34 * s + 0.12 * s, 0, null, GLS);
+    if (f > 0) { const rt = 0.24 * s + (0.07 * s - 0.24 * s) * f; G.userData.liq = cy(p, rt * 0.94, 0.225 * s, 0.34 * s * f, 14, col, 0, 0.34 * s * f / 2 + 0.01, 0, null, LQ()); }
+    glRim(p, 0.075 * s, 0, 0.58 * s, 0); G.userData.h = 0.34 * s * f;
+    return G;
+  }
+  function roundFlask(p, x, y, z, s, col) {
+    const G = lg(p, x, y, z, 'flask'); p = G; x = y = z = 0;
+    add(p, new T.SphereGeometry(0.2 * s, 14, 10), '#DDF2F7', 0, 0.2 * s, 0, null, GLS);
+    cy(p, 0.06 * s, 0.06 * s, 0.3 * s, 10, '#DDF2F7', 0, 0.4 * s + 0.1 * s, 0, null, GLS);
+    const l = add(p, new T.SphereGeometry(0.17 * s, 12, 8), col, 0, 0.15 * s, 0, null, LQ()); l.scale.set(1, 0.62, 1); G.userData.liq = l; G.userData.h = 0.2 * s;
+    glRim(p, 0.065 * s, 0, 0.65 * s, 0);
+    return G;
+  }
+  function gradCyl(p, x, y, z, s, col, f) {
+    const G = lg(p, x, y, z, 'cyl'); p = G; x = y = z = 0;
+    cy(p, 0.09 * s, 0.1 * s, 0.03 * s, 12, '#CFE0E5', 0, 0.015 * s, 0);
+    cy(p, 0.05 * s, 0.05 * s, 0.6 * s, 12, '#DDF2F7', 0, 0.33 * s, 0, null, GLS);
+    if (f > 0) { G.userData.liq = cy(p, 0.045 * s, 0.045 * s, 0.58 * s * f, 12, col, 0, 0.04 * s + 0.29 * s * f, 0, null, LQ()); G.userData.h = 0.58 * s * f; }
+    for (let i = 1; i < 6; i++) bx(p, 0.03 * s, 0.006, 0.01, '#5C7A85', 0.045 * s, 0.08 * s + i * 0.09 * s, 0.03 * s);
+    return G;
+  }
+  function mortar(p, x, y, z, s, powder, tilt) {
+    const G = lg(p, x, y, z, 'mortar'); p = G; x = y = z = 0;
+    cy(p, 0.12 * s, 0.15 * s, 0.05 * s, 12, '#E4E1D8', 0, 0.025 * s, 0);
+    cy(p, 0.27 * s, 0.17 * s, 0.2 * s, 14, '#F1EFE8', 0, 0.15 * s, 0);
+    cy(p, 0.235 * s, 0.235 * s, 0.012, 14, powder ? '#FFFFFF' : '#D5D1C4', 0, 0.245 * s, 0);
+    if (powder) G.userData.mound = cone(p, 0.15 * s, 0.1 * s, 9, '#FFFFFF', 0, 0.3 * s, 0);
+    const g = new T.Group(); g.position.set(0.06 * s, 0.3 * s, tilt ? 0.02 : 0); g.rotation.z = tilt || 0.55; p.add(g);
+    cy(g, 0.032 * s, 0.05 * s, 0.4 * s, 8, '#E8E4DA', 0, 0.1 * s, 0);
+    add(g, new T.SphereGeometry(0.07 * s, 8, 6), '#E8E4DA', 0, 0.31 * s, 0);
+    G.userData.pestle = g; G.userData.pz = g.rotation.z; G.userData.s = s;
+    return G;
+  }
+  function balance(p, x, y, z) {
+    const G = lg(p, x, y, z, 'balance'); p = G; x = y = z = 0;
+    bx(p, 0.8, 0.12, 0.6, '#E6ECEE', 0, 0.06, 0);
+    G.userData.disp = bx(p, 0.3, 0.1, 0.03, '#A8F5BA', 0, 0.1, 0.31, null, { emissive: new T.Color(0x5FD884), emissiveIntensity: 0.55 });
+    G.userData.pan = cy(p, 0.2, 0.2, 0.03, 16, '#C8D1D4', 0, 0.14, -0.05);
+    bx(p, 0.62, 0.4, 0.5, '#DDF2F7', 0, 0.34, -0.05, null, GLS);
+    G.userData.boat = bx(p, 0.14, 0.015, 0.1, '#FFFFFF', 0, 0.165, -0.05);
+    return G;
+  }
+  function bottle(p, x, y, z, col, h, lab) {
+    const G = lg(p, x, y, z, 'bottle'); p = G; x = y = z = 0;
+    cy(p, 0.09, 0.1, h, 10, col, 0, h / 2, 0);
+    cy(p, 0.05, 0.07, 0.08, 10, col, 0, h + 0.04, 0);
+    G.userData.cap = cy(p, 0.05, 0.05, 0.05, 10, '#2B3438', 0, h + 0.1, 0);
+    cy(p, 0.102, 0.102, h * 0.36, 10, lab || '#F7F7F2', 0, h * 0.45, 0);
+    return G;
+  }
+  function weighBoat(p, x, y, z) { bx(p, 0.16, 0.025, 0.1, '#FFFFFF', x, y + 0.013, z); bx(p, 0.1, 0.02, 0.07, '#F2F2F2', x, y + 0.03, z); }
+  function spatula(p, x, y, z, r) { const m = bx(p, 0.26, 0.012, 0.03, '#B8C2C6', x, y + 0.007, z); m.rotation.y = r || 0; bx(p, 0.07, 0.012, 0.045, '#B8C2C6', x + Math.cos(r || 0) * 0.15, y + 0.007, z - Math.sin(r || 0) * 0.15).rotation.y = r || 0; }
+  function benchTop(p, w, d, x, z) { bx(p, w, 0.95, d, '#E7EEF0', x, 0.475, z); for (let i = 0; i < Math.floor(w / 0.9); i++) bx(p, 0.82, 0.55, 0.03, '#D3E0E5', x - w / 2 + 0.55 + i * 0.9, 0.5, z + d / 2 + 0.005); bx(p, w + 0.1, 0.07, d + 0.1, '#39474D', x, 0.985, z); }
+  function buildLab(g) {
+    const px = 0.5;
+    bx(g, 15, 0.7, 12.4, '#BFCACE', px, -0.35, -0.2);
+    for (let i = 0; i < 7; i++) for (let j = 0; j < 6; j++) bx(g, 1.98, 0.06, 1.98, (i + j) % 2 ? '#FFFFFF' : '#EEF4F6', -5 + i * 2, 0.03, -5.2 + j * 2);
+    bx(g, 15, 6.6, 0.4, '#F8FBFC', px, 3.3, -6.4);
+    bx(g, 0.4, 6.6, 12.6, '#F3F8F9', -6.7, 3.3, -0.2);
+    bx(g, 0.4, 6.6, 12.6, '#F3F8F9', 7.7, 3.3, -0.2);
+    bx(g, 15, 1.2, 0.05, '#DCE8EC', px, 0.6, -6.18); bx(g, 15, 0.09, 0.07, '#5FB3CE', px, 1.28, -6.16); bx(g, 15, 0.14, 0.08, '#5FB3CE', px, 0.08, -6.16);
+    bx(g, 0.05, 1.2, 12.4, '#DCE8EC', -6.48, 0.6, -0.2); bx(g, 0.07, 0.09, 12.4, '#5FB3CE', -6.46, 1.28, -0.2);
+    bx(g, 0.05, 1.2, 12.4, '#DCE8EC', 7.48, 0.6, -0.2); bx(g, 0.07, 0.09, 12.4, '#5FB3CE', 7.46, 1.28, -0.2);
+    bx(g, 3.9, 0.012, 0.14, '#F2C21B', px, 0.07, -3.55); bx(g, 0.14, 0.012, 1.8, '#F2C21B', px - 1.9, 0.07, -4.45); bx(g, 0.14, 0.012, 1.8, '#F2C21B', px + 1.9, 0.07, -4.45);
+    // sign: text is measured so it always fits the plate
+    const cv = document.createElement('canvas'); cv.width = 1024; cv.height = 192; const c2 = cv.getContext('2d');
+    if (c2) { c2.fillStyle = '#FFFFFF'; c2.fillRect(0, 0, 1024, 192); c2.fillStyle = '#0E6B7F'; c2.fillRect(0, 0, 1024, 14); c2.fillRect(0, 178, 1024, 14); c2.textAlign = 'center'; c2.textBaseline = 'middle'; let fs = 100; do { c2.font = '800 ' + fs + 'px system-ui, sans-serif'; fs -= 4; } while (c2.measureText && c2.measureText('COMPOUNDING PHARMACY').width > 900 && fs > 30); c2.fillText('COMPOUNDING PHARMACY', 512, 98); }
+    const sg = new T.Mesh(new T.PlaneGeometry(4.2, 0.79), new T.MeshBasicMaterial({ map: new T.CanvasTexture(cv) })); sg.position.set(-3.8, 4.4, -6.12); g.add(sg);
+    bx(g, 4.4, 0.98, 0.06, '#0E6B7F', -3.8, 4.4, -6.17);
+    // hood bench
+    benchTop(g, 13.4, 1.7, px, -5.2);
+    const h = new T.Group(); h.position.set(px, 1.02, -5.2); g.add(h);
+    bx(h, 0.12, 2.75, 1.45, '#DCE4E7', -1.65, 1.375, -0.05); bx(h, 0.12, 2.75, 1.45, '#DCE4E7', 1.65, 1.375, -0.05);
+    bx(h, 3.4, 2.75, 0.08, '#F4F8F9', 0, 1.375, -0.76);
+    bx(h, 3.45, 0.3, 1.55, '#DCE4E7', 0, 2.9, -0.02);
+    const hl = bx(h, 3.1, 0.05, 0.32, '#FFFFFF', 0, 2.72, -0.35, null, { emissive: new T.Color(0xFFFFFF), emissiveIntensity: 0.9 });
+    const sash = lg(h, 0, 0, 0, 'hood'); sash.userData.light = hl;
+    bx(sash, 3.1, 1.3, 0.03, '#CDEBF2', 0, 1.95, 0.62, null, GLS); bx(sash, 3.3, 0.1, 0.07, '#9AA7AC', 0, 1.3, 0.63); bx(sash, 3.3, 0.1, 0.07, '#9AA7AC', 0, 2.62, 0.63);
+    bx(h, 3.1, 0.03, 1.3, '#B8C3C7', 0, 0.03, -0.1);
+    bx(h, 0.34, 0.55, 0.05, '#1E2A2E', 1.65, 2.05, 0.7); bx(h, 0.24, 0.12, 0.02, '#8EF0A8', 1.65, 2.2, 0.73, null, { emissive: new T.Color(0x5FD884), emissiveIntensity: 0.7 });
+    cy(g, 0.36, 0.36, 4.2, 12, '#C9D2D6', px, 5.0, -5.4); cy(g, 0.46, 0.46, 0.14, 12, '#9AA7AC', px, 4.1, -5.4);
+    const plate = lg(h, -0.9, 0, -0.1, 'plate');
+    cy(plate, 0.3, 0.3, 0.1, 16, '#38474D', 0, 0.1, 0); plate.userData.ring = cy(plate, 0.26, 0.26, 0.02, 16, '#6C7A80', 0, 0.16, 0);
+    const pf = flask(plate, 0, 0.17, 0, 1.15, '#7FD4E8', 0.55); plate.userData.liq = pf.userData.liq;
+    for (let i = 0; i < 5; i++) { const b = add(h, new T.SphereGeometry(0.025, 6, 5), '#FFFFFF', -0.9, 0.3, -0.1, null, { transparent: true, opacity: 0.75, depthWrite: false }); labBub.push({ m: b, x: -0.9, z: -0.1, y0: 0.22, hh: 0.32, p: i / 5, sp: 0.35 + i * 0.05, ph: i * 1.7 }); }
+    bx(h, 0.45, 0.04, 0.3, '#38474D', 0.75, 0.05, -0.4); cy(h, 0.015, 0.015, 1.55, 6, '#8A969B', 0.75, 0.82, -0.4); bx(h, 0.32, 0.03, 0.03, '#8A969B', 0.6, 1.0, -0.4);
+    roundFlask(h, 0.45, 0.78, -0.4, 1.0, '#F2C2D4');
+    beaker(h, 0.2, 0.04, 0.25, 0.14, 0.26, '#B9E8C0', 0.6); beaker(h, -0.3, 0.04, 0.3, 0.1, 0.2, '#F3E7A6', 0.5); gradCyl(h, 1.2, 0.04, 0.1, 1, '#FFD9A8', 0.6);
+    cy(h, 0.05, 0.05, 0.25, 8, '#FFFFFF', 1.35, 0.15, 0.35); cy(h, 0.025, 0.04, 0.07, 8, '#3F9FD6', 1.35, 0.3, 0.35);
+    // bench items beside the hood
+    mortar(g, -4.6, 1.02, -5.2, 1.0, true); mortar(g, -3.2, 1.02, -5.0, 0.8, false, 0.2); beaker(g, -2.4, 1.02, -5.3, 0.15, 0.28, '#BFE3F0', 0.7); flask(g, -2.0, 1.02, -4.9, 1.1, '#CDEFC9', 0.45);
+    balance(g, -5.4, 1.02, -5.2); weighBoat(g, -4.0, 1.02, -4.7); spatula(g, -3.9, 1.02, -4.55, 0.3);
+    flask(g, 3.1, 1.02, -5.3, 0.9, '#F2C2D4', 0.5); beaker(g, 3.7, 1.02, -5.0, 0.12, 0.22, '#D9CCF2', 0.65); beaker(g, 4.1, 1.02, -5.35, 0.18, 0.34, '#BFE3F0', 0.4); mortar(g, 5.0, 1.02, -5.1, 0.9, true); gradCyl(g, 5.9, 1.02, -5.3, 1.1, '#FFD9A8', 0.7);
+    roundFlask(g, 6.4, 1.02, -4.9, 0.9, '#F3E7A6'); spatula(g, 4.6, 1.02, -4.65, -0.4);
+    // wall shelves
+    [[-4, 2.45], [-4, 3.25], [5, 2.45], [5, 3.25]].forEach((s, si) => {
+      bx(g, 3.8, 0.06, 0.4, '#CBD5D9', s[0], s[1], -6.0);
+      for (let i = 0; i < 9; i++) { const c = ['#B4651A', '#B4651A', '#3C7A8C', '#E8EEF0', '#B4651A', '#7A8F3C'][(i + si) % 6]; if ((i + si * 3) % 4 === 3) beaker(g, s[0] - 1.7 + i * 0.42, s[1] + 0.03, -6.0, 0.1, 0.22, LSCRUB[(i + si) % 6], 0.55); else bottle(g, s[0] - 1.7 + i * 0.42, s[1] + 0.03, -6.0, c, 0.28 + (i % 3) * 0.05, null); }
+    });
+    // island
+    benchTop(g, 6.6, 1.5, px, -0.6);
+    mortar(g, -2.2, 1.02, -0.3, 1.1, true); mortar(g, 2.9, 1.02, -0.1, 0.85, false); mortar(g, 3.5, 1.02, -0.7, 0.7, true, -0.3);
+    beaker(g, -0.9, 1.02, -0.3, 0.17, 0.32, '#BFE3F0', 0.55); beaker(g, -0.5, 1.02, -0.05, 0.12, 0.22, '#F3E7A6', 0.6); beaker(g, -1.3, 1.02, -0.05, 0.1, 0.18, '#CDEFC9', 0.5);
+    flask(g, -1.6, 1.02, -0.65, 1.3, '#F2C2D4', 0.4); flask(g, 1.9, 1.02, -0.6, 1.0, '#BFE3F0', 0.5); roundFlask(g, 2.2, 1.02, -0.05, 1.0, '#D9CCF2');
+    gradCyl(g, 1.4, 1.02, -0.2, 1.2, '#CDEFC9', 0.65); gradCyl(g, 1.65, 1.02, 0.15, 0.9, '#FFD9A8', 0.4); balance(g, 0.7, 1.02, 0.05);
+    weighBoat(g, -0.1, 1.02, -0.1); weighBoat(g, 0.15, 1.02, -0.35); spatula(g, -2.8, 1.02, 0.1, 0.5); spatula(g, 0.1, 1.02, 0.2, -0.2);
+    // left bench and right storage
+    benchTop(g, 1.5, 7.2, -5.6, -1.6);
+    mortar(g, -5.6, 1.02, -4.2, 0.9, true); beaker(g, -5.5, 1.02, -3.0, 0.15, 0.3, '#BFE3F0', 0.6); flask(g, -5.7, 1.02, -2.2, 1.0, '#F3E7A6', 0.5); beaker(g, -5.3, 1.02, -1.5, 0.11, 0.2, '#F2C2D4', 0.6);
+    roundFlask(g, -5.6, 1.02, -0.5, 1.0, '#CDEFC9'); gradCyl(g, -5.4, 1.02, 0.4, 1.1, '#D9CCF2', 0.6); mortar(g, -5.7, 1.02, 1.2, 0.8, false); weighBoat(g, -5.2, 1.02, 0.9);
+    bx(g, 0.9, 3.6, 5.4, '#E3EBEE', 6.95, 1.8, -0.5); bx(g, 0.05, 3.2, 5.0, '#CDEBF2', 6.47, 1.85, -0.5, null, GLS);
+    for (let r = 0; r < 4; r++) { bx(g, 0.05, 0.05, 5.0, '#9AA7AC', 6.45, 0.65 + r * 0.8, -0.5); for (let i = 0; i < 7; i++) { if ((i + r) % 3 === 0) beaker(g, 6.6, 0.68 + r * 0.8, -2.5 + i * 0.66, 0.1, 0.22, LSCRUB[(i + r) % 6], 0.5); else bottle(g, 6.6, 0.68 + r * 0.8, -2.5 + i * 0.66, ['#B4651A', '#3C7A8C', '#B4651A', '#E8EEF0'][(i + r) % 4], 0.3, null); } }
+    bx(g, 0.5, 0.3, 0.3, '#2E8F4E', -6.2, 1.9, 4.4);
+    const ex = lg(g, -6.25, 0, 5.0, 'ext'); cy(ex, 0.14, 0.14, 0.7, 10, '#C4332B', 0, 0.45, 0); cy(ex, 0.05, 0.05, 0.12, 8, '#222', 0, 0.85, 0); bx(ex, 0.16, 0.04, 0.04, '#222', 0.08, 0.92, 0);
+    bx(g, 5.2, 0.01, 1.1, '#CFE2EA', px, 0.065, 1.35);
+  }
+  function buildLabPerson() {
+    if (!lastMe || !labG) return;
+    if (labPerson) { labG.remove(labPerson); const i = labItems.indexOf(labPerson); if (i >= 0) labItems.splice(i, 1); labPerson = null; }
+    const me = lastMe;
+    const g = person(1, false, false, false, me.body === 'normal' ? undefined : me.body, { skin: me.skin, hair: me.hairCol, shirt: '#F7FBFB', hairStyle: HAIR_MAP[me.hair] === undefined ? 0 : HAIR_MAP[me.hair], gender: me.gender, coat: true, scrub: me.scrub, acc: me.acc || 0, tag: { pharm: true } });
+    g.position.set(0.5, 0, -1.9); labG.add(g); labPerson = g; g.userData.lab = 'pharm'; g.userData.g = g; g.userData.busy = 0; labItems.push(g);
+  }
+  function wpos(G) { let x = 0, y = 0, z = 0, o = G; while (o && o !== scene) { x = o.position.x + o.scale.x * x; y = o.position.y + o.scale.y * y; z = o.position.z + o.scale.z * z; o = o.parent; } return { x, y, z }; }
+  function labSay(G, text, dy) { const w = wpos(G); say({ g: { position: { x: w.x, y: w.y, z: w.z } }, dy: dy || 0.7 }, text, 'emo'); }
+  function anim(G, dur, fn, end) { let u = 0; G.userData.busy = 1; tweens.push(function (dt) { u += dt; const k = Math.min(1, u / dur); fn(k, u); if (k >= 1) { if (end) end(); G.userData.busy = 0; return true; } return false; }); }
+  const wob = (k) => Math.sin(k * 26) * (1 - k);
+  function recolor(G, col) {
+    const L = G.userData.liq; if (!L) return;
+    if (!G.userData.own) { L.material = L.material.clone(); G.userData.own = true; }
+    L.material.color.set(col);
+  }
+  function labClick(ud) {
+    const G = ud && ud.g; if (!G || G.userData.busy > 0) return;
+    const k = G.userData.lab, w = wpos(G), U = G.userData, W = WORDS[k];
+    if (W && Math.random() < 0.8) labSay(G, W[Math.floor(Math.random() * W.length)], k === 'hood' ? 3.4 : k === 'bottle' ? 0.7 : 0.9);
+    if (k === 'mortar') {
+      const pe = U.pestle, s = U.s; let n = 0;
+      anim(G, 1.9, (t, u) => { pe.rotation.y = u * 7; pe.rotation.z = U.pz + Math.sin(u * 9) * 0.12; pe.position.x = 0.06 * s + Math.cos(u * 7) * 0.05 * s; pe.position.z = Math.sin(u * 7) * 0.05 * s; G.rotation.z = Math.sin(u * 22) * 0.01; if (u > n * 0.22) { n++; emitPuff(w.x + (Math.random() - 0.5) * 0.15, w.y + 0.35 * s, w.z + (Math.random() - 0.5) * 0.15); } if (U.mound) U.mound.scale.y = 1 - t * 0.6; },
+        () => { pe.rotation.y = 0; pe.rotation.z = U.pz; pe.position.set(0.06 * s, 0.3 * s, 0); G.rotation.z = 0; if (U.mound) U.mound.scale.y = 1; });
+    } else if (k === 'beaker' || k === 'flask') {
+      const L = U.liq; let n = 0; recolor(G, LSCRUB[Math.floor(Math.random() * LSCRUB.length)]);
+      anim(G, 1.5, (t, u) => { G.rotation.z = wob(t) * 0.1; if (L) { L.rotation.y = u * 6; L.scale.x = L.scale.z = 1 + Math.sin(u * 14) * 0.04 * (1 - t); } if (u > n * 0.2) { n++; emitPuff(w.x + (Math.random() - 0.5) * 0.12, w.y + (U.h || 0.2) + 0.1, w.z + (Math.random() - 0.5) * 0.12); } if (n < 4 && Math.random() < 0.3) emitDrop(w.x, w.y + (U.h || 0.2), w.z); },
+        () => { G.rotation.z = 0; if (L) { L.rotation.y = 0; L.scale.x = L.scale.z = 1; } });
+    } else if (k === 'cyl') {
+      const L = U.liq, y0 = L ? L.position.y : 0, hh = U.h || 0.3;
+      anim(G, 1.3, (t) => { if (!L) return; const s = 1 + Math.sin(t * PI) * 0.45 * (t < 0.5 ? 1 : 1 - (t - 0.5) * 0.4); L.scale.y = s; L.position.y = y0 + (s - 1) * hh / 2; }, () => { if (L) { L.scale.y = 1; L.position.y = y0; } });
+      recolor(G, LSCRUB[Math.floor(Math.random() * LSCRUB.length)]);
+    } else if (k === 'balance') {
+      const d = U.disp, pan = U.pan, bt = U.boat, py = pan.position.y, by = bt.position.y; d.material = d.material.clone();
+      anim(G, 1.4, (t, u) => { pan.position.y = py - Math.abs(Math.sin(u * 8)) * 0.02 * (1 - t); bt.position.y = by + (t < 0.2 ? t * 1.2 : Math.max(0, 0.24 - t * 0.3)) * (t < 0.6 ? 1 : 0.2) - (pan.position.y - py) * 0; d.material.emissiveIntensity = 0.55 + Math.sin(u * 30) * 0.4 * (1 - t); },
+        () => { pan.position.y = py; bt.position.y = by; d.material.emissiveIntensity = 0.55; });
+      labSay(G, (Math.round(Math.random() * 900) / 10 + 0.1).toFixed(1) + ' mg', 0.95);
+    } else if (k === 'bottle') {
+      const cap = U.cap, cy0 = cap.position.y, gy0 = G.position.y;
+      anim(G, 1.0, (t) => { G.position.y = gy0 + Math.sin(Math.min(1, t * 1.6) * PI) * 0.18; G.rotation.y = t * PI * 2; cap.position.y = cy0 + Math.sin(Math.min(1, t * 2) * PI) * 0.22; G.rotation.z = wob(t) * 0.05; },
+        () => { G.rotation.y = 0; G.rotation.z = 0; G.position.y = gy0; cap.position.y = cy0; });
+    } else if (k === 'hood') {
+      const hl = U.light;
+      anim(G, 2.6, (t, u) => { const up = t < 0.25 ? t / 0.25 : t > 0.75 ? (1 - t) / 0.25 : 1; G.position.y = up * 0.85; hl.material.emissiveIntensity = 0.9 + Math.sin(u * 18) * 0.35; }, () => { G.position.y = 0; hl.material.emissiveIntensity = 0.9; });
+    } else if (k === 'plate') {
+      labBoil = 3.2; const ring = U.ring; ring.material = ring.material.clone(); let n = 0; recolor(G, '#FFB06B');
+      anim(G, 3.2, (t, u) => { ring.material.color.setRGB(0.42 + (1 - t) * 0.5 * Math.min(1, t * 6), 0.48, 0.5); ring.material.emissive.setRGB(0.9 * (1 - t), 0.25 * (1 - t), 0); if (u > n * 0.25) { n++; emitPuff(w.x + (Math.random() - 0.5) * 0.15, w.y + 0.75, w.z + (Math.random() - 0.5) * 0.15); } }, () => { ring.material.emissive.setRGB(0, 0, 0); recolor(G, '#7FD4E8'); });
+    } else if (k === 'ext') {
+      anim(G, 1.0, (t) => { G.rotation.z = wob(t) * 0.18; G.rotation.x = wob(t) * 0.06; }, () => { G.rotation.z = 0; G.rotation.x = 0; });
+    } else if (k === 'pharm' && labPerson) {
+      const P = G.userData.P;
+      anim(G, 1.6, (t, u) => { if (P) { P.arms[1].rotation.x = -2.5 + Math.sin(u * 12) * 0.35; } G.position.y = Math.abs(Math.sin(t * PI * 2)) * 0.12; }, () => { if (P) P.arms[1].rotation.x = 0; G.position.y = 0; });
+      labSay(G, 'Check the math!', 3.0);
+    }
+  }
+  function labTick(dt) {
+    labT += dt; if (labBoil > 0) labBoil -= dt;
+    const sp = labBoil > 0 ? 3 : 1;
+    labBub.forEach(b => { b.p += dt * b.sp * sp; if (b.p > 1) b.p -= 1; b.m.position.set(b.x + Math.sin(labT * 3 + b.ph) * 0.03, b.y0 + b.p * b.hh, b.z + Math.cos(labT * 2 + b.ph) * 0.03); });
+    scene.children.forEach(c => { if (c !== labG && c !== hemi && c !== sun && c.visible && !(c.userData && c.userData.fx)) { c.visible = false; if (labHid.indexOf(c) < 0) labHid.push(c); } });
+    if (labPerson && labPerson.userData.busy <= 0) { labPerson.rotation.y = Math.sin(labT * 0.4) * 0.12; labPerson.position.y = Math.sin(labT * 1.6) * 0.01; }
+  }
+  api.setLab = function (on) {
+    if (!api.ok || !scene) return false;
+    on = !!on; if (on === labOn) return on;
+    if (on) {
+      if (!labG) { labG = new T.Group(); buildLab(labG); scene.add(labG); }
+      labHid = []; scene.children.forEach(c => { if (c !== labG && c !== hemi && c !== sun && c.visible && !(c.userData && c.userData.fx)) { c.visible = false; labHid.push(c); } });
+      labG.visible = true; labOn = true; buildLabPerson();
+    } else {
+      labOn = false; labHid.forEach(c => { c.visible = true; }); labHid = []; if (labG) labG.visible = false;
+    }
+    document.body.classList.toggle('lab', on); applyTheme(); return on;
+  };
+  api.labOn = () => labOn;
+  api.devLabClick = function (i) { const G = labItems[i]; if (G) labClick(G.userData); return labItems.length; };
+  /* ---- secret capsules: a pill drifting across the clouds, and one that pops out of the left plant ---- */
+  let capG = null, capObj = null, capT = 35 + Math.random() * 40, plantT = 70 + Math.random() * 60, plantL = null;
+  const CAPCOL = [['#E04F3A', '#FFFFFF'], ['#3E72D9', '#FFFFFF'], ['#2FAE66', '#FFFFFF'], ['#F2A516', '#FFFFFF'], ['#8A63C9', '#FFFFFF']];
+  function capModel(ci) {
+    const g = new T.Group(), c = CAPCOL[ci % 5], gl = { emissive: new T.Color(0xFFFFFF), emissiveIntensity: 0.18 };
+    const a = cy(g, 0.26, 0.26, 0.5, 10, c[0], -0.25, 0, 0, null, gl); a.rotation.z = PI / 2; const b = cy(g, 0.26, 0.26, 0.5, 10, c[1], 0.25, 0, 0, null, gl); b.rotation.z = PI / 2;
+    add(g, new T.SphereGeometry(0.26, 10, 8), c[0], -0.5, 0, 0, null, gl); add(g, new T.SphereGeometry(0.26, 10, 8), c[1], 0.5, 0, 0, null, gl);
+    const hit = new T.Mesh(new T.SphereGeometry(1.15, 6, 5), new T.MeshBasicMaterial({ visible: false })); g.add(hit);
+    g.userData.cap = true; return g;
+  }
+  function capRemove() { if (capObj) { capG.remove(capObj.g); capObj = null; } }
+  function spawnCap(kind) {
+    if (!capG || capObj) return false;
+    const g = capModel(Math.floor(Math.random() * 5)); capG.add(g);
+    if (kind === 'sky') { g.scale.set(1.5, 1.5, 1.5); g.position.set(-22, 9.7, -1); capObj = { kind, g, t: 0, sp: 1.7 + Math.random() * 0.5 }; }
+    else { g.scale.set(0.01, 0.01, 0.01); g.position.set(-8.6, 1.5, 5); capObj = { kind: 'plant', g, t: 0, phase: 'pop', stay: 14 + Math.random() * 6 }; }
+    return true;
+  }
+  function capTick(dt) {
+    if (!capG) return;
+    const ok = !labOn && !paused && !fpT && (!B.capsuleOk || B.capsuleOk());
+    if (!capObj) {
+      if (!ok) return;
+      capT -= dt; plantT -= dt;
+      if (capT <= 0) { capT = 100 + Math.random() * 120; spawnCap('sky'); }
+      else if (plantT <= 0) { plantT = 110 + Math.random() * 140; spawnCap('plant'); }
+      return;
+    }
+    const o = capObj, g = o.g; o.t += dt;
+    if (o.kind === 'sky') {
+      g.position.x += o.sp * dt; g.position.y = 9.7 + Math.sin(o.t * 1.3) * 0.5; g.rotation.z = Math.sin(o.t * 0.9) * 0.4; g.rotation.y += dt * 1.6;
+      if (g.position.x > 22) capRemove();
+      return;
+    }
+    const FROM = [-8.6, 1.5, 5], TO = [-7.2, 0.32, 4.1];
+    if (o.phase === 'pop') {
+      const k = Math.min(1, o.t / 0.95), s = 1.1 * Math.min(1, k * 3);
+      g.scale.set(s, s, s); g.position.set(FROM[0] + (TO[0] - FROM[0]) * k, FROM[1] + (TO[1] - FROM[1]) * k + Math.sin(k * PI) * 1.7, FROM[2] + (TO[2] - FROM[2]) * k); g.rotation.z += dt * 9; g.rotation.y += dt * 4;
+      if (plantL) plantL.forEach((l, i) => { l.rotation.z = Math.sin(o.t * 30 + i) * 0.12 * (1 - k); l.position.x = l.userData.x0 + Math.sin(o.t * 26 + i) * 0.04 * (1 - k); });
+      if (k >= 1) { o.phase = 'sit'; o.t = 0; g.rotation.x = 0; g.rotation.y = 0.6; g.rotation.z = 0; if (plantL) plantL.forEach(l => { l.rotation.z = 0; l.position.x = l.userData.x0; }); }
+    } else if (o.phase === 'sit') {
+      g.position.y = TO[1] + Math.abs(Math.sin(o.t * 3)) * 0.12; g.rotation.y = 0.6 + Math.sin(o.t * 1.5) * 0.5; g.rotation.z = Math.sin(o.t * 6) * 0.1;
+      if (o.t > o.stay) { o.phase = 'back'; o.t = 0; }
+    } else {
+      const k = Math.min(1, o.t / 0.7), s = 1.1 * (1 - Math.max(0, k - 0.6) / 0.4);
+      g.scale.set(Math.max(0.01, s), Math.max(0.01, s), Math.max(0.01, s)); g.position.set(TO[0] + (FROM[0] - TO[0]) * k, TO[1] + (FROM[1] - TO[1]) * k + Math.sin(k * PI) * 1.0, TO[2] + (FROM[2] - TO[2]) * k); g.rotation.z += dt * 8;
+      if (k >= 1) capRemove();
+    }
+  }
+  function capClick() {
+    if (!capObj) return;
+    const o = capObj, p = o.g.position, pos = new T.Vector3(p.x, p.y, p.z); capRemove();
+    burst(pos, 14, 0xFFD54A, 1.1);
+    if (B.onCapsule) B.onCapsule(o.kind);
+  }
+  api._capClick = function () { const had = !!capObj; capClick(); return had; };
+  api.devCapsule = function (kind) { if (!api.ok || !capG) return false; capRemove(); return spawnCap(kind === 'plant' ? 'plant' : 'sky'); };
   api.init = function (opts) {
     B = opts; host = opts.host;
     if (typeof THREE === 'undefined') return false;
@@ -2879,7 +3468,7 @@ const World = (function () {
       const wk = WK[d.w], r = rngOf('top' + d.id), label = 'Week ' + wk.n + (wk.t === 'PHAR 444' ? ' (spring)' : '') + ' · ' + wk.d;
       const mk = (type, diff, q, a, w, extra) => {
         if (!w) return;
-        TOPQ.push({ c: 'TOP', d: diff, q: q, a: a, w: w, e: ref(d), t: label, from: wk.from, wk: d.w, ref: d.id, rows: rowsOf(d), k: hash('TOP|' + d.id + '|' + type) });
+        TOPQ.push({ wt: (type === 'brand' || type === 'gen') ? 'bg' : type, c: 'TOP', d: diff, q: q, a: a, w: w, e: ref(d), t: label, from: wk.from, wk: d.w, ref: d.id, rows: rowsOf(d), k: hash('TOP|' + d.id + '|' + type) });
       };
       const brand = brandPick(d);
       if (brand && nz(brand) !== nz(d.g)) {
@@ -2891,6 +3480,7 @@ const World = (function () {
         const mine = words(d.i.join(' ')), first = cut(d.i[0], 100);
         mk('ind', 2, d.g + ' is indicated for:', first, wrongs(d, x => x.i && x.i.length ? cut(x.i[0], 100) : '', r, (t, x) => words(x.i.join(' ')).some(w => mine.indexOf(w) >= 0), 'ind'));
       }
+      if (String(d.p || '').replace(/\s+/g, ' ').trim().length >= 30) { const pr = cut(String(d.p).replace(/\s+/g, ' ').trim(), 150); mk('pearl', 2, 'Which is a clinical pearl for ' + d.g + '?', pr, wrongs(d, x => String(x.p || '').trim().length >= 30 ? cut(String(x.p).replace(/\s+/g, ' ').trim(), 150) : '', r, (t) => ovl(sig(t), sig(pr)).length >= 3 || t.toLowerCase().indexOf(String(d.g).toLowerCase().split(/[ ,\/]/)[0]) >= 0, null)); }
       if (d.m && d.m.length >= 40 && !/^n\/a/i.test(d.m)) mk('moa', 3, 'Which statement describes the mechanism of action of ' + d.g + '?', firstSent(d.m, 170), wrongs(d, x => x.m && x.m.length >= 40 && !/^n\/a/i.test(x.m) ? firstSent(x.m, 170) : '', r, null, 'moa'));
     });
   })();
@@ -2963,6 +3553,7 @@ const World = (function () {
     const st = S.set;
     if (q.from && q.from > todayStr() && !(q.c === 'TOP' && st.ahead)) return false;
     if (q.c === 'TOP' && st.wkOnly && q.wk !== curWeek()) return false;
+    if (q.c === 'TOP' && wkTypeOff(q)) return false;
     if (!st.topics[q.c] || st.diffs.indexOf(q.d) < 0) return false;
     if (st.mode === 'missed') return S.missed.indexOf(q.k) >= 0;
     if (st.mode === 'new') return !S.mastery[q.k];
@@ -2975,9 +3566,12 @@ const World = (function () {
     S.decks.forEach(d => { if (d.enabled) d.items.forEach(q => { if (eligible(q)) arr.push(q); }); });
     return arr;
   }
+  const WK_TYPES = [['bg', 'Brand / generic'], ['ind', 'Indications'], ['moa', 'Mechanism'], ['pearl', 'Clinical pearls'], ['class', 'Drug class']];
+  const wkTypeOff = (q) => !!(S.set.wkTypes && S.set.wkTypes[q.wt] === false);
   const focusOn = () => !!S.set.focus;
+  const labOn = () => !!S.lab;
   const LEARN_SEC = 300, learning = () => (S.playSec || 0) < LEARN_SEC; // the first five minutes: slower line, no surprise events
-  const timerOn = () => S.set.timer && !S.set.focus;
+  const timerOn = () => S.set.timer && !S.set.focus && !labOn();
   const calcOn = () => S.set.topics.CALC && S.set.mode !== 'missed';
   const retry = [];
   function chooseQ(karen) {
@@ -3005,7 +3599,7 @@ const World = (function () {
   }
   const KAREN_SEC = 25;
   function karenRoll() {
-    if (focusOn() || learning()) return false;
+    if (focusOn() || learning() || labOn()) return false;
     if (S.karenCd > 0) { S.karenCd--; return false; }
     if (S.served < 6 || upTotal() < 2) return false;
     if (Math.random() < 0.25) { S.karenCd = 8; save(); return true; }
@@ -3013,7 +3607,7 @@ const World = (function () {
   }
   /* the hard-of-hearing visitor: a greeting nobody can hear, then a bonus question that pays out a free upgrade */
   function elderRoll() {
-    if (focusOn() || learning()) return false;
+    if (focusOn() || learning() || labOn()) return false;
     if (S.elderCd > 0) { S.elderCd--; return false; }
     if (S.served < 8) return false;
     if (Math.random() < 0.16) { S.elderCd = 10; save(); return true; }
@@ -3045,7 +3639,7 @@ const World = (function () {
     return '<p class="gift"><b>' + esc(cur.name) + ' tells all her friends about you.</b> Free upgrade: ' + esc(u.name || u.short) + ' is now level ' + S.up[u.id] + '.</p>';
   }
   function sweatyRoll() {
-    if (focusOn() || learning()) return false;
+    if (focusOn() || learning() || labOn()) return false;
     if (S.sweatyCd > 0) { S.sweatyCd--; return false; }
     if (S.served < 3) return false;
     if (Math.random() < 0.22) { S.sweatyCd = 5; save(); return true; }
@@ -3061,6 +3655,7 @@ const World = (function () {
   function newCard() {
     qExpand();
     endInterrupt();
+    if (labOn()) return labCard();
     let info;
     if (World.ok) info = World.nextCustomer();
     else {
@@ -3070,12 +3665,13 @@ const World = (function () {
     }
     if (!World.ok && !info.karen && !info.sweaty) info.elder = elderRoll();
     if (!info.karen && !info.sweaty && !info.elder && !info.evt && (forceEvt || !World.ok)) info.evt = eventRoll();
-    const karen = !!info.karen, sweaty = !!info.sweaty && !karen, elder = !!info.elder && !karen && !sweaty, evt = !karen && !sweaty && !elder && info.evt ? info.evt : null, q = evt ? evQuestion(evt) : chooseQ(karen);
+    const calm = focusOn(), karen = !!info.karen && !calm, sweaty = !!info.sweaty && !karen && !calm, elder = !!info.elder && !karen && !sweaty && !calm, evt = !karen && !sweaty && !elder && !calm && info.evt ? info.evt : null, q = evt ? evQuestion(evt) : chooseQ(karen);
     view = 'q';
     if (!q) { cur = { empty: true, seed: info.seed, karen: false }; renderPanel(); return; }
     const opts = shuffle([q.a, ...q.w].map((t, i) => ({ t, ok: i === 0 })));
-    cur = { q, wasMissed: S.missed.indexOf(q.k) >= 0, opts, t0: Date.now(), done: false, hint: false, karen, sweaty, elder, elderStage: elder ? 0 : 2, ask: pick(ELDER_ASK), caller: !!info.caller, name: karen ? 'Karen' : sweaty ? 'Jittery Jim' : elder ? pick(info.seed % 2 === 0 ? ELDER_F : ELDER_M) : evt && EV_NAME[evt] ? pick(EV_NAME[evt]) : pick(NAMES), flavor: info.caller ? pick(CALLER_LINES) : evt ? pick(EV_FLAVOR[evt]) : karen ? pick(KAREN_LINES) : sweaty ? pick(JIM_LINES) : pick(FLAVOR[q.c] || FLAVOR.MY), seed: info.seed, num: S.served + 1, picked: -1, ok: false, resHTML: '', interrupt: null, evt: evt, insp: evt === 'inspector' ? { n: 1, of: 3, ok: 0, used: [q.k] } : null, review: reviewDue(S.mastery[q.k]) };
+    cur = { q, wasMissed: S.missed.indexOf(q.k) >= 0, opts, t0: Date.now(), done: false, hint: false, karen, sweaty, elder, elderStage: elder ? 0 : 2, ask: pick(ELDER_ASK), caller: !!info.caller && !calm, name: karen ? 'Karen' : sweaty ? 'Jittery Jim' : elder ? pick(info.seed % 2 === 0 ? ELDER_F : ELDER_M) : evt && EV_NAME[evt] ? pick(EV_NAME[evt]) : pick(NAMES), flavor: info.caller ? pick(CALLER_LINES) : evt ? pick(EV_FLAVOR[evt]) : karen ? pick(KAREN_LINES) : sweaty ? pick(JIM_LINES) : pick(FLAVOR[q.c] || FLAVOR.MY), seed: info.seed, num: S.served + 1, picked: -1, ok: false, resHTML: '', interrupt: null, evt: evt, insp: evt === 'inspector' ? { n: 1, of: 3, ok: 0, used: [q.k] } : null, review: reviewDue(S.mastery[q.k]) };
     if (evt === 'inspector') SFX.play('siren'); else if (evt === 'driver') SFX.play('thud'); else if (S.served > 0) SFX.play('bell');
+    if (sweatyOwed && calm) sweatyOwed = false;
     if (sweatyOwed) { sweatyOwed = false; cur.interrupt = { t0: Date.now(), dur: 7000, a: Math.floor(Math.random() * 3), dismissed: false, line: pick(JIM_BREAK) }; World.interrupt(true); }
     renderPanel();
   }
@@ -3108,13 +3704,14 @@ const World = (function () {
       const speed = timerOn() ? 1 + 0.5 * Math.max(0, 1 - elapsed / 20) : 1;
       const streakN = Math.min(S.streak, 5 + 3 * S.up.counsel), streak = 1 + 0.05 * streakN;
       const lucky = Math.random() < 0.06 * S.up.robot, fr = franchiseMult();
-      pay = Math.max(1, Math.round(base * shelf * speed * streak * fr * (lucky ? 2 : 1) * (cur.hint ? 0.5 : 1) * (karen ? 2 : 1) * (sweaty ? 1.5 : 1) * (rush.on ? 1.5 : 1)));
+      pay = Math.max(1, Math.round(base * shelf * speed * streak * fr * (lucky ? 2 : 1) * (cur.hint ? 0.5 : 1) * (karen ? 2 : 1) * (sweaty ? 1.5 : 1) * (rush.on ? 1.5 : 1) * (cur.lab ? 1.5 : 1)));
       chips.push(`<span class="big">+${money(pay)}</span>`, `<span>base $${base.toFixed(0)}</span>`);
       if (S.up.shelf) chips.push(`<span>shelves x${shelf.toFixed(2)}</span>`);
       if (timerOn()) chips.push(`<span>speed x${speed.toFixed(2)}</span>`);
       if (streakN > 0) chips.push(`<span>streak x${streak.toFixed(2)} (${S.streak} in a row)</span>`);
       if (S.franchises) chips.push(`<span>locations x${fr.toFixed(2)}</span>`);
       if (rush.on) chips.push('<span>rush hour x1.50</span>');
+      if (cur.lab) chips.push('<span>compounding bench x1.50</span>');
       if (lucky) chips.push('<span>robot: double fill</span>');
       if (cur.hint) chips.push('<span>hint used x0.5</span>');
       if (karen) chips.push('<span>Karen calmed x2</span>');
@@ -3123,6 +3720,7 @@ const World = (function () {
       S.sinceHint++;
       if (S.sinceHint >= 5 && S.hintsLeft < hintCap()) { S.hintsLeft++; S.sinceHint = 0; }
       if (q.gen) S.calcOK++;
+      if (cur.lab) { S.labOK = (S.labOK || 0) + 1; }
       if (karen) S.karenWin++;
       if (sweaty) S.jimWin++;
       extra += streakGift(pay); SFX.play('ok'); SFX.play('coin');
@@ -3165,12 +3763,12 @@ const World = (function () {
     shiftNote(q, ok, pay, ok || idx < 0 ? '' : o.t);
     save();
     checkAwards();
-    if (cur.visit) World.visitorReact(ok); else World.react(ok, pay);
+    if (cur.lab) { S.labN = (S.labN || 0) + 1; save(); } else if (cur.visit) World.visitorReact(ok); else World.react(ok, pay);
     const correctText = cur.opts.find(o2 => o2.ok).t;
     cur.resHTML = `<div class="result ${ok ? 'good' : 'fail'}" id="result"><h3>${esc(head)}</h3>
       ${ok ? '' : `<p><b>Answer:</b> ${esc(correctText)}</p>`}${!ok && idx >= 0 && whyNot(o.t) ? '<p class="whynot"><b>Why not \u201C' + esc(o.t) + '\u201D?</b> ' + whyNot(o.t) + '</p>' : ''}${extra}
       <div class="pay">${chips.join('')}</div>${explHTML(q)}
-      <div><button class="btn go" id="nextbtn" type="button">Next patient</button></div></div>`;
+      <div><button class="btn go" id="nextbtn" type="button">${cur.lab ? 'Next order' : 'Next patient'}</button></div></div>`;
     renderPanel(); renderStats(); renderStore(); renderUpgrades(); renderMastery(); renderReview(); renderFranchise();
     if (ok) { const b = document.querySelector('.opt[data-i="' + idx + '"]'); if (b) pop(b, '+' + money(pay)); }
     const nb = $('#nextbtn'); if (nb) { nb.focus({ preventScroll: true }); nb.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); }
@@ -3224,9 +3822,9 @@ const World = (function () {
       if (cur.done) { if (o.ok) c = 'ok'; else if (i === cur.picked) c = 'bad'; }
       return `<button type="button" class="opt ${c}" style="grid-row:${i + 1};grid-column:1" data-i="${i}" ${o.gone || cur.done || isBlocked(i) ? 'disabled' : ''}><kbd>${keys[i]}</kbd><span>${esc(o.t)}</span></button>`;
     }).join('');
-    const label = cur.elder ? cur.name.toUpperCase() + ' \u00B7 free upgrade if right' : cur.evt ? (cur.evt === 'inspector' ? 'HEALTH INSPECTOR \u00B7 question ' + cur.insp.n + ' of ' + cur.insp.of + ' \u00B7 need 2' : EV_LABEL[cur.evt]) : cur.caller ? 'KAREN · "I tried to call"' : cur.karen ? 'KAREN · wants the manager' : cur.sweaty ? 'JITTERY JIM · sweating buckets' : CATNAME[q.c] + (q.t ? ' · ' + q.t : '');
+    const label = cur.lab ? (cur.lab === 'pk' ? 'KINETICS CONSULT \u00B7 show your work' : 'COMPOUNDING ORDER \u00B7 show your work') : cur.elder ? cur.name.toUpperCase() + ' \u00B7 free upgrade if right' : cur.evt ? (cur.evt === 'inspector' ? 'HEALTH INSPECTOR \u00B7 question ' + cur.insp.n + ' of ' + cur.insp.of + ' \u00B7 need 2' : EV_LABEL[cur.evt]) : cur.caller ? 'KAREN · "I tried to call"' : cur.karen ? 'KAREN · wants the manager' : cur.sweaty ? 'JITTERY JIM · sweating buckets' : CATNAME[q.c] + (q.t ? ' · ' + q.t : '');
     const isK = cur.karen || cur.caller, showTimer = !isK && timerOn();
-    return `<article class="rx ${cur.karen ? 'karen' : cur.sweaty ? 'sweaty' : ''} ${cur.evt ? 'evt evt-' + cur.evt : ''}">
+    return `<article class="rx ${cur.lab ? 'labq' : ''} ${cur.karen ? 'karen' : cur.sweaty ? 'sweaty' : ''} ${cur.evt ? 'evt evt-' + cur.evt : ''}">
       <div class="rx-head"><span class="rx-sym" aria-hidden="true">&#8478;</span>
         <div class="rx-meta"><b>${esc(label)}</b><span>Rx #${pad} &middot; ${esc(cur.name)}</span></div>
         ${cur.wasMissed ? `<span class="missedtag" title="You missed this question before">Missed before</span>` : cur.review ? `<span class="missedtag rv" title="You mastered this a while ago. A quick memory check.">Memory check</span>` : ''}
@@ -3235,13 +3833,13 @@ const World = (function () {
       ${isK ? `<div class="ktimer" role="timer" aria-label="Time before Karen leaves"><div class="timer"><i id="timerbar"></i></div><b id="tcount">${KAREN_SEC}</b><small>sec</small></div>` : ''}
       <div class="rx-body">
         <div class="patient">${avatar(cur.seed, cur.done ? (cur.ok ? 'ok' : 'bad') : 'idle', cur.karen, cur.sweaty, cur.elder)}<div class="bubble"><em>${esc(cur.flavor)}</em><p>${esc(q.q)}</p></div></div>
-        <div class="opts" role="group" aria-label="Answer choices">${opts}${jimHTML()}</div>
+        <div class="opts" role="group" aria-label="Answer choices">${opts}${jimHTML()}</div>${labToolsHTML()}
         <div class="tools"><button type="button" class="btn" id="hintbtn" ${S.hintsLeft < 1 || cur.hint || cur.done ? 'disabled' : ''}>Ask the pharmacist (${S.hintsLeft})</button>
-          <span class="keyhint">${isK ? 'Karen leaves in ' + KAREN_SEC + ' s. A wrong answer costs an upgrade.' : timerOn() ? 'Speed bonus fades over 20 s' : focusOn() ? 'Focus mode: no timer' : 'Timer bonus is off'}</span></div>
+          <span class="keyhint">${isK ? 'Karen leaves in ' + KAREN_SEC + ' s. A wrong answer costs an upgrade.' : cur.lab ? 'Lab bench: no timer. Pays x1.5.' : timerOn() ? 'Speed bonus fades over 20 s' : focusOn() ? 'Focus mode: no timer' : 'Timer bonus is off'}</span></div>
       </div>${cur.resHTML || ''}</article>`;
   }
   function explHTML(q) {
-    if (!q.rows) return '<p class="why"><b>Why:</b> ' + esc(q.e) + '</p>';
+    if (!q.rows) return '<p class="why"><b>' + (q.lab ? 'Worked solution:' : 'Why:') + '</b> ' + esc(q.e) + '</p>';
     return '<dl class="expl">' + q.rows.map(r => '<dt>' + esc(r[0]) + '</dt><dd>' + esc(r[1]) + '</dd>').join('') + '</dl>';
   }
   function weekNote() {
@@ -3276,7 +3874,8 @@ const World = (function () {
       <div class="grp"><b>Topics <span><button type="button" class="link" data-act="topics-all">All</button> &middot; <button type="button" class="link" data-act="topics-none">None</button></span></b><div class="chips">${topics}</div></div>
       <div class="grp"><b>Difficulty</b><div class="chips">${diffs}</div></div>
       <div class="grp"><b>Mode</b><div class="chips">${modes}</div><p class="note">${MODES.find(m => m[0] === st.mode)[2]}</p></div>
-      <div class="grp"><b>Weekly drugs</b><div class="chips"><button type="button" class="chip" data-act="wkonly" aria-pressed="${!!st.wkOnly}">This week only</button><button type="button" class="chip" data-act="ahead" aria-pressed="${!!st.ahead}">Study ahead</button></div><p class="note">${weekNote()}</p></div>
+      <div class="grp"><b>Compounding pharmacy</b><div class="chips"><button type="button" class="chip" data-act="labk" data-v="comp" aria-pressed="${(S.labK || {}).comp !== false}">Compounding math</button><button type="button" class="chip" data-act="labk" data-v="pk" aria-pressed="${(S.labK || {}).pk !== false}">Kinetics</button></div><p class="note">Used when you tap Switch to compounding in the menu. Level chips above apply there too. ${S.labN ? 'Solved at the bench: ' + S.labOK + ' of ' + S.labN + '.' : ''}</p></div>
+      <div class="grp"><b>Weekly drugs</b><div class="chips"><button type="button" class="chip" data-act="wkonly" aria-pressed="${!!st.wkOnly}">This week only</button><button type="button" class="chip" data-act="ahead" aria-pressed="${!!st.ahead}">Study ahead</button></div><div class="chips" aria-label="Weekly question types">${WK_TYPES.map(x => `<button type="button" class="chip" data-act="wktype" data-v="${x[0]}" aria-pressed="${!(st.wkTypes && st.wkTypes[x[0]] === false)}">${x[1]}</button>`).join('')}</div><p class="note">${weekNote()} Use the question-type buttons to pick which kinds of weekly questions you get.</p></div>
       <div class="grp"><b>Speed bonus</b><div class="chips"><button type="button" class="chip" data-act="timer" aria-pressed="${st.timer}">Timer bonus ${st.timer ? 'on' : 'off'}</button></div><p class="note">Turn it off to study without time pressure. Karen still has a limit.</p></div>
       <p class="count">${n} question${n === 1 ? '' : 's'} match${calcOn() ? ' + endless calculations' : ''}</p>
       <div class="btnrow"><button type="button" class="btn go nbback" data-act="back">Close notebook and return to counter</button><button type="button" class="btn" data-act="tour">Replay tour</button><button type="button" class="btn" data-act="reset-set">Reset settings</button></div></div></div>`;
@@ -3365,7 +3964,7 @@ const World = (function () {
   }
   const petProgress = (p) => AW_CATS.filter((c, ci) => S.awards.frames.indexOf(ci * 3 + p.tier - 1) >= 0).length;
   const CAL_NAMES = ['Bronze', 'Silver', 'Gold', 'Platinum'], CAL_ICON = ['\uD83E\uDD49', '\uD83E\uDD48', '\uD83E\uDD47', '\uD83D\uDC8E'];
-  const weekQs = (n) => TOPQ.filter(q => q.wk === n);
+  const weekQs = (n) => TOPQ.filter(q => q.wk === n && !wkTypeOff(q));
   const weekProg = (n) => { const qs = weekQs(n); return { done: qs.filter(q => (S.mastery[q.k] || {}).box >= 2).length, total: qs.length }; };
   const weeksOpen = () => WEEKS.filter(w => (w.from <= todayStr() || S.set.ahead) && weekQs(w.n).length);
   const weeksMastered = () => weeksOpen().filter(w => { const p = weekProg(w.n); return p.total > 0 && p.done >= p.total; }).length;
@@ -3450,7 +4049,7 @@ const World = (function () {
     const calRow = `<div class="aw"><div class="awh"><b>\uD83D\uDCC5 Weekly drug calendar</b><span>${wm} week${wm === 1 ? '' : 's'} mastered</span></div><div class="awbar"><i style="width:${np ? Math.round(100 * np.done / Math.max(1, np.total)) : 100}%"></i></div><small class="awnote">${nextW ? 'Next: master all ' + np.total + ' questions of week ' + nextW.wk + ' (' + np.done + '/' + np.total + ')' : 'Every open week is mastered.'} Each mastered week raises the calendar one level.</small><div class="awt">${CAL_NAMES.map((c, i) => i < ct ? `<span class="tier on">${CAL_ICON[i]} ${c}${i === 3 && wm > 4 ? ' x' + (wm - 3) : ''}</span>` : `<span class="tier">\uD83D\uDD12 ${i + 1} week${i ? 's' : ''}</span>`).join('')}</div></div>`;
     const accN = S.acc || 0;
     const wardRow = `<div class="aw"><div class="awh"><b>\uD83E\uDDE5 Pharmacist wardrobe</b><span>${accN}/${ACCS.length}</span></div><div class="awbar"><i style="width:${Math.round(100 * accN / ACCS.length)}%"></i></div><div class="awt">${ACCS.map((a, i) => i < accN ? `<span class="tier on">${a[1]} ${a[0]}</span>` : `<span class="tier">\uD83D\uDD12 ${RANKS[i + 1][1]}</span>`).join('')}</div></div>`;
-    return `<div class="pane"><h3>Awards</h3><p class="sub">A question counts as mastered after two correct answers in a row. The top tier of a topic needs 90% of its questions mastered. Each tier hangs a framed photo on the pharmacy wall. Mastering several topics brings in pets. Each rank promotion adds an accessory to your pharmacist.</p>${calRow}${wardRow}${rows}<div class="grp"><b>Pets</b><div class="awps">${pets}${fcPetRow()}</div></div>${shareHTML()}<div class="btnrow"><button type="button" class="btn" data-act="flash">Open flashcards</button></div>${saveBoxHTML()}<div class="btnrow"><button type="button" class="btn go" data-act="back">Back to counter</button></div></div>`;
+    return `<div class="pane"><h3>Awards</h3><p class="sub">A question counts as mastered after two correct answers in a row. The top tier of a topic needs 90% of its questions mastered. Each tier hangs a framed photo on the pharmacy wall. Mastering several topics brings in pets. Each rank promotion adds an accessory to your pharmacist.</p>${calRow}${wardRow}${rows}<div class="grp"><b>Pets</b><div class="awps">${pets}${fcPetRow()}</div></div>${capsHTML()}${shareHTML()}<div class="btnrow"><button type="button" class="btn" data-act="flash">Open flashcards</button></div>${saveBoxHTML()}<div class="btnrow"><button type="button" class="btn go" data-act="back">Back to counter</button></div></div>`;
   }
 
 
@@ -3561,7 +4160,9 @@ const World = (function () {
     if (phone.ringing) { phone.ringing = false; World.phoneRing(false); updatePhoneBtn(); }
   }
   function startShelve(auto) {
-    if (fp.on || !World.ok || view !== 'q') return;
+    if (fp.on || !World.ok) return;
+    if (view !== 'q') { if (!auto) toast('Finish what you are doing first, then restock.'); return; }
+    if (focusOn()) { if (!auto) toast('Turn off focus mode to restock the shelves.'); return; }
     const pairs = shelfPairs(), targets = shuffle([0, 1, 2, 3, 4, 5]).slice(0, 5);
     fp.s = { pairs: pairs, targets: targets, step: 0, miss: 0, auto: auto, filled: {} };
     fpEnter('shelve', auto); World.fpShelve(pairs.map(p => p[1])); World.fpHold(pairs[targets[0]][0]); renderFp();
@@ -3673,7 +4274,7 @@ const World = (function () {
   const rush = { on: false, left: 0, next: Date.now() + 600000 };
   function rushBadge() { const el = $('#rush3d'); if (!el) return; el.hidden = !rush.on; if (rush.on) el.textContent = 'RUSH HOUR \u00B7 +50% pay \u00B7 ' + Math.ceil(rush.left) + 's'; }
   function rushTick() {
-    if (!World.ok || focusOn() || learning()) return;
+    if (!World.ok || focusOn() || learning() || labOn()) return;
     if (rush.on) {
       if (!fp.on && view === 'q') rush.left -= 0.25;
       if (rush.left <= 0) { rush.on = false; rush.next = Date.now() + (480 + Math.random() * 240) * 1000; World.setRush(false); toast('Rush hour is over. The line thins out.'); }
@@ -3683,7 +4284,7 @@ const World = (function () {
     rush.on = true; rush.left = 45; World.setRush(true); toast('Rush hour! Patients are pouring in. Everything pays +50% for 45 seconds.'); rushBadge();
   }
   function eventTick() {
-    if (focusOn() || learning() || fp.on || !World.ok || Date.now() < fp.cool) return;
+    if (focusOn() || learning() || labOn() || fp.on || !World.ok || Date.now() < fp.cool) return;
     if (view !== 'q' || !cur || cur.empty || cur.done || phone.ringing || phone.open || S.served < 6 || !S.me.done) return;
     const now = Date.now();
     if (S.served - (S.lastShelve || 0) >= 20) { startShelve(true); return; }
@@ -3805,7 +4406,7 @@ const World = (function () {
       '<div class="tools"><span class="keyhint">The patient at the counter is waiting. Their timer is paused during the call.</span></div></div>' + (c.resHTML || '') + '</article>';
   }
   function phoneTick() {
-    if (focusOn() || learning()) return;
+    if (focusOn() || learning() || labOn()) return;
     const now = Date.now();
     if (phone.ringing) { if (now >= phone.until) missCall(); else updatePhoneBtn(); }
     else if (!phone.open && !fp.on && now >= phone.nextAt && cur && !cur.empty && S.served >= 4) startRing();
@@ -4420,7 +5021,95 @@ const World = (function () {
     if (s) { cur = s; resumeTimers(); view = 'q'; renderPanel(); } else newCard();
   }
 
-  const GAME_VERSION = 43;
+  /* ---------------- compounding pharmacy ---------------- */
+  const LAB_FLAVOR = {
+    comp: ['A prescriber called in a custom compound.', 'The hospital needs this batch made before noon.', 'No commercial product exists, so we make it here.', 'Check the math before anything touches the hood.', 'A pediatric order that needs a special strength.'],
+    pk: ['The ICU wants a dosing recommendation.', 'A pharmacokinetic consult just came in.', 'Level is back. What should we change?', 'The team wants to know when it will reach steady state.', 'Pharmacy rounds: show your work.']
+  };
+  const LAB_NAMES = ['Dr. Kim (oncology)', 'ICU pharmacist', 'Peds nurse Ana', 'Dr. Okoye', 'Hospital pharmacy', 'NICU team', 'Dr. Larsen', 'Clinic RN Mo'];
+  const labKinds = () => { const k = S.labK || {}; const a = ['comp', 'pk'].filter(x => k[x] !== false); return a.length ? a : ['comp', 'pk']; };
+  const LABCALC = { expr: '', notes: '', ans: 0, out: '', open: true };
+  function labResult() {
+    const src = LABCALC.expr.trim();
+    if (!src) return '';
+    try { const v = labEval(src, LABCALC.ans); LABCALC.val = v; return '= ' + fmtS(v) + (Math.abs(v) < 1e-3 || Math.abs(v) >= 1e7 ? '' : ''); }
+    catch (e) { LABCALC.val = null; return 'keep typing…'; }
+  }
+  function labCard() {
+    const q = genLab(labKinds(), S.set.diffs);
+    view = 'q';
+    const opts = shuffle([q.a, ...q.w].map((t, i) => ({ t, ok: i === 0 })));
+    cur = { q, lab: q.lab, wasMissed: false, opts, t0: Date.now(), done: false, hint: false, karen: false, sweaty: false, elder: false, elderStage: 2, ask: '', caller: false,
+      name: pick(LAB_NAMES), flavor: pick(LAB_FLAVOR[q.lab]), seed: Math.floor(Math.random() * 100000), num: S.served + 1, picked: -1, ok: false, resHTML: '', interrupt: null, evt: null, insp: null, review: false };
+    LABCALC.expr = ''; LABCALC.notes = ''; LABCALC.out = '';
+    renderPanel();
+  }
+  function labToolsHTML() {
+    if (!cur || !cur.lab) return '';
+    const btn = (v, t) => `<button type="button" class="lbtn" data-act="lab-ins" data-v="${esc(v)}">${t}</button>`;
+    return `<details class="labtools" ${LABCALC.open ? 'open' : ''}><summary>Bench calculator &amp; scratchpad <small>no timer, take your time</small></summary>
+      <div class="labcalc"><div class="lrow"><input id="labexpr" class="field" type="text" inputmode="text" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="e.g. 100*e^(-0.1*8)" aria-label="Calculator expression" value="${esc(LABCALC.expr)}"><output id="labout" class="lout" aria-live="polite">${esc(labResult())}</output></div>
+        <div class="lkeys">${btn('ln(', 'ln')}${btn('log(', 'log')}${btn('exp(', 'e^x')}${btn('sqrt(', '√')}${btn('^', 'x^y')}${btn('(', '(')}${btn(')', ')')}${btn('/', '÷')}${btn('*', '×')}${btn('ans', 'ans')}${btn('0.693', '0.693')}<button type="button" class="lbtn" data-act="lab-ans">= store</button><button type="button" class="lbtn" data-act="lab-clr">clear</button></div>
+        <textarea id="labnotes" class="field" rows="3" placeholder="Scratchpad: write your set-up here (not graded)." aria-label="Scratchpad">${esc(LABCALC.notes)}</textarea></div></details>`;
+  }
+  function labTick() { const o = $('#labout'); if (o) o.textContent = labResult(); }
+  function syncLab() {
+    const on = !!S.lab, l = $('#lablab'), b = $('#labbtn');
+    if (l) l.textContent = on ? 'Back to the pharmacy' : 'Switch to compounding';
+    if (b) b.setAttribute('aria-pressed', String(on));
+    document.body.classList.toggle('lab', on);
+  }
+  function toggleLab() {
+    // switching is always allowed: quietly close whatever is in the way (no penalties)
+    if (fp && fp.on && !fp.done) { fp.done = true; fpExit(); }
+    if (phone) { if (phone.ringing) { phone.ringing = false; if (World.ok) World.phoneRing(false); updatePhoneBtn(); } if (phone.open || phone.call) { phone.open = false; phone.call = null; scheduleNext(100, 80); } phone.pending = false; }
+    if (rush.on) { rush.on = false; if (World.ok) World.setRush(false); rushBadge(); }
+    visitSaved = null; if (World.ok && World.visitorLeave) World.visitorLeave();
+    S.lab = !S.lab; save();
+    if (World.ok && World.setLab) World.setLab(S.lab);
+    syncLab(); SFX.play('bell');
+    toast(S.lab ? 'Welcome to the compounding pharmacy. No timer. Tap the equipment to play with it.' : 'Back at your pharmacy.');
+    document.body.classList.remove('drawer');
+    newCard();
+  }
+  document.addEventListener('input', (e) => {
+    const t = e.target; if (!t || !t.id) return;
+    if (t.id === 'labexpr') { LABCALC.expr = t.value; labTick(); }
+    else if (t.id === 'labnotes') LABCALC.notes = t.value;
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.target && e.target.id === 'labexpr' && e.key === 'Enter') { e.preventDefault(); labTick(); if (LABCALC.val != null) LABCALC.ans = LABCALC.val; }
+  });
+  document.addEventListener('toggle', (e) => { if (e.target && e.target.classList && e.target.classList.contains('labtools')) LABCALC.open = e.target.open; }, true);
+
+  /* ---------------- secret capsules ---------------- */
+  const CAPS = [
+    { n: 'Ruby capsule', e: '🔴', p: 'Grapefruit juice blocks CYP3A4 in the gut wall, so drugs like simvastatin and felodipine reach higher levels.' },
+    { n: 'Sapphire capsule', e: '🔵', p: 'Steady state takes about 4 to 5 half-lives, no matter how big the dose is.' },
+    { n: 'Emerald capsule', e: '🟢', p: 'Do not crush extended-release or enteric-coated tablets. It dumps the whole dose at once or destroys the coating.' },
+    { n: 'Amber capsule', e: '🟠', p: 'Vitamin K reverses warfarin slowly. 4-factor PCC reverses it fast when bleeding is serious.' },
+    { n: 'Violet capsule', e: '🟣', p: 'Narrow therapeutic index drugs need level monitoring: digoxin, lithium, phenytoin, warfarin, vancomycin.' }
+  ];
+  const capsLeft = () => CAPS.map((c, i) => i).filter(i => !(S.caps || []).includes(i));
+  const capsuleOk = () => !focusOn() && !labOn() && capsLeft().length > 0 && !learning() && view === 'q';
+  function onCapsule(src) {
+    const left = capsLeft(); if (!left.length) return;
+    const id = pick(left); S.caps = (S.caps || []).concat([id]);
+    const n = S.caps.length, bonus = 40 * n * Math.max(1, 1 + S.up.shelf * 0.25), c = CAPS[id];
+    S.cash += bonus; S.earned += bonus;
+    let sub = c.p + ' (+' + money(bonus) + ')';
+    if (n === CAPS.length) { S.hintsLeft = Math.min(hintCap() + 3, S.hintsLeft + 3); S.cash += 500; S.earned += 500; sub += ' All five found: +' + money(500) + ' and 3 hints!'; }
+    save(); SFX.play('unlock');
+    showUnlock({ emoji: c.e, title: 'Secret capsule ' + n + ' of ' + CAPS.length + ' (' + (src === 'plant' ? 'from the plant' : 'from the sky') + ')', sub });
+    renderStats(); if (view === 'awards') renderPanel();
+  }
+  function capsHTML() {
+    const have = S.caps || [];
+    return '<div class="grp capsrow"><b>Secret capsules ' + have.length + '/' + CAPS.length + '</b><div class="capdots">' + CAPS.map((c, i) => '<span class="capdot ' + (have.includes(i) ? 'on' : '') + '" title="' + (have.includes(i) ? esc(c.n) : 'Not found yet') + '">' + (have.includes(i) ? c.e : '?') + '</span>').join('') + '</div>' +
+      (have.length ? '<ul class="note capnotes">' + have.map(i => '<li><b>' + esc(CAPS[i].n) + ':</b> ' + esc(CAPS[i].p) + '</li>').join('') + '</ul>' : '<p class="note">Watch the sky at cloud height, and the plant by the counseling room. One will show up now and then. Tap it!</p>') + '</div>';
+  }
+
+  const GAME_VERSION = 49;
   const b64u = (u8) => { let s = ''; for (let i = 0; i < u8.length; i += 0x8000) s += String.fromCharCode.apply(null, u8.subarray(i, i + 0x8000)); return btoa(s).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); };
   const unb64u = (t) => { const s = atob(t.replace(/-/g, '+').replace(/_/g, '/')), u = new Uint8Array(s.length); for (let i = 0; i < s.length; i++) u[i] = s.charCodeAt(i); return u; };
   const chk = (t) => { let h = 2166136261; for (let i = 0; i < t.length; i++) { h ^= t.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36); };
@@ -4496,6 +5185,11 @@ const World = (function () {
       case 'dev-prior': learnOff(); return startPrior();
       case 'dev-rush': learnOff(); rush.next = 0; if (!rush.on) { rush.on = true; rush.left = 45; World.setRush(true); toast('Rush hour!'); rushBadge(); } return;
       case 'dev-fast': learnOff(); toast('Slow start skipped. Events can happen now.'); return;
+      case 'lab': return toggleLab();
+      case 'lab-ins': { const el = $('#labexpr'); if (!el) return; const p = el.selectionStart == null ? el.value.length : el.selectionStart; el.value = el.value.slice(0, p) + v + el.value.slice(el.selectionEnd == null ? p : el.selectionEnd); const np = p + v.length; el.focus(); try { el.setSelectionRange(np, np); } catch (x) {} LABCALC.expr = el.value; labTick(); return; }
+      case 'lab-ans': labTick(); if (LABCALC.val != null) { LABCALC.ans = LABCALC.val; toast('Stored. Type ans to reuse ' + fmtS(LABCALC.val) + '.'); } return;
+      case 'lab-clr': { LABCALC.expr = ''; const el = $('#labexpr'); if (el) el.value = ''; labTick(); return; }
+      case 'labk': { S.labK = S.labK || {}; const on = ['comp', 'pk'].filter(x => S.labK[x] !== false).length; if (S.labK[v] !== false && on <= 1) { toast('Keep at least one kind on.'); return; } S.labK[v] = S.labK[v] === false; save(); renderPanel(); return; }
       case 'sfx': S.sfx = S.sfx === false; save(); sfxLabel(); SFX.play('ok'); return;
       case 'flash': openView(view === 'flash' ? 'q' : 'flash'); if (view === 'q') { resumeTimers(); renderPanel(); } return;
       case 'share': return makeShare();
@@ -4506,6 +5200,7 @@ const World = (function () {
       case 'fc-flip': if (!fcs.flip) { fcs.flip = true; SFX.play('flip'); renderPanel(); } return;
       case 'fc-got': return fcRate(true);
       case 'fc-no': return fcRate(false);
+      case 'dev-sky': case 'dev-plant': { const ok = World.ok && World.devCapsule(a === 'dev-sky' ? 'sky' : 'plant'); toast(ok ? 'A capsule is out. Tap it.' : 'Could not spawn one.'); return; }
       case 'dev-insp': case 'dev-mumble': case 'dev-driver': { const k = { 'dev-insp': 'inspector', 'dev-mumble': 'mumble', 'dev-driver': 'driver' }[a]; learnOff(); if (!(World.ok && World.devEvent && World.devEvent(k))) forceEvt = k; toast(k === 'mumble' || !World.ok ? 'A visitor is next in line. Use "Test: skip to next patient".' : 'The visitor is walking in. Wait for them behind the counter, then click them.'); return; }
       case 'tour': return showTour();
       case 'shop-save': { const el = $('#shopname2'); const v = el ? el.value.replace(/\s+/g, ' ').trim().slice(0, 24) : ''; if (v) { S.shop = v; save(); syncBrand(); toast('Your pharmacy is now ' + v + '.'); renderPanel(); } return; }
@@ -4531,6 +5226,7 @@ const World = (function () {
       case 'tab-set': flipTab = true; openView('set'); return;
       case 'tab-studies': flipTab = true; openView('studies'); return;
       case 'wkonly': st.wkOnly = !st.wkOnly; break;
+      case 'wktype': { st.wkTypes = st.wkTypes || {}; const on = WK_TYPES.filter(x => st.wkTypes[x[0]] !== false).length; if (st.wkTypes[v] !== false && on <= 1) { toast('Keep at least one kind of weekly question on.'); return; } st.wkTypes[v] = st.wkTypes[v] === false; break; }
       case 'ahead': st.ahead = !st.ahead; break;
       case 'reset-set': S.set = defaults().set; break;
       case 'preview': readDraft(); $('#studyprev').innerHTML = previewHTML(parseStudy(draft.text, 'My notes')); return;
@@ -4618,7 +5314,7 @@ const World = (function () {
   setInterval(() => { if (window.__rxLoading) return; try { localStorage.setItem(SAVE_KEY, JSON.stringify(S)); } catch (e) { /* ignore */ } }, 5000);
 
   { const sc = $('#savecard'); if (sc) sc.innerHTML = saveBoxHTML(); }
-  World.init({ host: $('#stage'), getS: () => S, tagInfo: tagInfo, onBuy: buyUp, onNotes: () => openView('studies'), notesInfo: customCount, karenRoll: karenRoll, sweatyRoll: sweatyRoll, elderRoll: elderRoll, eventRoll: eventRoll, onVisitor: visitClick, onVisitorArrive: visitArrive, onPhone: openPhone, onPolice: policeCome, onFp: fpClick, sign: () => shopName() + '|' + tierName() + ' #' + (S.franchises + 1) });
+  World.init({ host: $('#stage'), getS: () => S, tagInfo: tagInfo, onBuy: buyUp, onNotes: () => openView('studies'), notesInfo: customCount, karenRoll: karenRoll, sweatyRoll: sweatyRoll, elderRoll: elderRoll, eventRoll: eventRoll, onVisitor: visitClick, onVisitorArrive: visitArrive, capsuleOk: capsuleOk, onCapsule: onCapsule, onPhone: openPhone, onPolice: policeCome, onFp: fpClick, sign: () => shopName() + '|' + tierName() + ' #' + (S.franchises + 1) });
   window.__rxDbg = () => ({ fp: fp, S: S, view: view, rush: rush, phoneR: phone.ringing, TOPQ: TOPQ, pool: poolQs, cur: cur });
   if (!World.ok) $('#stage').classList.add('flat');
   else { document.body.classList.add('fx'); World.setPharmacist(meSpec()); World.setAwards(S.awards); World.setCalendar(Math.min(4, S.awards.calW || 0), false, S.awards.calW || 0); }
@@ -4628,12 +5324,14 @@ const World = (function () {
     const menu = $('#menu'), close = menu && menu.querySelector('.menuclose');
     if (menu && close) {
       const hr = document.createElement('hr'); menu.insertBefore(hr, close);
-      [['dev-elder', 'Test: elder patient next'], ['dev-next', 'Test: skip to next patient'], ['dev-bottle', 'Test: bottle check'], ['dev-shelve', 'Test: restock'], ['dev-prior', 'Test: prior auth'], ['dev-rush', 'Test: rush hour'], ['dev-insp', 'Test: health inspector next'], ['dev-mumble', 'Test: mumbling patient next'], ['dev-driver', 'Test: delivery next'], ['dev-fast', 'Test: skip slow start']].forEach(b => {
+      [['dev-elder', 'Test: elder patient next'], ['dev-next', 'Test: skip to next patient'], ['dev-bottle', 'Test: bottle check'], ['dev-shelve', 'Test: restock'], ['dev-prior', 'Test: prior auth'], ['dev-rush', 'Test: rush hour'], ['dev-insp', 'Test: health inspector next'], ['dev-mumble', 'Test: mumbling patient next'], ['dev-driver', 'Test: delivery next'], ['dev-sky', 'Test: sky capsule'], ['dev-plant', 'Test: plant capsule'], ['dev-fast', 'Test: skip slow start']].forEach(b => {
         const el = document.createElement('button'); el.type = 'button'; el.dataset.act = b[0]; el.innerHTML = '<i aria-hidden="true">\u2699</i><span>' + b[1] + '</span>'; menu.insertBefore(el, close);
       });
     }
   }
   checkAwards(true);
+  if (S.lab && World.ok && World.setLab) World.setLab(true);
+  syncLab();
   renderAll();
   newCard();
   if (!S.me.done) openView('create');
