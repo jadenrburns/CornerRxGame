@@ -641,11 +641,11 @@ body.fx.focus .qpanel.min #counter { display: block; }
 .fcrate .btn { flex: 1; min-height: 46px; }
 .sharebox .sharepv { width: 100%; max-width: 360px; border-radius: 14px; border: 1.5px solid var(--line); justify-self: center; }
 .sharebox a.btn { text-decoration: none; display: inline-flex; align-items: center; }
-.rx.evt-inspector { border-color: #475569; } .rx.evt-driver { border-color: #8B5A2B; } .rx.evt-mumble { border-color: var(--amber); }
+.rx.evt-inspector { border-color: #475569; } .rx.evt-driver { border-color: #8B5A2B; }
 .rx.evt .rx-sym { color: var(--amber); }
 
 /* compounding pharmacy */
-body.lab .tags, body.lab .line3d, body.lab .bub3d, body.lab .rush3d, body.lab .phonebtn, body.lab .hint3d, body.lab #restockhud, body.lab .qbar .restock, body.lab #menu [data-act="shelve"], body.lab #menu [data-act="dev-elder"], body.lab #menu [data-act="dev-next"], body.lab #menu [data-act="dev-bottle"], body.lab #menu [data-act="dev-shelve"], body.lab #menu [data-act="dev-prior"], body.lab #menu [data-act="dev-rush"], body.lab #menu [data-act="dev-insp"], body.lab #menu [data-act="dev-mumble"], body.lab #menu [data-act="dev-driver"] { display: none !important; }
+body.lab .tags, body.lab .line3d, body.lab .bub3d, body.lab .rush3d, body.lab .phonebtn, body.lab .hint3d, body.lab #restockhud, body.lab .qbar .restock, body.lab #menu [data-act="shelve"], body.lab #menu [data-act="dev-elder"], body.lab #menu [data-act="dev-next"], body.lab #menu [data-act="dev-bottle"], body.lab #menu [data-act="dev-shelve"], body.lab #menu [data-act="dev-prior"], body.lab #menu [data-act="dev-rush"], body.lab #menu [data-act="dev-insp"], body.lab #menu [data-act="dev-driver"] { display: none !important; }
 .capdots { display: flex; gap: 8px; margin: 6px 0; }
 .capdot { width: 38px; height: 38px; border-radius: 50%; display: grid; place-items: center; border: 2px dashed var(--ink); font-size: 18px; opacity: .55; }
 .capdot.on { border-style: solid; opacity: 1; background: var(--surface); }
@@ -664,6 +664,22 @@ body.lab .tags, body.lab .line3d, body.lab .bub3d, body.lab .rush3d, body.lab .p
 .lbtn { padding: 7px 10px; border-radius: 9px; border: 1.5px solid var(--ink); background: var(--surface); color: var(--ink); font: 700 13px/1 var(--f-mono, monospace); cursor: pointer; min-height: 34px; }
 .lbtn:active { transform: translateY(1px); }
 .labcalc textarea.field { width: 100%; resize: vertical; font: 500 14px/1.35 var(--f-body, inherit); }
+
+/* synapse lab */
+body.syn .tags, body.syn .line3d, body.syn .bub3d, body.syn .rush3d, body.syn .phonebtn, body.syn .hint3d, body.syn #restockhud, body.syn .say3d { display: none !important; }
+.brainTag { position: absolute; left: 0; top: 0; padding: 4px 10px; border-radius: 999px; border: 1.5px solid var(--ink); background: #F8D5E0; color: #4A1D2D; font: 800 12px/1.2 var(--f-body, inherit); cursor: pointer; white-space: nowrap; }
+.synwrap { position: absolute; inset: 0; overflow: hidden; pointer-events: none; z-index: 2; display: none; }
+body.syn .synwrap { display: block; }
+.syn3d { position: absolute; left: 0; top: 0; padding: 2px 8px; border-radius: 999px; background: rgba(20,18,50,.82); color: #fff; border: 1.5px solid rgba(255,255,255,.7); font: 800 11px/1.3 var(--f-body, inherit); white-space: nowrap; }
+.syn3d.struct { background: rgba(255,255,255,.14); border-style: dashed; font-weight: 600; }
+.syn3d.hl { background: #FFD23F; color: #2B1D00; border-color: #fff; }
+.syn .synhead { display: flex; flex-wrap: wrap; align-items: baseline; gap: 8px; }
+.syncard { margin: 10px 0; padding: 10px; border: 1.5px solid var(--ink); border-radius: 12px; background: var(--surface); }
+.synq { font: 800 20px/1.2 var(--f-body, inherit); }
+.syn-opts { display: grid; gap: 6px; margin: 8px 0; }
+.syn .opt.sel { outline: 3px solid var(--amber); }
+.synguide { padding-left: 16px; margin: 6px 0; } .synguide li.sel span { font-size: 13px; }
+.linkbtn { background: none; border: 0; padding: 2px 0; color: inherit; text-align: left; cursor: pointer; font: inherit; text-decoration: underline dotted; }
 </style>
 
 <div class="shell">
@@ -697,6 +713,7 @@ body.lab .tags, body.lab .line3d, body.lab .bub3d, body.lab .rush3d, body.lab .p
     <button type="button" data-act="settings"><i aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5.5A1.5 1.5 0 0 1 5.5 4H12v16H5.5A1.5 1.5 0 0 1 4 18.5zM12 4h6.5A1.5 1.5 0 0 1 20 5.5v13a1.5 1.5 0 0 1-1.5 1.5H12"/></svg></i><span>Study hub</span></button>
     <button type="button" data-act="flash"><i aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="6" width="14" height="12" rx="2"/><path d="M7 3h12a2 2 0 0 1 2 2v10"/></svg></i><span>Flashcards</span></button>
     <button type="button" id="sfxbtn" data-act="sfx" aria-pressed="true"><i aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9zM16 9a4 4 0 0 1 0 6M18.5 6.5a8 8 0 0 1 0 11"/></svg></i><span id="sfxlab">Sound: on</span></button>
+    <button type="button" data-act="syn"><i aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 4a3 3 0 0 0-3 3 3 3 0 0 0-2 5 3 3 0 0 0 2 5 3 3 0 0 0 6 1V4a3 3 0 0 0-3 0zM15 4a3 3 0 0 1 3 3 3 3 0 0 1 2 5 3 3 0 0 1-2 5 3 3 0 0 1-6 1"/></svg></i><span>Synapse lab</span></button>
     <button type="button" id="labbtn" data-act="lab" aria-pressed="false"><i aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 3h6M10 3v6L4.5 19a1.6 1.6 0 0 0 1.4 2.4h12.2a1.6 1.6 0 0 0 1.4-2.4L14 9V3M7.5 15h9"/></svg></i><span id="lablab">Switch to compounding</span></button>
     <button type="button" id="focusbtn" data-act="focus" aria-pressed="false"><i aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="2.5"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg></i><span id="focuslab">Focus mode</span></button>
     <hr>
@@ -1551,7 +1568,7 @@ const World = (function () {
   let hovered = null, hintGone = false;
   const keysDown = { l: false, r: false, u: false, d: false };
   let th = 0.55, ph = 1.05, rad = 19, gth = 0.55, gph = 1.05, grad = 19, baseRad = 19, shake = 0;
-  const TX = 0.5, TY = 1.8, TZ = -0.2;
+  let TX = 0.5, TY = 1.8, TZ = -0.2;
 
   /* ---- builders ---- */
   function mat(color, up, extra) {
@@ -1774,6 +1791,7 @@ const World = (function () {
       const m = new T.Mesh(new T.OctahedronGeometry(0.075, 0), new T.MeshStandardMaterial({ color: 0x8FD8FF, flatShading: true, roughness: 0.2, metalness: 0.1, transparent: true }));
       m.scale.set(0.8, 1.4, 0.8); m.visible = false; m.userData.fx = true; scene.add(m); drops.push({ m, life: 0, vx: 0, vz: 0, vy: 0 });
     }
+    buildBrain(g);
     ug.notes = new T.Group(); ug.notes.position.set(BASE.notes[0], BASE.notes[1], BASE.notes[2]); scene.add(ug.notes); buildNotes();
   }
   function drawSign(txt) {
@@ -2045,7 +2063,7 @@ const World = (function () {
       if (!queue.length) queue.push(spawnCustomer(false, 0));
       assignSlots();
     }
-    cur = queue[0]; cur.mood = null; if (cur.karen) setBubble('!', 'kar'); else setBubble(cur.evt === 'inspector' ? '\u2714' : cur.evt === 'driver' ? '\uD83D\uDCE6' : cur.evt === 'mumble' ? '\u2026' : '?', '');
+    cur = queue[0]; cur.mood = null; if (cur.karen) setBubble('!', 'kar'); else setBubble(cur.evt === 'inspector' ? '\u2714' : cur.evt === 'driver' ? '\uD83D\uDCE6' : '?', '');
     return { seed: cur.seed, karen: !!cur.karen, sweaty: !!cur.sweaty, elder: !!cur.elder, evt: cur.evt || null, caller: !!cur.caller };
   };
   /* hard-of-hearing patient: eyes widen and question marks float off her head */
@@ -2465,8 +2483,8 @@ const World = (function () {
     const r = canvas.getBoundingClientRect();
     ndc.x = ((e.clientX - r.left) / r.width) * 2 - 1; ndc.y = -((e.clientY - r.top) / r.height) * 2 + 1;
     raycaster.setFromCamera(ndc, camera);
-    const hits = raycaster.intersectObjects(labOn ? labItems : [].concat(CLICK.map(i => ug[i]), [staffGroup, custGroup, petG, pharmG], phoneG ? [phoneG] : [], capG ? [capG] : []), true);
-    for (const h of hits) { let o = h.object; while (o) { if (o.userData && (o.userData.up || o.userData.cust || o.userData.pet || o.userData.pharm || o.userData.vis || o.userData.cap || o.userData.lab)) { pickObj = h.object; return o.userData; } o = o.parent; } }
+    const hits = raycaster.intersectObjects(synOn ? synItems : labOn ? labItems : [].concat(CLICK.map(i => ug[i]), [staffGroup, custGroup, petG, pharmG], phoneG ? [phoneG] : [], capG ? [capG] : [], brainG ? [brainG] : []), true);
+    for (const h of hits) { let o = h.object; while (o) { if (o.userData && (o.userData.up || o.userData.cust || o.userData.pet || o.userData.pharm || o.userData.vis || o.userData.cap || o.userData.lab || o.userData.site || o.userData.brain)) { pickObj = h.object; return o.userData; } o = o.parent; } }
     return null;
   }
   function setHover(up) {
@@ -2516,12 +2534,15 @@ const World = (function () {
       if (e.pointerType !== 'mouse' || (drag && drag.on)) return;
       if (fpT) { setFpHover(fpPick(e)); return; }
       const h = pick(e); setHover(h && h.up ? h.up : null);
-      if (!hovered) canvas.style.cursor = h && (h.cust || h.pet || h.pharm || h.vis || h.cap || h.lab) ? 'pointer' : 'default';
+      if (!hovered) canvas.style.cursor = h && (h.cust || h.pet || h.pharm || h.vis || h.cap || h.lab || h.site || h.brain) ? 'pointer' : 'default';
+      if (synOn) synHover = h && h.site ? h.site : null;
     });
     canvas.addEventListener('click', e => {
       if (noClick) { noClick = false; return; }
       if (fpT) { const id = fpPick(e); if (id && B.onFp) B.onFp(id); return; }
       const h = pick(e); dismissHint();
+      if (synOn) { if (h && h.site && B.onSynSite) B.onSynSite(h.site); return; }
+      if (h && h.brain) { if (B.onBrain) B.onBrain(); return; }
       if (h && h.lab) { labClick(h); return; }
       if (h && h.cap) { capClick(); return; }
       if (h && h.vis) { if (B.onVisitor) B.onVisitor(); return; }
@@ -2901,6 +2922,7 @@ const World = (function () {
     requestAnimationFrame(frame);
     const dt = Math.min(0.05, (now - last) / 1000 || 0.016); last = now; time += dt;
     if (labOn) labTick(dt);
+    if (synOn) synTick(dt);
     // customers
     const crowd = queue.concat(leaving, extras, pets, cops, visitor ? [visitor] : []), stf = pharm ? staff.concat([pharm]) : staff;
     queue.forEach((c, i) => {
@@ -2927,8 +2949,8 @@ const World = (function () {
     cops.forEach(c => { if (copJob && copJob.phase === 'in') { const w = moveTo(c, c.speed, dt, crowd); c.phase += dt; walkAnim(c.g, c.phase, w, dt); } });
     ragStep(dt); copStep(dt);
     // staff
-    staffGroup.visible = !labOn && !(fpT || fpK > 0.25);
-    capTick(dt);
+    staffGroup.visible = !labOn && !synOn && !(fpT || fpK > 0.25);
+    capTick(dt); brainTick(dt);
     staff.forEach(s => {
       if (fpT || fpK > 0) return;
       keepOffPharm(s); const w = moveTo(s, 1.7, dt, stf); keepOffPharm(s); s.phase += dt; walkAnim(s.g, s.phase, w, dt);
@@ -3019,7 +3041,8 @@ const World = (function () {
     scene.background = new T.Color(col);
     const c = new T.Color(col), dark = (c.r + c.g + c.b) / 3 < 0.35;
     hemi.intensity = dark ? 0.5 : 0.85; sun.intensity = dark ? 0.55 : 0.8;
-    if (labOn) { scene.background = new T.Color(dark ? '#16282F' : '#E7F0F3'); hemi.intensity = dark ? 0.9 : 1.1; sun.intensity = 0.7; }
+    if (synOn) { scene.background = new T.Color(SYN_BG); hemi.intensity = 0.95; sun.intensity = 0.6; }
+    else if (labOn) { scene.background = new T.Color(dark ? '#16282F' : '#E7F0F3'); hemi.intensity = dark ? 0.9 : 1.1; sun.intensity = 0.7; }
   }
   let insR = 0, insB = 0;
   function resize() {
@@ -3228,7 +3251,7 @@ const World = (function () {
     labT += dt; if (labBoil > 0) labBoil -= dt;
     const sp = labBoil > 0 ? 3 : 1;
     labBub.forEach(b => { b.p += dt * b.sp * sp; if (b.p > 1) b.p -= 1; b.m.position.set(b.x + Math.sin(labT * 3 + b.ph) * 0.03, b.y0 + b.p * b.hh, b.z + Math.cos(labT * 2 + b.ph) * 0.03); });
-    scene.children.forEach(c => { if (c !== labG && c !== hemi && c !== sun && c.visible && !(c.userData && c.userData.fx)) { c.visible = false; if (labHid.indexOf(c) < 0) labHid.push(c); } });
+    scene.children.forEach(c => { if (c !== labG && c !== synG && c !== hemi && c !== sun && c.visible && !(c.userData && c.userData.fx)) { c.visible = false; if (labHid.indexOf(c) < 0) labHid.push(c); } });
     if (labPerson && labPerson.userData.busy <= 0) { labPerson.rotation.y = Math.sin(labT * 0.4) * 0.12; labPerson.position.y = Math.sin(labT * 1.6) * 0.01; }
   }
   api.setLab = function (on) {
@@ -3265,7 +3288,7 @@ const World = (function () {
   }
   function capTick(dt) {
     if (!capG) return;
-    const ok = !labOn && !paused && !fpT && (!B.capsuleOk || B.capsuleOk());
+    const ok = !labOn && !synOn && !paused && !fpT && (!B.capsuleOk || B.capsuleOk());
     if (!capObj) {
       if (!ok) return;
       capT -= dt; plantT -= dt;
@@ -3302,6 +3325,170 @@ const World = (function () {
   }
   api._capClick = function () { const had = !!capObj; capClick(); return had; };
   api.devCapsule = function (kind) { if (!api.ok || !capG) return false; capRemove(); return spawnCap(kind === 'plant' ? 'plant' : 'sky'); };
+  /* ---- synapse lab: a low-poly cross-section of a synapse ---- */
+  let synG = null, synOn = false, synHid = [], synCat = 'epi', synLabelsOn = true, synT = 0, synSaved = null, synWrap = null, synHLids = null, synHover = null, synRetro = 0;
+  const synItems = [], synSite = {}, synVes = [], synParts = [], synLabs = [], synFlow = [];
+  const SX = 0.5, SG = [-2.8, 4.3];
+  const SYN_BG = '#171638';
+  // id: [short label, categories, location, x or angle, kind, colour]
+  const SSITES = {
+    sert: ['SERT', ['ad'], 'pre', -2.8, 'trans', '#B26CF0'], net: ['NET', ['ad'], 'pre', -2.25, 'trans', '#F08A3C'], dat: ['DAT', ['ad'], 'pre', -1.7, 'trans', '#E85D7A'],
+    vgcc: ['VGCC Ca²⁺', ['epi', 'cbd'], 'pre', -0.5, 'chan', '#FFD23F'], a2d: ['α2δ', ['epi'], 'pre', 0.05, 'enz', '#FFF08A'],
+    cb1: ['CB1', ['cbd'], 'pre', 1.7, 'rec', '#7DDC6B'], gat1: ['GAT-1', ['epi'], 'pre', 2.3, 'trans', '#6EE38A'], a2auto: ['α2 auto', ['ad'], 'pre', 2.9, 'rec', '#F2A516'],
+    nav: ['Nav Na⁺', ['epi'], 'dome', 0.55, 'chan', '#F2A516'], cavt: ['T-type Ca²⁺', ['epi'], 'dome', 2.55, 'chan', '#FF7A59'], ent1: ['ENT1', ['cbd'], 'dome', 0.14, 'trans', '#5ED3F3'],
+    mao: ['MAO', ['ad'], 'int', [-1.1, 3.95], 'mito', '#E8905A'], gabat: ['GABA-T', ['epi'], 'int', [0.9, 4.35], 'enz', '#6EE38A'], sv2a: ['SV2A', ['epi'], 'int', [1.9, 3.75], 'sv2a', '#FFC46B'], magl: ['MAGL', ['cbd'], 'int', [1.55, 3.45], 'enz', '#E5B34A'],
+    ht2a: ['5-HT2A', ['ad'], 'post', -2.9, 'rec', '#C28BFF'], ht1a: ['5-HT1A', ['ad', 'cbd'], 'post', -2.3, 'rec', '#9B7BFF'], gabaa: ['GABA-A Cl⁻', ['epi', 'cbd'], 'post', -1.6, 'chan', '#5FE08A'],
+    ampa: ['AMPA', ['epi'], 'post', -0.7, 'chan', '#FFB347'], nmda: ['NMDA', ['ad'], 'post', 0.3, 'chan', '#FF6B6B'], trpv1: ['TRPV1', ['cbd'], 'post', 2.0, 'chan', '#FF8F5A'], gpr55: ['GPR55', ['cbd'], 'post', 2.7, 'rec', '#5ED3F3'],
+    faah: ['FAAH', ['cbd'], 'pint', [-0.9, 1.05], 'enz', '#E5E266'], dagl: ['DAGL', ['cbd'], 'pint', [1.9, 1.15], 'enz', '#C7E86A']
+  };
+  const SDECOR = [['vgcc', 'pre', 0.85], ['ampa', 'post', 1.2], ['gabaa', 'post', 3.1], ['nmda', 'post', -3.3]];
+  const SSTRUCT = [['Presynaptic terminal', SX - 1.0, 5.55], ['Synaptic cleft', SX - 3.6, 2.3], ['Postsynaptic spine', SX, 0.35], ['Vesicle forming', SX + SG[0], SG[1] + 0.75], ['Docked vesicles fuse and release', SX + 0.35, 3.85]];
+  function sMat(g) { g.traverse(o => { if (o.material && o.material.clone) o.material = o.material.clone(); }); }
+  function siteReg(id, g) { g.userData.site = id; g.userData.g = g; const s = synSite[id] = synSite[id] || { groups: [] }; s.groups.push(g); synItems.push(g); const h = new T.Mesh(new T.SphereGeometry(0.5, 6, 5), new T.MeshBasicMaterial({ visible: false })); g.add(h); }
+  function prot(id, kind, col, x, y, rz, s) {
+    const g = new T.Group(); g.position.set(x, y, 0); g.rotation.z = rz || 0; g.scale.set(s || 1, s || 1, s || 1); synG.add(g);
+    const lite = '#FFFFFF';
+    if (kind === 'chan') {
+      cy(g, 0.21, 0.19, 0.3, 10, col, 0, 0.2, 0); cy(g, 0.19, 0.21, 0.3, 10, col, 0, -0.2, 0);
+      const r = add(g, new T.TorusGeometry(0.2, 0.05, 5, 10), lite, 0, 0.36, 0); r.rotation.x = PI / 2;
+      g.userData.ion = add(g, new T.SphereGeometry(0.06, 6, 5), '#FFE066', 0, 0.5, 0); g.userData.ph = Math.random();
+    } else if (kind === 'trans') {
+      cy(g, 0.17, 0.17, 0.66, 10, col, 0, 0, 0); g.userData.flap = bx(g, 0.26, 0.1, 0.06, lite, 0, 0.36, 0.14);
+      g.userData.ion = add(g, new T.SphereGeometry(0.05, 6, 5), '#FFFFFF', 0, 0.5, 0); g.userData.ph = Math.random();
+    } else if (kind === 'rec') {
+      cy(g, 0.1, 0.12, 0.5, 8, col, 0, 0, 0);
+      const a = bx(g, 0.1, 0.46, 0.12, col, -0.15, 0.42, 0); a.rotation.z = 0.5; const b = bx(g, 0.1, 0.46, 0.12, col, 0.15, 0.42, 0); b.rotation.z = -0.5;
+      g.userData.knob = add(g, new T.SphereGeometry(0.07, 6, 5), lite, 0, 0.5, 0);
+    } else if (kind === 'enz') {
+      ico(g, 0.22, col, 0, 0, 0); ico(g, 0.15, col, 0.2, 0.14, 0.1); ico(g, 0.12, lite, -0.15, 0.17, -0.05); g.userData.bob = Math.random() * 6;
+    } else if (kind === 'mito') {
+      const m = ico(g, 0.9, col, 0, 0, 0); m.scale.set(1.3, 0.55, 0.6);
+      for (let i = 0; i < 4; i++) { const c = bx(g, 0.06, 0.4, 0.5, '#B8652E', -0.8 + i * 0.5, 0, 0); c.rotation.z = 0.2; }
+      ico(g, 0.2, '#FFE9B8', -0.25, 0.3, 0.3); ico(g, 0.16, '#FFE9B8', 0.4, 0.28, 0.32); g.userData.bob = Math.random() * 6;
+    } else if (kind === 'sv2a') {
+      ico(g, 0.3, col, 0, 0, 0); cy(g, 0.05, 0.05, 0.3, 6, '#FF7A59', 0.0, 0.34, 0); add(g, new T.SphereGeometry(0.1, 6, 5), '#FF7A59', 0, 0.54, 0); g.userData.bob = Math.random() * 6;
+    }
+    sMat(g); if (id) siteReg(id, g); return g;
+  }
+  function buildSyn() {
+    synG = new T.Group(); synG.visible = false; scene.add(synG);
+    const tm = { transparent: true, opacity: 0.42, side: 2, depthWrite: false };
+    const td = add(synG, new T.SphereGeometry(3.4, 16, 8, 0, 2 * PI, 0, PI / 2), '#D88FD0', SX, 2.95, 0, null, tm); td.scale.set(1, 0.85, 0.75); td.castShadow = false;
+    cy(synG, 3.4, 3.4, 0.22, 26, '#E7A8D8', SX, 2.95, 0).scale.z = 0.75;
+    const pd = add(synG, new T.SphereGeometry(3.6, 16, 8, 0, 2 * PI, PI / 2, PI / 2), '#6BC4C9', SX, 1.65, 0, null, tm); pd.scale.set(1, 0.85, 0.75); pd.castShadow = false;
+    cy(synG, 3.6, 3.6, 0.22, 26, '#8EC5F0', SX, 1.65, 0).scale.z = 0.75;
+    bx(synG, 8, 1.1, 2.6, '#9EE0FF', SX, 2.3, 0, null, { transparent: true, opacity: 0.1, depthWrite: false });
+    [[-4.6, 2.3, -1.2, 0.9], [5.6, 2.8, -1.4, 0.7], [-5.2, 4.8, -2, 0.6], [6, 0.8, -1.2, 0.8]].forEach(q => { const b = ico(synG, q[3], '#3A3A78', q[0], q[1], q[2]); b.scale.set(1.5, 1, 0.8); });
+    // proteins
+    Object.keys(SSITES).forEach(id => {
+      const d = SSITES[id], loc = d[2], v = d[3];
+      if (loc === 'pre') prot(id, d[4], d[5], SX + v, 2.95, PI);
+      else if (loc === 'post') prot(id, d[4], d[5], SX + v, 1.65, 0);
+      else if (loc === 'dome') { const a = v; const X = SX + 3.4 * Math.cos(a), Y = 2.95 + 0.85 * 3.4 * Math.sin(a); prot(id, d[4], d[5], X, Y, a - PI / 2); }
+      else prot(id, d[4], d[5], SX + v[0], v[1], 0, d[4] === 'mito' ? 1 : 1.1);
+    });
+    // a2d sits on the VGCC; ion sources
+    SDECOR.forEach(q => { const d = SSITES[q[0]]; prot(q[0], d[4], d[5], SX + q[2], q[1] === 'pre' ? 2.95 : 1.65, q[1] === 'pre' ? PI : 0); });
+    // vesicles + golgi
+    for (let i = 0; i < 3; i++) { const gb = bx(synG, 1.0 - i * 0.12, 0.14, 0.7, '#B58AE0', SX + SG[0] - 0.1, SG[1] - 0.35 + i * 0.2, 0); gb.rotation.z = -0.12; }
+    for (let i = 0; i < 8; i++) {
+      const m = add(synG, new T.IcosahedronGeometry(0.24, 1), '#FFC46B', SX, 4, 0); m.material = m.material.clone(); m.castShadow = false;
+      const v = { m, st: 'res', t: Math.random() * 3, dur: 2 + Math.random() * 4, slot: -1, rp: [0, 0, 0] }; pickRes(v); m.position.set(SX + v.rp[0], v.rp[1], v.rp[2]); synVes.push(v);
+    }
+    for (let i = 0; i < 44; i++) { const m = add(synG, new T.OctahedronGeometry(0.075, 0), '#FFFFFF', SX, 5, 0); m.material = m.material.clone(); m.visible = false; m.castShadow = false; synParts.push({ m, life: 0, v: [0, 0, 0] }); }
+    // labels
+    synWrap = document.createElement('div'); synWrap.className = 'synwrap'; synWrap.setAttribute('aria-hidden', 'true'); host.appendChild(synWrap);
+    Object.keys(SSITES).forEach(id => { const el = document.createElement('span'); el.className = 'syn3d'; el.textContent = SSITES[id][0]; synWrap.appendChild(el); const g = synSite[id].groups[0]; synLabs.push({ el, id, cats: SSITES[id][1], g, dy: (SSITES[id][2] === 'pre' ? 0.8 : SSITES[id][2] === 'post' ? -0.85 : SSITES[id][2] === 'dome' ? 0.7 : 0.75) + ((synLabs.length % 3) * 0.28) * (SSITES[id][2] === 'post' ? -1 : 1) }); });
+    SSTRUCT.forEach(s => { const el = document.createElement('span'); el.className = 'syn3d struct'; el.textContent = s[0]; synWrap.appendChild(el); synLabs.push({ el, id: null, struct: true, x: s[1], y: s[2], dy: 0 }); });
+  }
+  function pickRes(v) { v.rp = [-1.7 + Math.random() * 3.8, 3.55 + Math.random() * 1.25, (Math.random() - 0.5) * 1.0]; }
+  const synNT = () => (synCat === 'ad' ? 0xC28BFF : synCat === 'cbd' ? 0xFFB347 : (Math.random() < 0.5 ? 0x6EE38A : 0xFFB347));
+  const DOCKS = [-0.4, 0.3, 0.95];
+  const docked = [false, false, false];
+  function spawnPart(x, y, z, vx, vy, vz, col) {
+    for (const p of synParts) { if (p.life > 0) continue; p.life = 2.6; p.m.visible = true; p.m.position.set(x, y, z); p.v = [vx, vy, vz]; p.m.material.color.setHex(col); p.m.scale.set(1, 1, 1); return p; }
+    return null;
+  }
+  function vesStep(v, dt) {
+    v.t += dt; const k = Math.min(1, v.t / v.dur), m = v.m, ease = k * k * (3 - 2 * k);
+    if (v.st === 'bud') { const s = 0.15 + 0.85 * ease; m.scale.set(s, s, s); m.position.set(SX + SG[0] + 0.3 * ease, SG[1] + 0.05 - ease * 0.1, 0); m.material.color.setHex(0x7a6a9a); if (k > 0.5) m.material.color.setHex(synNT()); if (k >= 1) { v.st = 'move'; v.t = 0; v.dur = 2.2; pickRes(v); v.from = [m.position.x, m.position.y, m.position.z]; } }
+    else if (v.st === 'move') { m.position.set(v.from[0] + (SX + v.rp[0] - v.from[0]) * ease, v.from[1] + (v.rp[1] - v.from[1]) * ease, v.from[2] + (v.rp[2] - v.from[2]) * ease); if (k >= 1) { v.st = 'res'; v.t = 0; v.dur = 2 + Math.random() * 6; } }
+    else if (v.st === 'res') {
+      m.position.set(SX + v.rp[0] + Math.sin(synT * 1.3 + v.rp[0]) * 0.12, v.rp[1] + Math.sin(synT * 1.7 + v.rp[2] * 3) * 0.1, v.rp[2]);
+      if (k >= 1) { const f = docked.indexOf(false); if (f >= 0) { docked[f] = true; v.slot = f; v.st = 'dock'; v.t = 0; v.dur = 1.0; v.from = [m.position.x, m.position.y, m.position.z]; } else { v.t = 0; v.dur = 1.5; } }
+    }
+    else if (v.st === 'dock') { const tx = SX + DOCKS[v.slot], ty = 3.3; m.position.set(v.from[0] + (tx - v.from[0]) * ease, v.from[1] + (ty - v.from[1]) * ease, v.from[2] * (1 - ease)); if (k >= 1) { v.st = 'prime'; v.t = 0; v.dur = 1.0 + Math.random() * 2.2; } }
+    else if (v.st === 'prime') { const p = 1 + Math.sin(synT * 10) * 0.05; m.scale.set(p, p, p); if (k >= 1) { v.st = 'fuse'; v.t = 0; v.dur = 0.7; v.rel = false; } }
+    else if (v.st === 'fuse') {
+      m.scale.set(1 + ease * 0.8, 1 - ease * 0.7, 1 + ease * 0.8); m.position.y = 3.3 - ease * 0.12;
+      if (!v.rel && k > 0.15) { v.rel = true; const n = 6; for (let i = 0; i < n; i++) spawnPart(m.position.x + (Math.random() - 0.5) * 0.3, 2.75, (Math.random() - 0.5) * 0.7, (Math.random() - 0.5) * 0.5, -0.9 - Math.random() * 0.5, (Math.random() - 0.5) * 0.3, synNT()); }
+      if (k >= 1) { docked[v.slot] = false; v.slot = -1; v.st = 'recy'; v.t = 0; v.dur = 1.9; v.from = [m.position.x, m.position.y, m.position.z]; }
+    }
+    else if (v.st === 'recy') { const s = 0.9 - 0.65 * ease; m.scale.set(s, s, s); m.position.set(v.from[0] + (SX + SG[0] + 0.3 - v.from[0]) * ease, v.from[1] + (SG[1] - v.from[1]) * ease + Math.sin(ease * PI) * 0.5, 0); if (k >= 1) { v.st = 'bud'; v.t = 0; v.dur = 1.5; } }
+  }
+  function synTick(dt) {
+    synT += dt;
+    scene.children.forEach(c => { if (c !== synG && c !== hemi && c !== sun && c.visible && !(c.userData && c.userData.fx)) { c.visible = false; if (synHid.indexOf(c) < 0) synHid.push(c); } });
+    synVes.forEach(v => vesStep(v, dt));
+    synParts.forEach(p => { if (p.life <= 0) return; p.life -= dt; const m = p.m; m.position.x += p.v[0] * dt; m.position.y += p.v[1] * dt; m.position.z += p.v[2] * dt; m.rotation.x += dt * 3; m.rotation.y += dt * 2;
+      if (p.v[1] < 0 && m.position.y < 1.95) { p.v[1] = 0; p.v[0] *= 0.2; p.life = Math.min(p.life, 0.35); } if (p.v[1] > 0 && m.position.y > 2.65) p.life = Math.min(p.life, 0.3);
+      const s = Math.min(1, p.life * 3); m.scale.set(s, s, s); if (p.life <= 0) m.visible = false; });
+    if (synCat === 'cbd') { synRetro -= dt; if (synRetro <= 0) { synRetro = 2.4; for (let i = 0; i < 3; i++) spawnPart(SX + 1.9 + (Math.random() - 0.5) * 0.4, 1.9, (Math.random() - 0.5) * 0.5, -0.12 - Math.random() * 0.1, 0.8 + Math.random() * 0.3, 0, 0xE8F25A); } }
+    Object.keys(synSite).forEach(id => synSite[id].groups.forEach(g => {
+      const U = g.userData;
+      if (U.ion) { const p = (synT * 0.55 + U.ph) % 1; U.ion.position.y = 0.55 - p * 1.0; U.ion.visible = p > 0.05 && p < 0.95; }
+      if (U.flap) U.flap.rotation.z = Math.sin(synT * 2 + U.ph * 6) * 0.45;
+      if (U.knob) { const s = 1 + Math.sin(synT * 4 + g.position.x) * 0.25; U.knob.scale.set(s, s, s); }
+      if (U.bob !== undefined) g.position.y += Math.sin(synT * 1.4 + U.bob) * dt * 0.08;
+      const on = synHLids && synHLids.indexOf(id) >= 0, hov = synHover === id, e = on ? 0.45 + Math.sin(synT * 6) * 0.3 : hov ? 0.35 : 0, sc = on ? 1.12 + Math.sin(synT * 6) * 0.05 : hov ? 1.08 : 1;
+      if (U.e !== e) { U.e = e; g.traverse(o => { if (o.material && o.material.emissive) { o.material.emissive.setRGB(e, e * 0.85, e * 0.2); } }); }
+      const base = g.userData.s0 || (g.userData.s0 = g.scale.x); g.scale.set(base * sc, base * sc, base * sc);
+    }));
+    synLabs.forEach(L => {
+      let show = synLabelsOn; if (!L.struct) show = show && L.cats.indexOf(synCat) >= 0; else show = true;
+      if (L.struct && synCat !== 'cbd' && L.x === SX + 0.35 && false) show = true;
+      const hl = L.id && synHLids && synHLids.indexOf(L.id) >= 0;
+      L.el.style.display = show || hl ? '' : 'none'; L.el.classList.toggle('hl', !!hl);
+      if (show || hl) { const q = L.struct ? { x: L.x, y: L.y, z: 0.8 } : L.g.position; place(L.el, q.x, q.y + L.dy, L.struct ? 0.8 : 0.9); }
+    });
+  }
+  api.setSyn = function (on) {
+    if (!api.ok || !scene) return false;
+    on = !!on; if (on === synOn) return on;
+    if (on) {
+      if (!synG) buildSyn();
+      synHid = []; scene.children.forEach(c => { if (c !== synG && c !== hemi && c !== sun && c.visible && !(c.userData && c.userData.fx)) { c.visible = false; synHid.push(c); } });
+      synG.visible = true; synOn = true;
+      synSaved = { TX, TY, TZ, gth, gph, grad }; TX = SX; TY = 3.0; TZ = 0; gth = 0; gph = 1.4; grad = baseRad * 0.5;
+      document.body.classList.add('syn');
+    } else {
+      synOn = false; synHid.forEach(c => { c.visible = true; }); synHid = []; if (synG) synG.visible = false;
+      if (synSaved) { TX = synSaved.TX; TY = synSaved.TY; TZ = synSaved.TZ; gth = synSaved.gth; gph = synSaved.gph; grad = synSaved.grad; synSaved = null; }
+      if (synWrap) synLabs.forEach(L => { L.el.style.display = 'none'; });
+      document.body.classList.remove('syn');
+    }
+    applyTheme(); return on;
+  };
+  api.synOn = () => synOn;
+  api.synCat = function (c) { synCat = c; synRetro = 0.3; synParts.forEach(p => { p.life = 0; p.m.visible = false; }); };
+  api.synLabels = function (on) { synLabelsOn = !!on; };
+  api.synHighlight = function (ids) { synHLids = ids && ids.length ? ids : null; };
+  api.synHover = function (id) { synHover = id; };
+  /* the floating brain next to the bookshelf opens the synapse lab */
+  let brainG = null, brainTag = null;
+  function buildBrain(g) {
+    brainG = new T.Group(); brainG.position.set(-7.7, 3.5, -3.9); g.add(brainG);
+    [-1, 1].forEach(sx => { const h = ico(brainG, 0.55, '#F29CB2', sx * 0.3, 0, 0); h.scale.set(1.0, 0.8, 1.25); [[0.1, 0.2, 0.3], [-0.12, 0.25, -0.2], [0.15, 0.1, -0.35]].forEach(b => { const n = ico(brainG, 0.2, '#F7B6C7', sx * (0.3 + b[0] * 0.5), 0.3 + b[1] * 0.2, b[2]); n.scale.set(1, 0.7, 1); }); });
+    const cb = ico(brainG, 0.28, '#D9778F', 0, -0.32, -0.6); cb.scale.set(1.4, 0.7, 0.9); cy(brainG, 0.1, 0.12, 0.45, 6, '#E58BA0', 0, -0.5, -0.25);
+    const hit = new T.Mesh(new T.SphereGeometry(1.3, 6, 5), new T.MeshBasicMaterial({ visible: false })); brainG.add(hit);
+    brainG.userData.brain = true;
+    brainTag = document.createElement('button'); brainTag.type = 'button'; brainTag.className = 'brainTag'; brainTag.textContent = 'Synapse lab'; brainTag.addEventListener('click', e => { e.stopPropagation(); if (B.onBrain) B.onBrain(); }); if (tagsEl) tagsEl.appendChild(brainTag);
+  }
+  function brainTick(dt) {
+    if (!brainG) return;
+    brainG.position.y = 3.5 + Math.sin(time * 1.4) * 0.18; brainG.rotation.y += dt * 0.6; brainG.rotation.z = Math.sin(time * 0.9) * 0.06;
+    if (brainTag) place(brainTag, brainG.position.x, brainG.position.y + 1.1, brainG.position.z);
+  }
   api.init = function (opts) {
     B = opts; host = opts.host;
     if (typeof THREE === 'undefined') return false;
@@ -3655,6 +3842,7 @@ const World = (function () {
   function newCard() {
     qExpand();
     endInterrupt();
+    if (World.ok && World.synOn && World.synOn()) World.setSyn(false);
     if (labOn()) return labCard();
     let info;
     if (World.ok) info = World.nextCustomer();
@@ -4415,7 +4603,7 @@ const World = (function () {
   function renderPanel() {
     const pn = $('#qpanel'); if (!pn) return;
     pn.classList.toggle('karen', !!(cur && cur.karen && !cur.done && view === 'q'));
-    const body = view === 'create' ? createHTML() : view === 'awards' ? awardsHTML() : view === 'phone' ? phoneHTML() : view === 'fp' ? '' : view === 'shift' ? shiftHTML() : view === 'flash' ? fcHTML() : view === 'ref' ? refHTML() : view === 'retire' ? retireHTML() : view === 'set' ? settingsHTML() : view === 'studies' ? studiesHTML() : (cur ? cardHTML() : '');
+    const body = view === 'create' ? createHTML() : view === 'awards' ? awardsHTML() : view === 'phone' ? phoneHTML() : view === 'fp' ? '' : view === 'shift' ? shiftHTML() : view === 'flash' ? fcHTML() : view === 'syn' ? synHTML() : view === 'ref' ? refHTML() : view === 'retire' ? retireHTML() : view === 'set' ? settingsHTML() : view === 'studies' ? studiesHTML() : (cur ? cardHTML() : '');
     $('#counter').innerHTML = qbar() + body;
     const nb = document.querySelector('.nbk');
     if (nb) {
@@ -4464,6 +4652,7 @@ const World = (function () {
   if (document.fonts) { if (document.fonts.ready) document.fonts.ready.then(fitSoon); if (document.fonts.addEventListener) document.fonts.addEventListener('loadingdone', fitSoon); }
   function qExpand() { const p = $('#qpanel'); if (p) { p.classList.remove('min'); const b = $('#qgrab'); if (b) { b.setAttribute('aria-expanded', 'true'); b.firstElementChild.textContent = 'Hide card to look around'; } } }
   function openView(v) {
+    if (view === 'syn' && v !== 'syn') synExit();
     qExpand();
     if (view === 'q' && cur && !cur.done && !cur.empty) cur.pausedAt = Date.now();
     view = v; studyMsg = v === 'studies' ? studyMsg : ''; renderPanel();
@@ -4912,7 +5101,7 @@ const World = (function () {
     if (focusOn() || learning()) return null;
     if (S.evCd > 0) { S.evCd--; return null; }
     if (S.served < 10) return null;
-    if (Math.random() < 0.15) { S.evCd = 8; save(); return pick(['inspector', 'mumble', 'driver']); }
+    if (Math.random() < 0.15) { S.evCd = 8; save(); return pick(['inspector', 'driver']); }
     return null;
   }
   function evQ(o) { o.k = hash('EV|' + o.q); o.c = 'SIG'; BYKEY[o.k] = o; return o; }
@@ -4956,19 +5145,14 @@ const World = (function () {
     if (kind === 'inspector') {
       const pool = LAWQS().filter(q => !carry || carry.used.indexOf(q.k) < 0); return pick(pool.length ? pool : LAWQS());
     }
-    if (kind === 'mumble') {
-      const x = pick(LASA);
-      return evQ({ d: 2, q: '“' + x[0] + '” Which drug does this patient most likely mean?', a: x[1], w: x[2].slice(), e: x[3], t: 'Look-alike / sound-alike' });
-    }
     const x = pick(DELIV), a = DELIV_STORE[x[1]];
     return evQ({ d: 1, q: 'The wholesaler tote holds ' + x[0] + '. Where does it go?', a: a, w: DELIV_STORE.filter((s, i) => i !== x[1]), e: x[2], t: 'Delivery check' });
   }
   const EV_FLAVOR = {
     inspector: ['*clicks pen* Let us look at your records.', '*peers over the clipboard* Routine inspection.', 'State Board. Please answer the following.'],
-    mumble: ['*mumbles and points at the shelves*', 'Um... sorry... my doctor wrote it down but I lost it.', '*scratches head* It is on the tip of my tongue...'],
     driver: ['*sets a tote on the counter* Delivery! Sign here.', 'Wholesaler delivery. Where should I leave these?', '*wheels in a cart* Cold chain items too.']
   };
-  const EV_LABEL = { inspector: 'HEALTH INSPECTOR', mumble: 'MUMBLING PATIENT · who do they mean?', driver: 'WHOLESALER DELIVERY · where does it go?' };
+  const EV_LABEL = { inspector: 'HEALTH INSPECTOR', driver: 'WHOLESALER DELIVERY · where does it go?' };
   function inspVerdict() {
     const i = cur.insp, passed = i.ok >= 2;
     if (passed) { const b = Math.round(60 * (1 + S.up.counsel * 0.1) * franchiseMult()); S.cash += b; S.earned += b; S.rep = Math.min(100, S.rep + 5); S.inspOK = (S.inspOK || 0) + 1; SFX.play('streak'); return '<p class="gift"><b>Inspection passed (' + i.ok + '/' + i.of + ').</b> The inspector leaves a glowing report. +' + money(b) + ' and reputation +5.</p>'; }
@@ -4980,7 +5164,6 @@ const World = (function () {
       if (ok) { S.hintsLeft++; return '<p class="gift"><b>Delivery stored correctly.</b> Dale leaves you a free pharmacist hint.</p>'; }
       const loss = Math.min(S.cash, 40); S.cash -= loss; return '<p class="gift sad"><b>Spoiled stock.</b> ' + (loss ? 'You lose ' + money(loss) + ' of product. ' : '') + 'Check the label and the DEA schedule next time.</p>';
     }
-    if (cur.evt === 'mumble') return ok ? '<p class="gift"><b>You read the room.</b> The patient beams. Confirming name, dose and indication is how you catch look-alike drugs.</p>' : '<p class="gift sad"><b>Wrong drug!</b> Confirm the indication and dose before handing it over.</p>';
     return '';
   }
   /* continue an inspection with the next question, same inspector */
@@ -5060,11 +5243,7 @@ const World = (function () {
     document.body.classList.toggle('lab', on);
   }
   function toggleLab() {
-    // switching is always allowed: quietly close whatever is in the way (no penalties)
-    if (fp && fp.on && !fp.done) { fp.done = true; fpExit(); }
-    if (phone) { if (phone.ringing) { phone.ringing = false; if (World.ok) World.phoneRing(false); updatePhoneBtn(); } if (phone.open || phone.call) { phone.open = false; phone.call = null; scheduleNext(100, 80); } phone.pending = false; }
-    if (rush.on) { rush.on = false; if (World.ok) World.setRush(false); rushBadge(); }
-    visitSaved = null; if (World.ok && World.visitorLeave) World.visitorLeave();
+    clearTasks();
     S.lab = !S.lab; save();
     if (World.ok && World.setLab) World.setLab(S.lab);
     syncLab(); SFX.play('bell');
@@ -5111,7 +5290,140 @@ const World = (function () {
       (have.length ? '<ul class="note capnotes">' + have.map(i => '<li><b>' + esc(CAPS[i].n) + ':</b> ' + esc(CAPS[i].p) + '</li>').join('') + '</ul>' : '<p class="note">Watch the sky at cloud height, and the plant by the counseling room. One will show up now and then. Tap it!</p>') + '</div>';
   }
 
-  const GAME_VERSION = 50;
+  /* ---------------- synapse lab ---------------- */
+  const SYN_CATS = [['epi', 'Epilepsy targets'], ['ad', 'Antidepressants + NMDA'], ['cbd', 'CBD pathways']];
+  const SYN_SITES = {
+    nav: { n: 'Voltage-gated Na⁺ channel', c: ['epi'], i: 'Fires the action potential down the axon. Fast, repetitive firing is what many seizures need.' },
+    cavt: { n: 'T-type Ca²⁺ channel', c: ['epi'], i: 'Low-threshold channel that drives the 3 Hz thalamic rhythm of absence seizures.' },
+    vgcc: { n: 'Voltage-gated Ca²⁺ channel (P/Q, N)', c: ['epi', 'cbd'], i: 'Ca²⁺ entry here triggers vesicles to fuse and release transmitter.' },
+    a2d: { n: 'α2δ subunit of the Ca²⁺ channel', c: ['epi'], i: 'Auxiliary subunit that helps channels reach the membrane. Gabapentinoids bind it and cut Ca²⁺-driven release.' },
+    gat1: { n: 'GAT-1 (GABA transporter)', c: ['epi'], i: 'Takes GABA back up from the cleft, ending its signal.' },
+    gabat: { n: 'GABA transaminase (GABA-T)', c: ['epi'], i: 'Enzyme that breaks GABA down inside the neuron and glia.' },
+    sv2a: { n: 'SV2A (synaptic vesicle protein 2A)', c: ['epi'], i: 'Vesicle protein that helps vesicles get ready for release.' },
+    gabaa: { n: 'GABA-A receptor (Cl⁻ channel)', c: ['epi', 'cbd'], i: 'Ligand-gated Cl⁻ channel. More Cl⁻ in makes the neuron less likely to fire.' },
+    ampa: { n: 'AMPA receptor', c: ['epi'], i: 'Fast glutamate-gated Na⁺ channel that carries most excitatory current.' },
+    sert: { n: 'SERT (serotonin transporter)', c: ['ad'], i: 'Pumps serotonin back into the presynaptic neuron.' },
+    net: { n: 'NET (norepinephrine transporter)', c: ['ad'], i: 'Pumps norepinephrine back into the presynaptic neuron.' },
+    dat: { n: 'DAT (dopamine transporter)', c: ['ad'], i: 'Pumps dopamine back into the presynaptic neuron.' },
+    mao: { n: 'MAO (monoamine oxidase, on mitochondria)', c: ['ad'], i: 'Breaks down serotonin, norepinephrine and dopamine inside the terminal.' },
+    a2auto: { n: 'α2 autoreceptor (presynaptic)', c: ['ad'], i: 'Feedback brake: norepinephrine here reduces further NE release.' },
+    ht2a: { n: '5-HT2A receptor (postsynaptic)', c: ['ad'], i: 'Excitatory Gq receptor linked to anxiety, insomnia and sexual side effects.' },
+    ht1a: { n: '5-HT1A receptor', c: ['ad', 'cbd'], i: 'Gi receptor. Activation calms firing and is linked to anxiolytic effects.' },
+    nmda: { n: 'NMDA receptor (postsynaptic)', c: ['ad'], i: 'Glutamate-gated Ca²⁺ channel, blocked by Mg²⁺ at rest. Ketamine plugs the pore.' },
+    cb1: { n: 'CB1 receptor (presynaptic, Gi/o)', c: ['cbd'], i: 'Retrograde endocannabinoids (2-AG, anandamide) bind here and reduce transmitter release.' },
+    faah: { n: 'FAAH (breaks down anandamide)', c: ['cbd'], i: 'Postsynaptic enzyme that clears anandamide.' },
+    magl: { n: 'MAGL (breaks down 2-AG)', c: ['cbd'], i: 'Presynaptic enzyme that clears 2-AG.' },
+    dagl: { n: 'DAGL (makes 2-AG)', c: ['cbd'], i: 'Postsynaptic enzyme that makes 2-AG on demand. It travels backward across the cleft to CB1.' },
+    trpv1: { n: 'TRPV1 channel', c: ['cbd'], i: 'Ion channel for heat and capsaicin. Also modulated by cannabinoids.' },
+    gpr55: { n: 'GPR55 receptor', c: ['cbd'], i: 'Orphan GPCR that can increase excitability. CBD is thought to block it.' },
+    ent1: { n: 'ENT1 (adenosine transporter)', c: ['cbd'], i: 'Clears adenosine from the cleft. Less uptake means more adenosine, which is calming.' }
+  };
+  const SD = (cat, name, ctx, act, sites, note) => ({ cat, name, ctx, act, sites, note });
+  const SYN_DRUGS = [
+    SD('epi', 'Phenytoin', '', 'inh', ['nav'], 'Blocks Na⁺ channels in the inactivated state, so fast repetitive firing stops.'),
+    SD('epi', 'Carbamazepine', '', 'inh', ['nav'], 'Use-dependent Na⁺ channel block.'),
+    SD('epi', 'Lamotrigine', '', 'inh', ['nav'], 'Na⁺ channel block, which also reduces glutamate release.'),
+    SD('epi', 'Lacosamide', '', 'inh', ['nav'], 'Enhances slow inactivation of Na⁺ channels.'),
+    SD('epi', 'Ethosuximide', 'absence seizures', 'inh', ['cavt'], 'Blocks T-type Ca²⁺ channels in thalamic neurons.'),
+    SD('epi', 'Gabapentin', '', 'inh', ['a2d'], 'Binds the α2δ subunit and lowers Ca²⁺-dependent release. It does not act on GABA receptors.'),
+    SD('epi', 'Pregabalin', '', 'inh', ['a2d'], 'Same target as gabapentin, with better absorption.'),
+    SD('epi', 'Levetiracetam', '', 'inh', ['sv2a'], 'Binds SV2A and reduces neurotransmitter release.'),
+    SD('epi', 'Tiagabine', '', 'inh', ['gat1'], 'Blocks GABA reuptake, so more GABA stays in the cleft.'),
+    SD('epi', 'Vigabatrin', '', 'inh', ['gabat'], 'Irreversible GABA-T inhibitor, which raises GABA. Watch for visual field loss.'),
+    SD('epi', 'Clonazepam', '', 'act', ['gabaa'], 'Positive allosteric modulator: more frequent Cl⁻ channel opening.'),
+    SD('epi', 'Diazepam', '', 'act', ['gabaa'], 'Benzodiazepine: increases GABA-A channel opening frequency.'),
+    SD('epi', 'Phenobarbital', '', 'act', ['gabaa'], 'Barbiturate: lengthens GABA-A channel opening time.'),
+    SD('epi', 'Perampanel', '', 'inh', ['ampa'], 'Non-competitive AMPA receptor antagonist.'),
+    SD('ad', 'Fluoxetine', 'SSRI', 'inh', ['sert'], 'Blocks serotonin reuptake. Long half-life, with an active metabolite.'),
+    SD('ad', 'Sertraline', 'SSRI', 'inh', ['sert'], 'Blocks serotonin reuptake.'),
+    SD('ad', 'Escitalopram', 'SSRI', 'inh', ['sert'], 'The S-enantiomer of citalopram, very selective for SERT.'),
+    SD('ad', 'Venlafaxine', 'SNRI', 'inh', ['sert', 'net'], 'Blocks SERT at low doses and NET at higher doses.'),
+    SD('ad', 'Duloxetine', 'SNRI', 'inh', ['sert', 'net'], 'Dual reuptake block. Also used for neuropathic pain.'),
+    SD('ad', 'Atomoxetine', 'ADHD, non-stimulant', 'inh', ['net'], 'Selective norepinephrine reuptake inhibitor.'),
+    SD('ad', 'Nortriptyline', 'TCA', 'inh', ['net', 'sert'], 'Secondary-amine TCA that favors NET.'),
+    SD('ad', 'Amitriptyline', 'TCA', 'inh', ['sert', 'net'], 'Tertiary-amine TCA that blocks SERT and NET.'),
+    SD('ad', 'Bupropion', 'NDRI', 'inh', ['dat', 'net'], 'Blocks dopamine and norepinephrine reuptake.'),
+    SD('ad', 'Phenelzine', 'MAOI', 'inh', ['mao'], 'Irreversible MAO inhibitor. Needs a tyramine-restricted diet.'),
+    SD('ad', 'Tranylcypromine', 'MAOI', 'inh', ['mao'], 'Irreversible MAO inhibitor. Hypertensive crisis risk with tyramine.'),
+    SD('ad', 'Mirtazapine', '', 'inh', ['a2auto'], 'Blocks α2 autoreceptors, which releases the brake on NE and 5-HT release.'),
+    SD('ad', 'Trazodone', '', 'inh', ['ht2a'], 'Blocks 5-HT2A. Often used at low doses for sleep.'),
+    SD('ad', 'Buspirone', 'anxiety', 'act', ['ht1a'], 'Partial agonist at 5-HT1A.'),
+    SD('ad', 'Ketamine', 'rapid-acting', 'inh', ['nmda'], 'Non-competitive NMDA pore blocker.'),
+    SD('ad', 'Esketamine (Spravato)', 'nasal spray', 'inh', ['nmda'], 'The S-enantiomer of ketamine, an NMDA antagonist.'),
+    SD('ad', 'Memantine', 'Alzheimer disease', 'inh', ['nmda'], 'Low-affinity uncompetitive NMDA channel blocker.'),
+    SD('ad', 'Dextromethorphan', 'in Auvelity with bupropion', 'inh', ['nmda'], 'NMDA antagonist (also a sigma-1 agonist).'),
+    SD('cbd', 'Dronabinol (THC)', '', 'act', ['cb1'], 'CB1 agonist.'),
+    SD('cbd', 'Nabilone', '', 'act', ['cb1'], 'Synthetic THC analog, a CB1 agonist.'),
+    SD('cbd', 'Rimonabant', 'withdrawn', 'inh', ['cb1'], 'CB1 inverse agonist, withdrawn for depression and suicidality.'),
+    SD('cbd', 'Cannabidiol', 'negative allosteric modulator', 'inh', ['cb1'], 'CBD weakly modulates CB1 and lowers THC effects.'),
+    SD('cbd', 'Cannabidiol', 'raises adenosine levels', 'inh', ['ent1'], 'Blocks ENT1, so adenosine builds up in the cleft.'),
+    SD('cbd', 'Cannabidiol', 'raises anandamide', 'inh', ['faah'], 'Slows anandamide breakdown by FAAH (and its transport).'),
+    SD('cbd', 'Cannabidiol', 'calming effect, serotonin pathway', 'act', ['ht1a'], 'Agonist activity at 5-HT1A is linked to anxiolytic effects.'),
+    SD('cbd', 'Cannabidiol', 'heat and pain channel', 'act', ['trpv1'], 'CBD activates, then desensitizes, TRPV1.'),
+    SD('cbd', 'Cannabidiol', 'orphan receptor linked to excitability', 'inh', ['gpr55'], 'CBD is a GPR55 antagonist.'),
+    SD('cbd', 'Cannabidiol', 'also enhances inhibition (with clobazam)', 'act', ['gabaa'], 'Positive allosteric modulation of GABA-A.'),
+    SD('cbd', 'Capsaicin', 'chili pepper', 'act', ['trpv1'], 'TRPV1 agonist, which gives heat and then desensitization.'),
+    SD('cbd', 'URB597', 'experimental', 'inh', ['faah'], 'FAAH inhibitor that raises anandamide.'),
+    SD('cbd', 'JZL184', 'experimental', 'inh', ['magl'], 'MAGL inhibitor that raises 2-AG.')
+  ];
+  const SYN = { cat: 'epi', labels: true, q: null, last: '', sel: null };
+  function synSitesFor(cat) { return Object.keys(SYN_SITES).filter(id => SYN_SITES[id].c.indexOf(cat) >= 0); }
+  function synNewQ() {
+    const pool = SYN_DRUGS.filter(d => d.cat === SYN.cat && (d.name + d.ctx) !== SYN.last), d = pick(pool.length ? pool : SYN_DRUGS.filter(x => x.cat === SYN.cat));
+    SYN.last = d.name + d.ctx;
+    const others = shuffle(synSitesFor(SYN.cat).filter(id => d.sites.indexOf(id) < 0)).slice(0, 3);
+    SYN.q = { d, act: null, site: null, done: false, opts: shuffle([d.sites[0]].concat(others)) };
+    if (World.ok && World.synHighlight) World.synHighlight(null);
+  }
+  function synSet() {
+    if (World.ok && World.synCat) { World.synCat(SYN.cat); World.synLabels(SYN.labels); }
+  }
+  function clearTasks() {
+    if (fp && fp.on && !fp.done) { fp.done = true; fpExit(); }
+    if (phone) { if (phone.ringing) { phone.ringing = false; if (World.ok) World.phoneRing(false); updatePhoneBtn(); } if (phone.open || phone.call) { phone.open = false; phone.call = null; scheduleNext(100, 80); } phone.pending = false; }
+    if (rush.on) { rush.on = false; if (World.ok) World.setRush(false); rushBadge(); }
+    visitSaved = null; if (World.ok && World.visitorLeave) World.visitorLeave();
+  }
+  function synEnter() {
+    if (view === 'syn') return;
+    clearTasks(); document.body.classList.remove('drawer');
+    openView('syn');
+    if (World.ok && !focusOn() && World.setSyn) World.setSyn(true);
+    if (!SYN.q) synNewQ();
+    synSet(); renderPanel(); SFX.play('bell');
+  }
+  function synExit() { if (World.ok && World.synOn && World.synOn()) World.setSyn(false); }
+  function onSynSite(id) {
+    const q = SYN.q;
+    if (q && q.act && !q.done && synSitesFor(SYN.cat).indexOf(id) >= 0) return synAnswerSite(id);
+    SYN.sel = id; if (World.ok) World.synHighlight([id]); if (view === 'syn') renderPanel();
+  }
+  function synAnswerAct(v) { const q = SYN.q; if (!q || q.act || q.done) return; q.act = v; renderPanel(); }
+  function synAnswerSite(id) {
+    const q = SYN.q; if (!q || !q.act || q.done) return;
+    q.site = id; q.done = true; q.actOK = q.act === q.d.act; q.siteOK = q.d.sites.indexOf(id) >= 0; q.ok = q.actOK && q.siteOK;
+    S.synN = (S.synN || 0) + 1;
+    if (q.ok) { S.synOK = (S.synOK || 0) + 1; S.synStreak = (S.synStreak || 0) + 1; q.pay = Math.round(14 * (1 + 0.25 * S.up.shelf) * (1 + Math.min(S.synStreak, 10) * 0.05) * franchiseMult()); S.cash += q.pay; S.earned += q.pay; SFX.play('ok'); SFX.play('coin'); } else { S.synStreak = 0; SFX.play('bad'); }
+    save(); if (World.ok) World.synHighlight(q.d.sites); renderStats(); renderPanel();
+  }
+  function synHTML() {
+    const q = SYN.q || (synNewQ(), SYN.q), cat = SYN.cat;
+    const tabs = SYN_CATS.map(c => `<button type="button" class="chip" data-act="syn-cat" data-v="${c[0]}" aria-pressed="${cat === c[0]}">${c[1]}</button>`).join('');
+    const lab = `<button type="button" class="chip" data-act="syn-labels" aria-pressed="${SYN.labels}">Labels ${SYN.labels ? 'on' : 'off'}</button>`;
+    const actB = [['inh', 'Inhibits / blocks'], ['act', 'Activates / enhances']].map(a => { let c = ''; if (q.done) { if (a[0] === q.d.act) c = 'ok'; else if (a[0] === q.act) c = 'bad'; } else if (a[0] === q.act) c = 'sel'; return `<button type="button" class="opt ${c}" data-act="syn-act" data-v="${a[0]}" ${q.act || q.done ? 'disabled' : ''}><span>${a[1]}</span></button>`; }).join('');
+    const siteB = q.act ? q.opts.map((id, i) => { let c = ''; if (q.done) { if (q.d.sites.indexOf(id) >= 0) c = 'ok'; else if (id === q.site) c = 'bad'; } return `<button type="button" class="opt ${c}" data-act="syn-site" data-v="${id}" ${q.done ? 'disabled' : ''}><kbd>${'ABCD'[i]}</kbd><span>${esc(SYN_SITES[id].n)}</span></button>`; }).join('') : '';
+    const res = q.done ? `<div class="result ${q.ok ? 'good' : 'fail'}"><h3>${q.ok ? 'Correct!' : q.actOK ? 'Right action, wrong site.' : q.siteOK ? 'Right site, wrong action.' : 'Not quite.'}</h3><p><b>${esc(q.d.name)}</b> ${q.d.act === 'inh' ? 'inhibits / blocks' : 'activates / enhances'} <b>${esc(SYN_SITES[q.d.sites[0]].n)}</b>${q.d.sites.length > 1 ? ' (also ' + esc(q.d.sites.slice(1).map(s => SYN_SITES[s].n).join(', ')) + ')' : ''}.</p><p class="why">${esc(q.d.note)}</p>${q.ok ? '<div class="pay"><span class="big">+' + money(q.pay) + '</span><span>streak ' + S.synStreak + '</span></div>' : ''}<div><button class="btn go" type="button" data-act="syn-next">Next drug</button></div></div>` : '';
+    const guide = synSitesFor(cat).map(id => `<li class="${SYN.sel === id ? 'sel' : ''}"><button type="button" class="linkbtn" data-act="syn-info" data-v="${id}"><b>${esc(SYN_SITES[id].n)}</b></button>${SYN.sel === id ? '<br><span>' + esc(SYN_SITES[id].i) + '</span>' : ''}</li>`).join('');
+    return `<div class="pane syn"><div class="synhead"><h3>Synapse lab</h3><span class="note">${S.synN ? 'Solved ' + (S.synOK || 0) + ' of ' + S.synN : 'Tap the glowing parts of the synapse, or play the drug quiz.'}</span></div>
+      <div class="chips">${tabs}${lab}</div>
+      <div class="syncard"><div class="synq"><b>${esc(q.d.name)}</b>${q.d.ctx ? '<small> (' + esc(q.d.ctx) + ')</small>' : ''}</div>
+        <p class="note">1. Does it inhibit or activate? ${q.act ? '2. Choose the site of action (or tap it in the 3D view).' : ''}</p>
+        <div class="opts syn-opts">${actB}</div>${siteB ? '<div class="opts syn-opts">' + siteB + '</div>' : ''}${res}</div>
+      <details class="grp"><summary><b>Site guide</b> <small>tap a name to see what it does</small></summary><ul class="synguide">${guide}</ul></details>
+      <div class="btnrow"><button type="button" class="btn go" data-act="back">Back to the pharmacy</button></div></div>`;
+  }
+
+  const GAME_VERSION = 51;
   const b64u = (u8) => { let s = ''; for (let i = 0; i < u8.length; i += 0x8000) s += String.fromCharCode.apply(null, u8.subarray(i, i + 0x8000)); return btoa(s).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); };
   const unb64u = (t) => { const s = atob(t.replace(/-/g, '+').replace(/_/g, '/')), u = new Uint8Array(s.length); for (let i = 0; i < s.length; i++) u[i] = s.charCodeAt(i); return u; };
   const chk = (t) => { let h = 2166136261; for (let i = 0; i < t.length; i++) { h ^= t.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36); };
@@ -5170,7 +5482,7 @@ const World = (function () {
       case 'awards': openView(view === 'awards' ? 'q' : 'awards'); if (view === 'q') { resumeTimers(); renderPanel(); } return;
       case 'me': { readShop(); const k = t.dataset.k, v = t.dataset.v; S.me[k] = (k === 'hair' || k === 'hairColor' || k === 'skin' || k === 'scrub') ? +v : v; save(); World.setPharmacist(meSpec()); renderPanel(); return; }
       case 'me-done': readShop(); S.me.done = true; save(); syncBrand(); backToQ(); maybeTour(); return;
-      case 'back': if (view === 'shift') return shiftNext(false); readDraft(); const wasC = view === 'create' && !S.me.done; if (view === 'create') readShop(); if (wasC) { S.me.done = true; save(); } backToQ(); if (wasC) maybeTour(); return;
+      case 'back': if (view === 'syn') synExit(); if (view === 'shift') return shiftNext(false); readDraft(); const wasC = view === 'create' && !S.me.done; if (view === 'create') readShop(); if (wasC) { S.me.done = true; save(); } backToQ(); if (wasC) maybeTour(); return;
       case 'phone': return openPhone();
       case 'menu': document.body.classList.remove('drawer'); document.body.classList.toggle('menuopen'); return;
       case 'sheet-ups': case 'sheet-prog': {
@@ -5188,6 +5500,13 @@ const World = (function () {
       case 'dev-rush': learnOff(); rush.next = 0; if (!rush.on) { rush.on = true; rush.left = 45; World.setRush(true); toast('Rush hour!'); rushBadge(); } return;
       case 'dev-fast': learnOff(); toast('Slow start skipped. Events can happen now.'); return;
       case 'lab': return toggleLab();
+      case 'syn': return synEnter();
+      case 'syn-cat': SYN.cat = v; SYN.q = null; SYN.sel = null; synNewQ(); synSet(); renderPanel(); return;
+      case 'syn-labels': SYN.labels = !SYN.labels; synSet(); renderPanel(); return;
+      case 'syn-act': return synAnswerAct(v);
+      case 'syn-site': return synAnswerSite(v);
+      case 'syn-next': synNewQ(); renderPanel(); return;
+      case 'syn-info': SYN.sel = SYN.sel === v ? null : v; if (World.ok) World.synHighlight(SYN.sel ? [SYN.sel] : null); renderPanel(); return;
       case 'lab-ins': { const el = $('#labexpr'); if (!el) return; const p = el.selectionStart == null ? el.value.length : el.selectionStart; el.value = el.value.slice(0, p) + v + el.value.slice(el.selectionEnd == null ? p : el.selectionEnd); const np = p + v.length; el.focus(); try { el.setSelectionRange(np, np); } catch (x) {} LABCALC.expr = el.value; labTick(); return; }
       case 'lab-ans': labTick(); if (LABCALC.val != null) { LABCALC.ans = LABCALC.val; toast('Stored. Type ans to reuse ' + fmtS(LABCALC.val) + '.'); } return;
       case 'lab-clr': { LABCALC.expr = ''; const el = $('#labexpr'); if (el) el.value = ''; labTick(); return; }
@@ -5203,7 +5522,7 @@ const World = (function () {
       case 'fc-got': return fcRate(true);
       case 'fc-no': return fcRate(false);
       case 'dev-sky': case 'dev-plant': { const ok = World.ok && World.devCapsule(a === 'dev-sky' ? 'sky' : 'plant'); toast(ok ? 'A capsule is out. Tap it.' : 'Could not spawn one.'); return; }
-      case 'dev-insp': case 'dev-mumble': case 'dev-driver': { const k = { 'dev-insp': 'inspector', 'dev-mumble': 'mumble', 'dev-driver': 'driver' }[a]; learnOff(); if (!(World.ok && World.devEvent && World.devEvent(k))) forceEvt = k; toast(k === 'mumble' || !World.ok ? 'A visitor is next in line. Use "Test: skip to next patient".' : 'The visitor is walking in. Wait for them behind the counter, then click them.'); return; }
+      case 'dev-insp': case 'dev-driver': { const k = { 'dev-insp': 'inspector', 'dev-driver': 'driver' }[a]; learnOff(); if (!(World.ok && World.devEvent && World.devEvent(k))) forceEvt = k; toast(!World.ok ? 'A visitor is next in line. Use "Test: skip to next patient".' : 'The visitor is walking in. Wait for them behind the counter, then click them.'); return; }
       case 'tour': return showTour();
       case 'shop-save': { const el = $('#shopname2'); const v = el ? el.value.replace(/\s+/g, ' ').trim().slice(0, 24) : ''; if (v) { S.shop = v; save(); syncBrand(); toast('Your pharmacy is now ' + v + '.'); renderPanel(); } return; }
       case 'tour-next': if (tourStep >= TOUR.length - 1) endTour(); else { tourStep++; drawTour(); } return;
@@ -5316,7 +5635,7 @@ const World = (function () {
   setInterval(() => { if (window.__rxLoading) return; try { localStorage.setItem(SAVE_KEY, JSON.stringify(S)); } catch (e) { /* ignore */ } }, 5000);
 
   { const sc = $('#savecard'); if (sc) sc.innerHTML = saveBoxHTML(); }
-  World.init({ host: $('#stage'), getS: () => S, tagInfo: tagInfo, onBuy: buyUp, onNotes: () => openView('studies'), notesInfo: customCount, karenRoll: karenRoll, sweatyRoll: sweatyRoll, elderRoll: elderRoll, eventRoll: eventRoll, onVisitor: visitClick, onVisitorArrive: visitArrive, capsuleOk: capsuleOk, onCapsule: onCapsule, onPhone: openPhone, onPolice: policeCome, onFp: fpClick, sign: () => shopName() + '|' + tierName() + ' #' + (S.franchises + 1) });
+  World.init({ host: $('#stage'), getS: () => S, tagInfo: tagInfo, onBuy: buyUp, onNotes: () => openView('studies'), notesInfo: customCount, karenRoll: karenRoll, sweatyRoll: sweatyRoll, elderRoll: elderRoll, eventRoll: eventRoll, onVisitor: visitClick, onVisitorArrive: visitArrive, capsuleOk: capsuleOk, onCapsule: onCapsule, onBrain: synEnter, onSynSite: onSynSite, onPhone: openPhone, onPolice: policeCome, onFp: fpClick, sign: () => shopName() + '|' + tierName() + ' #' + (S.franchises + 1) });
   window.__rxDbg = () => ({ fp: fp, S: S, view: view, rush: rush, phoneR: phone.ringing, TOPQ: TOPQ, pool: poolQs, cur: cur });
   if (!World.ok) $('#stage').classList.add('flat');
   else { document.body.classList.add('fx'); World.setPharmacist(meSpec()); World.setAwards(S.awards); World.setCalendar(Math.min(4, S.awards.calW || 0), false, S.awards.calW || 0); }
@@ -5326,7 +5645,7 @@ const World = (function () {
     const menu = $('#menu'), close = menu && menu.querySelector('.menuclose');
     if (menu && close) {
       const hr = document.createElement('hr'); menu.insertBefore(hr, close);
-      [['dev-elder', 'Test: elder patient next'], ['dev-next', 'Test: skip to next patient'], ['dev-bottle', 'Test: bottle check'], ['dev-shelve', 'Test: restock'], ['dev-prior', 'Test: prior auth'], ['dev-rush', 'Test: rush hour'], ['dev-insp', 'Test: health inspector next'], ['dev-mumble', 'Test: mumbling patient next'], ['dev-driver', 'Test: delivery next'], ['dev-sky', 'Test: sky capsule'], ['dev-plant', 'Test: plant capsule'], ['dev-fast', 'Test: skip slow start']].forEach(b => {
+      [['dev-elder', 'Test: elder patient next'], ['dev-next', 'Test: skip to next patient'], ['dev-bottle', 'Test: bottle check'], ['dev-shelve', 'Test: restock'], ['dev-prior', 'Test: prior auth'], ['dev-rush', 'Test: rush hour'], ['dev-insp', 'Test: health inspector next'], ['dev-driver', 'Test: delivery next'], ['dev-sky', 'Test: sky capsule'], ['dev-plant', 'Test: plant capsule'], ['dev-fast', 'Test: skip slow start']].forEach(b => {
         const el = document.createElement('button'); el.type = 'button'; el.dataset.act = b[0]; el.innerHTML = '<i aria-hidden="true">\u2699</i><span>' + b[1] + '</span>'; menu.insertBefore(el, close);
       });
     }
