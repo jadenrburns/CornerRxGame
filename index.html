@@ -3252,14 +3252,14 @@ const World = (function () {
     const g = new T.Group(), c = CAPCOL[ci % 5], gl = { emissive: new T.Color(0xFFFFFF), emissiveIntensity: 0.18 };
     const a = cy(g, 0.26, 0.26, 0.5, 10, c[0], -0.25, 0, 0, null, gl); a.rotation.z = PI / 2; const b = cy(g, 0.26, 0.26, 0.5, 10, c[1], 0.25, 0, 0, null, gl); b.rotation.z = PI / 2;
     add(g, new T.SphereGeometry(0.26, 10, 8), c[0], -0.5, 0, 0, null, gl); add(g, new T.SphereGeometry(0.26, 10, 8), c[1], 0.5, 0, 0, null, gl);
-    const hit = new T.Mesh(new T.SphereGeometry(1.15, 6, 5), new T.MeshBasicMaterial({ visible: false })); g.add(hit);
+    const hit = new T.Mesh(new T.SphereGeometry(2.1, 6, 5), new T.MeshBasicMaterial({ visible: false })); g.add(hit);
     g.userData.cap = true; return g;
   }
   function capRemove() { if (capObj) { capG.remove(capObj.g); capObj = null; } }
   function spawnCap(kind) {
     if (!capG || capObj) return false;
     const g = capModel(Math.floor(Math.random() * 5)); capG.add(g);
-    if (kind === 'sky') { g.scale.set(1.5, 1.5, 1.5); g.position.set(-22, 9.7, -1); capObj = { kind, g, t: 0, sp: 1.7 + Math.random() * 0.5 }; }
+    if (kind === 'sky') { g.scale.set(0.55, 0.55, 0.55); g.position.set(-22, 9.7, -1); capObj = { kind, g, t: 0, sp: 1.7 + Math.random() * 0.5 }; }
     else { g.scale.set(0.01, 0.01, 0.01); g.position.set(-8.6, 1.5, 5); capObj = { kind: 'plant', g, t: 0, phase: 'pop', stay: 14 + Math.random() * 6 }; }
     return true;
   }
@@ -3281,7 +3281,7 @@ const World = (function () {
     }
     const FROM = [-8.6, 1.5, 5], TO = [-7.2, 0.32, 4.1];
     if (o.phase === 'pop') {
-      const k = Math.min(1, o.t / 0.95), s = 1.1 * Math.min(1, k * 3);
+      const k = Math.min(1, o.t / 0.95), s = 0.5 * Math.min(1, k * 3);
       g.scale.set(s, s, s); g.position.set(FROM[0] + (TO[0] - FROM[0]) * k, FROM[1] + (TO[1] - FROM[1]) * k + Math.sin(k * PI) * 1.7, FROM[2] + (TO[2] - FROM[2]) * k); g.rotation.z += dt * 9; g.rotation.y += dt * 4;
       if (plantL) plantL.forEach((l, i) => { l.rotation.z = Math.sin(o.t * 30 + i) * 0.12 * (1 - k); l.position.x = l.userData.x0 + Math.sin(o.t * 26 + i) * 0.04 * (1 - k); });
       if (k >= 1) { o.phase = 'sit'; o.t = 0; g.rotation.x = 0; g.rotation.y = 0.6; g.rotation.z = 0; if (plantL) plantL.forEach(l => { l.rotation.z = 0; l.position.x = l.userData.x0; }); }
@@ -3289,7 +3289,7 @@ const World = (function () {
       g.position.y = TO[1] + Math.abs(Math.sin(o.t * 3)) * 0.12; g.rotation.y = 0.6 + Math.sin(o.t * 1.5) * 0.5; g.rotation.z = Math.sin(o.t * 6) * 0.1;
       if (o.t > o.stay) { o.phase = 'back'; o.t = 0; }
     } else {
-      const k = Math.min(1, o.t / 0.7), s = 1.1 * (1 - Math.max(0, k - 0.6) / 0.4);
+      const k = Math.min(1, o.t / 0.7), s = 0.5 * (1 - Math.max(0, k - 0.6) / 0.4);
       g.scale.set(Math.max(0.01, s), Math.max(0.01, s), Math.max(0.01, s)); g.position.set(TO[0] + (FROM[0] - TO[0]) * k, TO[1] + (FROM[1] - TO[1]) * k + Math.sin(k * PI) * 1.0, TO[2] + (FROM[2] - TO[2]) * k); g.rotation.z += dt * 8;
       if (k >= 1) capRemove();
     }
@@ -5090,6 +5090,8 @@ const World = (function () {
     { n: 'Amber capsule', e: '🟠', p: 'Vitamin K reverses warfarin slowly. 4-factor PCC reverses it fast when bleeding is serious.' },
     { n: 'Violet capsule', e: '🟣', p: 'Narrow therapeutic index drugs need level monitoring: digoxin, lithium, phenytoin, warfarin, vancomycin.' }
   ];
+  const CAPC = ['#E04F3A', '#3E72D9', '#2FAE66', '#F2A516', '#8A63C9'];
+  const capSvg = (i, s) => '<svg viewBox="0 0 40 40" width="' + (s || 26) + '" height="' + (s || 26) + '" aria-hidden="true"><g transform="rotate(-40 20 20)"><rect x="4" y="12" width="32" height="16" rx="8" fill="#fff" stroke="#1d2b2e" stroke-width="2.2"/><path d="M20 12H12a8 8 0 0 0 0 16h8z" fill="' + CAPC[i % 5] + '" stroke="#1d2b2e" stroke-width="2.2" stroke-linejoin="round"/><path d="M9 16.5h6" stroke="#fff" stroke-opacity=".6" stroke-width="2" stroke-linecap="round"/></g></svg>';
   const capsLeft = () => CAPS.map((c, i) => i).filter(i => !(S.caps || []).includes(i));
   const capsuleOk = () => !focusOn() && !labOn() && capsLeft().length > 0 && !learning() && view === 'q';
   function onCapsule(src) {
@@ -5100,16 +5102,16 @@ const World = (function () {
     let sub = c.p + ' (+' + money(bonus) + ')';
     if (n === CAPS.length) { S.hintsLeft = Math.min(hintCap() + 3, S.hintsLeft + 3); S.cash += 500; S.earned += 500; sub += ' All five found: +' + money(500) + ' and 3 hints!'; }
     save(); SFX.play('unlock');
-    showUnlock({ emoji: c.e, title: 'Secret capsule ' + n + ' of ' + CAPS.length + ' (' + (src === 'plant' ? 'from the plant' : 'from the sky') + ')', sub });
+    showUnlock({ emoji: capSvg(id, 54), title: 'Secret capsule ' + n + ' of ' + CAPS.length + ' (' + (src === 'plant' ? 'from the plant' : 'from the sky') + ')', sub });
     renderStats(); if (view === 'awards') renderPanel();
   }
   function capsHTML() {
     const have = S.caps || [];
-    return '<div class="grp capsrow"><b>Secret capsules ' + have.length + '/' + CAPS.length + '</b><div class="capdots">' + CAPS.map((c, i) => '<span class="capdot ' + (have.includes(i) ? 'on' : '') + '" title="' + (have.includes(i) ? esc(c.n) : 'Not found yet') + '">' + (have.includes(i) ? c.e : '?') + '</span>').join('') + '</div>' +
+    return '<div class="grp capsrow"><b>Secret capsules ' + have.length + '/' + CAPS.length + '</b><div class="capdots">' + CAPS.map((c, i) => '<span class="capdot ' + (have.includes(i) ? 'on' : '') + '" title="' + (have.includes(i) ? esc(c.n) : 'Not found yet') + '">' + (have.includes(i) ? capSvg(i, 24) : '?') + '</span>').join('') + '</div>' +
       (have.length ? '<ul class="note capnotes">' + have.map(i => '<li><b>' + esc(CAPS[i].n) + ':</b> ' + esc(CAPS[i].p) + '</li>').join('') + '</ul>' : '<p class="note">Watch the sky at cloud height, and the plant by the counseling room. One will show up now and then. Tap it!</p>') + '</div>';
   }
 
-  const GAME_VERSION = 49;
+  const GAME_VERSION = 50;
   const b64u = (u8) => { let s = ''; for (let i = 0; i < u8.length; i += 0x8000) s += String.fromCharCode.apply(null, u8.subarray(i, i + 0x8000)); return btoa(s).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); };
   const unb64u = (t) => { const s = atob(t.replace(/-/g, '+').replace(/_/g, '/')), u = new Uint8Array(s.length); for (let i = 0; i < s.length; i++) u[i] = s.charCodeAt(i); return u; };
   const chk = (t) => { let h = 2166136261; for (let i = 0; i < t.length; i++) { h ^= t.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36); };
