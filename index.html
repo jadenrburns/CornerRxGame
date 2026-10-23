@@ -676,6 +676,10 @@ body.syn .synwrap { display: block; }
 .syn .synhead { display: flex; flex-wrap: wrap; align-items: baseline; gap: 8px; }
 .syncard { margin: 10px 0; padding: 10px; border: 1.5px solid var(--ink); border-radius: 12px; background: var(--surface); }
 .synq { font: 800 20px/1.2 var(--f-body, inherit); }
+.syntoggle { display: grid; grid-template-columns: 1fr 1fr; gap: 0; margin: 8px 0; border: 2px solid var(--ink); border-radius: 999px; overflow: hidden; }
+.syntoggle button { padding: 10px 6px; border: 0; background: var(--surface); color: var(--ink); font: 800 14px/1.2 var(--f-body, inherit); cursor: pointer; }
+.syntoggle button.sel { background: var(--teal); color: var(--on-teal); }
+.syntoggle button.ok { background: #2CCDBB; color: #052; } .syntoggle button.bad { background: var(--coral); color: #fff; }
 .syn-opts { display: grid; gap: 6px; margin: 8px 0; }
 .syn .opt.sel { outline: 3px solid var(--amber); }
 .synguide { padding-left: 16px; margin: 6px 0; } .synguide li.sel span { font-size: 13px; }
@@ -2483,7 +2487,7 @@ const World = (function () {
     const r = canvas.getBoundingClientRect();
     ndc.x = ((e.clientX - r.left) / r.width) * 2 - 1; ndc.y = -((e.clientY - r.top) / r.height) * 2 + 1;
     raycaster.setFromCamera(ndc, camera);
-    const hits = raycaster.intersectObjects(synOn ? synItems : labOn ? labItems : [].concat(CLICK.map(i => ug[i]), [staffGroup, custGroup, petG, pharmG], phoneG ? [phoneG] : [], capG ? [capG] : [], brainG ? [brainG] : []), true);
+    const hits = raycaster.intersectObjects(synOn ? synItems.filter(g => g.visible) : labOn ? labItems : [].concat(CLICK.map(i => ug[i]), [staffGroup, custGroup, petG, pharmG], phoneG ? [phoneG] : [], capG ? [capG] : [], brainG ? [brainG] : []), true);
     for (const h of hits) { let o = h.object; while (o) { if (o.userData && (o.userData.up || o.userData.cust || o.userData.pet || o.userData.pharm || o.userData.vis || o.userData.cap || o.userData.lab || o.userData.site || o.userData.brain)) { pickObj = h.object; return o.userData; } o = o.parent; } }
     return null;
   }
@@ -3339,10 +3343,10 @@ const World = (function () {
     mao: ['MAO', ['ad'], 'int', [-1.1, 3.95], 'mito', '#E8905A'], gabat: ['GABA-T', ['epi'], 'int', [0.9, 4.35], 'enz', '#6EE38A'], sv2a: ['SV2A', ['epi'], 'int', [1.9, 3.75], 'sv2a', '#FFC46B'], magl: ['MAGL', ['cbd'], 'int', [1.55, 3.45], 'enz', '#E5B34A'],
     ht2a: ['5-HT2A', ['ad'], 'post', -2.9, 'rec', '#C28BFF'], ht1a: ['5-HT1A', ['ad', 'cbd'], 'post', -2.3, 'rec', '#9B7BFF'], gabaa: ['GABA-A Cl⁻', ['epi', 'cbd'], 'post', -1.6, 'chan', '#5FE08A'],
     ampa: ['AMPA', ['epi'], 'post', -0.7, 'chan', '#FFB347'], nmda: ['NMDA', ['ad'], 'post', 0.3, 'chan', '#FF6B6B'], trpv1: ['TRPV1', ['cbd'], 'post', 2.0, 'chan', '#FF8F5A'], gpr55: ['GPR55', ['cbd'], 'post', 2.7, 'rec', '#5ED3F3'],
-    faah: ['FAAH', ['cbd'], 'pint', [-0.9, 1.05], 'enz', '#E5E266'], dagl: ['DAGL', ['cbd'], 'pint', [1.9, 1.15], 'enz', '#C7E86A']
+    faah: ['FAAH', ['cbd'], 'pint', [-0.9, 0.55], 'enz', '#E5E266'], dagl: ['DAGL', ['cbd'], 'pint', [1.9, 0.65], 'enz', '#C7E86A']
   };
   const SDECOR = [['vgcc', 'pre', 0.85], ['ampa', 'post', 1.2], ['gabaa', 'post', 3.1], ['nmda', 'post', -3.3]];
-  const SSTRUCT = [['Presynaptic terminal', SX - 1.0, 5.55], ['Synaptic cleft', SX - 3.6, 2.3], ['Postsynaptic spine', SX, 0.35], ['Vesicle forming', SX + SG[0], SG[1] + 0.75], ['Docked vesicles fuse and release', SX + 0.35, 3.85]];
+  const SSTRUCT = [['Presynaptic terminal', SX - 1.0, 5.55], ['Synaptic cleft', SX - 3.6, 2.05], ['Postsynaptic spine', SX, -0.3], ['Vesicle forming', SX + SG[0], SG[1] + 0.75], ['Docked vesicles fuse and release', SX + 0.35, 3.85]];
   function sMat(g) { g.traverse(o => { if (o.material && o.material.clone) o.material = o.material.clone(); }); }
   function siteReg(id, g) { g.userData.site = id; g.userData.g = g; const s = synSite[id] = synSite[id] || { groups: [] }; s.groups.push(g); synItems.push(g); const h = new T.Mesh(new T.SphereGeometry(0.5, 6, 5), new T.MeshBasicMaterial({ visible: false })); g.add(h); }
   function prot(id, kind, col, x, y, rz, s) {
@@ -3375,20 +3379,20 @@ const World = (function () {
     const tm = { transparent: true, opacity: 0.42, side: 2, depthWrite: false };
     const td = add(synG, new T.SphereGeometry(3.4, 16, 8, 0, 2 * PI, 0, PI / 2), '#D88FD0', SX, 2.95, 0, null, tm); td.scale.set(1, 0.85, 0.75); td.castShadow = false;
     cy(synG, 3.4, 3.4, 0.22, 26, '#E7A8D8', SX, 2.95, 0).scale.z = 0.75;
-    const pd = add(synG, new T.SphereGeometry(3.6, 16, 8, 0, 2 * PI, PI / 2, PI / 2), '#6BC4C9', SX, 1.65, 0, null, tm); pd.scale.set(1, 0.85, 0.75); pd.castShadow = false;
-    cy(synG, 3.6, 3.6, 0.22, 26, '#8EC5F0', SX, 1.65, 0).scale.z = 0.75;
-    bx(synG, 8, 1.1, 2.6, '#9EE0FF', SX, 2.3, 0, null, { transparent: true, opacity: 0.1, depthWrite: false });
+    const pd = add(synG, new T.SphereGeometry(3.6, 16, 8, 0, 2 * PI, PI / 2, PI / 2), '#6BC4C9', SX, 1.15, 0, null, tm); pd.scale.set(1, 0.85, 0.75); pd.castShadow = false;
+    cy(synG, 3.6, 3.6, 0.22, 26, '#8EC5F0', SX, 1.15, 0).scale.z = 0.75;
+    bx(synG, 8, 1.6, 2.6, '#9EE0FF', SX, 2.05, 0, null, { transparent: true, opacity: 0.1, depthWrite: false });
     [[-4.6, 2.3, -1.2, 0.9], [5.6, 2.8, -1.4, 0.7], [-5.2, 4.8, -2, 0.6], [6, 0.8, -1.2, 0.8]].forEach(q => { const b = ico(synG, q[3], '#3A3A78', q[0], q[1], q[2]); b.scale.set(1.5, 1, 0.8); });
     // proteins
     Object.keys(SSITES).forEach(id => {
       const d = SSITES[id], loc = d[2], v = d[3];
       if (loc === 'pre') prot(id, d[4], d[5], SX + v, 2.95, PI);
-      else if (loc === 'post') prot(id, d[4], d[5], SX + v, 1.65, 0);
+      else if (loc === 'post') prot(id, d[4], d[5], SX + v, 1.15, 0);
       else if (loc === 'dome') { const a = v; const X = SX + 3.4 * Math.cos(a), Y = 2.95 + 0.85 * 3.4 * Math.sin(a); prot(id, d[4], d[5], X, Y, a - PI / 2); }
       else prot(id, d[4], d[5], SX + v[0], v[1], 0, d[4] === 'mito' ? 1 : 1.1);
     });
     // a2d sits on the VGCC; ion sources
-    SDECOR.forEach(q => { const d = SSITES[q[0]]; prot(q[0], d[4], d[5], SX + q[2], q[1] === 'pre' ? 2.95 : 1.65, q[1] === 'pre' ? PI : 0); });
+    SDECOR.forEach(q => { const d = SSITES[q[0]]; prot(q[0], d[4], d[5], SX + q[2], q[1] === 'pre' ? 2.95 : 1.15, q[1] === 'pre' ? PI : 0); });
     // vesicles + golgi
     for (let i = 0; i < 3; i++) { const gb = bx(synG, 1.0 - i * 0.12, 0.14, 0.7, '#B58AE0', SX + SG[0] - 0.1, SG[1] - 0.35 + i * 0.2, 0); gb.rotation.z = -0.12; }
     for (let i = 0; i < 8; i++) {
@@ -3427,15 +3431,15 @@ const World = (function () {
     else if (v.st === 'recy') { const s = 0.9 - 0.65 * ease; m.scale.set(s, s, s); m.position.set(v.from[0] + (SX + SG[0] + 0.3 - v.from[0]) * ease, v.from[1] + (SG[1] - v.from[1]) * ease + Math.sin(ease * PI) * 0.5, 0); if (k >= 1) { v.st = 'bud'; v.t = 0; v.dur = 1.5; } }
   }
   function synTick(dt) {
-    synT += dt;
-    scene.children.forEach(c => { if (c !== synG && c !== hemi && c !== sun && c.visible && !(c.userData && c.userData.fx)) { c.visible = false; if (synHid.indexOf(c) < 0) synHid.push(c); } });
+    dt *= 0.55; synT += dt;
+    scene.children.forEach(c => { if (c !== synG && c !== hemi && c !== sun && c.visible) { c.visible = false; if (synHid.indexOf(c) < 0) synHid.push(c); } });
     synVes.forEach(v => vesStep(v, dt));
     synParts.forEach(p => { if (p.life <= 0) return; p.life -= dt; const m = p.m; m.position.x += p.v[0] * dt; m.position.y += p.v[1] * dt; m.position.z += p.v[2] * dt; m.rotation.x += dt * 3; m.rotation.y += dt * 2;
-      if (p.v[1] < 0 && m.position.y < 1.95) { p.v[1] = 0; p.v[0] *= 0.2; p.life = Math.min(p.life, 0.35); } if (p.v[1] > 0 && m.position.y > 2.65) p.life = Math.min(p.life, 0.3);
+      if (p.v[1] < 0 && m.position.y < 1.5) { p.v[1] = 0; p.v[0] *= 0.2; p.life = Math.min(p.life, 0.35); } if (p.v[1] > 0 && m.position.y > 2.65) p.life = Math.min(p.life, 0.3);
       const s = Math.min(1, p.life * 3); m.scale.set(s, s, s); if (p.life <= 0) m.visible = false; });
-    if (synCat === 'cbd') { synRetro -= dt; if (synRetro <= 0) { synRetro = 2.4; for (let i = 0; i < 3; i++) spawnPart(SX + 1.9 + (Math.random() - 0.5) * 0.4, 1.9, (Math.random() - 0.5) * 0.5, -0.12 - Math.random() * 0.1, 0.8 + Math.random() * 0.3, 0, 0xE8F25A); } }
+    if (synCat === 'cbd') { synRetro -= dt; if (synRetro <= 0) { synRetro = 2.4; for (let i = 0; i < 3; i++) spawnPart(SX + 1.9 + (Math.random() - 0.5) * 0.4, 1.4, (Math.random() - 0.5) * 0.5, -0.12 - Math.random() * 0.1, 0.8 + Math.random() * 0.3, 0, 0xE8F25A); } }
     Object.keys(synSite).forEach(id => synSite[id].groups.forEach(g => {
-      const U = g.userData;
+      const U = g.userData, vis = SSITES[id][1].indexOf(synCat) >= 0; if (g.visible !== vis) g.visible = vis; if (!vis) return;
       if (U.ion) { const p = (synT * 0.55 + U.ph) % 1; U.ion.position.y = 0.55 - p * 1.0; U.ion.visible = p > 0.05 && p < 0.95; }
       if (U.flap) U.flap.rotation.z = Math.sin(synT * 2 + U.ph * 6) * 0.45;
       if (U.knob) { const s = 1 + Math.sin(synT * 4 + g.position.x) * 0.25; U.knob.scale.set(s, s, s); }
@@ -3457,9 +3461,9 @@ const World = (function () {
     on = !!on; if (on === synOn) return on;
     if (on) {
       if (!synG) buildSyn();
-      synHid = []; scene.children.forEach(c => { if (c !== synG && c !== hemi && c !== sun && c.visible && !(c.userData && c.userData.fx)) { c.visible = false; synHid.push(c); } });
+      synHid = []; scene.children.forEach(c => { if (c !== synG && c !== hemi && c !== sun && c.visible) { c.visible = false; synHid.push(c); } });
       synG.visible = true; synOn = true;
-      synSaved = { TX, TY, TZ, gth, gph, grad }; TX = SX; TY = 3.0; TZ = 0; gth = 0; gph = 1.4; grad = baseRad * 0.5;
+      synSaved = { TX, TY, TZ, gth, gph, grad }; TX = SX; TY = 2.5; TZ = 0; gth = 0; gph = 1.4; grad = baseRad * 0.56;
       document.body.classList.add('syn');
     } else {
       synOn = false; synHid.forEach(c => { c.visible = true; }); synHid = []; if (synG) synG.visible = false;
@@ -3478,8 +3482,15 @@ const World = (function () {
   let brainG = null, brainTag = null;
   function buildBrain(g) {
     brainG = new T.Group(); brainG.position.set(-7.7, 3.5, -3.9); g.add(brainG);
-    [-1, 1].forEach(sx => { const h = ico(brainG, 0.55, '#F29CB2', sx * 0.3, 0, 0); h.scale.set(1.0, 0.8, 1.25); [[0.1, 0.2, 0.3], [-0.12, 0.25, -0.2], [0.15, 0.1, -0.35]].forEach(b => { const n = ico(brainG, 0.2, '#F7B6C7', sx * (0.3 + b[0] * 0.5), 0.3 + b[1] * 0.2, b[2]); n.scale.set(1, 0.7, 1); }); });
-    const cb = ico(brainG, 0.28, '#D9778F', 0, -0.32, -0.6); cb.scale.set(1.4, 0.7, 0.9); cy(brainG, 0.1, 0.12, 0.45, 6, '#E58BA0', 0, -0.5, -0.25);
+    const RX = 0.55, RY = 0.45, RZ = 0.7;
+    [-1, 1].forEach(sx => {
+      const h = add(brainG, new T.IcosahedronGeometry(1, 2), '#F29CB2', sx * 0.3, 0, 0); h.scale.set(RX, RY, RZ);
+      for (let i = 0; i < 26; i++) {
+        const a = (i * 2.399) % (2 * PI), y = 0.95 - (i / 25) * 1.45, r = Math.sqrt(Math.max(0, 1 - y * y)), dx = Math.cos(a) * r, dz = Math.sin(a) * r;
+        const b = add(brainG, new T.IcosahedronGeometry(0.15 + (i % 3) * 0.03, 1), i % 2 ? '#F7B6C7' : '#E98AA4', sx * 0.3 + dx * RX * 0.95, y * RY * 0.95, dz * RZ * 0.95); b.scale.set(1, 0.8, 1.35);
+      }
+    });
+    bx(brainG, 0.03, 0.62, 1.1, '#C46A86', 0, 0.04, 0);
     const hit = new T.Mesh(new T.SphereGeometry(1.3, 6, 5), new T.MeshBasicMaterial({ visible: false })); brainG.add(hit);
     brainG.userData.brain = true;
     brainTag = document.createElement('button'); brainTag.type = 'button'; brainTag.className = 'brainTag'; brainTag.textContent = 'Synapse lab'; brainTag.addEventListener('click', e => { e.stopPropagation(); if (B.onBrain) B.onBrain(); }); if (tagsEl) tagsEl.appendChild(brainTag);
@@ -5395,10 +5406,10 @@ const World = (function () {
   function synExit() { if (World.ok && World.synOn && World.synOn()) World.setSyn(false); }
   function onSynSite(id) {
     const q = SYN.q;
-    if (q && q.act && !q.done && synSitesFor(SYN.cat).indexOf(id) >= 0) return synAnswerSite(id);
+    if (q && !q.done && synSitesFor(SYN.cat).indexOf(id) >= 0) { if (!q.act) { toast('Choose inhibitor or activator first, then tap the site.'); return; } return synAnswerSite(id); }
     SYN.sel = id; if (World.ok) World.synHighlight([id]); if (view === 'syn') renderPanel();
   }
-  function synAnswerAct(v) { const q = SYN.q; if (!q || q.act || q.done) return; q.act = v; renderPanel(); }
+  function synAnswerAct(v) { const q = SYN.q; if (!q || q.done) return; q.act = v; renderPanel(); }
   function synAnswerSite(id) {
     const q = SYN.q; if (!q || !q.act || q.done) return;
     q.site = id; q.done = true; q.actOK = q.act === q.d.act; q.siteOK = q.d.sites.indexOf(id) >= 0; q.ok = q.actOK && q.siteOK;
@@ -5410,20 +5421,20 @@ const World = (function () {
     const q = SYN.q || (synNewQ(), SYN.q), cat = SYN.cat;
     const tabs = SYN_CATS.map(c => `<button type="button" class="chip" data-act="syn-cat" data-v="${c[0]}" aria-pressed="${cat === c[0]}">${c[1]}</button>`).join('');
     const lab = `<button type="button" class="chip" data-act="syn-labels" aria-pressed="${SYN.labels}">Labels ${SYN.labels ? 'on' : 'off'}</button>`;
-    const actB = [['inh', 'Inhibits / blocks'], ['act', 'Activates / enhances']].map(a => { let c = ''; if (q.done) { if (a[0] === q.d.act) c = 'ok'; else if (a[0] === q.act) c = 'bad'; } else if (a[0] === q.act) c = 'sel'; return `<button type="button" class="opt ${c}" data-act="syn-act" data-v="${a[0]}" ${q.act || q.done ? 'disabled' : ''}><span>${a[1]}</span></button>`; }).join('');
-    const siteB = q.act ? q.opts.map((id, i) => { let c = ''; if (q.done) { if (q.d.sites.indexOf(id) >= 0) c = 'ok'; else if (id === q.site) c = 'bad'; } return `<button type="button" class="opt ${c}" data-act="syn-site" data-v="${id}" ${q.done ? 'disabled' : ''}><kbd>${'ABCD'[i]}</kbd><span>${esc(SYN_SITES[id].n)}</span></button>`; }).join('') : '';
+    const actB = '<div class="syntoggle" role="group" aria-label="Does it inhibit or activate?">' + [['inh', 'Inhibitor / blocker'], ['act', 'Activator / agonist']].map(a => { let c = ''; if (q.done) { if (a[0] === q.d.act) c = 'ok'; else if (a[0] === q.act) c = 'bad'; } else if (a[0] === q.act) c = 'sel'; return `<button type="button" class="${c}" data-act="syn-act" data-v="${a[0]}" aria-pressed="${a[0] === q.act}" ${q.done ? 'disabled' : ''}>${a[1]}</button>`; }).join('') + '</div>';
+    const in3d = !!(World.ok && World.synOn && World.synOn());
+    const siteB = !in3d && !q.done ? '<div class="opts syn-opts">' + q.opts.map((id, i) => `<button type="button" class="opt" data-act="syn-site" data-v="${id}"><kbd>${'ABCD'[i]}</kbd><span>${esc(SYN_SITES[id].n)}</span></button>`).join('') + '</div>' : '';
     const res = q.done ? `<div class="result ${q.ok ? 'good' : 'fail'}"><h3>${q.ok ? 'Correct!' : q.actOK ? 'Right action, wrong site.' : q.siteOK ? 'Right site, wrong action.' : 'Not quite.'}</h3><p><b>${esc(q.d.name)}</b> ${q.d.act === 'inh' ? 'inhibits / blocks' : 'activates / enhances'} <b>${esc(SYN_SITES[q.d.sites[0]].n)}</b>${q.d.sites.length > 1 ? ' (also ' + esc(q.d.sites.slice(1).map(s => SYN_SITES[s].n).join(', ')) + ')' : ''}.</p><p class="why">${esc(q.d.note)}</p>${q.ok ? '<div class="pay"><span class="big">+' + money(q.pay) + '</span><span>streak ' + S.synStreak + '</span></div>' : ''}<div><button class="btn go" type="button" data-act="syn-next">Next drug</button></div></div>` : '';
     const guide = synSitesFor(cat).map(id => `<li class="${SYN.sel === id ? 'sel' : ''}"><button type="button" class="linkbtn" data-act="syn-info" data-v="${id}"><b>${esc(SYN_SITES[id].n)}</b></button>${SYN.sel === id ? '<br><span>' + esc(SYN_SITES[id].i) + '</span>' : ''}</li>`).join('');
     return `<div class="pane syn"><div class="synhead"><h3>Synapse lab</h3><span class="note">${S.synN ? 'Solved ' + (S.synOK || 0) + ' of ' + S.synN : 'Tap the glowing parts of the synapse, or play the drug quiz.'}</span></div>
       <div class="chips">${tabs}${lab}</div>
       <div class="syncard"><div class="synq"><b>${esc(q.d.name)}</b>${q.d.ctx ? '<small> (' + esc(q.d.ctx) + ')</small>' : ''}</div>
-        <p class="note">1. Does it inhibit or activate? ${q.act ? '2. Choose the site of action (or tap it in the 3D view).' : ''}</p>
-        <div class="opts syn-opts">${actB}</div>${siteB ? '<div class="opts syn-opts">' + siteB + '</div>' : ''}${res}</div>
+        ${actB}${q.done ? '' : '<p class="note">' + (in3d ? 'Then tap the site of action in the 3D view.' : 'Then choose the site of action.') + '</p>'}${siteB}${res}</div>
       <details class="grp"><summary><b>Site guide</b> <small>tap a name to see what it does</small></summary><ul class="synguide">${guide}</ul></details>
       <div class="btnrow"><button type="button" class="btn go" data-act="back">Back to the pharmacy</button></div></div>`;
   }
 
-  const GAME_VERSION = 51;
+  const GAME_VERSION = 52;
   const b64u = (u8) => { let s = ''; for (let i = 0; i < u8.length; i += 0x8000) s += String.fromCharCode.apply(null, u8.subarray(i, i + 0x8000)); return btoa(s).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); };
   const unb64u = (t) => { const s = atob(t.replace(/-/g, '+').replace(/_/g, '/')), u = new Uint8Array(s.length); for (let i = 0; i < s.length; i++) u[i] = s.charCodeAt(i); return u; };
   const chk = (t) => { let h = 2166136261; for (let i = 0; i < t.length; i++) { h ^= t.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36); };
@@ -5636,7 +5647,7 @@ const World = (function () {
 
   { const sc = $('#savecard'); if (sc) sc.innerHTML = saveBoxHTML(); }
   World.init({ host: $('#stage'), getS: () => S, tagInfo: tagInfo, onBuy: buyUp, onNotes: () => openView('studies'), notesInfo: customCount, karenRoll: karenRoll, sweatyRoll: sweatyRoll, elderRoll: elderRoll, eventRoll: eventRoll, onVisitor: visitClick, onVisitorArrive: visitArrive, capsuleOk: capsuleOk, onCapsule: onCapsule, onBrain: synEnter, onSynSite: onSynSite, onPhone: openPhone, onPolice: policeCome, onFp: fpClick, sign: () => shopName() + '|' + tierName() + ' #' + (S.franchises + 1) });
-  window.__rxDbg = () => ({ fp: fp, S: S, view: view, rush: rush, phoneR: phone.ringing, TOPQ: TOPQ, pool: poolQs, cur: cur });
+  window.__rxDbg = () => ({ fp: fp, S: S, view: view, rush: rush, phoneR: phone.ringing, TOPQ: TOPQ, pool: poolQs, cur: cur, synQ: () => (typeof SYN !== 'undefined' ? SYN.q : null), synTap: id => onSynSite(id) });
   if (!World.ok) $('#stage').classList.add('flat');
   else { document.body.classList.add('fx'); World.setPharmacist(meSpec()); World.setAwards(S.awards); World.setCalendar(Math.min(4, S.awards.calW || 0), false, S.awards.calW || 0); }
   applyFocus(); syncBrand(); sfxLabel();
