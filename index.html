@@ -672,10 +672,14 @@ body.syn .tags, body.syn .line3d, body.syn .bub3d, body.syn .rush3d, body.syn .p
 body.syn .synwrap { display: block; }
 .syn3d { position: absolute; left: 0; top: 0; padding: 2px 8px; border-radius: 999px; background: rgba(20,18,50,.82); color: #fff; border: 1.5px solid rgba(255,255,255,.7); font: 800 11px/1.3 var(--f-body, inherit); white-space: nowrap; }
 .syn3d.struct { background: rgba(255,255,255,.14); border-style: dashed; font-weight: 600; }
+.syn3d.ion { padding: 0 6px; font-size: 10px; background: rgba(10,8,30,.9); border-width: 2px; }
+.syn3d.drug { background: #FF5C8A; color: #fff; border-color: #fff; font-size: 12px; }
 .syn3d.hl { background: #FFD23F; color: #2B1D00; border-color: #fff; }
 .syn .synhead { display: flex; flex-wrap: wrap; align-items: baseline; gap: 8px; }
 .syncard { margin: 10px 0; padding: 10px; border: 1.5px solid var(--ink); border-radius: 12px; background: var(--surface); }
 .synq { font: 800 20px/1.2 var(--f-body, inherit); }
+.subgrp { margin-top: 10px; padding-top: 8px; border-top: 2px dashed var(--ink-soft, rgba(0,0,0,.25)); }
+.subgrp .subh { display: block; margin-bottom: 6px; font-size: 13px; letter-spacing: .06em; text-transform: uppercase; }
 .syntoggle { display: grid; grid-template-columns: 1fr 1fr; gap: 0; margin: 8px 0; border: 2px solid var(--ink); border-radius: 999px; overflow: hidden; }
 .syntoggle button { padding: 10px 6px; border: 0; background: var(--surface); color: var(--ink); font: 800 14px/1.2 var(--f-body, inherit); cursor: pointer; }
 .syntoggle button.sel { background: var(--teal); color: var(--on-teal); }
@@ -737,7 +741,7 @@ body.syn .synwrap { display: block; }
 <script>
 /* Question bank: Q(category, difficulty 1-3, question, correct, [3 wrong], explanation) */
 const BANK = [];
-function Q(c, d, q, a, w, e) { BANK.push({ c, d, q, a, w, e }); }
+function Q(c, d, q, a, w, e, t) { const o = { c, d, q, a, w, e }; if (t) o.t = t; BANK.push(o); }
 
 /* ---------- Brand <-> Generic ---------- */
 Q("BG",1,"Lipitor is the brand name of which drug?","atorvastatin",["simvastatin","rosuvastatin","pravastatin"],"Lipitor = atorvastatin, a high-intensity statin at 40-80 mg.");
@@ -1000,6 +1004,102 @@ Q("SIG",2,"What does checking the prescription drug monitoring program (PDMP) he
 Q("SIG",1,"Which waste belongs in a sharps container?","Needles and lancets",["Expired tablets","Empty paper boxes","Ointment tubes"],"Needles, syringes with needles and lancets go in a puncture-resistant sharps container. Expired drugs follow separate disposal rules.");
 Q("SIG",1,"What is a medication 'near miss'?","An error caught before it reaches the patient",["An error that harmed a patient","A late delivery","A refused prescription"],"Near misses are reported and reviewed too, because they reveal weak points in the workflow before someone is hurt.");
 Q("SIG",2,"What is the best check for a high-alert medication such as insulin?","An independent double check",["A single quick check","Checking only the label color","Asking the patient to read the label"],"High-alert drugs get an independent double check by a second person, because errors with them cause the most harm.");
+/* PharmTox, Exam 3 question bank (PHAR 443). Q(category, difficulty, question, correct, wrongs, explanation, section) */
+Q("PT3",2,"During this exam your pupils may dilate, you may experience dry mouth, and an increase in heartbeat. This would indicate that your _________ has become activated:","Sympathetic system",["Parasympathetic system","Enteric system","Renal system"],"From your PHAR 443 Exam 3 question bank.","Adrenergics");
+Q("PT3",2,"Cardiac sympathetic pathways arise from upper thoracic spinal segments and pass through sympathetic ganglia. Which listed structure belongs to this pathway?","The paravertebral sympathetic chain ganglion",["The visceral afferent fibers","The intrinsic enteric nervous system","The parasympathetic chain ganglion"],"From your PHAR 443 Exam 3 question bank.","Adrenergics");
+Q("PT3",2,"This receptor has a higher affinity for epinephrine and its activation inhibits the release of norepinephrine, acetylcholine, and insulin.","α2",["α1","β1","β2"],"From your PHAR 443 Exam 3 question bank.","Adrenergics");
+Q("PT3",2,"Fred takes phenelzine, a nonselective MAO inhibitor, and consumes large amounts of aged cheese and fermented beer. Which acute complication is most concerning?","Severe hypertension",["Early signs of Parkinson’s","Hypotension","BPH"],"From your PHAR 443 Exam 3 question bank.","Adrenergics");
+Q("PT3",2,"Which of the following drugs is the most sensitive to pretreatment with reserpine?","Amphetamine",["Clonidine","Dobutamine","Isoproterenol"],"From your PHAR 443 Exam 3 question bank.","Adrenergics");
+Q("PT3",2,"Cedric was recently suffered his first bee sting during a maze and suffered anaphylactic shock. The most appropriate treatment would be:","Epinephrine",["Clonidine","Terbutaline"],"From your PHAR 443 Exam 3 question bank.","Adrenergics");
+Q("PT3",2,"Minerva periodically suffers from orthostatic dizziness from autonomic neuropathy. Which of the following is the most appropriate treatment?","Droxidopa",["Clonidine","Dobutamine","Isoproterenol"],"From your PHAR 443 Exam 3 question bank.","Adrenergics");
+Q("PT3",2,"At high dopamine infusion rates, which receptor predominantly mediates vasoconstriction and increased blood pressure?","α1",["α₂","β₁","β₂"],"From your PHAR 443 Exam 3 question bank.","Adrenergics");
+Q("PT3",2,"Charlie suffers from asthma due to chronic smoke inhalation and was recently prescribed an inhaler that targets the β₂ receptor. What was Charlie most likely prescribed:","Albuterol",["Dobutamine","Phenylephrine","Norepinephrine"],"From your PHAR 443 Exam 3 question bank.","Adrenergics");
+Q("PT3",2,"Severus has asthma and COPD. In addition to an inhaled corticosteroid for asthma, he uses a twice-daily long-acting β2 agonist that is not an acute rescue drug. Which drug is it?","Salmeterol",["Albuterol","Fenoldopam","Droxidopa"],"From your PHAR 443 Exam 3 question bank.","Adrenergics");
+Q("PT3",2,"Clonidine:","Is an α₂ receptor agonist",["Is an α₁ receptor agonist","A commonly used treatment for COPD","A prodrug that is converted into desglymidodrine"],"From your PHAR 443 Exam 3 question bank.","Adrenergics");
+Q("PT3",2,"Agonism of which adrenergic receptor most directly increases heart rate, myocardial contractility, and renin release?","β₁",["α₁","α₂","β₂"],"From your PHAR 443 Exam 3 question bank.","Adrenergics");
+Q("PT3",2,"Tom is newly prescribed terazosin for hypertension and BPH. A prescribing error starts treatment at 15 mg/day instead of an appropriate low initial dose. He takes the first dose while shopping. Which adverse effect is most likely?","Tom collapsed in the aisle of the grocery store due to the “First Dose Effect”",["Tom has exacerbated his congestive heart failure","Tom bought beer, drank excessively, and suffer a hypertensive crisis due to the “Cheese Effect”","Tom went on to NOT become Voldemort because he practiced self-care and got his health under control. This is a joke answer so please don’t choose it."],"From your PHAR 443 Exam 3 question bank.","Adrenergics");
+Q("PT3",2,"Propranolol is a nonselective β blocker without additional α1-blocking vasodilator activity. In the conventional generation classification, it is a:","First generation β blocker",["Second generation β blocker","Third generation β blocker"],"From your PHAR 443 Exam 3 question bank.","Adrenergics");
+Q("PT3",2,"Rubeus is large 62 year old male, that suffer from hypertension and has experience an myocardial infarction after a stressful year at work and the loss of a close friend. He was prescribed one of the most commonly prescribed β₁ blockers that has an extended-release formulation for one-daily dosing since Rubeus tends to forget things. He was prescribed:","Metoprolol",["Propranolol","Ketanserin","Phenoxybenzamine"],"From your PHAR 443 Exam 3 question bank.","Adrenergics");
+Q("PT3",2,"In treating anaphylactic vasodilation and shock, which pattern best describes the intended cardiovascular actions of epinephrine through α1-mediated vasoconstriction and β1-mediated cardiac stimulation?","Increased cardiac stimulation, increased blood pressure, increased peripheral resistance",["Decreased cardiac stimulation, decreased blood pressure, increased peripheral resistance","Increased cardiac stimulation, decreased blood pressure, no change in peripheral resistance","Decreased cardiac stimulation, increased blood pressure, decreased peripheral resistance"],"From your PHAR 443 Exam 3 question bank.","Adrenergics");
+Q("PT3",2,"Which listed catecholamine has dose-dependent dopaminergic, β1, and α1 effects and can cause digital ischemia at high infusion rates?","Dopamine",["Norepinephrine","Droxidopa","Epinephrine"],"From your PHAR 443 Exam 3 question bank.","Adrenergics");
+Q("PT3",2,"As you are taking this exam or speaking in public your ______ is most likely activated.","Sympathetic nervous system",["Parasympathetic nervous system","Enteric nervous system","Antisympathetic nervous system"],"From your PHAR 443 Exam 3 question bank.","Adrenergics");
+Q("PT3",2,"Which listed receptor class on vascular smooth muscle is a target for reducing sympathetic vasoconstriction?","Alpha adrenergic receptors",["Delta adrenergic receptors","Nicotinic receptors","Muscarinic receptors"],"From your PHAR 443 Exam 3 question bank.","Adrenergics");
+Q("PT3",2,"If you applied reserpine, it would have the greatest effect on which of the following drugs?","Amphetamine",["Clonidine","Epinephrine","Terbutaline"],"From your PHAR 443 Exam 3 question bank.","Adrenergics");
+Q("PT3",2,"Which statement best describes ephedrine’s mixed direct and indirect sympathomimetic action?","Direct α- and β-adrenergic agonism plus norepinephrine release",["Delta adrenergic receptors","Nicotinic receptors","Muscarinic receptors"],"From your PHAR 443 Exam 3 question bank.","Adrenergics");
+Q("PT3",2,"Epinephrine:","Is a powerful cardiac stimulant",["Is a powerful CNS stimulant","Mediates the parasympathetic response"],"From your PHAR 443 Exam 3 question bank.","Adrenergics");
+Q("PT3",2,"At high dopamine infusion rates, which receptor predominantly mediates the vasoconstrictor response?","Alpha 1 receptors",["Alpha 2 receptors","Beta 1 receptors","Beta 2 receptors"],"From your PHAR 443 Exam 3 question bank.","Adrenergics");
+Q("PT3",2,"This short-acting Beta-adrenergic receptor agonist is used for cardiac decompensation.","Dobutamine",["Albuterol","Formoterol","Dopamine"],"From your PHAR 443 Exam 3 question bank.","Adrenergics");
+Q("PT3",2,"Which selective short-acting β2 agonist is used for relief of bronchospasm?","Albuterol",["Dobutamine","Formoterol","Dopamine"],"From your PHAR 443 Exam 3 question bank.","Adrenergics");
+Q("PT3",2,"Which long-acting β2 agonist is used for maintenance treatment of bronchoconstriction in COPD?","Formoterol",["Dobutamine","Albuterol","Dopamine"],"From your PHAR 443 Exam 3 question bank.","Adrenergics");
+Q("PT3",2,"Which α2-adrenergic agonist reduces central sympathetic outflow and is used to treat hypertension?","Clonidine",["Albuterol","Dopamine","Epinephrine"],"From your PHAR 443 Exam 3 question bank.","Adrenergics");
+Q("PT3",2,"Which is NOT a standard contemporary indication for a selective α1-adrenergic antagonist used as a standalone disease treatment?","Chronic heart failure",["Benign prostatic hyperplasia","Hypertension"],"From your PHAR 443 Exam 3 question bank.","Adrenergics");
+Q("PT3",2,"This structural analogue of prazosin is used to treat hypertension:","Terazosin",["Prazosin","Formoterol","Albuterol"],"From your PHAR 443 Exam 3 question bank.","Adrenergics");
+Q("PT3",2,"Which listed α2 antagonist also shows antagonist activity at serotonin 5-HT1B/1D receptors?","Yohimbine",["Prazosin","Terazosin","Formoterol"],"From your PHAR 443 Exam 3 question bank.","Adrenergics");
+Q("PT3",2,"In the conventional β-blocker generation classification, which group is described as β1-selective without an added vasodilator mechanism?","Second generation",["First generation","Third generation"],"From your PHAR 443 Exam 3 question bank.","Adrenergics");
+Q("PT3",2,"Which nonselective β blocker used for hypertension is contraindicated in bronchial asthma?","Propranolol",["Yohimbine","Prazosin","Atenolol"],"From your PHAR 443 Exam 3 question bank.","Adrenergics");
+Q("PT3",2,"Which is a documented additional property of carvedilol?","It has antioxidant properties",["It is Beta 1 specific","It also blocks dopamine receptors"],"From your PHAR 443 Exam 3 question bank.","Adrenergics");
+Q("PT3",2,"Which is a therapeutic use of CNS drugs?","To treat psychiatric conditions such as depression, mania, and schizophrenia",["To exacerbated pathophysiological conditions","To better understand the mechanism behind drugs with NO known clinical efficacy"],"From your PHAR 443 Exam 3 question bank.","Introduction to the CNS");
+Q("PT3",2,"Which cell type is the principal resident myeloid immune cell of the CNS?","Microglia",["Neuron","Astrocyte","Oligodendrocyte"],"From your PHAR 443 Exam 3 question bank.","Introduction to the CNS");
+Q("PT3",2,"At a sufficient blocking concentration, what would TTX do to neurons that rely on TTX-sensitive voltage-gated sodium channels for their action potentials?","The cell would be unable to fire action potentials",["Nothing","The cell would become extremely negative","The cell would fire action potentials repeatedly"],"From your PHAR 443 Exam 3 question bank.","Introduction to the CNS");
+Q("PT3",2,"If you wanted to prolong the time course of glutamate in the synapse you would block:","Excitatory Amino Acid Transporters (EAATs)",["NMDA receptors","AMPA receptors","Glutamine synthase"],"From your PHAR 443 Exam 3 question bank.","Introduction to the CNS");
+Q("PT3",2,"NMDA receptors are unique because","They have a Mg²⁺ block",["They are on the only receptor that binds glutamate","They bind GABA and Glutamate","They are sensitive to changes in dopamine"],"From your PHAR 443 Exam 3 question bank.","Introduction to the CNS");
+Q("PT3",2,"In which neuronal populations is glutamate present, including its role as a precursor for GABA?","Both glutamatergic and GABAergic neurons",["Only glutamatergic neurons","Only GABAergic neurons"],"From your PHAR 443 Exam 3 question bank.","Introduction to the CNS");
+Q("PT3",2,"________ is the precursor for Serotonin and Serotonin is the precursor for _________.","Tryptophan, melatonin",["Tyrosine, melatonin","Tyrosine, melanin","Tryptophan, melanin"],"From your PHAR 443 Exam 3 question bank.","Introduction to the CNS");
+Q("PT3",2,"Which neurotransmitter system is involved in sleep and mood and is directly targeted by triptan drugs used for migraine?","Serotonin",["Dopamine","Glutamate","GABA"],"From your PHAR 443 Exam 3 question bank.","Introduction to the CNS");
+Q("PT3",2,"Which of the following statements best describes the role of astrocytes in synaptic transmission?","They recycle neurotransmitters and regulate ion balance",["They propagate action potentials","They generate myelin sheaths","They directly release acetylcholine"],"From your PHAR 443 Exam 3 question bank.","Introduction to the CNS");
+Q("PT3",2,"Which of the following neurotransmitters is primarily excitatory in the CNS?","Glutamate",["GABA","Dopamine","Serotonin"],"From your PHAR 443 Exam 3 question bank.","Introduction to the CNS");
+Q("PT3",2,"Benzodiazepines do not bind the GABA receptor at the same site as the endogenous ligand, GABA, but still increase the signaling of the GABA receptor. What drug “type” would a benzodiazepine be?","Positive Allosteric Modulator",["Full agonist","Partial agonist","Competitive antagonists"],"From your PHAR 443 Exam 3 question bank.","Anxiolytics");
+Q("PT3",2,"Tyrion, known for his wit, seeks treatment for anxiety. His physician prescribes a drug that enhances the effects of endogenous gamma-aminobutyric acid (GABA). Which pharmacodynamic effect is the drug primarily targeting?","Positive Allosteric Modulator",["Antagonist","Agonist","Synergist"],"From your PHAR 443 Exam 3 question bank.","Anxiolytics");
+Q("PT3",2,"Which neurotransmitter system is primarily enhanced by benzodiazepines?","GABA",["Dopamine","Serotonin","Acetylcholine"],"From your PHAR 443 Exam 3 question bank.","Anxiolytics");
+Q("PT3",2,"In appropriately selected patients, which antagonist reverses benzodiazepine effects?","Flumazenil",["Naloxone","Buspirone","Hydroxyzine"],"From your PHAR 443 Exam 3 question bank.","Anxiolytics");
+Q("PT3",2,"What is the mechanism of action of buspirone?","Partial agonist at 5-HT1A receptors",["GABA-A receptor agonist","Dopamine D2 receptor antagonist","Beta-adrenergic antagonist"],"From your PHAR 443 Exam 3 question bank.","Anxiolytics");
+Q("PT3",2,"Which of the following is TRUE regarding benzodiazepine metabolism?","Many undergo hepatic oxidation via CYP3A4",["All benzodiazepines are water-soluble","None are affected by CYP inhibition","All have short half-lives"],"From your PHAR 443 Exam 3 question bank.","Anxiolytics");
+Q("PT3",2,"Which anxiolytic is a histamine H1 receptor antagonist?","Hydroxyzine",["Buspirone","Sertraline","Fluoxetine"],"From your PHAR 443 Exam 3 question bank.","Anxiolytics");
+Q("PT3",2,"A 60-year-old woman with generalized anxiety disorder has been using alprazolam for over a year. Her provider wants to discontinue it. What is the safest strategy?","Use a gradual, individualized taper adjusted to withdrawal symptoms and clinical response",["Stop the medication immediately","Switch directly to diazepam","Add an SSRI and stop the benzodiazepine the same day"],"From your PHAR 443 Exam 3 question bank.","Anxiolytics");
+Q("PT3",2,"Which mechanism contributes to the effects of many general anesthetics, including propofol?","Enhance GABAergic neurotransmission",["Block voltage-gated Na+ channels","Activate NMDA receptors","Inhibit acetylcholinesterase"],"From your PHAR 443 Exam 3 question bank.","General anesthesia");
+Q("PT3",2,"What is the mechanism of propofol?","Positive allosteric modulator of GABA-A receptor",["NMDA receptor antagonist","Sodium channel blocker","Dopamine receptor agonist"],"From your PHAR 443 Exam 3 question bank.","General anesthesia");
+Q("PT3",2,"Which of the following anesthetics acts as a dissociative agent by blocking NMDA receptors?","Ketamine",["Propofol","Midazolam","Isoflurane"],"From your PHAR 443 Exam 3 question bank.","General anesthesia");
+Q("PT3",2,"All other conditions equal, which listed physicochemical property most directly influences how quickly inhaled anesthetic partial pressure equilibrates between alveoli and blood?","Blood-gas partition coefficient",["Lipid solubility","Protein binding","Molecular weight"],"From your PHAR 443 Exam 3 question bank.","General anesthesia");
+Q("PT3",2,"Among these listed agents, which has the lowest blood–gas partition coefficient?","Nitrous oxide",["Sevoflurane","Isoflurane","Halothane"],"From your PHAR 443 Exam 3 question bank.","General anesthesia");
+Q("PT3",2,"A patient undergoing surgery is administered ketamine. Postoperatively, she reports vivid dreams and hallucinations. What is the mechanism of action of ketamine?","NMDA receptor antagonist",["GABA-A receptor agonist","Serotonin reuptake inhibitor","Sodium channel blocker"],"From your PHAR 443 Exam 3 question bank.","General anesthesia");
+Q("PT3",2,"What is the main role of Epinephrine when combined with Lidocaine in local anesthesia?","To prolong the effect via vasoconstriction",["To reduce pain","To prevent allergy","To increase absorption"],"From your PHAR 443 Exam 3 question bank.","Local anesthesia");
+Q("PT3",2,"Which property generally distinguishes ester and amide local anesthetic metabolism?","Site of metabolism",["Duration of action","pKa value","Mechanism of action"],"From your PHAR 443 Exam 3 question bank.","Local anesthesia");
+Q("PT3",2,"A 45-year-old man is scheduled for a mole excision on his arm. The physician plans to use lidocaine with epinephrine for local anesthesia. What is the purpose of adding epinephrine?","To prolong the anesthetic effect via vasoconstriction",["To increase systemic absorption of lidocaine","To reduce allergic reactions","To enhance sodium channel blockade"],"From your PHAR 443 Exam 3 question bank.","Local anesthesia");
+Q("PT3",2,"A 35-year-old man undergoes dental surgery and experiences prolonged numbness after bupivacaine administration. What characteristic explains its longer duration of action compared to lidocaine?","Higher lipid solubility and protein binding",["Lower lipid solubility and water solubility","Rapid hepatic metabolism","Shorter half-life"],"From your PHAR 443 Exam 3 question bank.","Local anesthesia");
+Q("PT3",2,"Which of the following hypnotic agents mimics the action of melatonin?","Ramelteon",["Zolpidem","Diazepam","Flumazenil"],"From your PHAR 443 Exam 3 question bank.","Sedatives and hypnotics");
+Q("PT3",2,"Which of the following is NOT a property of an ideal hypnotic?","Causes rebound insomnia",["Normal sleep architecture","Dependence-free use","Minimal drug interaction"],"From your PHAR 443 Exam 3 question bank.","Sedatives and hypnotics");
+Q("PT3",2,"A 28-year-old woman presents to the emergency department after taking an excessive amount of zolpidem (Ambien). She is drowsy but arousable. Which mechanism best explains zolpidem’s sedative effect?","Positive allosteric modulation at the benzodiazepine site of α1-containing GABAA receptors",["Agonist at melatonin receptors","Partial agonist at 5-HT1A receptors","NMDA receptor antagonist"],"From your PHAR 443 Exam 3 question bank.","Sedatives and hypnotics");
+Q("PT3",2,"A 62-year-old man with insomnia reports that he has been taking diazepam nightly for the past 6 months. He now experiences increased anxiety and poor sleep after stopping it abruptly. What is the best explanation?","Drug withdrawal",["Pharmacologic tolerance","Serotonin deficiency","Dopamine excess"],"From your PHAR 443 Exam 3 question bank.","Sedatives and hypnotics");
+Q("PT3",2,"Which is one possible underlying molecular cause of epilepsy?","Charlie has a mutation in a voltage-gated ion channel",["Charlie is very old","Charlie has recently been taking melatonin supplements to help them sleep"],"From your PHAR 443 Exam 3 question bank.","Epilepsy");
+Q("PT3",2,"Gabapentin and Pregabalin:","Bind the α2δ subunit of voltage-gated Ca2+ channels",["Act via the GABA receptor","Act via the Na⁺ channel","Act via the NMDA receptor"],"From your PHAR 443 Exam 3 question bank.","Epilepsy");
+Q("PT3",2,"Which broad-spectrum antiseizure medication has an incompletely established mechanism involving multiple actions and can displace phenytoin from plasma protein binding?","Valproate",["Phenytoin","Ethosuximide","Topiramate"],"From your PHAR 443 Exam 3 question bank.","Epilepsy");
+Q("PT3",2,"Which drug is a first-line choice for isolated absence seizures and reduces low-voltage-activated T-type calcium currents?","Ethosuximide",["Phenytoin","Valproate","Topiramate"],"From your PHAR 443 Exam 3 question bank.","Epilepsy");
+Q("PT3",2,"Ethosuximide is most effective in treating which type of seizure?","Absence",["Tonic-clonic","Partial","Focal"],"From your PHAR 443 Exam 3 question bank.","Epilepsy");
+Q("PT3",2,"Gabapentin binds to an auxiliary subunit of which neuronal channel?","Voltage-gated calcium channel",["GABA receptor","Sodium channel","NMDA receptor"],"From your PHAR 443 Exam 3 question bank.","Epilepsy");
+Q("PT3",2,"Which anti-epileptic drug enhances slow inactivation of sodium channels without affecting fast inactivation?","Lacosamide",["Phenytoin","Carbamazepine","Lamotrigine"],"From your PHAR 443 Exam 3 question bank.","Epilepsy");
+Q("PT3",2,"A 5-year-old boy has ongoing convulsive seizures without regaining consciousness between episodes. IV access is available and initial emergency stabilization is underway. Which listed drug is appropriate as immediate initial antiseizure therapy?","IV diazepam",["Phenytoin","Carbamazepine","Gabapentin"],"From your PHAR 443 Exam 3 question bank.","Epilepsy");
+Q("PT3",2,"A 26-year-old woman has confirmed isolated absence seizures and no other seizure types. Which listed medication is generally the first-line choice?","Ethosuximide",["Phenytoin","Carbamazepine","Lamotrigine"],"From your PHAR 443 Exam 3 question bank.","Epilepsy");
+Q("PT3",2,"MPTP exposure can cause a syndrome that most closely resembles:","Parkinson’s",["Alzheimer’s","Amyotrophic Lateral Sclerosis","Huntington’s"],"From your PHAR 443 Exam 3 question bank.","Dopamine");
+Q("PT3",2,"L-DOPA is converted to dopamine via:","AADC",["MAOA","MAOB","COMT"],"From your PHAR 443 Exam 3 question bank.","Dopamine");
+Q("PT3",2,"Which dopamine receptor family predominantly couples to Gi/o?","D₂-like",["D₁-like","D5 receptor"],"From your PHAR 443 Exam 3 question bank.","Dopamine");
+Q("PT3",2,"Why is carbidopa combined with levodopa in Parkinson disease treatment?","It inhibits peripheral conversion of levodopa to dopamine, increasing levodopa available to enter the brain",["It converts levodopa directly to dopamine in the plasma","It directly activates dopamine receptors in the brain"],"From your PHAR 443 Exam 3 question bank.","Dopamine");
+Q("PT3",2,"Bob is displaying a tremor at rest, bradykinesia, akinesia, and poor balance. What is the appropriate therapy for Bob.","Levodopa/Carbidopa",["Benzodiazepines","Phenytoin","Reserpine"],"From your PHAR 443 Exam 3 question bank.","Dopamine");
+Q("PT3",2,"Which two neurotransmitter systems are targeted by the traditional dopaminergic and antimuscarinic approaches to Parkinson disease?","Acetylcholine and Dopamine",["Glutamate and GABA","Acetylcholine and Serotonin","Serotonin and Dopamine"],"From your PHAR 443 Exam 3 question bank.","Dopamine");
+Q("PT3",2,"Which neurotransmitter is deficient in Parkinson’s disease?","Dopamine",["Serotonin","Acetylcholine","GABA"],"From your PHAR 443 Exam 3 question bank.","Dopamine");
+Q("PT3",2,"Terry is displaying signs of apathy, poor speech, and weak emotional expression. This are all considered _____ symptoms associated with schizophrenia.","Negative Symptoms",["Positive Symptoms","Neutral Symptoms"],"From your PHAR 443 Exam 3 question bank.","Psychosis and mania");
+Q("PT3",2,"Which statement best describes the receptor pharmacology of many second-generation antipsychotics?","Many combine dopamine and serotonin receptor actions, but mechanisms vary among agents",["Have a higher potency for just the D₂ receptor","Have a higher potency for just the D₁ receptor","Have a lower potency at 5HT_(2A) and a higher potency at the D₁ receptor"],"From your PHAR 443 Exam 3 question bank.","Psychosis and mania");
+Q("PT3",2,"Which 5-HT2A inverse agonist is FDA-approved for hallucinations and delusions associated with Parkinson disease psychosis?","Pimavanserin",["Lithium","Aripiprazole"],"From your PHAR 443 Exam 3 question bank.","Psychosis and mania");
+Q("PT3",2,"When accessing receptor occupancy of the D₂ receptor there are two thresholds that are detected: one is efficacy and the other is EPS. What does EPS stand for?","Extrapyramidal Symptoms",["Efficacy Parameter System","Extracellular Postural Settings"],"From your PHAR 443 Exam 3 question bank.","Psychosis and mania");
+Q("PT3",2,"Which listed drug has no appreciable dopamine D2 receptor affinity?","Pimavanserin",["Clozapine","Aripiprazole","Risperidone"],"From your PHAR 443 Exam 3 question bank.","Psychosis and mania");
+Q("PT3",2,"Which listed drug is a classic mood stabilizer used for long-term bipolar I maintenance that requires serum concentration monitoring?","Lithium",["Diazepam","Aripiprazole","Trazodone"],"From your PHAR 443 Exam 3 question bank.","Psychosis and mania");
+Q("PT3",2,"Sandy recently started lithium. Which listed follow-up test specifically monitors exposure to a drug with a narrow therapeutic range?","They will do a blood draw to monitor serum concentrations",["They will be weighed","They will do a hair sample analysis"],"From your PHAR 443 Exam 3 question bank.","Psychosis and mania");
+Q("PT3",2,"Sandy not only takes Lithium but has been treated their high blood pressure. Which of the following types of blood pressure medication could cause significant reductions in Lithium clearance and lead to toxicity.","Thiazide diuretic",["Calcium channel blocker","Beta blocker"],"From your PHAR 443 Exam 3 question bank.","Psychosis and mania");
+Q("PT3",2,"Which receptor is the principal therapeutic target of traditional D2-blocking antipsychotics?","Dopamine D2 receptors",["NMDA receptors","GABA-A receptors","Nicotinic receptors"],"From your PHAR 443 Exam 3 question bank.","Psychosis and mania");
+Q("PT3",2,"Which of the following is a second-generation (atypical) antipsychotic?","Clozapine",["Haloperidol","Chlorpromazine","Fluphenazine"],"From your PHAR 443 Exam 3 question bank.","Psychosis and mania");
+Q("PT3",2,"Which of the following best describes tardive dyskinesia?","Involuntary repetitive movements",["Acute muscle rigidity","Sedation","Hypotension"],"From your PHAR 443 Exam 3 question bank.","Psychosis and mania");
+Q("PT3",2,"Which of the following is considered a negative symptom of schizophrenia?","Social withdrawal",["Hallucinations","Delusions","Disorganized speech"],"From your PHAR 443 Exam 3 question bank.","Psychosis and mania");
+Q("PT3",2,"Which of the following drugs acts as a partial agonist at dopamine D2 receptors?","Aripiprazole",["Haloperidol","Clozapine","Risperidone"],"From your PHAR 443 Exam 3 question bank.","Psychosis and mania");
+Q("PT3",2,"What is the mechanism of action of risperidone?","Dopamine D2 and serotonin 5-HT2A receptor antagonist",["Dopamine agonist","NMDA receptor blocker","GABA-A receptor modulator"],"From your PHAR 443 Exam 3 question bank.","Psychosis and mania");
 /* ---------- Compounding pharmacy: calculation + kinetics generators ---------- */
 function fmtS(n) { return String(Number(Number(n).toPrecision(3))); }
 function mkL(kind, d, q, correct, cands, unit, steps) {
@@ -3345,6 +3445,8 @@ const World = (function () {
     ampa: ['AMPA', ['epi'], 'post', -0.7, 'chan', '#FFB347'], nmda: ['NMDA', ['ad'], 'post', 0.3, 'chan', '#FF6B6B'], trpv1: ['TRPV1', ['cbd'], 'post', 2.0, 'chan', '#FF8F5A'], gpr55: ['GPR55', ['cbd'], 'post', 2.7, 'rec', '#5ED3F3'],
     faah: ['FAAH', ['cbd'], 'pint', [-0.9, 0.55], 'enz', '#E5E266'], dagl: ['DAGL', ['cbd'], 'pint', [1.9, 0.65], 'enz', '#C7E86A']
   };
+  const ION = { vgcc: ['Ca²⁺', '#FFD23F'], nav: ['Na⁺', '#F2A516'], cavt: ['Ca²⁺', '#FF7A59'], gabaa: ['Cl⁻', '#5FE08A'], ampa: ['Na⁺', '#FFB347'], nmda: ['Ca²⁺', '#FF6B6B'], trpv1: ['Ca²⁺', '#FF8F5A'], sert: ['5-HT', '#B26CF0'], net: ['NE', '#F08A3C'], dat: ['DA', '#E85D7A'], gat1: ['GABA', '#6EE38A'], ent1: ['AEA', '#5ED3F3'] };
+  const synIonLabs = []; let synDrug = null, synDrugM = null, synDrugEl = null, tmpV = null;
   const SDECOR = [['vgcc', 'pre', 0.85], ['ampa', 'post', 1.2], ['gabaa', 'post', 3.1], ['nmda', 'post', -3.3]];
   const SSTRUCT = [['Presynaptic terminal', SX - 1.0, 5.55], ['Synaptic cleft', SX - 3.6, 2.05], ['Postsynaptic spine', SX, -0.3], ['Vesicle forming', SX + SG[0], SG[1] + 0.75], ['Docked vesicles fuse and release', SX + 0.35, 3.85]];
   function sMat(g) { g.traverse(o => { if (o.material && o.material.clone) o.material = o.material.clone(); }); }
@@ -3393,6 +3495,16 @@ const World = (function () {
     });
     // a2d sits on the VGCC; ion sources
     SDECOR.forEach(q => { const d = SSITES[q[0]]; prot(q[0], d[4], d[5], SX + q[2], q[1] === 'pre' ? 2.95 : 1.15, q[1] === 'pre' ? PI : 0); });
+    Object.keys(ION).forEach(id => { (synSite[id] ? synSite[id].groups : []).forEach((g, gi) => {
+      const U = g.userData; if (!U.ion) return;
+      U.ion.material.color.setHex(parseInt(ION[id][1].slice(1), 16)); U.ion.scale.set(1.7, 1.7, 1.7);
+      U.ion2 = add(g, new T.SphereGeometry(0.06, 6, 5), ION[id][1], 0, 0.5, 0); U.ion2.material = U.ion2.material.clone(); U.ion2.scale.set(1.7, 1.7, 1.7); U.ion2.visible = false;
+      U.blk = bx(g, 0.5, 0.07, 0.26, '#FF3B3B', 0, 0.5, 0.0); U.blk.rotation.z = 0.5; U.blk.material = U.blk.material.clone(); U.blk.visible = false;
+      U.blk2 = bx(g, 0.5, 0.07, 0.26, '#FF3B3B', 0, 0.5, 0.0); U.blk2.rotation.z = -0.5; U.blk2.material = U.blk2.material.clone(); U.blk2.visible = false;
+      if (gi === 0) { const el = document.createElement('span'); el.className = 'syn3d ion'; el.textContent = ION[id][0]; el.style.borderColor = ION[id][1]; synWrap0().appendChild(el); synIonLabs.push({ el, id, g }); }
+    }); });
+    synDrugM = new T.Group(); synG.add(synDrugM); synDrugM.visible = false;
+    cy(synDrugM, 0.09, 0.09, 0.2, 8, '#FFFFFF', 0, 0.1, 0); cy(synDrugM, 0.09, 0.09, 0.2, 8, '#FF5C8A', 0, -0.1, 0); add(synDrugM, new T.SphereGeometry(0.09, 8, 6), '#FFFFFF', 0, 0.2, 0); add(synDrugM, new T.SphereGeometry(0.09, 8, 6), '#FF5C8A', 0, -0.2, 0); synDrugM.scale.set(1.5, 1.5, 1.5);
     // vesicles + golgi
     for (let i = 0; i < 3; i++) { const gb = bx(synG, 1.0 - i * 0.12, 0.14, 0.7, '#B58AE0', SX + SG[0] - 0.1, SG[1] - 0.35 + i * 0.2, 0); gb.rotation.z = -0.12; }
     for (let i = 0; i < 8; i++) {
@@ -3401,10 +3513,11 @@ const World = (function () {
     }
     for (let i = 0; i < 44; i++) { const m = add(synG, new T.OctahedronGeometry(0.075, 0), '#FFFFFF', SX, 5, 0); m.material = m.material.clone(); m.visible = false; m.castShadow = false; synParts.push({ m, life: 0, v: [0, 0, 0] }); }
     // labels
-    synWrap = document.createElement('div'); synWrap.className = 'synwrap'; synWrap.setAttribute('aria-hidden', 'true'); host.appendChild(synWrap);
+    synWrap0();
     Object.keys(SSITES).forEach(id => { const el = document.createElement('span'); el.className = 'syn3d'; el.textContent = SSITES[id][0]; synWrap.appendChild(el); const g = synSite[id].groups[0]; synLabs.push({ el, id, cats: SSITES[id][1], g, dy: (SSITES[id][2] === 'pre' ? 0.8 : SSITES[id][2] === 'post' ? -0.85 : SSITES[id][2] === 'dome' ? 0.7 : 0.75) + ((synLabs.length % 3) * 0.28) * (SSITES[id][2] === 'post' ? -1 : 1) }); });
     SSTRUCT.forEach(s => { const el = document.createElement('span'); el.className = 'syn3d struct'; el.textContent = s[0]; synWrap.appendChild(el); synLabs.push({ el, id: null, struct: true, x: s[1], y: s[2], dy: 0 }); });
   }
+  function synWrap0() { if (!synWrap) { synWrap = document.createElement('div'); synWrap.className = 'synwrap'; synWrap.setAttribute('aria-hidden', 'true'); host.appendChild(synWrap); } return synWrap; }
   function pickRes(v) { v.rp = [-1.7 + Math.random() * 3.8, 3.55 + Math.random() * 1.25, (Math.random() - 0.5) * 1.0]; }
   const synNT = () => (synCat === 'ad' ? 0xC28BFF : synCat === 'cbd' ? 0xFFB347 : (Math.random() < 0.5 ? 0x6EE38A : 0xFFB347));
   const DOCKS = [-0.4, 0.3, 0.95];
@@ -3440,14 +3553,39 @@ const World = (function () {
     if (synCat === 'cbd') { synRetro -= dt; if (synRetro <= 0) { synRetro = 2.4; for (let i = 0; i < 3; i++) spawnPart(SX + 1.9 + (Math.random() - 0.5) * 0.4, 1.4, (Math.random() - 0.5) * 0.5, -0.12 - Math.random() * 0.1, 0.8 + Math.random() * 0.3, 0, 0xE8F25A); } }
     Object.keys(synSite).forEach(id => synSite[id].groups.forEach(g => {
       const U = g.userData, vis = SSITES[id][1].indexOf(synCat) >= 0; if (g.visible !== vis) g.visible = vis; if (!vis) return;
-      if (U.ion) { const p = (synT * 0.55 + U.ph) % 1; U.ion.position.y = 0.55 - p * 1.0; U.ion.visible = p > 0.05 && p < 0.95; }
-      if (U.flap) U.flap.rotation.z = Math.sin(synT * 2 + U.ph * 6) * 0.45;
-      if (U.knob) { const s = 1 + Math.sin(synT * 4 + g.position.x) * 0.25; U.knob.scale.set(s, s, s); }
-      if (U.bob !== undefined) g.position.y += Math.sin(synT * 1.4 + U.bob) * dt * 0.08;
+      const fx = synDrug && synDrug.docked && synDrug.sites.indexOf(id) >= 0 ? synDrug.act : null;
+      if (U.fx !== fx) { U.fx = fx; U.e = -1; }
+      if (U.ion) {
+        const f = fx === 'inh' ? 0 : fx === 'act' ? 2.4 : 1; U.pp = (U.pp === undefined ? U.ph : U.pp) + dt * 0.55 * f;
+        if (fx === 'inh') { U.ion.position.set(Math.sin(synT * 18) * 0.04, 0.62, 0); U.ion.visible = true; } else { const p = U.pp % 1; U.ion.position.set(0, 0.55 - p * 1.0, 0); U.ion.visible = p > 0.05 && p < 0.95; }
+        if (U.ion2) { const on2 = fx === 'act'; U.ion2.visible = false; if (on2) { const p2 = (U.pp + 0.5) % 1; U.ion2.position.set(0, 0.55 - p2 * 1.0, 0); U.ion2.visible = p2 > 0.05 && p2 < 0.95; } }
+        if (U.blk) { U.blk.visible = U.blk2.visible = fx === 'inh'; }
+      }
+      if (fx) { const k = fx === 'inh' ? 0.35 + Math.sin(synT * 8) * 0.2 : 0.3 + Math.sin(synT * 7) * 0.2; g.traverse(o => { if (o.material && o.material.emissive && o !== U.blk && o !== U.blk2) o.material.emissive.setRGB(fx === 'inh' ? k : 0.05, fx === 'inh' ? 0.03 : k, 0.05); }); }
+      if (U.flap) U.flap.rotation.z = fx === 'inh' ? 0 : Math.sin(synT * (fx === 'act' ? 4.5 : 2) + U.ph * 6) * 0.45;
+      if (U.knob) { const s = fx === 'inh' ? 0.5 : 1 + Math.sin(synT * (fx === 'act' ? 9 : 4) + g.position.x) * (fx === 'act' ? 0.5 : 0.25); U.knob.scale.set(s, s, s); }
+      if (U.bob !== undefined && fx !== 'inh') g.position.y += Math.sin(synT * 1.4 + U.bob) * dt * (fx === 'act' ? 0.2 : 0.08);
       const on = synHLids && synHLids.indexOf(id) >= 0, hov = synHover === id, e = on ? 0.45 + Math.sin(synT * 6) * 0.3 : hov ? 0.35 : 0, sc = on ? 1.12 + Math.sin(synT * 6) * 0.05 : hov ? 1.08 : 1;
-      if (U.e !== e) { U.e = e; g.traverse(o => { if (o.material && o.material.emissive) { o.material.emissive.setRGB(e, e * 0.85, e * 0.2); } }); }
+      if (!fx && U.e !== e) { U.e = e; g.traverse(o => { if (o.material && o.material.emissive) { o.material.emissive.setRGB(e, e * 0.85, e * 0.2); } }); }
       const base = g.userData.s0 || (g.userData.s0 = g.scale.x); g.scale.set(base * sc, base * sc, base * sc);
     }));
+    if (synDrug && synDrugM) {
+      const D = synDrug, m = synDrugM; m.visible = true; D.t += dt;
+      let tx, ty, tz = 0.5;
+      if (!D.reveal) { tx = SX + Math.sin(D.t * 0.45) * 2.8; ty = 2.05 + Math.sin(D.t * 0.9) * 0.4; tz = 0.5 + Math.sin(D.t * 0.7) * 0.4; D.p = [tx, ty, tz]; }
+      else {
+        const g = synSite[D.sites[0]].groups[0], loc = SSITES[D.sites[0]][2], dy = (loc === 'pre' || loc === 'dome') ? -0.5 : 0.5; const goal = [g.position.x, g.position.y + dy, 0.45];
+        D.k = Math.min(1, (D.k || 0) + dt / 1.6); const e = D.k * D.k * (3 - 2 * D.k); tx = D.p0[0] + (goal[0] - D.p0[0]) * e; ty = D.p0[1] + (goal[1] - D.p0[1]) * e; tz = D.p0[2] + (goal[2] - D.p0[2]) * e; if (D.k >= 1) D.docked = true;
+      }
+      m.position.set(tx, ty, tz); m.rotation.z += dt * 2.2; m.rotation.x = Math.sin(D.t * 2) * 0.4;
+      if (!synDrugEl) { synDrugEl = document.createElement('span'); synDrugEl.className = 'syn3d drug'; synWrap0().appendChild(synDrugEl); }
+      if (synDrugEl.textContent !== D.name) synDrugEl.textContent = D.name; synDrugEl.style.display = ''; place(synDrugEl, tx, ty + 0.5, 0.9);
+    } else { if (synDrugM) synDrugM.visible = false; if (synDrugEl) synDrugEl.style.display = 'none'; }
+    synIonLabs.forEach(L => {
+      const U = L.g.userData, ok = synLabelsOn && L.g.visible && U.ion && U.ion.visible && typeof U.ion.getWorldPosition === 'function';
+      L.el.style.display = ok ? '' : 'none';
+      if (ok) { tmpV = tmpV || new T.Vector3(); U.ion.getWorldPosition(tmpV); place(L.el, tmpV.x, tmpV.y + 0.22, 0.9); }
+    });
     synLabs.forEach(L => {
       let show = synLabelsOn; if (!L.struct) show = show && L.cats.indexOf(synCat) >= 0; else show = true;
       if (L.struct && synCat !== 'cbd' && L.x === SX + 0.35 && false) show = true;
@@ -3468,7 +3606,7 @@ const World = (function () {
     } else {
       synOn = false; synHid.forEach(c => { c.visible = true; }); synHid = []; if (synG) synG.visible = false;
       if (synSaved) { TX = synSaved.TX; TY = synSaved.TY; TZ = synSaved.TZ; gth = synSaved.gth; gph = synSaved.gph; grad = synSaved.grad; synSaved = null; }
-      if (synWrap) synLabs.forEach(L => { L.el.style.display = 'none'; });
+      if (synWrap) { synLabs.forEach(L => { L.el.style.display = 'none'; }); synIonLabs.forEach(L => { L.el.style.display = 'none'; }); if (synDrugEl) synDrugEl.style.display = 'none'; }
       document.body.classList.remove('syn');
     }
     applyTheme(); return on;
@@ -3476,21 +3614,33 @@ const World = (function () {
   api.synOn = () => synOn;
   api.synCat = function (c) { synCat = c; synRetro = 0.3; synParts.forEach(p => { p.life = 0; p.m.visible = false; }); };
   api.synLabels = function (on) { synLabelsOn = !!on; };
+  api.synDrug = function (d) {
+    if (!d) { synDrug = null; return; }
+    synDrug = { name: d.name, act: d.act, sites: d.sites.filter(s => synSite[s]), t: 0, reveal: false, docked: false, k: 0, p: [SX, 2.05, 0.5], p0: null };
+  };
+  api.synReveal = function () { if (synDrug && !synDrug.reveal && synDrug.sites.length) { synDrug.reveal = true; synDrug.p0 = synDrug.p.slice(); } };
   api.synHighlight = function (ids) { synHLids = ids && ids.length ? ids : null; };
   api.synHover = function (id) { synHover = id; };
   /* the floating brain next to the bookshelf opens the synapse lab */
   let brainG = null, brainTag = null;
   function buildBrain(g) {
     brainG = new T.Group(); brainG.position.set(-7.7, 3.5, -3.9); g.add(brainG);
-    const RX = 0.55, RY = 0.45, RZ = 0.7;
     [-1, 1].forEach(sx => {
-      const h = add(brainG, new T.IcosahedronGeometry(1, 2), '#F29CB2', sx * 0.3, 0, 0); h.scale.set(RX, RY, RZ);
-      for (let i = 0; i < 26; i++) {
-        const a = (i * 2.399) % (2 * PI), y = 0.95 - (i / 25) * 1.45, r = Math.sqrt(Math.max(0, 1 - y * y)), dx = Math.cos(a) * r, dz = Math.sin(a) * r;
-        const b = add(brainG, new T.IcosahedronGeometry(0.15 + (i % 3) * 0.03, 1), i % 2 ? '#F7B6C7' : '#E98AA4', sx * 0.3 + dx * RX * 0.95, y * RY * 0.95, dz * RZ * 0.95); b.scale.set(1, 0.8, 1.35);
+      const geo = new T.SphereGeometry(1, 56, 40), pa = geo.attributes.position;
+      for (let k = 0; k < pa.count; k++) {
+        let x = pa.getX(k), y = pa.getY(k), z = pa.getZ(k);
+        const med = x * sx < 0;                       /* medial side faces the other hemisphere */
+        const fold = Math.sin(9 * x + 2.2 * Math.sin(5 * z + 1.3 * y)) * Math.sin(8 * y + 2.4 * Math.sin(6 * x + 4 * z)) + 0.6 * Math.sin(13 * z + 3 * Math.sin(7 * y));
+        const d = 1 + 0.075 * Math.max(-1.2, Math.min(1.2, fold)) * (med && Math.abs(x) > 0.5 ? 0.3 : 1);
+        x *= d; y *= d; z *= d;
+        if (med) x *= 0.3;                            /* flat inner wall */
+        if (y < 0) y *= 0.62;                         /* flatter underside */
+        if (y < -0.1 && z > 0.1) { y -= 0.06; }
+        pa.setXYZ(k, x * 0.5, y * 0.5, z * 0.82);
       }
+      geo.computeVertexNormals();
+      add(brainG, geo, '#F29CB2', sx * 0.14, 0, 0, null, { flatShading: false });
     });
-    bx(brainG, 0.03, 0.62, 1.1, '#C46A86', 0, 0.04, 0);
     const hit = new T.Mesh(new T.SphereGeometry(1.3, 6, 5), new T.MeshBasicMaterial({ visible: false })); brainG.add(hit);
     brainG.userData.brain = true;
     brainTag = document.createElement('button'); brainTag.type = 'button'; brainTag.className = 'brainTag'; brainTag.textContent = 'Synapse lab'; brainTag.addEventListener('click', e => { e.stopPropagation(); if (B.onBrain) B.onBrain(); }); if (tagsEl) tagsEl.appendChild(brainTag);
@@ -3541,7 +3691,7 @@ const World = (function () {
   const CATS = [
     ['BG', 'Brand / Generic'], ['CL', 'Drug classes'], ['MOA', 'Mechanisms'], ['AE', 'Adverse effects'],
     ['DDI', 'Interactions'], ['CN', 'Counseling'], ['AD', 'Antidotes'], ['SIG', 'Sig & law'],
-    ['TOP', 'Weekly drugs'], ['CALC', 'Calculations'], ['MY', 'My studies']
+    ['TOP', 'Weekly drugs'], ['CALC', 'Calculations'], ['PT3', 'PharmTox \u00B7 Exam 3'], ['MY', 'My studies']
   ];
   const CATNAME = {}; CATS.forEach(c => CATNAME[c[0]] = c[1]);
   const FLAVOR = {
@@ -4063,14 +4213,16 @@ const World = (function () {
   }
   function settingsHTML() {
     const st = S.set, mc = missedByCat(), ms = masteryByCat();
-    const topics = CATS.filter(c => c[0] !== 'MY' || S.decks.length).map(c => `<button type="button" class="chip tp" data-act="topic" data-v="${c[0]}" aria-pressed="${!!st.topics[c[0]]}"><span class="cn">${c[1]}${c[0] === 'TOP' && curWeek() ? ' <small class="mc wk">wk ' + curWeek() + '</small>' : ''}${mc[c[0]] ? ` <small class="mc">${mc[c[0]]} missed</small>` : ''}</span>${ms[c[0]] && ms[c[0]].n ? (() => { const pc = Math.round(100 * ms[c[0]].s / ms[c[0]].n); return `<span class="mbar" role="img" aria-label="${pc}% mastered"><i style="width:${pc}%"></i><em>${pc}%</em></span>`; })() : ''}</button>`).join('');
+    const chipOf = c => `<button type="button" class="chip tp" data-act="topic" data-v="${c[0]}" aria-pressed="${!!st.topics[c[0]]}"><span class="cn">${c[0] === 'PT3' ? 'Exam 3' : c[1]}${c[0] === 'TOP' && curWeek() ? ' <small class="mc wk">wk ' + curWeek() + '</small>' : ''}${mc[c[0]] ? ` <small class="mc">${mc[c[0]]} missed</small>` : ''}</span>${ms[c[0]] && ms[c[0]].n ? (() => { const pc = Math.round(100 * ms[c[0]].s / ms[c[0]].n); return `<span class="mbar" role="img" aria-label="${pc}% mastered"><i style="width:${pc}%"></i><em>${pc}%</em></span>`; })() : ''}</button>`;
+    const topics = CATS.filter(c => c[0] !== 'MY' && c[0] !== 'PT3' || c[0] === 'MY' && S.decks.length).map(chipOf).join('');
+    const tox = CATS.filter(c => c[0] === 'PT3').map(chipOf).join('');
     const diffs = [[1, 'Level 1 easy'], [2, 'Level 2 medium'], [3, 'Level 3 hard']].map(d => `<button type="button" class="chip" data-act="diff" data-v="${d[0]}" aria-pressed="${st.diffs.indexOf(d[0]) >= 0}">${d[1]}</button>`).join('');
     const modes = MODES.map(m => `<button type="button" class="chip" data-act="mode" data-v="${m[0]}" aria-pressed="${st.mode === m[0]}">${m[1]}</button>`).join('');
     const n = poolQs().length;
     return `<div class="pane nbk ${nbClosing ? 'closing' : ''}"><div class="nbcover"><span class="nbtitle">Study hub</span></div><div class="nbsheet">${hubTabs('set')}<h3>Question settings</h3><p class="sub">Changes apply to the next patient.</p>
       ${S.shop ? '' : '<div class="grp"><b>Name your pharmacy</b><div class="btnrow"><input id="shopname2" class="field" type="text" maxlength="24" autocomplete="off" placeholder="Corner Rx" aria-label="Pharmacy name"><button type="button" class="btn go" data-act="shop-save">Save name</button></div><p class="note">Shown on the sign above your shelves. Set once.</p></div>'}
       <div class="grp"><b>Focus mode</b><div class="chips"><button type="button" class="chip" data-act="focus" aria-pressed="${!!st.focus}">Focus mode ${st.focus ? 'on' : 'off'}</button></div><p class="note">Hides the 3D pharmacy and turns off the timer, patient events, phone calls, Karen and Jim, so it is only questions.</p></div>
-      <div class="grp"><b>Topics <span><button type="button" class="link" data-act="topics-all">All</button> &middot; <button type="button" class="link" data-act="topics-none">None</button></span></b><div class="chips">${topics}</div></div>
+      <div class="grp"><b>Topics <span><button type="button" class="link" data-act="topics-all">All</button> &middot; <button type="button" class="link" data-act="topics-none">None</button></span></b><div class="chips">${topics}</div>${tox ? '<div class="subgrp"><b class="subh">PharmTox</b><div class="chips">' + tox + '</div></div>' : ''}</div>
       <div class="grp"><b>Difficulty</b><div class="chips">${diffs}</div></div>
       <div class="grp"><b>Mode</b><div class="chips">${modes}</div><p class="note">${MODES.find(m => m[0] === st.mode)[2]}</p></div>
       <div class="grp"><b>Compounding pharmacy</b><div class="chips"><button type="button" class="chip" data-act="labk" data-v="comp" aria-pressed="${(S.labK || {}).comp !== false}">Compounding math</button><button type="button" class="chip" data-act="labk" data-v="pk" aria-pressed="${(S.labK || {}).pk !== false}">Kinetics</button></div><p class="note">Used when you tap Switch to compounding in the menu. Level chips above apply there too. ${S.labN ? 'Solved at the bench: ' + S.labOK + ' of ' + S.labN + '.' : ''}</p></div>
@@ -5385,6 +5537,7 @@ const World = (function () {
     const others = shuffle(synSitesFor(SYN.cat).filter(id => d.sites.indexOf(id) < 0)).slice(0, 3);
     SYN.q = { d, act: null, site: null, done: false, opts: shuffle([d.sites[0]].concat(others)) };
     if (World.ok && World.synHighlight) World.synHighlight(null);
+    if (World.ok && World.synDrug) World.synDrug({ name: d.name, act: d.act, sites: d.sites });
   }
   function synSet() {
     if (World.ok && World.synCat) { World.synCat(SYN.cat); World.synLabels(SYN.labels); }
@@ -5415,7 +5568,7 @@ const World = (function () {
     q.site = id; q.done = true; q.actOK = q.act === q.d.act; q.siteOK = q.d.sites.indexOf(id) >= 0; q.ok = q.actOK && q.siteOK;
     S.synN = (S.synN || 0) + 1;
     if (q.ok) { S.synOK = (S.synOK || 0) + 1; S.synStreak = (S.synStreak || 0) + 1; q.pay = Math.round(14 * (1 + 0.25 * S.up.shelf) * (1 + Math.min(S.synStreak, 10) * 0.05) * franchiseMult()); S.cash += q.pay; S.earned += q.pay; SFX.play('ok'); SFX.play('coin'); } else { S.synStreak = 0; SFX.play('bad'); }
-    save(); if (World.ok) World.synHighlight(q.d.sites); renderStats(); renderPanel();
+    save(); if (World.ok) { World.synHighlight(q.d.sites); if (World.synReveal) World.synReveal(); } renderStats(); renderPanel();
   }
   function synHTML() {
     const q = SYN.q || (synNewQ(), SYN.q), cat = SYN.cat;
@@ -5434,7 +5587,7 @@ const World = (function () {
       <div class="btnrow"><button type="button" class="btn go" data-act="back">Back to the pharmacy</button></div></div>`;
   }
 
-  const GAME_VERSION = 52;
+  const GAME_VERSION = 56;
   const b64u = (u8) => { let s = ''; for (let i = 0; i < u8.length; i += 0x8000) s += String.fromCharCode.apply(null, u8.subarray(i, i + 0x8000)); return btoa(s).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); };
   const unb64u = (t) => { const s = atob(t.replace(/-/g, '+').replace(/_/g, '/')), u = new Uint8Array(s.length); for (let i = 0; i < s.length; i++) u[i] = s.charCodeAt(i); return u; };
   const chk = (t) => { let h = 2166136261; for (let i = 0; i < t.length; i++) { h ^= t.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36); };
