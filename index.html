@@ -645,7 +645,7 @@ body.fx.focus .qpanel.min #counter { display: block; }
 .rx.evt .rx-sym { color: var(--amber); }
 
 /* compounding pharmacy */
-body.lab .tags, body.lab .line3d, body.lab .bub3d, body.lab .rush3d, body.lab .phonebtn, body.lab .hint3d, body.lab #restockhud, body.lab .qbar .restock, body.lab #menu [data-act="shelve"], body.lab #menu [data-act="dev-elder"], body.lab #menu [data-act="dev-next"], body.lab #menu [data-act="dev-bottle"], body.lab #menu [data-act="dev-shelve"], body.lab #menu [data-act="dev-prior"], body.lab #menu [data-act="dev-rush"], body.lab #menu [data-act="dev-insp"], body.lab #menu [data-act="dev-driver"] { display: none !important; }
+body.lab .evtTag, body.lab .tags, body.lab .line3d, body.lab .bub3d, body.lab .rush3d, body.lab .phonebtn, body.lab .hint3d, body.lab #restockhud, body.lab .qbar .restock, body.lab #menu [data-act="shelve"], body.lab #menu [data-act="dev-elder"], body.lab #menu [data-act="dev-next"], body.lab #menu [data-act="dev-bottle"], body.lab #menu [data-act="dev-shelve"], body.lab #menu [data-act="dev-prior"], body.lab #menu [data-act="dev-rush"], body.lab #menu [data-act="dev-insp"], body.lab #menu [data-act="dev-driver"] { display: none !important; }
 .capdots { display: flex; gap: 8px; margin: 6px 0; }
 .capdot { width: 38px; height: 38px; border-radius: 50%; display: grid; place-items: center; border: 2px dashed var(--ink); font-size: 18px; opacity: .55; }
 .capdot.on { border-style: solid; opacity: 1; background: var(--surface); }
@@ -666,7 +666,9 @@ body.lab .tags, body.lab .line3d, body.lab .bub3d, body.lab .rush3d, body.lab .p
 .labcalc textarea.field { width: 100%; resize: vertical; font: 500 14px/1.35 var(--f-body, inherit); }
 
 /* synapse lab */
-body.syn .tags, body.syn .line3d, body.syn .bub3d, body.syn .rush3d, body.syn .phonebtn, body.syn .hint3d, body.syn #restockhud, body.syn .say3d { display: none !important; }
+body.syn .evtTag, body.syn .tags, body.syn .line3d, body.syn .bub3d, body.syn .rush3d, body.syn .phonebtn, body.syn .hint3d, body.syn #restockhud, body.syn .say3d { display: none !important; }
+.evtTag { position: absolute; left: 0; top: 0; padding: 4px 10px; border-radius: 999px; border: 2px solid var(--ink); background: #FFD23F; color: #2B1D00; font: 800 12px/1.2 var(--f-body, inherit); cursor: pointer; white-space: nowrap; box-shadow: 0 2px 0 rgba(0,0,0,.25); animation: evtpulse 1.4s ease-in-out infinite; }
+@keyframes evtpulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.06); } }
 .brainTag { position: absolute; left: 0; top: 0; padding: 4px 10px; border-radius: 999px; border: 1.5px solid var(--ink); background: #F8D5E0; color: #4A1D2D; font: 800 12px/1.2 var(--f-body, inherit); cursor: pointer; white-space: nowrap; }
 .synwrap { position: absolute; inset: 0; overflow: hidden; pointer-events: none; z-index: 2; display: none; }
 body.syn .synwrap { display: block; }
@@ -1011,7 +1013,6 @@ Q("PT3",2,"This receptor has a higher affinity for epinephrine and its activatio
 Q("PT3",2,"Fred takes phenelzine, a nonselective MAO inhibitor, and consumes large amounts of aged cheese and fermented beer. Which acute complication is most concerning?","Severe hypertension",["Early signs of Parkinson’s","Hypotension","BPH"],"From your PHAR 443 Exam 3 question bank.","Adrenergics");
 Q("PT3",2,"Which of the following drugs is the most sensitive to pretreatment with reserpine?","Amphetamine",["Clonidine","Dobutamine","Isoproterenol"],"From your PHAR 443 Exam 3 question bank.","Adrenergics");
 Q("PT3",2,"Cedric was recently suffered his first bee sting during a maze and suffered anaphylactic shock. The most appropriate treatment would be:","Epinephrine",["Clonidine","Terbutaline"],"From your PHAR 443 Exam 3 question bank.","Adrenergics");
-Q("PT3",2,"Minerva periodically suffers from orthostatic dizziness from autonomic neuropathy. Which of the following is the most appropriate treatment?","Droxidopa",["Clonidine","Dobutamine","Isoproterenol"],"From your PHAR 443 Exam 3 question bank.","Adrenergics");
 Q("PT3",2,"At high dopamine infusion rates, which receptor predominantly mediates vasoconstriction and increased blood pressure?","α1",["α₂","β₁","β₂"],"From your PHAR 443 Exam 3 question bank.","Adrenergics");
 Q("PT3",2,"Charlie suffers from asthma due to chronic smoke inhalation and was recently prescribed an inhaler that targets the β₂ receptor. What was Charlie most likely prescribed:","Albuterol",["Dobutamine","Phenylephrine","Norepinephrine"],"From your PHAR 443 Exam 3 question bank.","Adrenergics");
 Q("PT3",2,"Severus has asthma and COPD. In addition to an inhaled corticosteroid for asthma, he uses a twice-daily long-acting β2 agonist that is not an acute rescue drug. Which drug is it?","Salmeterol",["Albuterol","Fenoldopam","Droxidopa"],"From your PHAR 443 Exam 3 question bank.","Adrenergics");
@@ -1021,11 +1022,9 @@ Q("PT3",2,"Tom is newly prescribed terazosin for hypertension and BPH. A prescri
 Q("PT3",2,"Propranolol is a nonselective β blocker without additional α1-blocking vasodilator activity. In the conventional generation classification, it is a:","First generation β blocker",["Second generation β blocker","Third generation β blocker"],"From your PHAR 443 Exam 3 question bank.","Adrenergics");
 Q("PT3",2,"Rubeus is large 62 year old male, that suffer from hypertension and has experience an myocardial infarction after a stressful year at work and the loss of a close friend. He was prescribed one of the most commonly prescribed β₁ blockers that has an extended-release formulation for one-daily dosing since Rubeus tends to forget things. He was prescribed:","Metoprolol",["Propranolol","Ketanserin","Phenoxybenzamine"],"From your PHAR 443 Exam 3 question bank.","Adrenergics");
 Q("PT3",2,"In treating anaphylactic vasodilation and shock, which pattern best describes the intended cardiovascular actions of epinephrine through α1-mediated vasoconstriction and β1-mediated cardiac stimulation?","Increased cardiac stimulation, increased blood pressure, increased peripheral resistance",["Decreased cardiac stimulation, decreased blood pressure, increased peripheral resistance","Increased cardiac stimulation, decreased blood pressure, no change in peripheral resistance","Decreased cardiac stimulation, increased blood pressure, decreased peripheral resistance"],"From your PHAR 443 Exam 3 question bank.","Adrenergics");
-Q("PT3",2,"Which listed catecholamine has dose-dependent dopaminergic, β1, and α1 effects and can cause digital ischemia at high infusion rates?","Dopamine",["Norepinephrine","Droxidopa","Epinephrine"],"From your PHAR 443 Exam 3 question bank.","Adrenergics");
 Q("PT3",2,"As you are taking this exam or speaking in public your ______ is most likely activated.","Sympathetic nervous system",["Parasympathetic nervous system","Enteric nervous system","Antisympathetic nervous system"],"From your PHAR 443 Exam 3 question bank.","Adrenergics");
 Q("PT3",2,"Which listed receptor class on vascular smooth muscle is a target for reducing sympathetic vasoconstriction?","Alpha adrenergic receptors",["Delta adrenergic receptors","Nicotinic receptors","Muscarinic receptors"],"From your PHAR 443 Exam 3 question bank.","Adrenergics");
 Q("PT3",2,"If you applied reserpine, it would have the greatest effect on which of the following drugs?","Amphetamine",["Clonidine","Epinephrine","Terbutaline"],"From your PHAR 443 Exam 3 question bank.","Adrenergics");
-Q("PT3",2,"Which statement best describes ephedrine’s mixed direct and indirect sympathomimetic action?","Direct α- and β-adrenergic agonism plus norepinephrine release",["Delta adrenergic receptors","Nicotinic receptors","Muscarinic receptors"],"From your PHAR 443 Exam 3 question bank.","Adrenergics");
 Q("PT3",2,"Epinephrine:","Is a powerful cardiac stimulant",["Is a powerful CNS stimulant","Mediates the parasympathetic response"],"From your PHAR 443 Exam 3 question bank.","Adrenergics");
 Q("PT3",2,"At high dopamine infusion rates, which receptor predominantly mediates the vasoconstrictor response?","Alpha 1 receptors",["Alpha 2 receptors","Beta 1 receptors","Beta 2 receptors"],"From your PHAR 443 Exam 3 question bank.","Adrenergics");
 Q("PT3",2,"This short-acting Beta-adrenergic receptor agonist is used for cardiac decompensation.","Dobutamine",["Albuterol","Formoterol","Dopamine"],"From your PHAR 443 Exam 3 question bank.","Adrenergics");
@@ -1034,7 +1033,6 @@ Q("PT3",2,"Which long-acting β2 agonist is used for maintenance treatment of br
 Q("PT3",2,"Which α2-adrenergic agonist reduces central sympathetic outflow and is used to treat hypertension?","Clonidine",["Albuterol","Dopamine","Epinephrine"],"From your PHAR 443 Exam 3 question bank.","Adrenergics");
 Q("PT3",2,"Which is NOT a standard contemporary indication for a selective α1-adrenergic antagonist used as a standalone disease treatment?","Chronic heart failure",["Benign prostatic hyperplasia","Hypertension"],"From your PHAR 443 Exam 3 question bank.","Adrenergics");
 Q("PT3",2,"This structural analogue of prazosin is used to treat hypertension:","Terazosin",["Prazosin","Formoterol","Albuterol"],"From your PHAR 443 Exam 3 question bank.","Adrenergics");
-Q("PT3",2,"Which listed α2 antagonist also shows antagonist activity at serotonin 5-HT1B/1D receptors?","Yohimbine",["Prazosin","Terazosin","Formoterol"],"From your PHAR 443 Exam 3 question bank.","Adrenergics");
 Q("PT3",2,"In the conventional β-blocker generation classification, which group is described as β1-selective without an added vasodilator mechanism?","Second generation",["First generation","Third generation"],"From your PHAR 443 Exam 3 question bank.","Adrenergics");
 Q("PT3",2,"Which nonselective β blocker used for hypertension is contraindicated in bronchial asthma?","Propranolol",["Yohimbine","Prazosin","Atenolol"],"From your PHAR 443 Exam 3 question bank.","Adrenergics");
 Q("PT3",2,"Which is a documented additional property of carvedilol?","It has antioxidant properties",["It is Beta 1 specific","It also blocks dopamine receptors"],"From your PHAR 443 Exam 3 question bank.","Adrenergics");
@@ -1101,7 +1099,7 @@ Q("PT3",2,"Which of the following is considered a negative symptom of schizophre
 Q("PT3",2,"Which of the following drugs acts as a partial agonist at dopamine D2 receptors?","Aripiprazole",["Haloperidol","Clozapine","Risperidone"],"From your PHAR 443 Exam 3 question bank.","Psychosis and mania");
 Q("PT3",2,"What is the mechanism of action of risperidone?","Dopamine D2 and serotonin 5-HT2A receptor antagonist",["Dopamine agonist","NMDA receptor blocker","GABA-A receptor modulator"],"From your PHAR 443 Exam 3 question bank.","Psychosis and mania");
 /* PharmTox Exam 3 drug-list questions (PHAR 443): P(section, difficulty, question, correct, [3 wrong], explanation) */
-const P = (t, d, q, a, w, e) => Q("PT3", d, q, a, w, e, t);
+const P = (t, d, q, a, w, e) => Q("PT3G", d, q, a, w, e, t);
 
 /* ---------- Adrenergics ---------- */
 P("Adrenergics",1,"Which drug is a nonselective β1 and β2 agonist with almost no α activity, used for bradycardia or heart block?","Isoproterenol",["Dobutamine","Phenylephrine","Albuterol"],"Isoproterenol stimulates β1 (rate and contractility) and β2 (vasodilation, so diastolic pressure falls). It is the classic β-only agonist.");
@@ -1923,13 +1921,23 @@ const World = (function () {
     let skin = karen ? '#E8745F' : sweaty ? '#D4DAAE' : SKIN[seed % 6], hair = karen ? '#E8C766' : sweaty ? '#2E2420' : HAIR[(seed >> 3) % 6], shirt = karen ? '#D9467A' : sweaty ? '#8A97A8' : isStaff ? '#F4FAFA' : SHIRT[(seed >> 5) % 6], style = karen ? 3 : sweaty ? 4 : (seed >> 7) % 3;
     if (o.elder) { hair = '#E6E6EE'; shirt = o.gender === 'f' ? '#B79CD6' : '#7C9CB8'; style = o.gender === 'f' ? 6 : 8; }
     if (o.skin) skin = o.skin; if (o.hair) hair = o.hair; if (o.shirt) shirt = o.shirt; if (o.hairStyle !== undefined) style = o.hairStyle;
+    const varied = !karen && !sweaty && !o.elder && !o.inspector && !o.driver && !o.cap && o.hairStyle === undefined;
+    const rnd = (n) => (Math.imul((seed | 0) + 977 * n + 13, 2654435761) >>> 8) % 1000 / 1000;
+    let costume = null;
+    if (varied && !isStaff && hol) {
+      const cr = rnd(12);
+      if (hol === 'halloween') { if (cr < 0.13) { costume = 'witch'; skin = '#8DBF6A'; shirt = '#2B2438'; } else if (cr < 0.24) { costume = 'vampire'; skin = '#E9E4F0'; shirt = '#1C1826'; } else if (cr < 0.32) costume = 'pumpkin'; }
+      else if (hol === 'christmas') { if (cr < 0.2) costume = 'santa'; else if (cr < 0.3) costume = 'antlers'; else if (cr < 0.4) costume = 'scarf'; }
+    }
+    if (varied) { const STY = [0, 1, 2, 5, 6, 7, 8, 9, 10, 11]; style = STY[Math.floor(rnd(1) * STY.length)]; if (style === 8 && o.gender === 'f') style = 5; }
     const own = (c) => new T.MeshStandardMaterial({ color: c, flatShading: true, roughness: 0.85 });
+    const goldM0 = () => own('#F2C94C');
     const P = { legs: [], arms: [], shirtM: own(shirt), skinM: own(skin) }, pants = own(o.scrub || '#27384F'), hairM = own(hair), dark = own('#1b1b24');
     const tag = o.tag || (isStaff ? { up: 'tech' } : { cust: true });
     // Body types: normal, jacked (huge upper body, tiny legs), obese. Upper body and head live in their own groups.
     const jacked = body === 'jacked', obese = body === 'obese', slim = body === 'slim';
     const tr = o.gender === 'f' ? [0.3, 0.43] : o.gender === 'm' ? [0.42, 0.35] : [0.34, 0.4];
-    const legL = jacked ? 0.4 : 0.68, legW = jacked || obese ? 0.3 : slim ? 0.15 : 0.2, headS = jacked ? 0.82 : obese ? 1.12 : 1;
+    const legL = jacked ? 0.5 + 0.2 * rnd(7) : 0.68, legW = jacked || obese ? 0.3 : slim ? 0.15 : 0.2, headS = jacked ? 0.82 : obese ? 1.12 : 1;
     const up = new T.Group(); up.position.y = legL - 0.68; g.add(up);
     const hd = new T.Group(); hd.position.y = 1.85 * (1 - headS); hd.scale.set(headS, headS, headS); up.add(hd);
     let par = up;
@@ -1939,6 +1947,14 @@ const World = (function () {
     if (jacked) tor.scale.set(2.0, 1.12, 1.5);
     if (obese) { tor.scale.set(1.8, 1, 1.75); const belly = put(new T.IcosahedronGeometry(0.62, 0), P.shirtM, 0, 0.95, 0.3); belly.scale.set(1.25, 1, 1.05); }
     if (o.coat) put(new T.BoxGeometry(0.2, 0.62, 0.03), own(o.scrub), 0, 1.22, Math.max(tr[0], tr[1]) * tor.scale.z + 0.005);
+    if (varied && !isStaff && !o.coat) {
+      const rt = jacked ? 0.46 : tr[0], rb = jacked ? 0.15 : tr[1], sz = tor.scale.z, fz = (y) => (rb + (rt - rb) * (y - 0.645) / 0.95) * sz + 0.012, cl = Math.floor(rnd(8) * 6);
+      if (cl === 1) { const bc = own('#F4FAFA'); [0.85, 1.07, 1.29].forEach(y => put(new T.BoxGeometry(0.44, 0.07, 0.03), bc, 0, y, fz(y))); }
+      else if (cl === 2) { const hc = own(shirt); const hood = put(new T.TorusGeometry(0.2, 0.09, 5, 8), hc, 0, 1.6, -0.1); hood.rotation.x = PI / 2 - 0.4; put(new T.BoxGeometry(0.38, 0.2, 0.03), own('#3A4658'), 0, 0.85, fz(0.85)); [-0.08, 0.08].forEach(x => put(new T.BoxGeometry(0.02, 0.2, 0.02), own('#FFFFFF'), x, 1.4, fz(1.4))); }
+      else if (cl === 3) { const wc = own('#FFFFFF'); [-1, 1].forEach(s => { const c = put(new T.BoxGeometry(0.13, 0.11, 0.03), wc, s * 0.07, 1.55, fz(1.55)); c.rotation.z = s * 0.7; }); put(new T.BoxGeometry(0.07, 0.5, 0.03), own('#B91C1C'), 0, 1.25, fz(1.25) + 0.005); put(new T.BoxGeometry(0.1, 0.08, 0.04), own('#B91C1C'), 0, 1.5, fz(1.5) + 0.005); }
+      else if (cl === 4) { const jc = own('#2F3B52'); [-1, 1].forEach(s => put(new T.BoxGeometry(0.09, 0.85, 0.03), jc, s * 0.17, 1.1, fz(1.1))); [1.35, 1.1, 0.85].forEach(y => put(new T.IcosahedronGeometry(0.035, 0), goldM0(), 0, y, fz(y) + 0.01)); }
+      else if (cl === 5) { const oc = own('#27384F'); [-1, 1].forEach(s => put(new T.BoxGeometry(0.07, 0.75, 0.03), oc, s * 0.15, 1.2, fz(1.2))); put(new T.BoxGeometry(0.34, 0.26, 0.03), oc, 0, 0.95, fz(0.95)); }
+    }
     par = hd;
     put(new T.IcosahedronGeometry(0.32, 0), P.skinM, 0, 1.85, 0);
     if (style === 3) { put(new T.SphereGeometry(0.37, 6, 4, 0, PI * 2, 0, PI / 2), hairM, 0, 1.9, 0); put(new T.BoxGeometry(0.14, 0.55, 0.42), hairM, -0.31, 1.68, -0.02); put(new T.BoxGeometry(0.14, 0.55, 0.42), hairM, 0.31, 1.68, -0.02); put(new T.BoxGeometry(0.64, 0.5, 0.14), hairM, 0, 1.7, -0.28); }
@@ -1946,13 +1962,52 @@ const World = (function () {
     else if (style === 5) { put(new T.SphereGeometry(0.35, 6, 4, 0, PI * 2, 0, PI / 2), hairM, 0, 1.9, 0); put(new T.BoxGeometry(0.7, 0.95, 0.16), hairM, 0, 1.45, -0.28); put(new T.BoxGeometry(0.14, 0.7, 0.32), hairM, -0.34, 1.58, -0.06); put(new T.BoxGeometry(0.14, 0.7, 0.32), hairM, 0.34, 1.58, -0.06); }
     else if (style === 6) { put(new T.SphereGeometry(0.35, 6, 4, 0, PI * 2, 0, PI / 2), hairM, 0, 1.9, 0); put(new T.IcosahedronGeometry(0.17, 0), hairM, 0, 2.27, -0.06); }
     else if (style === 7) { const cu = put(new T.IcosahedronGeometry(0.46, 0), hairM, 0, 2.08, -0.14); cu.scale.set(1.1, 0.9, 0.8); }
+    else if (style === 9) { put(new T.BoxGeometry(0.11, 0.24, 0.62), hairM, 0, 2.15, -0.02); put(new T.BoxGeometry(0.11, 0.14, 0.5), hairM, 0, 2.04, -0.02); }
+    else if (style === 10) { const af = put(new T.SphereGeometry(0.48, 7, 5), hairM, 0, 1.98, -0.08); af.scale.set(1.05, 0.95, 1); }
+    else if (style === 11) { put(new T.SphereGeometry(0.35, 6, 4, 0, PI * 2, 0, PI / 2), hairM, 0, 1.9, 0); const tl = put(new T.BoxGeometry(0.11, 0.5, 0.11), hairM, 0, 1.78, -0.38); tl.rotation.x = 0.35; put(new T.IcosahedronGeometry(0.1, 0), own('#E04F3A'), 0, 2.02, -0.33); }
     else if (style === 8) { /* bald */ }
     else if (style === 2) put(new T.CylinderGeometry(0.34, 0.34, 0.14, 6), hairM, 0, 2.08, 0);
     else {
       put(new T.SphereGeometry(0.35, 6, 4, 0, PI * 2, 0, PI / 2), hairM, 0, 1.9, 0);
       if (style === 1) put(new T.IcosahedronGeometry(0.15, 0), hairM, 0, 2.28, -0.12);
     }
-    P.dark = dark; P.eyes = [put(new T.BoxGeometry(0.07, 0.07, 0.04), dark, -0.11, 1.88, 0.29), put(new T.BoxGeometry(0.07, 0.07, 0.04), dark, 0.11, 1.88, 0.29)];
+    if (!karen && !sweaty) { const wh = own('#FFFFFF'); put(new T.BoxGeometry(0.105, 0.085, 0.03), wh, -0.11, 1.88, 0.283); put(new T.BoxGeometry(0.105, 0.085, 0.03), wh, 0.11, 1.88, 0.283); }
+    if (costume) {
+      if (costume === 'witch') { put(new T.CylinderGeometry(0.52, 0.52, 0.04, 9), own('#1F1B2E'), 0, 2.06, 0); const wc = put(new T.ConeGeometry(0.27, 0.72, 7), own('#1F1B2E'), 0, 2.42, 0); wc.rotation.z = 0.12; put(new T.CylinderGeometry(0.285, 0.3, 0.08, 7), own('#7B3FA0'), 0, 2.12, 0); put(new T.BoxGeometry(0.1, 0.09, 0.03), own('#F2C94C'), 0, 2.12, 0.29); put(new T.ConeGeometry(0.06, 0.16, 4), skin ? own('#6FA051') : dark, 0, 1.78, 0.37).rotation.x = PI / 2; }
+      else if (costume === 'vampire') { put(new T.BoxGeometry(0.1, 0.12, 0.04), own('#FFFFFF'), -0.06, 1.675, 0.31); put(new T.BoxGeometry(0.1, 0.12, 0.04), own('#FFFFFF'), 0.06, 1.675, 0.31); put(new T.BoxGeometry(0.6, 0.12, 0.06), own('#1C1826'), 0, 2.06, 0.22); }
+      else if (costume === 'pumpkin') { const pk = put(new T.IcosahedronGeometry(0.2, 0), own('#F28A1E'), 0, 2.2, -0.02); pk.scale.set(1.2, 0.9, 1.2); put(new T.BoxGeometry(0.06, 0.12, 0.06), own('#3E8E41'), 0, 2.36, -0.02); }
+      else if (costume === 'santa') { put(new T.ConeGeometry(0.3, 0.55, 7), own('#D8283A'), 0, 2.27, -0.04).rotation.x = -0.25; put(new T.CylinderGeometry(0.34, 0.34, 0.1, 8), own('#FFFFFF'), 0, 2.04, 0); put(new T.IcosahedronGeometry(0.09, 0), own('#FFFFFF'), 0, 2.46, -0.2); }
+      else if (costume === 'antlers') { const br = own('#8A5A2B'); [-1, 1].forEach(s => { const a = put(new T.BoxGeometry(0.05, 0.36, 0.05), br, s * 0.2, 2.2, 0); a.rotation.z = -s * 0.35; const b = put(new T.BoxGeometry(0.05, 0.2, 0.05), br, s * 0.3, 2.28, 0); b.rotation.z = s * 0.6; }); put(new T.IcosahedronGeometry(0.06, 0), own('#E04F3A'), 0, 1.82, 0.35); }
+      else if (costume === 'scarf') { const sf = put(new T.TorusGeometry(0.27, 0.075, 5, 8), own(rnd(12) < 0.5 ? '#D8283A' : '#3E8E41'), 0, 1.58, 0); sf.rotation.x = PI / 2; put(new T.BoxGeometry(0.12, 0.4, 0.05), own('#D8283A'), 0.15, 1.35, 0.3, up); }
+    }
+    P.dark = dark; P.eyes = [put(new T.BoxGeometry(0.06, 0.065, 0.04), dark, -0.11, 1.88, 0.295), put(new T.BoxGeometry(0.06, 0.065, 0.04), dark, 0.11, 1.88, 0.295)];
+    {
+      const DSK = { '#F2C9A5': '#D9A883', '#E0A97E': '#C48A60', '#C48A5E': '#A8704A', '#8D5A3B': '#74472C', '#F6D7BD': '#DDB596', '#6F4429': '#59351F' }, noseM = own(DSK[skin] || skin);
+      put(new T.BoxGeometry(0.07, 0.11, 0.1), noseM, 0, 1.815, 0.325);
+      if (!karen && !sweaty && o.gender !== 'f') {
+        const mm = own('#6E2A2A'), mt = rnd(2);
+        put(new T.BoxGeometry(0.14, 0.028, 0.04), mm, 0, 1.715, 0.3);
+        if (mt < 0.4) { const a = put(new T.BoxGeometry(0.04, 0.03, 0.04), mm, -0.085, 1.735, 0.29); a.rotation.z = -0.5; const b = put(new T.BoxGeometry(0.04, 0.03, 0.04), mm, 0.085, 1.735, 0.29); b.rotation.z = 0.5; }
+        else if (mt > 0.85) { const a = put(new T.BoxGeometry(0.04, 0.03, 0.04), mm, -0.085, 1.7, 0.29); a.rotation.z = 0.5; const b = put(new T.BoxGeometry(0.04, 0.03, 0.04), mm, 0.085, 1.7, 0.29); b.rotation.z = -0.5; }
+      }
+      if (!karen && !sweaty && o.gender !== 'f') { const br = rnd(3) * 0.3 - 0.1; [-1, 1].forEach(s => { const bb = put(new T.BoxGeometry(0.11, 0.032, 0.03), hairM, s * 0.11, 1.965, 0.295); bb.rotation.z = -s * br; }); }
+      if (varied) {
+        const fh = rnd(4);
+        if (o.gender !== 'f' && fh < 0.55) {
+          if (fh < 0.1) put(new T.BoxGeometry(0.3, 0.15, 0.04), own('#8A7466'), 0, 1.66, 0.25);
+          else if (fh < 0.22) put(new T.BoxGeometry(0.24, 0.05, 0.06), hairM, 0, 1.765, 0.315);
+          else if (fh < 0.3) { put(new T.BoxGeometry(0.24, 0.05, 0.06), hairM, 0, 1.765, 0.315); put(new T.BoxGeometry(0.1, 0.15, 0.07), hairM, 0, 1.63, 0.27); }
+          else if (fh < 0.43) { put(new T.BoxGeometry(0.38, 0.2, 0.14), hairM, 0, 1.64, 0.18); put(new T.BoxGeometry(0.24, 0.05, 0.06), hairM, 0, 1.765, 0.31); }
+          else { put(new T.BoxGeometry(0.06, 0.2, 0.1), hairM, -0.3, 1.74, 0.08); put(new T.BoxGeometry(0.06, 0.2, 0.1), hairM, 0.3, 1.74, 0.08); put(new T.BoxGeometry(0.24, 0.05, 0.06), hairM, 0, 1.765, 0.315); }
+        }
+        const sc = rnd(5);
+        if (sc < 0.22) {
+          const sm = own('#B3504A'), side = rnd(6) < 0.5 ? -1 : 1;
+          if (sc < 0.12) { const c = put(new T.BoxGeometry(0.025, 0.22, 0.03), sm, side * 0.17, 1.82, 0.27); c.rotation.z = side * 0.55; }
+          else { put(new T.BoxGeometry(0.03, 0.1, 0.03), own('#E8C9C0'), side * 0.11, 1.955, 0.31); }
+        }
+      }
+    }
     if (o.elder) {
       const fr = own('#6B6B78'); [-0.11, 0.11].forEach(x => put(new T.TorusGeometry(0.08, 0.014, 4, 10), fr, x, 1.88, 0.3)); put(new T.BoxGeometry(0.08, 0.015, 0.02), fr, 0, 1.9, 0.3);
       P.scl = [-0.11, 0.11].map(x => { const m = put(new T.BoxGeometry(0.15, 0.15, 0.03), own('#FFFFFF'), x, 1.88, 0.272); m.visible = false; return m; });
@@ -2009,6 +2064,7 @@ const World = (function () {
     if (o.elder) g.scale.set(0.95, 0.9, 0.95);
     if (karen) g.scale.set(1.08, 1.08, 1.08);
     if (sweaty) g.scale.set(0.66, 1.1, 0.66);
+    if (varied && !o.elder) { const gs = 0.9 + 0.24 * rnd(9); g.scale.set(gs, gs, gs); }
     P.waddle = obese; g.rotation.order = 'YXZ'; g.userData.P = P; return g;
   }
   function walkAnim(p, t, walking, dt) {
@@ -2104,7 +2160,7 @@ const World = (function () {
       const m = new T.Mesh(new T.OctahedronGeometry(0.075, 0), new T.MeshStandardMaterial({ color: 0x8FD8FF, flatShading: true, roughness: 0.2, metalness: 0.1, transparent: true }));
       m.scale.set(0.8, 1.4, 0.8); m.visible = false; m.userData.fx = true; scene.add(m); drops.push({ m, life: 0, vx: 0, vz: 0, vy: 0 });
     }
-    buildBrain(g);
+    buildBrain(g); buildEvt(g);
     ug.notes = new T.Group(); ug.notes.position.set(BASE.notes[0], BASE.notes[1], BASE.notes[2]); scene.add(ug.notes); buildNotes();
   }
   function drawSign(txt) {
@@ -2796,8 +2852,8 @@ const World = (function () {
     const r = canvas.getBoundingClientRect();
     ndc.x = ((e.clientX - r.left) / r.width) * 2 - 1; ndc.y = -((e.clientY - r.top) / r.height) * 2 + 1;
     raycaster.setFromCamera(ndc, camera);
-    const hits = raycaster.intersectObjects(synOn ? synItems.filter(g => g.visible) : labOn ? labItems : [].concat(CLICK.map(i => ug[i]), [staffGroup, custGroup, petG, pharmG], phoneG ? [phoneG] : [], capG ? [capG] : [], brainG ? [brainG] : []), true);
-    for (const h of hits) { let o = h.object; while (o) { if (o.userData && (o.userData.up || o.userData.cust || o.userData.pet || o.userData.pharm || o.userData.vis || o.userData.cap || o.userData.lab || o.userData.site || o.userData.brain)) { pickObj = h.object; return o.userData; } o = o.parent; } }
+    const hits = raycaster.intersectObjects(synOn ? synItems.filter(g => g.visible) : labOn ? labItems : [].concat(CLICK.map(i => ug[i]), [staffGroup, custGroup, petG, pharmG], phoneG ? [phoneG] : [], capG ? [capG] : [], brainG ? [brainG] : [], evtG ? [evtG] : []), true);
+    for (const h of hits) { let o = h.object; while (o) { if (o.userData && (o.userData.up || o.userData.cust || o.userData.pet || o.userData.pharm || o.userData.vis || o.userData.cap || o.userData.lab || o.userData.site || o.userData.brain || o.userData.evt)) { pickObj = h.object; return o.userData; } o = o.parent; } }
     return null;
   }
   function setHover(up) {
@@ -2847,7 +2903,7 @@ const World = (function () {
       if (e.pointerType !== 'mouse' || (drag && drag.on)) return;
       if (fpT) { setFpHover(fpPick(e)); return; }
       const h = pick(e); setHover(h && h.up ? h.up : null);
-      if (!hovered) canvas.style.cursor = h && (h.cust || h.pet || h.pharm || h.vis || h.cap || h.lab || h.site || h.brain) ? 'pointer' : 'default';
+      if (!hovered) canvas.style.cursor = h && (h.cust || h.pet || h.pharm || h.vis || h.cap || h.lab || h.site || h.brain || h.evt) ? 'pointer' : 'default';
       if (synOn) synHover = h && h.site ? h.site : null;
     });
     canvas.addEventListener('click', e => {
@@ -2856,6 +2912,7 @@ const World = (function () {
       const h = pick(e); dismissHint();
       if (synOn) { if (h && h.site && B.onSynSite) B.onSynSite(h.site); return; }
       if (h && h.brain) { if (B.onBrain) B.onBrain(); return; }
+      if (h && h.evt) { if (B.onEvt) B.onEvt(h.evt); return; }
       if (h && h.lab) { labClick(h); return; }
       if (h && h.cap) { capClick(); return; }
       if (h && h.vis) { if (B.onVisitor) B.onVisitor(); return; }
@@ -3263,7 +3320,7 @@ const World = (function () {
     ragStep(dt); copStep(dt);
     // staff
     staffGroup.visible = !labOn && !synOn && !(fpT || fpK > 0.25);
-    capTick(dt); brainTick(dt);
+    capTick(dt); brainTick(dt); evtTick(dt); holTick(dt);
     staff.forEach(s => {
       if (fpT || fpK > 0) return;
       keepOffPharm(s); const w = moveTo(s, 1.7, dt, stf); keepOffPharm(s); s.phase += dt; walkAnim(s.g, s.phase, w, dt);
@@ -3356,6 +3413,8 @@ const World = (function () {
     hemi.intensity = dark ? 0.5 : 0.85; sun.intensity = dark ? 0.55 : 0.8;
     if (synOn) { scene.background = new T.Color(SYN_BG); hemi.intensity = 0.95; sun.intensity = 0.6; }
     else if (labOn) { scene.background = new T.Color(dark ? '#16282F' : '#E7F0F3'); hemi.intensity = dark ? 0.9 : 1.1; sun.intensity = 0.7; }
+    else if (hol && HOLBG[hol]) { scene.background = new T.Color(HOLBG[hol][dark ? 1 : 0]); try { if (hol === 'halloween') { hemi.color.setHex(0xFFB26B); sun.color.setHex(0xFF9540); hemi.intensity = dark ? 0.7 : 0.95; } else { hemi.color.setHex(0xEAF3FF); sun.color.setHex(0xFFF2DD); } } catch (e) { /* stub */ } }
+    if (!(hol && !synOn && !labOn)) { try { hemi.color.setHex(0xffffff); sun.color.setHex(0xffffff); } catch (e) { /* stub */ } }
   }
   let insR = 0, insB = 0;
   function resize() {
@@ -3854,6 +3913,104 @@ const World = (function () {
     brainG.userData.brain = true;
     brainTag = document.createElement('button'); brainTag.type = 'button'; brainTag.className = 'brainTag'; brainTag.textContent = 'Synapse lab'; brainTag.addEventListener('click', e => { e.stopPropagation(); if (B.onBrain) B.onBrain(); }); if (tagsEl) tagsEl.appendChild(brainTag);
   }
+  /* clickable event objects on the counter: restock box, prior-auth folder, mystery pill bottle */
+  let evtG = null; const evtO = {};
+  const EVT_DEF = { shelve: ['Restock', -5.7], prior: ['Prior auth', -4.5], bottle: ['Check bottle', -6.9] };
+  function buildEvt(g) {
+    evtG = new T.Group(); g.add(evtG);
+    Object.keys(EVT_DEF).forEach(k => {
+      const o = new T.Group(); o.position.set(EVT_DEF[k][1], 1.27, 0.42); o.visible = false; o.userData.evt = k; evtG.add(o);
+      if (k === 'shelve') {
+        bx(o, 0.8, 0.5, 0.6, '#C99A5B', 0, 0.25, 0); bx(o, 0.14, 0.02, 0.62, '#EAD9B0', 0, 0.51, 0); bx(o, 0.5, 0.32, 0.42, '#D8A968', -0.05, 0.66, 0.02).rotation.y = 0.35;
+        bx(o, 0.3, 0.18, 0.02, '#FFFFFF', 0, 0.25, 0.31);
+      } else if (k === 'prior') {
+        bx(o, 0.8, 0.05, 1.0, '#F2A516', 0, 0.03, 0); bx(o, 0.34, 0.05, 0.12, '#F2A516', -0.2, 0.03, -0.55); bx(o, 0.68, 0.03, 0.88, '#FFFFFF', 0, 0.075, 0.02);
+        for (let i = 0; i < 4; i++) bx(o, 0.5, 0.02, 0.05, '#7BA7B5', 0, 0.1, -0.28 + i * 0.18);
+        cy(o, 0.09, 0.09, 0.05, 8, '#E04F3A', 0.22, 0.12, 0.3);
+      } else {
+        cy(o, 0.24, 0.24, 0.6, 10, '#F2A516', 0, 0.3, 0); cy(o, 0.245, 0.245, 0.3, 10, '#F4F9F9', 0, 0.3, 0); cy(o, 0.27, 0.27, 0.16, 10, '#FFFFFF', 0, 0.68, 0);
+        bx(o, 0.18, 0.12, 0.02, '#2CCDBB', 0, 0.32, 0.245);
+      }
+      const hit = new T.Mesh(new T.SphereGeometry(0.75, 6, 5), new T.MeshBasicMaterial({ visible: false })); hit.position.y = 0.4; o.add(hit);
+      const tag = document.createElement('button'); tag.type = 'button'; tag.className = 'evtTag'; tag.textContent = EVT_DEF[k][0]; tag.hidden = true;
+      tag.addEventListener('click', e => { e.stopPropagation(); if (B.onEvt) B.onEvt(k); });
+      if (tagsEl) tagsEl.appendChild(tag);
+      evtO[k] = { g: o, tag: tag, on: false, t: Math.random() * 6, s: 0 };
+    });
+  }
+  function evtTick(dt) {
+    Object.keys(evtO).forEach(k => {
+      const e = evtO[k], want = e.on && !labOn && !synOn, tgt = want ? 1 : 0;
+      e.s += (tgt - e.s) * Math.min(1, dt * 7); e.t += dt;
+      const vis = e.s > 0.03; e.g.visible = vis; e.tag.hidden = !(want && e.s > 0.5);
+      if (!vis) return;
+      const sc = Math.max(0.01, e.s); e.g.scale.set(sc, sc, sc);
+      e.g.position.y = 1.27 + Math.abs(Math.sin(e.t * 2.4)) * 0.12; e.g.rotation.y = Math.sin(e.t * 1.1) * 0.25;
+      if (!e.tag.hidden) place(e.tag, e.g.position.x, e.g.position.y + 1.15, e.g.position.z);
+    });
+  }
+  /* ---- seasonal events: Halloween (Oct 24-31) and Christmas (Dec 18-25) ---- */
+  let hol = null, holN = 0, holG = null, holItems = [], holAnim = [], holFlakes = [];
+  const HOLBG = { halloween: ['#F6A352', '#3A1D0A'], christmas: ['#DCEBFA', '#1B2A44'] };
+  function holMk(fn) { const g = new T.Group(); holG.add(g); fn(g); return g; }
+  function holBuild(kind) {
+    if (holG) { scene.remove(holG); holG.traverse(n => { if (n.geometry && n.geometry.dispose) n.geometry.dispose(); }); }
+    holG = null; holItems = []; holAnim = []; holFlakes = [];
+    if (!kind) return;
+    holG = new T.Group(); scene.add(holG);
+    const bunt = (cols, y) => holMk(g => { for (let i = 0; i < 22; i++) { const x = -11 + i, sag = Math.sin((i / 21) * PI) * -0.7; const c = cone(g, 0.28, 0.55, 3, cols[i % cols.length], x, y + sag, -6.85); c.rotation.x = PI; c.rotation.y = 0.3; } });
+    if (kind === 'halloween') {
+      bunt(['#F28A1E', '#1F1B2E', '#7B3FA0'], 6.4);
+      const orange = '#F28A1E', stem = '#3E8E41', glowM = { emissive: new T.Color('#FFD23F'), emissiveIntensity: 0.9 };
+      const pumpkin = (g, x, y, z, s) => { const p = ico(g, 0.5 * s, orange, x, y + 0.42 * s, z); p.scale.set(1.15, 0.9, 1.15); cy(g, 0.07 * s, 0.1 * s, 0.22 * s, 5, stem, x, y + 0.9 * s, z); };
+      holItems.push(holMk(g => { pumpkin(g, -9.0, 1.27, 0.5, 0.7); pumpkin(g, -8.4, 1.27, 0.7, 0.45); }));
+      holItems.push(holMk(g => { pumpkin(g, -9.3, 0, 3.0, 1.35); bx(g, 0.14, 0.14, 0.05, '#FFE066', -9.55, 0.62, 3.9, null, glowM); bx(g, 0.14, 0.14, 0.05, '#FFE066', -9.05, 0.62, 3.9, null, glowM); bx(g, 0.34, 0.1, 0.05, '#FFE066', -9.3, 0.38, 3.92, null, glowM); }));
+      const bub = [];
+      holItems.push(holMk(g => { cy(g, 0.8, 0.6, 0.8, 9, '#1F1B2E', -7.3, 0.4, 6.0); cy(g, 0.84, 0.84, 0.08, 9, '#2B2438', -7.3, 0.82, 6.0); cy(g, 0.66, 0.66, 0.05, 9, '#6FD14C', -7.3, 0.8, 6.0, null, glowM); for (let i = 0; i < 4; i++) { const b = ico(g, 0.1, '#9BE86A', -7.3, 0.9, 6.0); bub.push({ m: b, t: i * 0.6 }); } [-1, 1].forEach(s => cy(g, 0.07, 0.07, 0.35, 5, '#1F1B2E', -7.3 + s * 0.5, 0.15, 6.4)); }));
+      holAnim.push(dt => bub.forEach(b => { b.t += dt * 0.7; const k = b.t % 1; b.m.position.y = 0.85 + k * 0.7; b.m.position.x = -7.3 + Math.sin(b.t * 6) * 0.25; b.m.scale.setScalar ? b.m.scale.setScalar(1 - k * 0.7) : b.m.scale.set(1 - k * 0.7, 1 - k * 0.7, 1 - k * 0.7); }));
+      const gh = holMk(g => { const body = ico(g, 0.5, '#F4F4FF', 0, 0, 0); body.scale.set(1, 1.3, 1); bx(g, 0.12, 0.18, 0.06, '#1b1b24', -0.16, 0.12, 0.45); bx(g, 0.12, 0.18, 0.06, '#1b1b24', 0.16, 0.12, 0.45); bx(g, 0.18, 0.12, 0.06, '#1b1b24', 0, -0.15, 0.46); [-0.3, 0, 0.3].forEach(x => cone(g, 0.15, 0.3, 4, '#F4F4FF', x, -0.72, 0).rotation.x = PI); }); holItems.push(gh);
+      holAnim.push(dt => { gh.position.set(4.8 + Math.sin(time * 0.6) * 1.4, 3.3 + Math.sin(time * 1.7) * 0.3, 5.5); gh.rotation.y = Math.sin(time * 0.8) * 0.5; });
+      const bats = []; holItems.push(holMk(g => { for (let i = 0; i < 5; i++) { const b = new T.Group(); bx(b, 0.22, 0.14, 0.18, '#1F1B2E', 0, 0, 0); const l = bx(b, 0.5, 0.04, 0.26, '#2B2438', -0.32, 0.02, 0), r = bx(b, 0.5, 0.04, 0.26, '#2B2438', 0.32, 0.02, 0); g.add(b); bats.push({ g: b, l, r, ph: i * 1.3 }); } }));
+      holAnim.push(dt => bats.forEach(b => { const a = time * 0.5 + b.ph; b.g.position.set(Math.cos(a) * 7, 7 + Math.sin(a * 2.3) * 0.6, 2 + Math.sin(a) * 2.5); b.g.rotation.y = -a + PI; const f = Math.sin(time * 14 + b.ph) * 0.6; b.l.rotation.z = f; b.r.rotation.z = -f; }));
+      const sp = []; holItems.push(holMk(g => { for (let i = 0; i < 6; i++) { const l = bx(g, 1.8, 0.03, 0.03, '#EEEEEE', 9, 6.2, -7.05); l.rotation.z = i * PI / 6; } [0.5, 0.9, 1.3].forEach(r => { const t = new T.Mesh(new T.TorusGeometry(r, 0.012, 3, 12), new T.MeshBasicMaterial({ color: 0xEEEEEE })); t.position.set(9, 6.2, -7.05); g.add(t); }); const s = new T.Group(); ico(s, 0.2, '#1b1b24', 0, 0, 0); [-1, 1].forEach(q => [0.15, 0.3].forEach(o => { const lg = bx(s, 0.3, 0.025, 0.025, '#1b1b24', q * 0.28, o - 0.2, 0); lg.rotation.z = q * 0.5; })); g.add(s); sp.push(s); bx(g, 0.02, 2.4, 0.02, '#EEEEEE', 8.4, 7.4, -6.9); }));
+      holAnim.push(dt => sp.forEach(s => { s.position.set(8.4, 6.2 + Math.sin(time * 1.2) * 0.5, -6.85); }));
+      holItems.push(holMk(g => { cone(g, 0.36, 0.8, 8, '#1F1B2E', -1.6, 1.27 + 0.42, 0.55).rotation.z = 0.08; cy(g, 0.58, 0.58, 0.05, 10, '#1F1B2E', -1.6, 1.3, 0.55); cy(g, 0.37, 0.4, 0.09, 8, '#7B3FA0', -1.6, 1.4, 0.55); }));
+      holItems.push(holMk(g => { const b = new T.Mesh(new T.SphereGeometry(0.4, 8, 5, 0, PI * 2, PI / 2, PI / 2), new T.MeshStandardMaterial({ color: 0xF28A1E, flatShading: true, side: 2 })); b.position.set(2.9, 1.7, 0.55); g.add(b); ['#E04F3A', '#FFD23F', '#2CCDBB', '#8A63C9', '#FFFFFF', '#E04F3A'].forEach((c, i) => ico(g, 0.075, c, 2.9 + Math.cos(i * 1.05) * 0.2, 1.6 + (i % 2) * 0.05, 0.55 + Math.sin(i * 1.05) * 0.2)); }));
+    } else {
+      bunt(['#D8283A', '#2F8F4E', '#FFFFFF'], 6.4);
+      const giftC = ['#D8283A', '#2F8F4E', '#3E7BD1', '#F2C94C', '#8A63C9', '#2CCDBB'];
+      const gift = (g, x, y, z, s, ci, ry) => { const b = bx(g, 0.6 * s, 0.5 * s, 0.6 * s, giftC[ci % 6], x, y + 0.25 * s, z); b.rotation.y = ry || 0; const rb = '#FFFFFF'; const r1 = bx(g, 0.64 * s, 0.52 * s, 0.1 * s, rb, x, y + 0.25 * s, z); r1.rotation.y = ry || 0; const r2 = bx(g, 0.1 * s, 0.52 * s, 0.64 * s, rb, x, y + 0.25 * s, z); r2.rotation.y = ry || 0; ico(g, 0.1 * s, rb, x, y + 0.56 * s, z); };
+      const tree = holMk(g => { const gx = -8.8, gz = 2.6; cy(g, 0.22, 0.28, 0.5, 6, '#6B4423', gx, 0.25, gz); [[1.15, 1.3, 0.5], [0.9, 1.15, 1.25], [0.62, 1.0, 2.0], [0.36, 0.8, 2.7]].forEach((t, i) => cone(g, t[0], t[1], 8, i % 2 ? '#2F8F4E' : '#237A3F', gx, t[2] + t[1] / 2, gz)); const star = ico(g, 0.25, '#FFD23F', gx, 3.62, gz, null); star.material = star.material.clone(); star.material.emissive = new T.Color('#FFD23F'); star.material.emissiveIntensity = 0.9; star.scale.set(1, 1, 0.5);
+        const lights = []; ['#D8283A', '#F2C94C', '#3E7BD1', '#FFFFFF', '#2CCDBB', '#D8283A', '#F2C94C', '#3E7BD1'].forEach((c, i) => { const a = i * 2.4, h = 0.9 + i * 0.3, r = Math.max(0.2, 1.05 - h * 0.3); const l = ico(g, 0.08, c, gx + Math.cos(a) * r, h, gz + Math.sin(a) * r); l.material = l.material.clone(); l.material.emissive = new T.Color(c); l.material.emissiveIntensity = 0.8; lights.push(l); });
+        holAnim.push(dt => lights.forEach((l, i) => { l.material.emissiveIntensity = 0.3 + 0.7 * (0.5 + 0.5 * Math.sin(time * 3 + i * 1.3)); })); });
+      holItems.push(tree);
+      holItems.push(holMk(g => { gift(g, -8.0, 0, 3.4, 1, 0, 0.3); gift(g, -8.55, 0, 3.8, 0.7, 2, -0.2); }));
+      holItems.push(holMk(g => { gift(g, -1.6, 1.27, 0.55, 0.7, 3, 0.2); }));
+      holItems.push(holMk(g => { gift(g, -9.3, 0, 3.8, 0.9, 1, 0.1); gift(g, -9.3, 0.45, 3.8, 0.55, 4, 0.5); gift(g, -7.7, 0, 2.5, 0.65, 5, -0.4); }));
+      holItems.push(holMk(g => { const wr = new T.Mesh(new T.TorusGeometry(0.7, 0.18, 6, 14), new T.MeshStandardMaterial({ color: 0x2F8F4E, flatShading: true })); wr.position.set(6.5, 4.4, -7.0); g.add(wr); cone(g, 0.18, 0.4, 3, '#D8283A', 6.3, 3.75, -6.85).rotation.z = 0.7; cone(g, 0.18, 0.4, 3, '#D8283A', 6.7, 3.75, -6.85).rotation.z = -0.7; ico(g, 0.1, '#D8283A', 6.5, 3.78, -6.8); }));
+      holItems.push(holMk(g => { [0, 1, 2].forEach(i => { const x = 2.7 + i * 0.22; cy(g, 0.04, 0.04, 0.55, 5, i % 2 ? '#FFFFFF' : '#D8283A', x, 1.55, 0.6); cy(g, 0.04, 0.04, 0.18, 5, i % 2 ? '#FFFFFF' : '#D8283A', x - 0.07, 1.86, 0.6).rotation.z = 1.2; }); }));
+      holItems.push(holMk(g => { const sx = 7.4, sz = 2.8; ico(g, 0.62, '#FFFFFF', sx, 0.55, sz); ico(g, 0.45, '#FFFFFF', sx, 1.3, sz); ico(g, 0.32, '#FFFFFF', sx, 1.8, sz); cone(g, 0.06, 0.3, 5, '#F28A1E', sx, 1.82, sz + 0.34).rotation.x = PI / 2; bx(g, 0.05, 0.05, 0.03, '#1b1b24', sx - 0.1, 1.9, sz + 0.3); bx(g, 0.05, 0.05, 0.03, '#1b1b24', sx + 0.1, 1.9, sz + 0.3); cy(g, 0.3, 0.3, 0.05, 8, '#1b1b24', sx, 2.1, sz); cy(g, 0.2, 0.2, 0.35, 8, '#1b1b24', sx, 2.3, sz); }));
+      holItems.push(holMk(g => { gift(g, -7.4, 0, 4.2, 1.2, 3, 0.4); gift(g, -7.4, 0.6, 4.2, 0.7, 0, 0); gift(g, -6.7, 0, 3.6, 0.8, 2, -0.3); gift(g, -6.6, 0, 4.4, 0.6, 1, 0.7); }));
+      for (let i = 0; i < 90; i++) { const f = new T.Mesh(new T.OctahedronGeometry(0.07, 0), new T.MeshBasicMaterial({ color: 0xFFFFFF })); f.position.set(-12 + Math.random() * 24, Math.random() * 11, -8 + Math.random() * 20); holG.add(f); holFlakes.push({ m: f, v: 0.6 + Math.random() * 1.1, s: Math.random() * 6 }); }
+    }
+    holShow();
+  }
+  function holShow() { holItems.forEach((g, i) => { g.visible = i < holN; }); }
+  function holTick(dt) {
+    if (!holG) return;
+    holG.visible = !labOn && !synOn;
+    holAnim.forEach(f => f(dt));
+    holFlakes.forEach(f => { const p = f.m.position; p.y -= f.v * dt; p.x += Math.sin(time * 0.8 + f.s) * 0.4 * dt; if (p.y < 0) { p.y = 11; p.x = -12 + Math.random() * 24; } });
+  }
+  api.setHoliday = function (kind, n) {
+    if (!api.ok || !scene) return false;
+    kind = kind || null; const rebuild = kind !== hol || !holG; hol = kind; holN = Math.max(1, n || 1);
+    if (rebuild) holBuild(kind); else holShow();
+    applyTheme(); return true;
+  };
+  api.holiday = () => hol;
+  api.evtShow = function (k, on) { if (evtO[k]) { evtO[k].on = !!on; if (on) evtO[k].s = 0; } };
+  api.evtOn = function (k) { return !!(evtO[k] && evtO[k].on); };
   function brainTick(dt) {
     if (!brainG) return;
     brainG.position.y = 3.5 + Math.sin(time * 1.4) * 0.18; brainG.rotation.y += dt * 0.6; brainG.rotation.z = Math.sin(time * 0.9) * 0.06;
@@ -3900,7 +4057,7 @@ const World = (function () {
   const CATS = [
     ['BG', 'Brand / Generic'], ['CL', 'Drug classes'], ['MOA', 'Mechanisms'], ['AE', 'Adverse effects'],
     ['DDI', 'Interactions'], ['CN', 'Counseling'], ['AD', 'Antidotes'], ['SIG', 'Sig & law'],
-    ['TOP', 'Weekly drugs'], ['CALC', 'Calculations'], ['PT3', 'PharmTox \u00B7 Exam 3'], ['MY', 'My studies']
+    ['TOP', 'Weekly drugs'], ['CALC', 'Calculations'], ['PT3', 'PharmTox \u00B7 Exam 3 questions'], ['PT3G', 'PharmTox \u00B7 Exam 3 drug practice'], ['MY', 'My studies']
   ];
   const CATNAME = {}; CATS.forEach(c => CATNAME[c[0]] = c[1]);
   const FLAVOR = {
@@ -4256,7 +4413,7 @@ const World = (function () {
     cur.done = true; cur.picked = idx; cur.ok = ok; S.served++;
     let pay = 0; const chips = []; let head = '', extra = '';
     if (ok) {
-      S.streak++; S.best = Math.max(S.best, S.streak); S.correct++;
+      S.streak++; S.best = Math.max(S.best, S.streak); S.correct++; holCorrect();
       const base = 10 * [1, 1.6, 2.4][q.d - 1];
       const shelf = 1 + 0.25 * S.up.shelf;
       const speed = timerOn() ? 1 + 0.5 * Math.max(0, 1 - elapsed / 20) : 1;
@@ -4422,9 +4579,9 @@ const World = (function () {
   }
   function settingsHTML() {
     const st = S.set, mc = missedByCat(), ms = masteryByCat();
-    const chipOf = c => `<button type="button" class="chip tp" data-act="topic" data-v="${c[0]}" aria-pressed="${!!st.topics[c[0]]}"><span class="cn">${c[0] === 'PT3' ? 'Exam 3' : c[1]}${c[0] === 'TOP' && curWeek() ? ' <small class="mc wk">wk ' + curWeek() + '</small>' : ''}${mc[c[0]] ? ` <small class="mc">${mc[c[0]]} missed</small>` : ''}</span>${ms[c[0]] && ms[c[0]].n ? (() => { const pc = Math.round(100 * ms[c[0]].s / ms[c[0]].n); return `<span class="mbar" role="img" aria-label="${pc}% mastered"><i style="width:${pc}%"></i><em>${pc}%</em></span>`; })() : ''}</button>`;
-    const topics = CATS.filter(c => c[0] !== 'MY' && c[0] !== 'PT3' || c[0] === 'MY' && S.decks.length).map(chipOf).join('');
-    const tox = CATS.filter(c => c[0] === 'PT3').map(chipOf).join('');
+    const chipOf = c => `<button type="button" class="chip tp" data-act="topic" data-v="${c[0]}" aria-pressed="${!!st.topics[c[0]]}"><span class="cn">${c[0] === 'PT3' ? 'Exam 3: your exam questions' : c[0] === 'PT3G' ? 'Exam 3: drug-list practice' : c[1]}${c[0] === 'TOP' && curWeek() ? ' <small class="mc wk">wk ' + curWeek() + '</small>' : ''}${mc[c[0]] ? ` <small class="mc">${mc[c[0]]} missed</small>` : ''}</span>${ms[c[0]] && ms[c[0]].n ? (() => { const pc = Math.round(100 * ms[c[0]].s / ms[c[0]].n); return `<span class="mbar" role="img" aria-label="${pc}% mastered"><i style="width:${pc}%"></i><em>${pc}%</em></span>`; })() : ''}</button>`;
+    const topics = CATS.filter(c => c[0] !== 'MY' && c[0] !== 'PT3' && c[0] !== 'PT3G' || c[0] === 'MY' && S.decks.length).map(chipOf).join('');
+    const tox = CATS.filter(c => c[0] === 'PT3' || c[0] === 'PT3G').map(chipOf).join('');
     const diffs = [[1, 'Level 1 easy'], [2, 'Level 2 medium'], [3, 'Level 3 hard']].map(d => `<button type="button" class="chip" data-act="diff" data-v="${d[0]}" aria-pressed="${st.diffs.indexOf(d[0]) >= 0}">${d[1]}</button>`).join('');
     const modes = MODES.map(m => `<button type="button" class="chip" data-act="mode" data-v="${m[0]}" aria-pressed="${st.mode === m[0]}">${m[1]}</button>`).join('');
     const n = poolQs().length;
@@ -4541,7 +4698,7 @@ const World = (function () {
     document.body.appendChild(el);
     let fin = false; const done = () => { if (fin) return; fin = true; el.remove(); try { if (u.land) u.land(); } catch (e) { if (window.console) console.error(e); } setTimeout(nextUnlock, 150); };
     const badge = el.querySelector('.ubadge'), body = el.querySelector('.ubody');
-    if (!el.animate) { setTimeout(done, 2200); return; }
+    if (!el.animate) { setTimeout(done, 5000); return; }
     badge.animate([{ transform: 'scale(.2) rotate(-12deg)', opacity: 0 }, { transform: 'scale(1.12) rotate(3deg)', opacity: 1, offset: .6 }, { transform: 'scale(1) rotate(0)', opacity: 1 }], { duration: 520, easing: 'cubic-bezier(.2,.9,.3,1.2)', fill: 'forwards' });
     body.animate([{ opacity: 0, transform: 'translateY(8px)' }, { opacity: 1, transform: 'none' }], { duration: 400, delay: 200, fill: 'forwards' });
     setTimeout(() => {
@@ -4552,8 +4709,8 @@ const World = (function () {
       const dx = t.x - (r.left + r.width / 2), dy = t.y - (r.top + r.height / 2);
       const a = badge.animate([{ transform: 'translate(0,0) scale(1)', opacity: 1 }, { transform: 'translate(' + dx * 0.55 + 'px,' + (dy * 0.55 - 70) + 'px) scale(.6) rotate(180deg)', opacity: 1, offset: .55 }, { transform: 'translate(' + dx + 'px,' + dy + 'px) scale(.12) rotate(360deg)', opacity: .9 }], { duration: 900, easing: 'cubic-bezier(.45,.05,.55,.95)', fill: 'forwards' });
       a.onfinish = done;
-    }, 1900);
-    setTimeout(done, 4200);
+    }, 5200);
+    setTimeout(done, 7600);
   }
   function checkCal(silent) {
     const n = weeksMastered(), have = S.awards.calW || 0;
@@ -4609,7 +4766,7 @@ const World = (function () {
     const calRow = `<div class="aw"><div class="awh"><b>\uD83D\uDCC5 Weekly drug calendar</b><span>${wm} week${wm === 1 ? '' : 's'} mastered</span></div><div class="awbar"><i style="width:${np ? Math.round(100 * np.done / Math.max(1, np.total)) : 100}%"></i></div><small class="awnote">${nextW ? 'Next: master all ' + np.total + ' questions of week ' + nextW.wk + ' (' + np.done + '/' + np.total + ')' : 'Every open week is mastered.'} Each mastered week raises the calendar one level.</small><div class="awt">${CAL_NAMES.map((c, i) => i < ct ? `<span class="tier on">${CAL_ICON[i]} ${c}${i === 3 && wm > 4 ? ' x' + (wm - 3) : ''}</span>` : `<span class="tier">\uD83D\uDD12 ${i + 1} week${i ? 's' : ''}</span>`).join('')}</div></div>`;
     const accN = S.acc || 0;
     const wardRow = `<div class="aw"><div class="awh"><b>\uD83E\uDDE5 Pharmacist wardrobe</b><span>${accN}/${ACCS.length}</span></div><div class="awbar"><i style="width:${Math.round(100 * accN / ACCS.length)}%"></i></div><div class="awt">${ACCS.map((a, i) => i < accN ? `<span class="tier on">${a[1]} ${a[0]}</span>` : `<span class="tier">\uD83D\uDD12 ${RANKS[i + 1][1]}</span>`).join('')}</div></div>`;
-    return `<div class="pane"><h3>Awards</h3><p class="sub">A question counts as mastered after two correct answers in a row. The top tier of a topic needs 90% of its questions mastered. Each tier hangs a framed photo on the pharmacy wall. Mastering several topics brings in pets. Each rank promotion adds an accessory to your pharmacist.</p>${calRow}${wardRow}${rows}<div class="grp"><b>Pets</b><div class="awps">${pets}${fcPetRow()}</div></div>${capsHTML()}${shareHTML()}<div class="btnrow"><button type="button" class="btn" data-act="flash">Open flashcards</button></div>${saveBoxHTML()}<div class="btnrow"><button type="button" class="btn go" data-act="back">Back to counter</button></div></div>`;
+    return `<div class="pane"><h3>Awards</h3><p class="sub">A question counts as mastered after two correct answers in a row. The top tier of a topic needs 90% of its questions mastered. Each tier hangs a framed photo on the pharmacy wall. Mastering several topics brings in pets. Each rank promotion adds an accessory to your pharmacist.</p>${calRow}${wardRow}${rows}<div class="grp"><b>Pets</b><div class="awps">${pets}${fcPetRow()}</div></div>${seasonHTML()}${capsHTML()}${shareHTML()}<div class="btnrow"><button type="button" class="btn" data-act="flash">Open flashcards</button></div>${saveBoxHTML()}<div class="btnrow"><button type="button" class="btn go" data-act="back">Back to counter</button></div></div>`;
   }
 
 
@@ -4688,7 +4845,7 @@ const World = (function () {
     const ok = i === fp.q.ok; fp.done = true; fp.picked = i;
     if (ok) S.bottleOK = (S.bottleOK || 0) + 1; else { S.bottleBad = (S.bottleBad || 0) + 1; World.fpMark('b' + i); }
     World.fpSelect('b' + i); save(); renderFp();
-    setTimeout(() => { fpExit(); if (!ok) setTimeout(() => { if (World.ragdoll()) toast('Wrong bottle! A patient in the waiting area collapsed.'); }, 900); }, ok ? 1200 : 1800);
+    setTimeout(() => { fpExit(); if (!ok) setTimeout(() => { if (World.ragdoll()) toast('Wrong bottle! A patient in the waiting area collapsed.'); }, 900); }, ok ? 3400 : 4600);
   }
   function policeCome() {
     S.polLoss = (S.polLoss || 0) + 1;
@@ -4721,6 +4878,7 @@ const World = (function () {
   }
   function startShelve(auto) {
     if (fp.on || !World.ok) return;
+    clearEvt('shelve');
     if (view !== 'q') { if (!auto) toast('Finish what you are doing first, then restock.'); return; }
     if (focusOn()) { if (!auto) toast('Turn off focus mode to restock the shelves.'); return; }
     const pairs = shelfPairs(), targets = shuffle([0, 1, 2, 3, 4, 5]).slice(0, 5);
@@ -4847,9 +5005,27 @@ const World = (function () {
     if (focusOn() || learning() || labOn() || fp.on || !World.ok || Date.now() < fp.cool) return;
     if (view !== 'q' || !cur || cur.empty || cur.done || phone.ringing || phone.open || S.served < 6 || !S.me.done) return;
     const now = Date.now();
-    if (S.served - (S.lastShelve || 0) >= 20) { startShelve(true); return; }
-    if (now >= fp.nextBottle) { fp.nextBottle = now + (90 + Math.random() * 80) * 1000; startBottles(); return; }
-    if (S.served >= 10 && now >= fp.nextPrior) { fp.nextPrior = now + (180 + Math.random() * 120) * 1000; startPrior(); }
+    if (S.served - (S.lastShelve || 0) >= 20 && offerEvt('shelve', 'A delivery box is on the counter. Tap it to restock when you are ready.')) return;
+    if (now >= fp.nextBottle && offerEvt('bottle', 'A pill bottle is waiting on the counter. Tap it for a bottle check.')) { fp.nextBottle = now + (90 + Math.random() * 80) * 1000; return; }
+    if (S.served >= 10 && now >= fp.nextPrior && offerEvt('prior', 'A prior authorization folder landed on the counter. Tap it when you have a minute.')) fp.nextPrior = now + (180 + Math.random() * 120) * 1000;
+  }
+  /* events no longer pull the player in: they appear as an object on the counter and wait to be tapped */
+  const evtAt = {};
+  function offerEvt(kind, msg) {
+    if (!World.ok || !World.evtShow) return false;
+    if (World.evtOn(kind)) return false;
+    World.evtShow(kind, true); evtAt[kind] = Date.now(); SFX.play('bell'); toast(msg); return true;
+  }
+  function clearEvt(kind) { if (World.ok && World.evtShow) World.evtShow(kind, false); delete evtAt[kind]; }
+  function onEvt(kind) {
+    if (fp.on) return;
+    if (view !== 'q') { toast('Finish what you are doing first, then tap it again.'); return; }
+    if (focusOn() || learning() || labOn()) return;
+    clearEvt(kind);
+    if (kind === 'shelve') startShelve(false); else if (kind === 'bottle') { fp.cool = 0; startBottles(); } else if (kind === 'prior') startPrior();
+  }
+  function evtExpire() {
+    ['bottle', 'prior'].forEach(k => { if (evtAt[k] && Date.now() - evtAt[k] > 150000) clearEvt(k); });
   }
 
   /* ---- drug reference (Top 300 weekly list) ---- */
@@ -4899,7 +5075,7 @@ const World = (function () {
   const scheduleNext = (min, span) => { phone.nextAt = Date.now() + (min + Math.random() * span) * 1000; };
   function toast(msg) {
     const t = $('#toast3d'); if (!t) return;
-    t.textContent = msg; t.classList.add('on'); clearTimeout(toast.h); toast.h = setTimeout(() => t.classList.remove('on'), 3800);
+    t.textContent = msg; t.classList.add('on'); clearTimeout(toast.h); toast.h = setTimeout(() => t.classList.remove('on'), Math.min(11000, 4800 + String(msg).length * 55));
   }
   function startRing() {
     SFX.play('ring'); phone.ringing = true; phone.until = Date.now() + 16000; World.phoneRing(true); updatePhoneBtn();
@@ -5656,6 +5832,39 @@ const World = (function () {
     showUnlock({ emoji: capSvg(id, 54), title: 'Secret capsule ' + n + ' of ' + CAPS.length + ' (' + (src === 'plant' ? 'from the plant' : 'from the sky') + ')', sub });
     renderStats(); if (view === 'awards') renderPanel();
   }
+  /* ---------------- seasonal events ---------------- */
+  const HOLS = {
+    halloween: { name: 'Halloween', emoji: '\uD83C\uDF83', start: [10, 24], end: [10, 31], deco: ['Pumpkins on the counter', 'Jack-o-lantern', 'Witch cauldron', 'Friendly ghost', 'Bat swarm', 'Spider web', 'Witch hat', 'Candy bowl'], intro: 'Halloween week! The pharmacy glows orange. Answer questions to unlock decorations, and watch for costumed patients.' },
+    christmas: { name: 'Christmas', emoji: '\uD83C\uDF84', start: [12, 18], end: [12, 25], deco: ['Christmas tree', 'Gifts under the tree', 'Counter gift', 'Present pile', 'Wreath', 'Candy canes', 'Snowman', 'Giant gift stack'], intro: 'Christmas week! Snow is falling. Answer questions to put more gifts under the tree.' }
+  };
+  const DECO_EVERY = 4;
+  function holNow() {
+    let q = null; try { q = new URLSearchParams(location.search).get('holiday'); } catch (e) { /* no params */ }
+    if (q) return HOLS[q] ? q : null;
+    const d = new Date(), m = d.getMonth() + 1, day = d.getDate();
+    for (const k in HOLS) { const h = HOLS[k]; if (m === h.start[0] && day >= h.start[1] && day <= h.end[1]) return k; }
+    return null;
+  }
+  const holProg = (k) => { S.hol = S.hol && typeof S.hol === 'object' ? S.hol : {}; return S.hol[k] || 0; };
+  const holCount = () => { const k = holNow(); return k ? Math.min(8, 1 + Math.floor(holProg(k) / DECO_EVERY)) : 0; };
+  let holCur = undefined;
+  function holSync() {
+    const k = holNow(); if (k === holCur || !World.ok || !World.setHoliday) return;
+    holCur = k; World.setHoliday(k, holCount());
+    if (k && !S['holSeen' + k + new Date().getFullYear()]) { S['holSeen' + k + new Date().getFullYear()] = 1; save(); setTimeout(() => toast(HOLS[k].emoji + ' ' + HOLS[k].intro), 1500); }
+  }
+  function holCorrect() {
+    const k = holNow(); if (!k || !HOLS[k]) return;
+    const before = holCount(); S.hol[k] = holProg(k) + 1; const after = holCount();
+    if (after > before && World.ok && World.setHoliday) {
+      World.setHoliday(k, after);
+      showUnlock({ emoji: HOLS[k].emoji, title: HOLS[k].deco[after - 1], sub: HOLS[k].name + ' decoration ' + after + ' of 8 unlocked', target: null });
+    }
+  }
+  function seasonHTML() {
+    return '<div class="grp"><b>Seasonal events</b>' + Object.keys(HOLS).map(k => { const h = HOLS[k], n = Math.min(8, 1 + Math.floor(holProg(k) / DECO_EVERY)), seen = holProg(k) > 0;
+      return '<p class="note"><b>' + h.emoji + ' ' + h.name + '</b> (the week before ' + h.name + '): ' + (seen ? n + '/8 decorations unlocked.' : 'answer questions that week to unlock 8 decorations.') + (holNow() === k ? ' <b>Happening now.</b>' : '') + '</p>'; }).join('') + '</div>';
+  }
   function capsHTML() {
     const have = S.caps || [];
     return '<div class="grp capsrow"><b>Secret capsules ' + have.length + '/' + CAPS.length + '</b><div class="capdots">' + CAPS.map((c, i) => '<span class="capdot ' + (have.includes(i) ? 'on' : '') + '" title="' + (have.includes(i) ? esc(c.n) : 'Not found yet') + '">' + (have.includes(i) ? capSvg(i, 24) : '?') + '</span>').join('') + '</div>' +
@@ -5796,7 +6005,7 @@ const World = (function () {
       <div class="btnrow"><button type="button" class="btn go" data-act="back">Back to the pharmacy</button></div></div>`;
   }
 
-  const GAME_VERSION = 57;
+  const GAME_VERSION = 60;
   const b64u = (u8) => { let s = ''; for (let i = 0; i < u8.length; i += 0x8000) s += String.fromCharCode.apply(null, u8.subarray(i, i + 0x8000)); return btoa(s).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); };
   const unb64u = (t) => { const s = atob(t.replace(/-/g, '+').replace(/_/g, '/')), u = new Uint8Array(s.length); for (let i = 0; i < s.length; i++) u[i] = s.charCodeAt(i); return u; };
   const chk = (t) => { let h = 2166136261; for (let i = 0; i < t.length; i++) { h ^= t.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36); };
@@ -5989,7 +6198,7 @@ const World = (function () {
     const rb = $('#retirebtn'); if (rb) rb.disabled = S.cash < RETIRE_AT;
     if (!document.hidden && !tourEl) S.playSec = (S.playSec || 0) + 0.25;
     World.setSlow(learning());
-    World.refreshTags(); phoneTick(); rushTick(); eventTick();
+    World.refreshTags(); phoneTick(); rushTick(); eventTick(); evtExpire(); holSync();
     const uh = document.querySelector('#ups h2 small'); if (uh) uh.textContent = money(S.cash) + ' on hand';
   }, 250);
   setInterval(() => {
@@ -6008,8 +6217,8 @@ const World = (function () {
   setInterval(() => { if (window.__rxLoading) return; try { localStorage.setItem(SAVE_KEY, JSON.stringify(S)); } catch (e) { /* ignore */ } }, 5000);
 
   { const sc = $('#savecard'); if (sc) sc.innerHTML = saveBoxHTML(); }
-  World.init({ host: $('#stage'), getS: () => S, tagInfo: tagInfo, onBuy: buyUp, onNotes: () => openView('studies'), notesInfo: customCount, karenRoll: karenRoll, sweatyRoll: sweatyRoll, elderRoll: elderRoll, eventRoll: eventRoll, onVisitor: visitClick, onVisitorArrive: visitArrive, capsuleOk: capsuleOk, onCapsule: onCapsule, onBrain: synEnter, onSynSite: onSynSite, onPhone: openPhone, onPolice: policeCome, onFp: fpClick, sign: () => shopName() + '|' + tierName() + ' #' + (S.franchises + 1) });
-  window.__rxDbg = () => ({ fp: fp, S: S, view: view, rush: rush, phoneR: phone.ringing, TOPQ: TOPQ, pool: poolQs, cur: cur, synQ: () => (typeof SYN !== 'undefined' ? SYN.q : null), synTap: id => onSynSite(id) });
+  World.init({ host: $('#stage'), getS: () => S, tagInfo: tagInfo, onBuy: buyUp, onNotes: () => openView('studies'), notesInfo: customCount, karenRoll: karenRoll, sweatyRoll: sweatyRoll, elderRoll: elderRoll, eventRoll: eventRoll, onVisitor: visitClick, onVisitorArrive: visitArrive, capsuleOk: capsuleOk, onCapsule: onCapsule, onBrain: synEnter, onSynSite: onSynSite, onEvt: onEvt, onPhone: openPhone, onPolice: policeCome, onFp: fpClick, sign: () => shopName() + '|' + tierName() + ' #' + (S.franchises + 1) });
+  window.__rxDbg = () => ({ fp: fp, S: S, view: view, rush: rush, phoneR: phone.ringing, TOPQ: TOPQ, pool: poolQs, cur: cur, synQ: () => (typeof SYN !== 'undefined' ? SYN.q : null), synTap: id => onSynSite(id), offer: k => offerEvt(k, 'test'), onEvt: onEvt, holiday: () => holNow(), holN: () => holCount() });
   if (!World.ok) $('#stage').classList.add('flat');
   else { document.body.classList.add('fx'); World.setPharmacist(meSpec()); World.setAwards(S.awards); World.setCalendar(Math.min(4, S.awards.calW || 0), false, S.awards.calW || 0); }
   applyFocus(); syncBrand(); sfxLabel();
