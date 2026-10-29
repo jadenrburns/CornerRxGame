@@ -668,6 +668,9 @@ body.lab .evtTag, body.lab .tags, body.lab .line3d, body.lab .bub3d, body.lab .r
 /* synapse lab */
 body.syn .evtTag, body.syn .tags, body.syn .line3d, body.syn .bub3d, body.syn .rush3d, body.syn .phonebtn, body.syn .hint3d, body.syn #restockhud, body.syn .say3d { display: none !important; }
 .evtTag { position: absolute; left: 0; top: 0; padding: 4px 10px; border-radius: 999px; border: 2px solid var(--ink); background: #FFD23F; color: #2B1D00; font: 800 12px/1.2 var(--f-body, inherit); cursor: pointer; white-space: nowrap; box-shadow: 0 2px 0 rgba(0,0,0,.25); animation: evtpulse 1.4s ease-in-out infinite; }
+.evtTag { opacity: .85; font-size: 13px; padding: 6px 12px; min-height: 30px; background: #DDE8E8; animation: none; }
+.evtTag.due { opacity: 1; background: #FFD23F; animation: evtDue .6s ease-in-out infinite alternate; }
+@keyframes evtDue { from { box-shadow: 0 2px 0 rgba(0,0,0,.25), 0 0 0 0 rgba(255,210,63,.9); } to { box-shadow: 0 2px 0 rgba(0,0,0,.25), 0 0 0 9px rgba(255,210,63,0); } }
 @keyframes evtpulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.06); } }
 .brainTag { position: absolute; left: 0; top: 0; padding: 4px 10px; border-radius: 999px; border: 1.5px solid var(--ink); background: #F8D5E0; color: #4A1D2D; font: 800 12px/1.2 var(--f-body, inherit); cursor: pointer; white-space: nowrap; }
 .synwrap { position: absolute; inset: 0; overflow: hidden; pointer-events: none; z-index: 2; display: none; }
@@ -676,6 +679,8 @@ body.syn .synwrap { display: block; }
 .syn3d.struct { background: rgba(255,255,255,.14); border-style: dashed; font-weight: 600; }
 .syn3d.ion { padding: 0 6px; font-size: 10px; background: rgba(10,8,30,.9); border-width: 2px; }
 .syn3d.drug { background: #FF5C8A; color: #fff; border-color: #fff; font-size: 12px; }
+.syn3d.exp { white-space: normal; max-width: 220px; text-align: left; border-radius: 14px; padding: 6px 10px; z-index: 6; background: rgba(255,248,214,.97); color: #2B1D00; border-color: #FFD23F; font-weight: 600; line-height: 1.3; }
+.syn3d.exp b { display: block; font-weight: 800; margin-bottom: 2px; }
 .syn3d.hl { background: #FFD23F; color: #2B1D00; border-color: #fff; }
 .syn .synhead { display: flex; flex-wrap: wrap; align-items: baseline; gap: 8px; }
 .syncard { margin: 10px 0; padding: 10px; border: 1.5px solid var(--ink); border-radius: 12px; background: var(--surface); }
@@ -686,6 +691,11 @@ body.syn .synwrap { display: block; }
 .syntoggle button { padding: 10px 6px; border: 0; background: var(--surface); color: var(--ink); font: 800 14px/1.2 var(--f-body, inherit); cursor: pointer; }
 .syntoggle button.sel { background: var(--teal); color: var(--on-teal); }
 .syntoggle button.ok { background: #2CCDBB; color: #052; } .syntoggle button.bad { background: var(--coral); color: #fff; }
+.syndir { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin: 6px 0; padding: 6px 8px; border-radius: 12px; background: rgba(255,255,255,.08); }
+.syndir span { font-weight: 700; font-size: 13px; }
+.dirbtn { min-width: 84px; padding: 8px 12px; border-radius: 999px; border: 2px solid var(--ink); background: #DDE8E8; font: 800 14px/1 var(--f-body, inherit); cursor: pointer; }
+.dirbtn.up { background: #7DDC6B; }
+.dirbtn.down { background: #FF8E8E; }
 .syn-opts { display: grid; gap: 6px; margin: 8px 0; }
 .syn .opt.sel { outline: 3px solid var(--amber); }
 .synguide { padding-left: 16px; margin: 6px 0; } .synguide li.sel span { font-size: 13px; }
@@ -1854,7 +1864,7 @@ const World = (function () {
   const reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   const UPIDS = ['shelf', 'tech', 'counsel', 'library', 'robot'];
   const CLICK = UPIDS.concat(['notes']);
-  const BASE = { notes: [9.1, 1.26, -5.2], shelf: [-1.5, 0, -6.5], tech: [-6.9, 0, 0], counsel: [-6.2, 0, 3.4], library: [-9.0, 0, -4.0], robot: [6.8, 0, -5.4] };
+  const BASE = { notes: [9.1, 1.26, -5.2], shelf: [-1.5, 0, -6.5], tech: [-6.9, 0, 0], counsel: [8.0, 0, 2.2], library: [-9.0, 0, -4.0], robot: [6.8, 0, -5.4] };
   const TAGY = { notes: 2.5, shelf: 4.7, tech: 2.7, counsel: 3.3, library: 4.7, robot: 3.6 };
   const SKIN = ['#F2C9A5', '#E0A97E', '#C48A5E', '#8D5A3B', '#F6D7BD', '#6F4429'];
   const HAIR = ['#2B1B12', '#6B3A1E', '#B5651D', '#D9B25A', '#A8A8A8', '#1E1E2E'];
@@ -1865,11 +1875,12 @@ const World = (function () {
   const maxq = () => (rushOn ? 8 : 5);
   const OBST = [
     { x0: -9.6, x1: 4.15, z0: -1.0, z1: 1.05 },    // counter, wall to wall, with the computer stations
-    { x0: -7.8, x1: -4.6, z0: 1.8, z1: 5.0 },      // counseling room
+    { x0: 6.4, x1: 9.6, z0: 0.6, z1: 3.8 },        // counseling room (right side)
     { x0: -9.6, x1: -8.4, z0: -5.8, z1: -2.2 },    // library
     { x0: 8.3, x1: 9.9, z0: -5.8, z1: -4.6 },      // study desk
     { x0: 5.5, x1: 8.1, z0: -6.7, z1: -4.1 },      // robot
-    { x0: -6.2, x1: 6.2, z0: -7.1, z1: -6.0 }      // shelves
+    { x0: -6.2, x1: 6.2, z0: -7.1, z1: -6.0 },     // shelves
+    { x0: 1.2, x1: 5.2, z0: -5.7, z1: -4.1 }       // event table
   ];
   const EXIT = [[-3.4, 2.8], [-3.4, 6.3], [4.4, 6.4], [5, 7.2], [5, 10.8]];
 
@@ -2124,10 +2135,10 @@ const World = (function () {
     // porch rug, plants
     bx(g, 2.4, 0.04, 3.6, '#F2A516', 5, 0.08, 6.9);
     bx(g, 2.9, 0.12, 0.2, '#0E9A8E', 5, 0.18, 5.2);
-    [[8.4, 4.5], [-8.6, 5]].forEach((p, pi) => { cy(g, 0.4, 0.3, 0.6, 6, '#E04F3A', p[0], 0.3, p[1]); const l1 = ico(g, 0.65, '#3E8E41', p[0], 1.1, p[1]), l2 = ico(g, 0.45, '#56A85A', p[0] + 0.2, 1.6, p[1]); if (pi === 1) { l1.userData.x0 = l1.position.x; l2.userData.x0 = l2.position.x; plantL = [l1, l2]; } });
+    [[8.3, 6.5], [-8.6, 5]].forEach((p, pi) => { cy(g, 0.4, 0.3, 0.6, 6, '#E04F3A', p[0], 0.3, p[1]); const l1 = ico(g, 0.65, '#3E8E41', p[0], 1.1, p[1]), l2 = ico(g, 0.45, '#56A85A', p[0] + 0.2, 1.6, p[1]); if (pi === 1) { l1.userData.x0 = l1.position.x; l2.userData.x0 = l2.position.x; plantL = [l1, l2]; } });
     // waiting room seating: a bench along the right wall and two chairs near the door
-    bx(g, 0.75, 0.12, 2.7, '#8A5A3B', 9.0, 0.5, 2.2); bx(g, 0.6, 0.1, 2.55, '#0E9A8E', 8.98, 0.6, 2.2); bx(g, 0.12, 0.8, 2.7, '#8A5A3B', 9.4, 0.95, 2.2);
-    [[0.9, 1.0], [0.9, 3.4]].forEach(l => { bx(g, 0.6, 0.45, 0.1, '#6D4630', 9.0, 0.22, l[0] + (l[1] > 3 ? 0.0 : 0.4)); });
+    bx(g, 0.75, 0.12, 2.5, '#8A5A3B', 9.0, 0.5, 5.25); bx(g, 0.6, 0.1, 2.35, '#0E9A8E', 8.98, 0.6, 5.25); bx(g, 0.12, 0.8, 2.5, '#8A5A3B', 9.4, 0.95, 5.25);
+    [4.2, 6.3].forEach(zz => { bx(g, 0.6, 0.45, 0.1, '#6D4630', 9.0, 0.22, zz); });
     [6.6, 7.7].forEach(x => { bx(g, 0.75, 0.1, 0.75, '#F2A516', x, 0.5, 5.45); bx(g, 0.75, 0.75, 0.1, '#F2A516', x, 0.9, 5.82); [[-0.3, -0.3], [0.3, -0.3], [-0.3, 0.3], [0.3, 0.3]].forEach(o => bx(g, 0.08, 0.45, 0.08, '#6D4630', x + o[0], 0.22, 5.45 + o[1])); });
     bx(g, 0.6, 0.05, 0.6, '#F4F9F9', 7.15, 0.6, 6.7); cy(g, 0.05, 0.05, 0.55, 6, '#6D4630', 7.15, 0.3, 6.7);
     // scenery
@@ -2210,15 +2221,21 @@ const World = (function () {
     if (lv < 1) { ghostBox(G, 3.2, 2.8, 3.2, 'counsel'); return; }
     bx(G, 3.2, 0.05, 3.2, '#BFE3DF', 0, 0.04, 0, 'counsel');
     const glass = { transparent: true, opacity: 0.22, roughness: 0.2 };
-    bx(G, 3.2, 2.7, 0.06, '#9FE8E0', 0, 1.35, -1.55, 'counsel', glass); bx(G, 0.06, 2.7, 3.2, '#9FE8E0', -1.55, 1.35, 0, 'counsel', glass);
-    bx(G, 0.06, 2.7, 1.2, '#9FE8E0', 1.55, 1.35, -0.9, 'counsel', glass);
-    [[-1.55, -1.55], [1.55, -1.55], [-1.55, 1.55], [1.55, 0.3]].forEach(p => bx(G, 0.12, 2.8, 0.12, '#0E9A8E', p[0], 1.4, p[1], 'counsel'));
+    // glass walls: back, right and front are solid; the DOOR is the gap in the left wall, facing into the pharmacy
+    bx(G, 3.2, 2.7, 0.06, '#9FE8E0', 0, 1.35, -1.55, 'counsel', glass); bx(G, 0.06, 2.7, 3.2, '#9FE8E0', 1.55, 1.35, 0, 'counsel', glass);
+    bx(G, 3.2, 2.7, 0.06, '#9FE8E0', 0, 1.35, 1.55, 'counsel', glass);
+    bx(G, 0.06, 2.7, 1.1, '#9FE8E0', -1.55, 1.35, -1.0, 'counsel', glass); bx(G, 0.06, 2.7, 0.4, '#9FE8E0', -1.55, 1.35, 1.35, 'counsel', glass);
+    [[-1.55, -1.55], [1.55, -1.55], [-1.55, 1.55], [1.55, 1.55]].forEach(p => bx(G, 0.12, 2.8, 0.12, '#0E9A8E', p[0], 1.4, p[1], 'counsel'));
+    bx(G, 0.14, 2.1, 0.1, '#F2A516', -1.55, 1.05, -0.45, 'counsel'); bx(G, 0.14, 2.1, 0.1, '#F2A516', -1.55, 1.05, 1.15, 'counsel');
+    bx(G, 0.14, 0.18, 1.8, '#F2A516', -1.55, 2.2, 0.35, 'counsel');
+    bx(G, 0.08, 0.34, 1.1, '#0E9A8E', -1.62, 2.5, 0.35, 'counsel', { emissive: new T.Color(0x1FB5A5), emissiveIntensity: 0.5 });
+    bx(G, 0.9, 0.03, 1.5, '#E04F3A', -2.1, 0.03, 0.35, 'counsel');
     bx(G, 3.3, 0.12, 3.3, '#0E9A8E', 0, 2.82, 0, 'counsel', { transparent: true, opacity: 0.35 });
-    bx(G, 1.3, 0.7, 0.7, '#F1F6F6', 0, 0.38, -0.9, 'counsel');
-    bx(G, 0.7, 0.14, 0.7, '#F2A516', -0.6, 0.55, 0.3, 'counsel'); bx(G, 0.7, 0.8, 0.12, '#F2A516', -0.6, 0.95, 0.62, 'counsel');
-    bx(G, 0.7, 0.14, 0.7, '#E04F3A', 0.7, 0.55, 0.3, 'counsel'); bx(G, 0.7, 0.8, 0.12, '#E04F3A', 0.7, 0.95, 0.62, 'counsel');
+    bx(G, 1.3, 0.7, 0.7, '#F1F6F6', 0.2, 0.38, -1.0, 'counsel');
+    bx(G, 0.7, 0.14, 0.7, '#F2A516', 0.5, 0.55, 0.3, 'counsel'); bx(G, 0.12, 0.8, 0.7, '#F2A516', 0.9, 0.95, 0.3, 'counsel');
+    bx(G, 0.7, 0.14, 0.7, '#E04F3A', 0.5, 0.55, 1.0, 'counsel'); bx(G, 0.12, 0.8, 0.7, '#E04F3A', 0.9, 0.95, 1.0, 'counsel');
     cy(G, 0.22, 0.17, 0.35, 6, '#E04F3A', 1.2, 0.18, -1.2, 'counsel'); ico(G, 0.4, '#3E8E41', 1.2, 0.65, -1.2, 'counsel');
-    for (let i = 0; i < Math.min(lv, 6); i++) bx(G, 0.14, 0.14, 0.14, '#F2A516', -1.2 + i * 0.25, 1.4, -1.45, 'counsel', { emissive: new T.Color(0xF2A516), emissiveIntensity: 0.8 });
+    for (let i = 0; i < Math.min(lv, 6); i++) bx(G, 0.14, 0.14, 0.14, '#F2A516', -0.6 + i * 0.25, 1.4, -1.45, 'counsel', { emissive: new T.Color(0xF2A516), emissiveIntensity: 0.8 });
   }
   function buildLibrary(lv) {
     const G = ug.library; clear(G);
@@ -2389,8 +2406,8 @@ const World = (function () {
     return c;
   }
   /* ---- waiting room: seats, and a few people who sit or wander while they wait ---- */
-  const SEATS = [[8.8, 1.35, -PI / 2], [8.8, 2.2, -PI / 2], [8.8, 3.05, -PI / 2], [6.6, 5.45, PI], [7.7, 5.45, PI]];
-  const IDLE_PTS = [[-2.8, 4.6], [3.4, 3.4], [6.0, 3.2], [6.9, 4.4], [0.9, 6.0], [-3.0, 6.1], [5.4, 2.0], [2.2, 5.6]];
+  const SEATS = [[8.8, 4.45, -PI / 2], [8.8, 5.25, -PI / 2], [8.8, 6.05, -PI / 2], [6.6, 5.45, PI], [7.7, 5.45, PI]];
+  const IDLE_PTS = [[-2.8, 4.6], [3.4, 3.4], [5.3, 3.2], [6.9, 4.9], [0.9, 6.0], [-3.0, 6.1], [5.4, 2.0], [2.2, 5.6]];
   const idleCap = () => 3 + (Math.floor(time / 35) % 2);
   function endIdle(c) { c.idl = null; c.sit = false; c.seat = -1; }
   function idleTick(c, i, w, dt) {
@@ -2524,9 +2541,11 @@ const World = (function () {
   /* ---- effects ---- */
   const puffs = [], drops = [], extras = [];
   function emitPuff(x, y, z) {
+    if (synOn || labOn) return;
     for (const p of puffs) { if (p.life > 0) continue; p.life = 0.9; p.m.visible = true; p.m.position.set(x, y, z); p.m.scale.set(1, 1, 1); p.m.material.opacity = 0.9; p.vx = (Math.random() - 0.5) * 0.8; p.vz = (Math.random() - 0.5) * 0.8; return; }
   }
   function emitDrop(x, y, z) {
+    if (synOn || labOn) return;
     for (const d of drops) { if (d.life > 0) continue; d.life = 1.1; d.m.visible = true; d.m.position.set(x, y, z); d.m.scale.set(1, 1, 1); d.m.material.opacity = 0.95; d.vy = 0.5 + Math.random(); d.vx = (Math.random() - 0.5) * 1.6; d.vz = Math.random() * 0.8; return; }
   }
   function sweatyFx(c, dt) {
@@ -3386,6 +3405,11 @@ const World = (function () {
       const fv = 40 + (fpTF - 40) * s2; if (Math.abs(fv - fpFov) > 0.05) { fpFov = fv; camera.fov = fv; camera.updateProjectionMatrix(); }
     } else { camera.lookAt(TX, TY, TZ); if (fpFov !== 40) { fpFov = 40; camera.fov = 40; camera.updateProjectionMatrix(); } }
     if (fpG && fpK === 0 && !fpT) fpClear();
+    if (synOn) {
+      // nothing from the pharmacy (patient puffs, drips, coins) may draw over the synapse
+      scene.children.forEach(c => { if (c !== synG && c !== hemi && c !== sun && c.visible) { c.visible = false; if (synHid.indexOf(c) < 0) synHid.push(c); } });
+      camera.updateMatrixWorld(); synLabelPass();
+    }
     renderer.render(scene, camera);
     if (fpScreen && fpqEl) {
       if (fpK > 0.985) {
@@ -3698,24 +3722,24 @@ const World = (function () {
   api._capClick = function () { const had = !!capObj; capClick(); return had; };
   api.devCapsule = function (kind) { if (!api.ok || !capG) return false; capRemove(); return spawnCap(kind === 'plant' ? 'plant' : 'sky'); };
   /* ---- synapse lab: a low-poly cross-section of a synapse ---- */
-  let synG = null, synOn = false, synHid = [], synCat = 'epi', synLabelsOn = true, synT = 0, synSaved = null, synWrap = null, synHLids = null, synHover = null, synRetro = 0;
+  let synDrugPos = null, synG = null, synOn = false, synHid = [], synCat = 'epi', synLabelsOn = true, synT = 0, synSaved = null, synWrap = null, synHLids = null, synHover = null, synRetro = 0;
   const synItems = [], synSite = {}, synVes = [], synParts = [], synLabs = [], synFlow = [];
   const SX = 0.5, SG = [-2.8, 4.3];
   const SYN_BG = '#171638';
   // id: [short label, categories, location, x or angle, kind, colour]
   const SSITES = {
     sert: ['SERT', ['ad'], 'pre', -2.8, 'trans', '#B26CF0'], net: ['NET', ['ad'], 'pre', -2.25, 'trans', '#F08A3C'], dat: ['DAT', ['ad'], 'pre', -1.7, 'trans', '#E85D7A'],
-    vgcc: ['VGCC Ca²⁺', ['epi', 'cbd'], 'pre', -0.5, 'chan', '#FFD23F'], a2d: ['α2δ', ['epi'], 'pre', 0.05, 'enz', '#FFF08A'],
+    vgcc: ['VGCC Ca²⁺', ['epi', 'cbd'], 'pre', -0.5, 'chan', '#FFD23F'], a2d: ['α2δ', ['epi'], 'pre', 0.35, 'enz', '#FF7AC8'],
     cb1: ['CB1', ['cbd'], 'pre', 1.7, 'rec', '#7DDC6B'], gat1: ['GAT-1', ['epi'], 'pre', 2.3, 'trans', '#6EE38A'], a2auto: ['α2 auto', ['ad'], 'pre', 2.9, 'rec', '#F2A516'],
-    nav: ['Nav Na⁺', ['epi'], 'dome', 0.55, 'chan', '#F2A516'], cavt: ['T-type Ca²⁺', ['epi'], 'dome', 2.55, 'chan', '#FF7A59'], ent1: ['ENT1', ['cbd'], 'dome', 0.14, 'trans', '#5ED3F3'],
+    nav: ['Voltage-gated Na⁺ channel', ['epi'], 'dome', 0.55, 'chan', '#F2A516'], cavt: ['T-type Ca²⁺', ['epi'], 'dome', 2.55, 'chan', '#FF7A59'], ent1: ['ENT1', ['cbd'], 'dome', 0.14, 'trans', '#5ED3F3'],
     mao: ['MAO', ['ad'], 'int', [-1.1, 3.95], 'mito', '#E8905A'], gabat: ['GABA-T', ['epi'], 'int', [0.9, 4.35], 'enz', '#6EE38A'], sv2a: ['SV2A', ['epi'], 'int', [1.9, 3.75], 'sv2a', '#FFC46B'], magl: ['MAGL', ['cbd'], 'int', [1.55, 3.45], 'enz', '#E5B34A'],
     ht2a: ['5-HT2A', ['ad'], 'post', -2.9, 'rec', '#C28BFF'], ht1a: ['5-HT1A', ['ad', 'cbd'], 'post', -2.3, 'rec', '#9B7BFF'], gabaa: ['GABA-A Cl⁻', ['epi', 'cbd'], 'post', -1.6, 'chan', '#5FE08A'],
-    ampa: ['AMPA', ['epi'], 'post', -0.7, 'chan', '#FFB347'], nmda: ['NMDA', ['ad'], 'post', 0.3, 'chan', '#FF6B6B'], trpv1: ['TRPV1', ['cbd'], 'post', 2.0, 'chan', '#FF8F5A'], gpr55: ['GPR55', ['cbd'], 'post', 2.7, 'rec', '#5ED3F3'],
+    ampa: ['AMPA', ['epi'], 'post', -0.7, 'chan', '#FFB347'], nmda: ['NMDA', ['ad', 'epi'], 'post', 2.2, 'chan', '#FF6B6B'], trpv1: ['TRPV1', ['cbd'], 'post', 2.0, 'chan', '#FF8F5A'], gpr55: ['GPR55', ['cbd'], 'post', 2.7, 'rec', '#5ED3F3'],
     faah: ['FAAH', ['cbd'], 'pint', [-0.9, 0.55], 'enz', '#E5E266'], dagl: ['DAGL', ['cbd'], 'pint', [1.9, 0.65], 'enz', '#C7E86A']
   };
   const ION = { vgcc: ['Ca²⁺', '#FFD23F'], nav: ['Na⁺', '#F2A516'], cavt: ['Ca²⁺', '#FF7A59'], gabaa: ['Cl⁻', '#5FE08A'], ampa: ['Na⁺', '#FFB347'], nmda: ['Ca²⁺', '#FF6B6B'], trpv1: ['Ca²⁺', '#FF8F5A'], sert: ['5-HT', '#B26CF0'], net: ['NE', '#F08A3C'], dat: ['DA', '#E85D7A'], gat1: ['GABA', '#6EE38A'], ent1: ['AEA', '#5ED3F3'] };
-  const synIonLabs = []; let synDrug = null, synDrugM = null, synDrugEl = null, tmpV = null;
-  const SDECOR = [['vgcc', 'pre', 0.85], ['ampa', 'post', 1.2], ['gabaa', 'post', 3.1], ['nmda', 'post', -3.3]];
+  const synIonLabs = [], synInfo = {}; let synDrug = null, synDrugM = null, synDrugEl = null, tmpV = null;
+  const SDECOR = [['vgcc', 'pre', 0.85], ['ampa', 'post', 1.2], ['gabaa', 'post', 3.1]];
   const SSTRUCT = [['Presynaptic terminal', SX - 1.0, 5.55], ['Synaptic cleft', SX - 3.6, 2.05], ['Postsynaptic spine', SX, -0.3], ['Vesicle forming', SX + SG[0], SG[1] + 0.75], ['Docked vesicles fuse and release', SX + 0.35, 3.85]];
   function sMat(g) { g.traverse(o => { if (o.material && o.material.clone) o.material = o.material.clone(); }); }
   function siteReg(id, g) { g.userData.site = id; g.userData.g = g; const s = synSite[id] = synSite[id] || { groups: [] }; s.groups.push(g); synItems.push(g); const h = new T.Mesh(new T.SphereGeometry(0.5, 6, 5), new T.MeshBasicMaterial({ visible: false })); g.add(h); }
@@ -3751,12 +3775,11 @@ const World = (function () {
     cy(synG, 3.4, 3.4, 0.22, 26, '#E7A8D8', SX, 2.95, 0).scale.z = 0.75;
     const pd = add(synG, new T.SphereGeometry(3.6, 16, 8, 0, 2 * PI, PI / 2, PI / 2), '#6BC4C9', SX, 1.15, 0, null, tm); pd.scale.set(1, 0.85, 0.75); pd.castShadow = false;
     cy(synG, 3.6, 3.6, 0.22, 26, '#8EC5F0', SX, 1.15, 0).scale.z = 0.75;
-    bx(synG, 8, 1.6, 2.6, '#9EE0FF', SX, 2.05, 0, null, { transparent: true, opacity: 0.1, depthWrite: false });
     [[-4.6, 2.3, -1.2, 0.9], [5.6, 2.8, -1.4, 0.7], [-5.2, 4.8, -2, 0.6], [6, 0.8, -1.2, 0.8]].forEach(q => { const b = ico(synG, q[3], '#3A3A78', q[0], q[1], q[2]); b.scale.set(1.5, 1, 0.8); });
     // proteins
     Object.keys(SSITES).forEach(id => {
       const d = SSITES[id], loc = d[2], v = d[3];
-      if (loc === 'pre') prot(id, d[4], d[5], SX + v, 2.95, PI);
+      if (loc === 'pre') prot(id, d[4], d[5], SX + v, 2.95, PI, id === 'a2d' ? 2.1 : undefined);
       else if (loc === 'post') prot(id, d[4], d[5], SX + v, 1.15, 0);
       else if (loc === 'dome') { const a = v; const X = SX + 3.4 * Math.cos(a), Y = 2.95 + 0.85 * 3.4 * Math.sin(a); prot(id, d[4], d[5], X, Y, a - PI / 2); }
       else prot(id, d[4], d[5], SX + v[0], v[1], 0, d[4] === 'mito' ? 1 : 1.1);
@@ -3765,11 +3788,11 @@ const World = (function () {
     SDECOR.forEach(q => { const d = SSITES[q[0]]; prot(q[0], d[4], d[5], SX + q[2], q[1] === 'pre' ? 2.95 : 1.15, q[1] === 'pre' ? PI : 0); });
     Object.keys(ION).forEach(id => { (synSite[id] ? synSite[id].groups : []).forEach((g, gi) => {
       const U = g.userData; if (!U.ion) return;
-      U.ion.material.color.setHex(parseInt(ION[id][1].slice(1), 16)); U.ion.scale.set(1.7, 1.7, 1.7);
-      U.ion2 = add(g, new T.SphereGeometry(0.06, 6, 5), ION[id][1], 0, 0.5, 0); U.ion2.material = U.ion2.material.clone(); U.ion2.scale.set(1.7, 1.7, 1.7); U.ion2.visible = false;
+      const s1 = ionSprite(ION[id][0], ION[id][1]);
+      if (s1) { g.remove(U.ion); U.ion = s1; g.add(s1); U.ion2 = ionSprite(ION[id][0], ION[id][1]); g.add(U.ion2); U.ion2.visible = false; }
+      else { U.ion.material.color.setHex(parseInt(ION[id][1].slice(1), 16)); U.ion.scale.set(1.7, 1.7, 1.7); U.ion2 = add(g, new T.SphereGeometry(0.06, 6, 5), ION[id][1], 0, 0.5, 0); U.ion2.material = U.ion2.material.clone(); U.ion2.scale.set(1.7, 1.7, 1.7); U.ion2.visible = false; }
       U.blk = bx(g, 0.5, 0.07, 0.26, '#FF3B3B', 0, 0.5, 0.0); U.blk.rotation.z = 0.5; U.blk.material = U.blk.material.clone(); U.blk.visible = false;
       U.blk2 = bx(g, 0.5, 0.07, 0.26, '#FF3B3B', 0, 0.5, 0.0); U.blk2.rotation.z = -0.5; U.blk2.material = U.blk2.material.clone(); U.blk2.visible = false;
-      if (gi === 0) { const el = document.createElement('span'); el.className = 'syn3d ion'; el.textContent = ION[id][0]; el.style.borderColor = ION[id][1]; synWrap0().appendChild(el); synIonLabs.push({ el, id, g }); }
     }); });
     synDrugM = new T.Group(); synG.add(synDrugM); synDrugM.visible = false;
     cy(synDrugM, 0.09, 0.09, 0.2, 8, '#FFFFFF', 0, 0.1, 0); cy(synDrugM, 0.09, 0.09, 0.2, 8, '#FF5C8A', 0, -0.1, 0); add(synDrugM, new T.SphereGeometry(0.09, 8, 6), '#FFFFFF', 0, 0.2, 0); add(synDrugM, new T.SphereGeometry(0.09, 8, 6), '#FF5C8A', 0, -0.2, 0); synDrugM.scale.set(1.5, 1.5, 1.5);
@@ -3782,8 +3805,18 @@ const World = (function () {
     for (let i = 0; i < 44; i++) { const m = add(synG, new T.OctahedronGeometry(0.075, 0), '#FFFFFF', SX, 5, 0); m.material = m.material.clone(); m.visible = false; m.castShadow = false; synParts.push({ m, life: 0, v: [0, 0, 0] }); }
     // labels
     synWrap0();
-    Object.keys(SSITES).forEach(id => { const el = document.createElement('span'); el.className = 'syn3d'; el.textContent = SSITES[id][0]; synWrap.appendChild(el); const g = synSite[id].groups[0]; synLabs.push({ el, id, cats: SSITES[id][1], g, dy: (SSITES[id][2] === 'pre' ? 0.8 : SSITES[id][2] === 'post' ? -0.85 : SSITES[id][2] === 'dome' ? 0.7 : 0.75) + ((synLabs.length % 3) * 0.28) * (SSITES[id][2] === 'post' ? -1 : 1) }); });
+    Object.keys(SSITES).forEach(id => { const el = document.createElement('span'); el.className = 'syn3d'; el.textContent = SSITES[id][0]; synWrap.appendChild(el); const g = synSite[id].groups[0]; synLabs.push({ el, id, cats: SSITES[id][1], g, dy: SSITES[id][2] === 'post' ? (SSITES[id][4] === 'chan' ? 0.72 : 0.68) + (synLabs.length % 2) * 0.3 : (SSITES[id][2] === 'pre' ? 0.8 : SSITES[id][2] === 'dome' ? 0.7 : 0.75) + (synLabs.length % 3) * 0.28, short: SSITES[id][0] }); });
     SSTRUCT.forEach(s => { const el = document.createElement('span'); el.className = 'syn3d struct'; el.textContent = s[0]; synWrap.appendChild(el); synLabs.push({ el, id: null, struct: true, x: s[1], y: s[2], dy: 0 }); });
+  }
+  /* ions are floating letters: a camera-facing sprite drawn from the ion's symbol */
+  function ionSprite(txt, col) {
+    try {
+      if (!T.Sprite || !T.CanvasTexture || !T.SpriteMaterial) return null;
+      const c = document.createElement('canvas'); c.width = 192; c.height = 96; const x = c.getContext('2d'); if (!x) return null;
+      x.font = '800 56px sans-serif'; x.textAlign = 'center'; x.textBaseline = 'middle'; x.lineJoin = 'round'; x.lineWidth = 11; x.strokeStyle = '#120F2E'; x.strokeText(txt, 96, 52); x.fillStyle = col; x.fillText(txt, 96, 52);
+      const s = new T.Sprite(new T.SpriteMaterial({ map: new T.CanvasTexture(c), transparent: true, depthTest: false, depthWrite: false }));
+      s.scale.set(0.95, 0.475, 1); s.renderOrder = 20; s.userData.ionSprite = true; return s;
+    } catch (e) { return null; }
   }
   function synWrap0() { if (!synWrap) { synWrap = document.createElement('div'); synWrap.className = 'synwrap'; synWrap.setAttribute('aria-hidden', 'true'); host.appendChild(synWrap); } return synWrap; }
   function pickRes(v) { v.rp = [-1.7 + Math.random() * 3.8, 3.55 + Math.random() * 1.25, (Math.random() - 0.5) * 1.0]; }
@@ -3821,18 +3854,20 @@ const World = (function () {
     if (synCat === 'cbd') { synRetro -= dt; if (synRetro <= 0) { synRetro = 2.4; for (let i = 0; i < 3; i++) spawnPart(SX + 1.9 + (Math.random() - 0.5) * 0.4, 1.4, (Math.random() - 0.5) * 0.5, -0.12 - Math.random() * 0.1, 0.8 + Math.random() * 0.3, 0, 0xE8F25A); } }
     Object.keys(synSite).forEach(id => synSite[id].groups.forEach(g => {
       const U = g.userData, vis = SSITES[id][1].indexOf(synCat) >= 0; if (g.visible !== vis) g.visible = vis; if (!vis) return;
-      const fx = synDrug && synDrug.docked && synDrug.sites.indexOf(id) >= 0 ? synDrug.act : null;
+      const fx = synDrug && synDrug.docked && synDrug.sites.indexOf(id) >= 0 ? ((synDrug.acts && synDrug.acts[id]) || synDrug.act) : null;
       if (U.fx !== fx) { U.fx = fx; U.e = -1; }
       if (U.ion) {
         const f = fx === 'inh' ? 0 : fx === 'act' ? 2.4 : 1; U.pp = (U.pp === undefined ? U.ph : U.pp) + dt * 0.55 * f;
         if (fx === 'inh') { U.ion.position.set(Math.sin(synT * 18) * 0.04, 0.62, 0); U.ion.visible = true; } else { const p = U.pp % 1; U.ion.position.set(0, 0.55 - p * 1.0, 0); U.ion.visible = p > 0.05 && p < 0.95; }
         if (U.ion2) { const on2 = fx === 'act'; U.ion2.visible = false; if (on2) { const p2 = (U.pp + 0.5) % 1; U.ion2.position.set(0, 0.55 - p2 * 1.0, 0); U.ion2.visible = p2 > 0.05 && p2 < 0.95; } }
         if (U.blk) { U.blk.visible = U.blk2.visible = fx === 'inh'; }
+        // ions only appear once the site is selected (tapped, hovered, or revealed by the drug)
+        if (!(fx || (synHLids && synHLids.indexOf(id) >= 0) || synHover === id)) { U.ion.visible = false; if (U.ion2) U.ion2.visible = false; }
       }
       if (fx) { const k = fx === 'inh' ? 0.35 + Math.sin(synT * 8) * 0.2 : 0.3 + Math.sin(synT * 7) * 0.2; g.traverse(o => { if (o.material && o.material.emissive && o !== U.blk && o !== U.blk2) o.material.emissive.setRGB(fx === 'inh' ? k : 0.05, fx === 'inh' ? 0.03 : k, 0.05); }); }
       if (U.flap) U.flap.rotation.z = fx === 'inh' ? 0 : Math.sin(synT * (fx === 'act' ? 4.5 : 2) + U.ph * 6) * 0.45;
       if (U.knob) { const s = fx === 'inh' ? 0.5 : 1 + Math.sin(synT * (fx === 'act' ? 9 : 4) + g.position.x) * (fx === 'act' ? 0.5 : 0.25); U.knob.scale.set(s, s, s); }
-      if (U.bob !== undefined && fx !== 'inh') g.position.y += Math.sin(synT * 1.4 + U.bob) * dt * (fx === 'act' ? 0.2 : 0.08);
+      if (U.bob !== undefined && fx !== 'inh' && id !== 'a2d') g.position.y += Math.sin(synT * 1.4 + U.bob) * dt * (fx === 'act' ? 0.2 : 0.08);
       const on = synHLids && synHLids.indexOf(id) >= 0, hov = synHover === id, e = on ? 0.45 + Math.sin(synT * 6) * 0.3 : hov ? 0.35 : 0, sc = on ? 1.12 + Math.sin(synT * 6) * 0.05 : hov ? 1.08 : 1;
       if (!fx && U.e !== e) { U.e = e; g.traverse(o => { if (o.material && o.material.emissive) { o.material.emissive.setRGB(e, e * 0.85, e * 0.2); } }); }
       const base = g.userData.s0 || (g.userData.s0 = g.scale.x); g.scale.set(base * sc, base * sc, base * sc);
@@ -3847,8 +3882,12 @@ const World = (function () {
       }
       m.position.set(tx, ty, tz); m.rotation.z += dt * 2.2; m.rotation.x = Math.sin(D.t * 2) * 0.4;
       if (!synDrugEl) { synDrugEl = document.createElement('span'); synDrugEl.className = 'syn3d drug'; synWrap0().appendChild(synDrugEl); }
-      if (synDrugEl.textContent !== D.name) synDrugEl.textContent = D.name; synDrugEl.style.display = ''; place(synDrugEl, tx, ty + 0.5, 0.9);
+      if (synDrugEl.textContent !== D.name) synDrugEl.textContent = D.name; synDrugEl.style.display = ''; synDrugPos = [tx, ty];
     } else { if (synDrugM) synDrugM.visible = false; if (synDrugEl) synDrugEl.style.display = 'none'; }
+  }
+  // labels are projected after the camera has moved this frame, so they stay locked to the models
+  function synLabelPass() {
+    if (synDrugEl && synDrugEl.style.display === '' && synDrugPos) place(synDrugEl, synDrugPos[0], synDrugPos[1] + 0.5, 0.9);
     synIonLabs.forEach(L => {
       const U = L.g.userData, ok = synLabelsOn && L.g.visible && U.ion && U.ion.visible && typeof U.ion.getWorldPosition === 'function';
       L.el.style.display = ok ? '' : 'none';
@@ -3858,7 +3897,9 @@ const World = (function () {
       let show = synLabelsOn; if (!L.struct) show = show && L.cats.indexOf(synCat) >= 0; else show = true;
       if (L.struct && synCat !== 'cbd' && L.x === SX + 0.35 && false) show = true;
       const hl = L.id && synHLids && synHLids.indexOf(L.id) >= 0;
-      L.el.style.display = show || hl ? '' : 'none'; L.el.classList.toggle('hl', !!hl);
+      const ex = !!(L.id && synInfo[L.id] && (hl || synHover === L.id));
+      if (L.exp !== ex) { L.exp = ex; L.el.textContent = ''; if (ex) { const b = document.createElement('b'); b.textContent = synInfo[L.id].n; const p = document.createElement('span'); p.textContent = synInfo[L.id].i; L.el.appendChild(b); L.el.appendChild(p); } else L.el.textContent = L.short || ''; L.el.classList.toggle('exp', ex); }
+      L.el.style.display = show || hl || ex ? '' : 'none'; L.el.classList.toggle('hl', !!hl);
       if (show || hl) { const q = L.struct ? { x: L.x, y: L.y, z: 0.8 } : L.g.position; place(L.el, q.x, q.y + L.dy, L.struct ? 0.8 : 0.9); }
     });
   }
@@ -3884,9 +3925,10 @@ const World = (function () {
   api.synLabels = function (on) { synLabelsOn = !!on; };
   api.synDrug = function (d) {
     if (!d) { synDrug = null; return; }
-    synDrug = { name: d.name, act: d.act, sites: d.sites.filter(s => synSite[s]), t: 0, reveal: false, docked: false, k: 0, p: [SX, 2.05, 0.5], p0: null };
+    synDrug = { name: d.name, act: d.act, acts: d.acts, sites: d.sites.filter(s => synSite[s]), t: 0, reveal: false, docked: false, k: 0, p: [SX, 2.05, 0.5], p0: null };
   };
   api.synReveal = function () { if (synDrug && !synDrug.reveal && synDrug.sites.length) { synDrug.reveal = true; synDrug.p0 = synDrug.p.slice(); } };
+  api.synInfo = function (m) { Object.keys(m || {}).forEach(k => { synInfo[k] = m[k]; }); };
   api.synHighlight = function (ids) { synHLids = ids && ids.length ? ids : null; };
   api.synHover = function (id) { synHover = id; };
   /* the floating brain next to the bookshelf opens the synapse lab */
@@ -3915,11 +3957,15 @@ const World = (function () {
   }
   /* clickable event objects on the counter: restock box, prior-auth folder, mystery pill bottle */
   let evtG = null; const evtO = {};
-  const EVT_DEF = { shelve: ['Restock', -5.7], prior: ['Prior auth', -4.5], bottle: ['Check bottle', -6.9] };
+  const EVT_DEF = { shelve: ['Restock', 2.0], prior: ['Prior auth', 3.2], bottle: ['Check bottle', 4.4] }, EVT_Y = 1.08, EVT_Z = -4.9;
   function buildEvt(g) {
     evtG = new T.Group(); g.add(evtG);
+    // event table: between the bottle shelf and the robot, so the technician stations stay clear
+    bx(g, 3.9, 0.1, 1.4, '#F4F9F9', 3.2, 1.0, EVT_Z); bx(g, 3.9, 0.1, 0.1, '#F2A516', 3.2, 0.94, EVT_Z + 0.7);
+    [[-1.75, -0.5], [1.75, -0.5], [-1.75, 0.5], [1.75, 0.5]].forEach(l => bx(g, 0.12, 0.95, 0.12, '#0A6F66', 3.2 + l[0], 0.47, EVT_Z + l[1]));
+    bx(g, 3.7, 0.06, 1.2, '#0E9A8E', 3.2, 0.35, EVT_Z);
     Object.keys(EVT_DEF).forEach(k => {
-      const o = new T.Group(); o.position.set(EVT_DEF[k][1], 1.27, 0.42); o.visible = false; o.userData.evt = k; evtG.add(o);
+      const o = new T.Group(); o.position.set(EVT_DEF[k][1], EVT_Y, EVT_Z); o.scale.set(1.25, 1.25, 1.25); o.visible = true; o.userData.evt = k; evtG.add(o);
       if (k === 'shelve') {
         bx(o, 0.8, 0.5, 0.6, '#C99A5B', 0, 0.25, 0); bx(o, 0.14, 0.02, 0.62, '#EAD9B0', 0, 0.51, 0); bx(o, 0.5, 0.32, 0.42, '#D8A968', -0.05, 0.66, 0.02).rotation.y = 0.35;
         bx(o, 0.3, 0.18, 0.02, '#FFFFFF', 0, 0.25, 0.31);
@@ -3931,22 +3977,26 @@ const World = (function () {
         cy(o, 0.24, 0.24, 0.6, 10, '#F2A516', 0, 0.3, 0); cy(o, 0.245, 0.245, 0.3, 10, '#F4F9F9', 0, 0.3, 0); cy(o, 0.27, 0.27, 0.16, 10, '#FFFFFF', 0, 0.68, 0);
         bx(o, 0.18, 0.12, 0.02, '#2CCDBB', 0, 0.32, 0.245);
       }
-      const hit = new T.Mesh(new T.SphereGeometry(0.75, 6, 5), new T.MeshBasicMaterial({ visible: false })); hit.position.y = 0.4; o.add(hit);
-      const tag = document.createElement('button'); tag.type = 'button'; tag.className = 'evtTag'; tag.textContent = EVT_DEF[k][0]; tag.hidden = true;
+      const hit = new T.Mesh(new T.SphereGeometry(0.95, 6, 5), new T.MeshBasicMaterial({ visible: false })); hit.position.y = 0.4; o.add(hit);
+      const tag = document.createElement('button'); tag.type = 'button'; tag.className = 'evtTag'; tag.textContent = EVT_DEF[k][0]; tag.hidden = false;
       tag.addEventListener('click', e => { e.stopPropagation(); if (B.onEvt) B.onEvt(k); });
       if (tagsEl) tagsEl.appendChild(tag);
-      evtO[k] = { g: o, tag: tag, on: false, t: Math.random() * 6, s: 0 };
+      evtO[k] = { g: o, tag: tag, on: false, t: Math.random() * 6, s: 0, d: 0 };
     });
   }
   function evtTick(dt) {
     Object.keys(evtO).forEach(k => {
-      const e = evtO[k], want = e.on && !labOn && !synOn, tgt = want ? 1 : 0;
-      e.s += (tgt - e.s) * Math.min(1, dt * 7); e.t += dt;
-      const vis = e.s > 0.03; e.g.visible = vis; e.tag.hidden = !(want && e.s > 0.5);
-      if (!vis) return;
-      const sc = Math.max(0.01, e.s); e.g.scale.set(sc, sc, sc);
-      e.g.position.y = 1.27 + Math.abs(Math.sin(e.t * 2.4)) * 0.12; e.g.rotation.y = Math.sin(e.t * 1.1) * 0.25;
-      if (!e.tag.hidden) place(e.tag, e.g.position.x, e.g.position.y + 1.15, e.g.position.z);
+      const e = evtO[k], show = !labOn && !synOn;
+      e.t += dt; e.g.visible = show; e.tag.hidden = !show;
+      if (!show) return;
+      // due: bounce and wiggle so it is easy to spot; otherwise sit calmly on the table
+      e.d += ((e.on ? 1 : 0) - e.d) * Math.min(1, dt * 6);
+      const due = e.d > 0.5; if (e.tag.classList.contains('due') !== due) e.tag.classList.toggle('due', due);
+      const bob = Math.abs(Math.sin(e.t * 4.2)) * 0.32 * e.d + Math.sin(e.t * 1.3) * 0.015 * (1 - e.d);
+      e.g.position.y = EVT_Y + bob;
+      e.g.rotation.y = Math.sin(e.t * 1.1) * 0.25 * (1 - e.d); e.g.rotation.z = Math.sin(e.t * 26) * 0.12 * e.d;
+      const sc = 1.25 + 0.1 * e.d * Math.abs(Math.sin(e.t * 4.2)); e.g.scale.set(sc, sc, sc);
+      place(e.tag, e.g.position.x, EVT_Y + 1.6, e.g.position.z);
     });
   }
   /* ---- seasonal events: Halloween (Oct 24-31) and Christmas (Dec 18-25) ---- */
@@ -4009,7 +4059,7 @@ const World = (function () {
     applyTheme(); return true;
   };
   api.holiday = () => hol;
-  api.evtShow = function (k, on) { if (evtO[k]) { evtO[k].on = !!on; if (on) evtO[k].s = 0; } };
+  api.evtShow = function (k, on) { if (evtO[k]) evtO[k].on = !!on; };
   api.evtOn = function (k) { return !!(evtO[k] && evtO[k].on); };
   function brainTick(dt) {
     if (!brainG) return;
@@ -5021,6 +5071,7 @@ const World = (function () {
     if (fp.on) return;
     if (view !== 'q') { toast('Finish what you are doing first, then tap it again.'); return; }
     if (focusOn() || learning() || labOn()) return;
+    if (kind !== 'shelve' && !(World.ok && World.evtOn && World.evtOn(kind))) { toast(kind === 'bottle' ? 'No bottle to check right now. It bounces when one is ready.' : 'No prior auth waiting right now. It bounces when one arrives.'); return; }
     clearEvt(kind);
     if (kind === 'shelve') startShelve(false); else if (kind === 'bottle') { fp.cool = 0; startBottles(); } else if (kind === 'prior') startPrior();
   }
@@ -5890,7 +5941,7 @@ const World = (function () {
     a2auto: { n: 'α2 autoreceptor (presynaptic)', c: ['ad'], i: 'Feedback brake: norepinephrine here reduces further NE release.' },
     ht2a: { n: '5-HT2A receptor (postsynaptic)', c: ['ad'], i: 'Excitatory Gq receptor linked to anxiety, insomnia and sexual side effects.' },
     ht1a: { n: '5-HT1A receptor', c: ['ad', 'cbd'], i: 'Gi receptor. Activation calms firing and is linked to anxiolytic effects.' },
-    nmda: { n: 'NMDA receptor (postsynaptic)', c: ['ad'], i: 'Glutamate-gated Ca²⁺ channel, blocked by Mg²⁺ at rest. Ketamine plugs the pore.' },
+    nmda: { n: 'NMDA receptor (postsynaptic)', c: ['ad', 'epi'], i: 'Glutamate-gated Ca²⁺ channel, blocked by Mg²⁺ at rest. Ketamine plugs the pore.' },
     cb1: { n: 'CB1 receptor (presynaptic, Gi/o)', c: ['cbd'], i: 'Retrograde endocannabinoids (2-AG, anandamide) bind here and reduce transmitter release.' },
     faah: { n: 'FAAH (breaks down anandamide)', c: ['cbd'], i: 'Postsynaptic enzyme that clears anandamide.' },
     magl: { n: 'MAGL (breaks down 2-AG)', c: ['cbd'], i: 'Presynaptic enzyme that clears 2-AG.' },
@@ -5900,21 +5951,22 @@ const World = (function () {
     ent1: { n: 'ENT1 (adenosine transporter)', c: ['cbd'], i: 'Clears adenosine from the cleft. Less uptake means more adenosine, which is calming.' }
   };
   const SD = (cat, name, ctx, act, sites, note) => ({ cat, name, ctx, act, sites, note });
+  const SM = (cat, name, ctx, rows, note) => { const acts = {}, lab = {}; rows.forEach(r => { acts[r[0]] = r[1]; lab[r[0]] = r[2]; }); return { cat, name, ctx, act: null, acts, lab, sites: Object.keys(acts), note, multi: true }; };
   const SYN_DRUGS = [
+    SM('epi', 'Valproate', 'set the arrow for each target', [['gabat', 'act', 'GABA turnover (GABA-T)'], ['nav', 'inh', 'Na⁺ channels'], ['nmda', 'inh', 'NMDA receptors']], 'Broad spectrum: blocks Na⁺ channels, raises GABA turnover and levels (it inhibits GABA-T), and dampens NMDA-mediated excitation. (It also blocks T-type Ca²⁺ channels, which helps in absence seizures.)'),
+    SM('epi', 'Topiramate', 'set the arrow for each target', [['nav', 'inh', 'Na⁺ channels'], ['ampa', 'inh', 'AMPA / kainate receptors'], ['gabaa', 'act', 'GABA-A receptors']], 'Multiple targets: blocks Na⁺ channels, antagonizes AMPA receptors, and enhances GABA-A. It also weakly inhibits carbonic anhydrase.'),
     SD('epi', 'Phenytoin', '', 'inh', ['nav'], 'Blocks Na⁺ channels in the inactivated state, so fast repetitive firing stops.'),
     SD('epi', 'Carbamazepine', '', 'inh', ['nav'], 'Use-dependent Na⁺ channel block.'),
     SD('epi', 'Lamotrigine', '', 'inh', ['nav'], 'Na⁺ channel block, which also reduces glutamate release.'),
+    SD('epi', 'Oxcarbazepine', 'prodrug of the active MHD metabolite', 'inh', ['nav'], 'Use-dependent Na⁺ channel block, a keto analog of carbamazepine.'),
+    SD('epi', 'Eslicarbazepine', '', 'inh', ['nav'], 'Prodrug of the same active metabolite as oxcarbazepine. Blocks Na⁺ channels, favoring the inactivated state.'),
     SD('epi', 'Lacosamide', '', 'inh', ['nav'], 'Enhances slow inactivation of Na⁺ channels.'),
     SD('epi', 'Ethosuximide', 'absence seizures', 'inh', ['cavt'], 'Blocks T-type Ca²⁺ channels in thalamic neurons.'),
     SD('epi', 'Gabapentin', '', 'inh', ['a2d'], 'Binds the α2δ subunit and lowers Ca²⁺-dependent release. It does not act on GABA receptors.'),
     SD('epi', 'Pregabalin', '', 'inh', ['a2d'], 'Same target as gabapentin, with better absorption.'),
     SD('epi', 'Levetiracetam', '', 'inh', ['sv2a'], 'Binds SV2A and reduces neurotransmitter release.'),
-    SD('epi', 'Tiagabine', '', 'inh', ['gat1'], 'Blocks GABA reuptake, so more GABA stays in the cleft.'),
-    SD('epi', 'Vigabatrin', '', 'inh', ['gabat'], 'Irreversible GABA-T inhibitor, which raises GABA. Watch for visual field loss.'),
-    SD('epi', 'Clonazepam', '', 'act', ['gabaa'], 'Positive allosteric modulator: more frequent Cl⁻ channel opening.'),
-    SD('epi', 'Diazepam', '', 'act', ['gabaa'], 'Benzodiazepine: increases GABA-A channel opening frequency.'),
+    SD('epi', 'Benzodiazepines', 'e.g. diazepam, clonazepam, lorazepam', 'act', ['gabaa'], 'Positive allosteric modulators: they increase how often the GABA-A Cl⁻ channel opens (barbiturates lengthen the opening instead).'),
     SD('epi', 'Phenobarbital', '', 'act', ['gabaa'], 'Barbiturate: lengthens GABA-A channel opening time.'),
-    SD('epi', 'Perampanel', '', 'inh', ['ampa'], 'Non-competitive AMPA receptor antagonist.'),
     SD('ad', 'Fluoxetine', 'SSRI', 'inh', ['sert'], 'Blocks serotonin reuptake. Long half-life, with an active metabolite.'),
     SD('ad', 'Sertraline', 'SSRI', 'inh', ['sert'], 'Blocks serotonin reuptake.'),
     SD('ad', 'Escitalopram', 'SSRI', 'inh', ['sert'], 'The S-enantiomer of citalopram, very selective for SERT.'),
@@ -5953,12 +6005,12 @@ const World = (function () {
     const pool = SYN_DRUGS.filter(d => d.cat === SYN.cat && (d.name + d.ctx) !== SYN.last), d = pick(pool.length ? pool : SYN_DRUGS.filter(x => x.cat === SYN.cat));
     SYN.last = d.name + d.ctx;
     const others = shuffle(synSitesFor(SYN.cat).filter(id => d.sites.indexOf(id) < 0)).slice(0, 3);
-    SYN.q = { d, act: null, site: null, done: false, opts: shuffle([d.sites[0]].concat(others)) };
-    if (World.ok && World.synHighlight) World.synHighlight(null);
-    if (World.ok && World.synDrug) World.synDrug({ name: d.name, act: d.act, sites: d.sites });
+    SYN.q = { d, act: null, site: null, done: false, picks: [], opts: d.multi ? shuffle(synSitesFor(SYN.cat)) : shuffle([d.sites[0]].concat(others)), stage: d.multi ? 'dir' : null, dirs: {} };
+    if (World.ok && World.synHighlight) World.synHighlight(d.multi ? d.sites.slice() : null);
+    if (World.ok && World.synDrug) World.synDrug({ name: d.name, act: d.act, acts: d.acts, sites: d.sites });
   }
   function synSet() {
-    if (World.ok && World.synCat) { World.synCat(SYN.cat); World.synLabels(SYN.labels); }
+    if (World.ok && World.synCat) { World.synCat(SYN.cat); World.synLabels(SYN.labels); if (World.synInfo) { const m = {}; Object.keys(SYN_SITES).forEach(k => { m[k] = { n: SYN_SITES[k].n, i: SYN_SITES[k].i }; }); World.synInfo(m); } }
   }
   function clearTasks() {
     if (fp && fp.on && !fp.done) { fp.done = true; fpExit(); }
@@ -5977,8 +6029,36 @@ const World = (function () {
   function synExit() { if (World.ok && World.synOn && World.synOn()) World.setSyn(false); }
   function onSynSite(id) {
     const q = SYN.q;
-    if (q && !q.done && synSitesFor(SYN.cat).indexOf(id) >= 0) { if (!q.act) { toast('Choose inhibitor or activator first, then tap the site.'); return; } return synAnswerSite(id); }
+    if (q && !q.done && !q.d.multi && synSitesFor(SYN.cat).indexOf(id) >= 0) { if (!q.act) { SYN.sel = id; if (World.ok) World.synHighlight([id]); toast('Choose inhibitor or activator first, then tap the site.'); if (view === 'syn') renderPanel(); return; } return synAnswerSite(id); }
     SYN.sel = id; if (World.ok) World.synHighlight([id]); if (view === 'syn') renderPanel();
+  }
+  function synPick(id) {
+    const q = SYN.q; if (!q || q.done) return; const i = q.picks.indexOf(id); if (i >= 0) q.picks.splice(i, 1); else q.picks.push(id);
+    if (World.ok) World.synHighlight(q.picks.length ? q.picks.slice() : null); renderPanel();
+  }
+  function synFinish() {
+    const q = SYN.q; q.done = true; q.stage = null;
+    S.synN = (S.synN || 0) + 1;
+    if (q.ok) { S.synOK = (S.synOK || 0) + 1; S.synStreak = (S.synStreak || 0) + 1; q.pay = Math.round(14 * 2 * (1 + 0.25 * S.up.shelf) * (1 + Math.min(S.synStreak, 10) * 0.05) * franchiseMult()); S.cash += q.pay; S.earned += q.pay; SFX.play('ok'); SFX.play('coin'); } else { S.synStreak = 0; SFX.play('bad'); }
+    save(); if (World.ok) { World.synHighlight(q.d.sites); if (World.synReveal) World.synReveal(); } renderStats(); renderPanel();
+  }
+  function synSubmit() {
+    const q = SYN.q; if (!q || q.done || !q.d.multi || q.stage) return;
+    if (!q.picks.length) { toast('Select every site it acts on first, then submit.'); return; }
+    q.right = q.picks.filter(x => q.d.sites.indexOf(x) >= 0); q.extra = q.picks.filter(x => q.d.sites.indexOf(x) < 0); q.miss = q.d.sites.filter(x => q.picks.indexOf(x) < 0);
+    q.sitesOK = !q.extra.length && !q.miss.length; q.actOK = q.siteOK = q.sitesOK;
+    if (q.sitesOK) { q.stage = 'dir'; q.dirs = {}; SFX.play('ok'); if (World.ok) World.synHighlight(q.d.sites.slice()); toast('Sites correct. Now set each one: is it turned up or down by the drug?'); renderPanel(); return; }
+    q.ok = false; synFinish();
+  }
+  function synDir(id) {
+    const q = SYN.q; if (!q || q.done || q.stage !== 'dir' || q.d.sites.indexOf(id) < 0) return;
+    q.dirs[id] = q.dirs[id] === 'up' ? 'down' : 'up'; renderPanel();
+  }
+  function synDirSubmit() {
+    const q = SYN.q; if (!q || q.done || q.stage !== 'dir') return;
+    if (q.d.sites.some(id => !q.dirs[id])) { toast('Tap each arrow to set up or down first.'); return; }
+    q.dirOK = q.d.sites.filter(id => q.dirs[id] === (q.d.acts[id] === 'inh' ? 'down' : 'up'));
+    q.ok = q.dirOK.length === q.d.sites.length; synFinish();
   }
   function synAnswerAct(v) { const q = SYN.q; if (!q || q.done) return; q.act = v; renderPanel(); }
   function synAnswerSite(id) {
@@ -5994,18 +6074,21 @@ const World = (function () {
     const lab = `<button type="button" class="chip" data-act="syn-labels" aria-pressed="${SYN.labels}">Labels ${SYN.labels ? 'on' : 'off'}</button>`;
     const actB = '<div class="syntoggle" role="group" aria-label="Does it inhibit or activate?">' + [['inh', 'Inhibitor / blocker'], ['act', 'Activator / agonist']].map(a => { let c = ''; if (q.done) { if (a[0] === q.d.act) c = 'ok'; else if (a[0] === q.act) c = 'bad'; } else if (a[0] === q.act) c = 'sel'; return `<button type="button" class="${c}" data-act="syn-act" data-v="${a[0]}" aria-pressed="${a[0] === q.act}" ${q.done ? 'disabled' : ''}>${a[1]}</button>`; }).join('') + '</div>';
     const in3d = !!(World.ok && World.synOn && World.synOn());
-    const siteB = !in3d && !q.done ? '<div class="opts syn-opts">' + q.opts.map((id, i) => `<button type="button" class="opt" data-act="syn-site" data-v="${id}"><kbd>${'ABCD'[i]}</kbd><span>${esc(SYN_SITES[id].n)}</span></button>`).join('') + '</div>' : '';
-    const res = q.done ? `<div class="result ${q.ok ? 'good' : 'fail'}"><h3>${q.ok ? 'Correct!' : q.actOK ? 'Right action, wrong site.' : q.siteOK ? 'Right site, wrong action.' : 'Not quite.'}</h3><p><b>${esc(q.d.name)}</b> ${q.d.act === 'inh' ? 'inhibits / blocks' : 'activates / enhances'} <b>${esc(SYN_SITES[q.d.sites[0]].n)}</b>${q.d.sites.length > 1 ? ' (also ' + esc(q.d.sites.slice(1).map(s => SYN_SITES[s].n).join(', ')) + ')' : ''}.</p><p class="why">${esc(q.d.note)}</p>${q.ok ? '<div class="pay"><span class="big">+' + money(q.pay) + '</span><span>streak ' + S.synStreak + '</span></div>' : ''}<div><button class="btn go" type="button" data-act="syn-next">Next drug</button></div></div>` : '';
+    const multi = !!q.d.multi;
+    const dirB = multi && q.stage === 'dir' && !q.done ? '<div class="syndirs"><p class="note">Tap each arrow to cycle it: ▲ = the drug turns this target up (enhances / activates), ▼ = turns it down (blocks / inhibits).</p>' + q.d.sites.map(id => { const v = q.dirs[id]; return `<div class="syndir"><span>${esc(q.d.lab[id] || SYN_SITES[id].n)}</span><button type="button" class="dirbtn ${v || ''}" data-act="syn-dir" data-v="${id}" aria-label="${esc(q.d.lab[id])}: ${v || 'not set'}">${v === 'up' ? '▲ up' : v === 'down' ? '▼ down' : '? tap'}</button></div>`; }).join('') + '<div><button class="btn go" type="button" data-act="syn-dirsubmit">Submit</button></div></div>' : '';
+    const siteB = multi && q.stage === 'dir' ? dirB : multi && !q.done ? '<div class="opts syn-opts">' + (in3d ? '' : q.opts.map(id => `<button type="button" class="opt${q.picks.indexOf(id) >= 0 ? ' sel' : ''}" data-act="syn-site" data-v="${id}" aria-pressed="${q.picks.indexOf(id) >= 0}"><span>${esc(SYN_SITES[id].n)}</span></button>`).join('')) + '</div><div><button class="btn go" type="button" data-act="syn-submit">Submit (' + q.picks.length + ' selected)</button></div>' : !in3d && !q.done ? '<div class="opts syn-opts">' + q.opts.map((id, i) => `<button type="button" class="opt" data-act="syn-site" data-v="${id}"><kbd>${'ABCD'[i]}</kbd><span>${esc(SYN_SITES[id].n)}</span></button>`).join('') + '</div>' : '';
+    const mres = q.done && multi ? `<div class="result ${q.ok ? 'good' : 'fail'}"><h3>${q.ok ? 'Correct!' : 'Not quite.'}</h3><p><b>${esc(q.d.name)}</b>: ${Object.keys(q.d.acts).map(k => (q.d.acts[k] === 'inh' ? 'turns down ' : 'turns up ') + '<b>' + esc(q.d.lab[k]) + '</b>').join('; ')}.</p>${!q.ok ? '<p class="why">Check: ' + esc(q.d.sites.filter(k => q.dirs[k] !== (q.d.acts[k] === 'inh' ? 'down' : 'up')).map(k => q.d.lab[k] + ' should be ' + (q.d.acts[k] === 'inh' ? 'down' : 'up')).join('; ')) + '.</p>' : ''}${q.miss && q.miss.length ? '<p class="why">Missed: ' + esc(q.miss.map(k => SYN_SITES[k].n).join(', ')) + '.</p>' : ''}${q.extra && q.extra.length ? '<p class="why">Not a target: ' + esc(q.extra.map(k => SYN_SITES[k].n).join(', ')) + '.</p>' : ''}<p class="why">${esc(q.d.note)}</p>${q.ok ? '<div class="pay"><span class="big">+' + money(q.pay) + '</span><span>streak ' + S.synStreak + '</span></div>' : ''}<div><button class="btn go" type="button" data-act="syn-next">Next drug</button></div></div>` : '';
+    const res = q.done && multi ? mres : q.done ? `<div class="result ${q.ok ? 'good' : 'fail'}"><h3>${q.ok ? 'Correct!' : q.actOK ? 'Right action, wrong site.' : q.siteOK ? 'Right site, wrong action.' : 'Not quite.'}</h3><p><b>${esc(q.d.name)}</b> ${q.d.act === 'inh' ? 'inhibits / blocks' : 'activates / enhances'} <b>${esc(SYN_SITES[q.d.sites[0]].n)}</b>${q.d.sites.length > 1 ? ' (also ' + esc(q.d.sites.slice(1).map(s => SYN_SITES[s].n).join(', ')) + ')' : ''}.</p><p class="why">${esc(q.d.note)}</p>${q.ok ? '<div class="pay"><span class="big">+' + money(q.pay) + '</span><span>streak ' + S.synStreak + '</span></div>' : ''}<div><button class="btn go" type="button" data-act="syn-next">Next drug</button></div></div>` : '';
     const guide = synSitesFor(cat).map(id => `<li class="${SYN.sel === id ? 'sel' : ''}"><button type="button" class="linkbtn" data-act="syn-info" data-v="${id}"><b>${esc(SYN_SITES[id].n)}</b></button>${SYN.sel === id ? '<br><span>' + esc(SYN_SITES[id].i) + '</span>' : ''}</li>`).join('');
     return `<div class="pane syn"><div class="synhead"><h3>Synapse lab</h3><span class="note">${S.synN ? 'Solved ' + (S.synOK || 0) + ' of ' + S.synN : 'Tap the glowing parts of the synapse, or play the drug quiz.'}</span></div>
       <div class="chips">${tabs}${lab}</div>
       <div class="syncard"><div class="synq"><b>${esc(q.d.name)}</b>${q.d.ctx ? '<small> (' + esc(q.d.ctx) + ')</small>' : ''}</div>
-        ${actB}${q.done ? '' : '<p class="note">' + (in3d ? 'Then tap the site of action in the 3D view.' : 'Then choose the site of action.') + '</p>'}${siteB}${res}</div>
+        ${multi ? '' : actB}${q.done ? '' : '<p class="note">' + (multi ? (q.stage ? '' : in3d ? 'Tap EVERY site it acts on in the 3D view (tap again to undo), then submit.' : 'Select EVERY site it acts on, then submit.') : in3d ? 'Then tap the site of action in the 3D view.' : 'Then choose the site of action.') + '</p>'}${siteB}${res}</div>
       <details class="grp"><summary><b>Site guide</b> <small>tap a name to see what it does</small></summary><ul class="synguide">${guide}</ul></details>
       <div class="btnrow"><button type="button" class="btn go" data-act="back">Back to the pharmacy</button></div></div>`;
   }
 
-  const GAME_VERSION = 60;
+  const GAME_VERSION = 67;
   const b64u = (u8) => { let s = ''; for (let i = 0; i < u8.length; i += 0x8000) s += String.fromCharCode.apply(null, u8.subarray(i, i + 0x8000)); return btoa(s).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); };
   const unb64u = (t) => { const s = atob(t.replace(/-/g, '+').replace(/_/g, '/')), u = new Uint8Array(s.length); for (let i = 0; i < s.length; i++) u[i] = s.charCodeAt(i); return u; };
   const chk = (t) => { let h = 2166136261; for (let i = 0; i < t.length; i++) { h ^= t.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36); };
@@ -6087,6 +6170,9 @@ const World = (function () {
       case 'syn-labels': SYN.labels = !SYN.labels; synSet(); renderPanel(); return;
       case 'syn-act': return synAnswerAct(v);
       case 'syn-site': return synAnswerSite(v);
+      case 'syn-submit': return synSubmit();
+      case 'syn-dir': return synDir(v);
+      case 'syn-dirsubmit': return synDirSubmit();
       case 'syn-next': synNewQ(); renderPanel(); return;
       case 'syn-info': SYN.sel = SYN.sel === v ? null : v; if (World.ok) World.synHighlight(SYN.sel ? [SYN.sel] : null); renderPanel(); return;
       case 'lab-ins': { const el = $('#labexpr'); if (!el) return; const p = el.selectionStart == null ? el.value.length : el.selectionStart; el.value = el.value.slice(0, p) + v + el.value.slice(el.selectionEnd == null ? p : el.selectionEnd); const np = p + v.length; el.focus(); try { el.setSelectionRange(np, np); } catch (x) {} LABCALC.expr = el.value; labTick(); return; }
