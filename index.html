@@ -523,6 +523,28 @@ body.fx .fpq.mini { left: max(10px, env(safe-area-inset-left, 0px)); }
 }
 
 .stat .ic { display: none; }
+.quick { display: flex; gap: 8px; align-items: center; }
+.quick .qk { display: grid; place-items: center; width: 44px; height: 44px; padding: 0; border-radius: 14px; border: 2px solid var(--ink); background: var(--surface); color: var(--teal-ink, var(--ink)); box-shadow: 0 3px 0 var(--ink); cursor: pointer; pointer-events: auto; }
+.quick .qk i { display: grid; place-items: center; }
+.quick .qk[aria-pressed="true"] { background: var(--teal-soft); }
+#sfxbtn[aria-pressed="false"] { opacity: .6; text-decoration: line-through; }
+.quick .qk:active { transform: translateY(2px); box-shadow: 0 1px 0 var(--ink); }
+.sr { position: absolute !important; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+body.fx .quick { gap: 6px; } body.fx .quick .qk { width: 40px; height: 40px; border-radius: 12px; }
+/* streak fire: the border burns brighter and thicker as the streak grows */
+@property --fa { syntax: '<angle>'; inherits: false; initial-value: 0deg; }
+.stat.fire { position: relative; isolation: isolate; --fw: 2px; --fg: 6px; --fspd: 3.2s; box-shadow: 0 0 var(--fg) calc(var(--fg) / 3) rgba(255, 120, 20, .55); animation: fireglow calc(var(--fspd) / 4) ease-in-out infinite alternate; }
+.stat.fire::before { content: ''; position: absolute; inset: calc(var(--fw) * -1); z-index: -1; border-radius: inherit; background: conic-gradient(from var(--fa), #FF3D00, #FFB300, #FFF176, #FF6D00, #E53900, #FFB300, #FF3D00); animation: firespin var(--fspd) linear infinite; filter: saturate(1.2); }
+.stat.fire::after { content: ''; position: absolute; inset: calc(var(--fw) * -1.6); z-index: -2; border-radius: inherit; background: conic-gradient(from calc(var(--fa) * -1), rgba(255, 90, 0, .0), rgba(255, 140, 0, .75), rgba(255, 220, 80, .0), rgba(255, 70, 0, .7), rgba(255, 90, 0, .0)); filter: blur(calc(var(--fg) / 2.2)); animation: firespin calc(var(--fspd) * 1.4) linear infinite reverse; opacity: .85; }
+.stat.fire.f1 { --fw: 2px; --fg: 6px; --fspd: 3.6s; }
+.stat.fire.f2 { --fw: 3px; --fg: 11px; --fspd: 2.8s; }
+.stat.fire.f3 { --fw: 4px; --fg: 17px; --fspd: 2.1s; }
+.stat.fire.f4 { --fw: 5px; --fg: 24px; --fspd: 1.5s; }
+.stat.fire.f5 { --fw: 7px; --fg: 34px; --fspd: 1s; }
+@keyframes firespin { to { --fa: 360deg; } }
+@keyframes fireglow { from { box-shadow: 0 0 var(--fg) calc(var(--fg) / 4) rgba(255, 110, 20, .45); } to { box-shadow: 0 0 calc(var(--fg) * 1.5) calc(var(--fg) / 2.5) rgba(255, 190, 40, .8); } }
+@media (prefers-reduced-motion: reduce) { .stat.fire, .stat.fire::before, .stat.fire::after { animation: none; } }
+
 body.fx { --tb: calc(50px + env(safe-area-inset-top, 0px)); }
 body.fx .toast3d:not(.on) { transform: translate(-50%, calc(-100% - var(--tb) - 90px)); }
 body.fx .stats { gap: 6px; }
@@ -668,7 +690,7 @@ body.lab .evtTag, body.lab .tags, body.lab .line3d, body.lab .bub3d, body.lab .r
 /* synapse lab */
 body.syn .evtTag, body.syn .tags, body.syn .line3d, body.syn .bub3d, body.syn .rush3d, body.syn .phonebtn, body.syn .hint3d, body.syn #restockhud, body.syn .say3d { display: none !important; }
 .evtTag { position: absolute; left: 0; top: 0; padding: 4px 10px; border-radius: 999px; border: 2px solid var(--ink); background: #FFD23F; color: #2B1D00; font: 800 12px/1.2 var(--f-body, inherit); cursor: pointer; white-space: nowrap; box-shadow: 0 2px 0 rgba(0,0,0,.25); animation: evtpulse 1.4s ease-in-out infinite; }
-.evtTag { opacity: .85; font-size: 13px; padding: 6px 12px; min-height: 30px; background: #DDE8E8; animation: none; }
+.evtTag { opacity: .85; font-size: 7px; padding: 2px 6px; min-height: 0; border-width: 1.5px; background: #DDE8E8; animation: none; }
 .evtTag.due { opacity: 1; background: #FFD23F; animation: evtDue .6s ease-in-out infinite alternate; }
 @keyframes evtDue { from { box-shadow: 0 2px 0 rgba(0,0,0,.25), 0 0 0 0 rgba(255,210,63,.9); } to { box-shadow: 0 2px 0 rgba(0,0,0,.25), 0 0 0 9px rgba(255,210,63,0); } }
 @keyframes evtpulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.06); } }
@@ -711,6 +733,7 @@ body.syn .synwrap { display: block; }
       <div><h1>Corner Rx</h1><small>Pharmacy tycoon study game</small></div>
     </div>
     <div class="stats" id="stats" aria-label="Your pharmacy stats"></div>
+    <div class="quick"><button type="button" class="qk" id="sfxbtn" data-act="sfx" aria-label="Sound" aria-pressed="true"><i aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9zM16 9a4 4 0 0 1 0 6M18.5 6.5a8 8 0 0 1 0 11"/></svg></i><span id="sfxlab" class="sr">Sound: on</span></button><button type="button" class="qk" id="focusbtn" data-act="focus" aria-label="Focus mode" aria-pressed="false"><i aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="2.5"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg></i><span id="focuslab" class="sr">Focus mode</span></button></div>
     <button type="button" class="drawerbtn" data-act="menu" aria-label="Open menu" aria-haspopup="true"><span aria-hidden="true">&#9776;</span><b>Menu</b></button>
   </header>
     <div class="tags"></div>
@@ -730,15 +753,14 @@ body.syn .synwrap { display: block; }
   <nav class="menu" id="menu" aria-label="Game menu">
     <button type="button" data-act="sheet-ups"><i aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg></i><span>Upgrades</span></button>
     <button type="button" data-act="sheet-prog"><i aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 4h8v5a4 4 0 0 1-8 0zM8 6H4v1a3 3 0 0 0 4 3M16 6h4v1a3 3 0 0 1-4 3M12 13v4M8 20h8"/></svg></i><span>Progress &amp; awards</span></button>
-    <button type="button" data-act="settings"><i aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5.5A1.5 1.5 0 0 1 5.5 4H12v16H5.5A1.5 1.5 0 0 1 4 18.5zM12 4h6.5A1.5 1.5 0 0 1 20 5.5v13a1.5 1.5 0 0 1-1.5 1.5H12"/></svg></i><span>Study hub</span></button>
+    <button type="button" data-act="settings"><i aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5.5A1.5 1.5 0 0 1 5.5 4H12v16H5.5A1.5 1.5 0 0 1 4 18.5zM12 4h6.5A1.5 1.5 0 0 1 20 5.5v13a1.5 1.5 0 0 1-1.5 1.5H12"/></svg></i><span>Topics</span></button>
     <button type="button" data-act="flash"><i aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="6" width="14" height="12" rx="2"/><path d="M7 3h12a2 2 0 0 1 2 2v10"/></svg></i><span>Flashcards</span></button>
-    <button type="button" id="sfxbtn" data-act="sfx" aria-pressed="true"><i aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9zM16 9a4 4 0 0 1 0 6M18.5 6.5a8 8 0 0 1 0 11"/></svg></i><span id="sfxlab">Sound: on</span></button>
     <button type="button" data-act="syn"><i aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 4a3 3 0 0 0-3 3 3 3 0 0 0-2 5 3 3 0 0 0 2 5 3 3 0 0 0 6 1V4a3 3 0 0 0-3 0zM15 4a3 3 0 0 1 3 3 3 3 0 0 1 2 5 3 3 0 0 1-2 5 3 3 0 0 1-6 1"/></svg></i><span>Synapse lab</span></button>
     <button type="button" id="labbtn" data-act="lab" aria-pressed="false"><i aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 3h6M10 3v6L4.5 19a1.6 1.6 0 0 0 1.4 2.4h12.2a1.6 1.6 0 0 0 1.4-2.4L14 9V3M7.5 15h9"/></svg></i><span id="lablab">Switch to compounding</span></button>
-    <button type="button" id="focusbtn" data-act="focus" aria-pressed="false"><i aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="2.5"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg></i><span id="focuslab">Focus mode</span></button>
     <hr>
     <button type="button" data-act="ref"><i aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 4h11a3 3 0 0 1 3 3v13H8a3 3 0 0 1-3-3zM5 17a3 3 0 0 1 3-3h11"/></svg></i><span>Drug reference</span></button>
     <button type="button" data-act="shelve"><i aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8l9-4 9 4-9 4zM3 8v8l9 4 9-4V8M12 12v8"/></svg></i><span>Restock shelves</span></button>
+    <button type="button" data-act="create"><i aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/></svg></i><span>Character</span></button>
     <hr>
     <button type="button" class="menuclose" data-act="drawer-close"><i aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></i><span>Close menu</span></button>
   </nav>
@@ -1864,7 +1886,7 @@ const World = (function () {
   const reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   const UPIDS = ['shelf', 'tech', 'counsel', 'library', 'robot'];
   const CLICK = UPIDS.concat(['notes']);
-  const BASE = { notes: [9.1, 1.26, -5.2], shelf: [-1.5, 0, -6.5], tech: [-6.9, 0, 0], counsel: [8.0, 0, 2.2], library: [-9.0, 0, -4.0], robot: [6.8, 0, -5.4] };
+  const BASE = { notes: [9.1, 1.26, -5.2], shelf: [-1.5, 0, -6.5], tech: [-6.9, 0, 0], counsel: [-11.55, 0, 3.85], library: [-9.0, 0, -4.0], robot: [6.8, 0, -5.4] };
   const TAGY = { notes: 2.5, shelf: 4.7, tech: 2.7, counsel: 3.3, library: 4.7, robot: 3.6 };
   const SKIN = ['#F2C9A5', '#E0A97E', '#C48A5E', '#8D5A3B', '#F6D7BD', '#6F4429'];
   const HAIR = ['#2B1B12', '#6B3A1E', '#B5651D', '#D9B25A', '#A8A8A8', '#1E1E2E'];
@@ -1875,7 +1897,7 @@ const World = (function () {
   const maxq = () => (rushOn ? 8 : 5);
   const OBST = [
     { x0: -9.6, x1: 4.15, z0: -1.0, z1: 1.05 },    // counter, wall to wall, with the computer stations
-    { x0: 6.4, x1: 9.6, z0: 0.6, z1: 3.8 },        // counseling room (right side)
+    { x0: -13.3, x1: -10.0, z0: 2.2, z1: 5.5 },    // counseling room (outside the left wall)
     { x0: -9.6, x1: -8.4, z0: -5.8, z1: -2.2 },    // library
     { x0: 8.3, x1: 9.9, z0: -5.8, z1: -4.6 },      // study desk
     { x0: 5.5, x1: 8.1, z0: -6.7, z1: -4.1 },      // robot
@@ -2047,18 +2069,19 @@ const World = (function () {
       P.skinM.emissive.setHex(0x1c1e0a); P.sweaty = true;
     }
     const A = o.acc || 0, goldM = own('#F2C94C');
-    if (A >= 2) { const blk = own('#101018'); put(new T.BoxGeometry(0.17, 0.1, 0.05), blk, -0.11, 1.88, 0.31); put(new T.BoxGeometry(0.17, 0.1, 0.05), blk, 0.11, 1.88, 0.31); put(new T.BoxGeometry(0.1, 0.025, 0.05), blk, 0, 1.9, 0.31); }
-    if (A >= 4) put(new T.BoxGeometry(0.17, 0.05, 0.04), goldM, 0, 1.735, 0.318);
-    if (A >= 5) { const fm = own('#2B2B33'); put(new T.CylinderGeometry(0.5, 0.5, 0.03, 10), fm, 0, 2.06, 0); put(new T.CylinderGeometry(0.27, 0.3, 0.24, 8), fm, 0, 2.19, 0); put(new T.CylinderGeometry(0.305, 0.305, 0.05, 8), own('#8B1E2D'), 0, 2.1, 0); }
+    const on = k => o.accOn ? o.accOn.indexOf(k) >= 0 : A >= k;
+    if (on(2)) { const blk = own('#101018'); put(new T.BoxGeometry(0.17, 0.1, 0.05), blk, -0.11, 1.88, 0.31); put(new T.BoxGeometry(0.17, 0.1, 0.05), blk, 0.11, 1.88, 0.31); put(new T.BoxGeometry(0.1, 0.025, 0.05), blk, 0, 1.9, 0.31); }
+    if (on(4)) put(new T.BoxGeometry(0.17, 0.05, 0.04), goldM, 0, 1.735, 0.318);
+    if (on(5)) { const fm = own('#2B2B33'); put(new T.CylinderGeometry(0.5, 0.5, 0.03, 10), fm, 0, 2.06, 0); put(new T.CylinderGeometry(0.27, 0.3, 0.24, 8), fm, 0, 2.19, 0); put(new T.CylinderGeometry(0.305, 0.305, 0.05, 8), own('#8B1E2D'), 0, 2.1, 0); }
     par = up;
     if (o.inspector) { put(new T.BoxGeometry(0.07, 0.46, 0.03), own('#B91C1C'), 0, 1.18, Math.max(tr[0], tr[1]) + 0.02); put(new T.BoxGeometry(0.2, 0.05, 0.04), own('#E8EDF2'), 0, 1.45, Math.max(tr[0], tr[1]) + 0.01); }
     if (o.driver) { put(new T.BoxGeometry(0.56, 0.42, 0.4), own('#C9A06A'), 0, 1.0, 0.5); put(new T.BoxGeometry(0.1, 0.43, 0.41), own('#8A5A2B'), 0, 1.0, 0.5); }
-    if (A >= 7) {
+    if (on(7)) {
       const cm = own('#7B3FA0'), fur = own('#9A5CC4'), c1 = put(new T.CylinderGeometry(tr[0] + 0.09, tr[1] + 0.1, 1.0, 7), cm, 0, 1.1, 0); c1.scale.copy(tor.scale);
       [-1, 1].forEach(s => put(new T.IcosahedronGeometry(0.2, 0), fur, s * (jacked ? 0.8 : obese ? 0.62 : slim ? 0.34 : 0.4), 1.58, 0));
       const col = put(new T.TorusGeometry(0.3, 0.1, 5, 9), fur, 0, 1.6, 0); col.rotation.x = PI / 2; col.scale.set(tor.scale.x, tor.scale.z, 1);
     }
-    if (A >= 1) { const ch = put(new T.TorusGeometry(A >= 7 ? 0.5 : 0.31, 0.03, 5, 10), goldM, 0, A >= 7 ? 1.66 : 1.56, 0.02); ch.rotation.x = PI / 2; if (A < 7) ch.scale.set(tor.scale.x, tor.scale.z, 1); put(new T.BoxGeometry(0.11, 0.11, 0.03), goldM, 0, A >= 7 ? 1.3 : 1.26, A >= 7 ? 0.56 : 0.4); }
+    if (on(1)) { const ch = put(new T.TorusGeometry(on(7) ? 0.5 : 0.31, 0.03, 5, 10), goldM, 0, on(7) ? 1.66 : 1.56, 0.02); ch.rotation.x = PI / 2; if (!on(7)) ch.scale.set(tor.scale.x, tor.scale.z, 1); put(new T.BoxGeometry(0.11, 0.11, 0.03), goldM, 0, on(7) ? 1.3 : 1.26, on(7) ? 0.56 : 0.4); }
     [-1, 1].forEach(s => {
       const leg = new T.Group(); leg.position.set(s * (jacked ? 0.2 : obese ? 0.24 : slim ? 0.12 : 0.15), legL, 0); g.add(leg);
       put(new T.BoxGeometry(legW, legL, legW + 0.04), pants, 0, -legL / 2, 0, leg); P.legs.push(leg);
@@ -2066,8 +2089,8 @@ const World = (function () {
       if (jacked) arm.scale.set(2.3, 1.15, 2.3); else if (obese) arm.scale.set(1.6, 1, 1.6); else if (slim) arm.scale.set(0.8, 1, 0.8);
       put(new T.BoxGeometry(0.15, 0.62, 0.16), jacked ? P.skinM : P.shirtM, 0, -0.3, 0, arm);
       put(new T.IcosahedronGeometry(0.09, 0), P.skinM, 0, -0.66, 0, arm); P.arms.push(arm);
-      if (A >= 3) put(new T.BoxGeometry(0.2, 0.09, 0.13), goldM, 0, -0.7, 0.02, arm);
-      if ((A >= 6 || o.elder) && s === 1) { put(new T.CylinderGeometry(0.025, 0.025, 1.05, 5), own('#5B3A21'), 0, -1.02, 0.06, arm); put(new T.IcosahedronGeometry(0.07, 0), goldM, 0, -0.5, 0.06, arm); }
+      if (on(3)) put(new T.BoxGeometry(0.2, 0.09, 0.13), goldM, 0, -0.7, 0.02, arm);
+      if ((on(6) || o.elder) && s === 1) { put(new T.CylinderGeometry(0.025, 0.025, 1.05, 5), own('#5B3A21'), 0, -1.02, 0.06, arm); put(new T.IcosahedronGeometry(0.07, 0), goldM, 0, -0.5, 0.06, arm); }
       if (karen && s === 1) put(new T.BoxGeometry(0.34, 0.27, 0.13), own('#8A63C9'), 0, -0.82, 0.06, arm);
       if (o.inspector && s === 1) { put(new T.BoxGeometry(0.3, 0.38, 0.04), own('#C9A06A'), 0, -0.8, 0.1, arm); put(new T.BoxGeometry(0.24, 0.3, 0.02), own('#FFFFFF'), 0, -0.8, 0.125, arm); }
     });
@@ -2100,8 +2123,10 @@ const World = (function () {
     for (let i = 0; i < 9; i++) for (let j = 0; j < 7; j++) bx(g, 2, 0.06, 2, (i + j) % 2 ? '#E4F1F0' : '#D2E7E5', -8 + i * 2, 0.03, -6.2 + j * 2);
     bx(g, 20, 6.4, 0.4, '#A5D6D0', 0, 3.2, -7.5);
     bx(g, 20, 0.5, 0.5, '#0E9A8E', 0, 0.25, -7.2);
-    bx(g, 0.4, 6.4, 14.2, '#8FC9C3', -9.8, 3.2, -0.6);
-    bx(g, 0.5, 0.5, 14.2, '#0E9A8E', -9.5, 0.25, -0.6);
+    // left wall, with a doorway (z 3.4 to 5.0) into the counseling room outside
+    bx(g, 0.4, 6.4, 11.1, '#8FC9C3', -9.8, 3.2, -2.15); bx(g, 0.4, 6.4, 1.5, '#8FC9C3', -9.8, 3.2, 5.75); bx(g, 0.4, 3.8, 1.6, '#8FC9C3', -9.8, 4.5, 4.2);
+    bx(g, 0.5, 0.5, 11.1, '#0E9A8E', -9.5, 0.25, -2.15); bx(g, 0.5, 0.5, 1.5, '#0E9A8E', -9.5, 0.25, 5.75);
+    bx(g, 0.55, 0.14, 1.7, '#F2A516', -9.8, 2.6, 4.2); bx(g, 0.5, 0.05, 1.6, '#2F5256', -9.8, 0.03, 4.2);
     // sign + cross
     const cv = document.createElement('canvas'); cv.width = 1024; cv.height = 256;
     const tex = new T.CanvasTexture(cv);
@@ -2135,10 +2160,10 @@ const World = (function () {
     // porch rug, plants
     bx(g, 2.4, 0.04, 3.6, '#F2A516', 5, 0.08, 6.9);
     bx(g, 2.9, 0.12, 0.2, '#0E9A8E', 5, 0.18, 5.2);
-    [[8.3, 6.5], [-8.6, 5]].forEach((p, pi) => { cy(g, 0.4, 0.3, 0.6, 6, '#E04F3A', p[0], 0.3, p[1]); const l1 = ico(g, 0.65, '#3E8E41', p[0], 1.1, p[1]), l2 = ico(g, 0.45, '#56A85A', p[0] + 0.2, 1.6, p[1]); if (pi === 1) { l1.userData.x0 = l1.position.x; l2.userData.x0 = l2.position.x; plantL = [l1, l2]; } });
+    [[8.4, 4.5], [-8.6, 6.2]].forEach((p, pi) => { cy(g, 0.4, 0.3, 0.6, 6, '#E04F3A', p[0], 0.3, p[1]); const l1 = ico(g, 0.65, '#3E8E41', p[0], 1.1, p[1]), l2 = ico(g, 0.45, '#56A85A', p[0] + 0.2, 1.6, p[1]); if (pi === 1) { l1.userData.x0 = l1.position.x; l2.userData.x0 = l2.position.x; plantL = [l1, l2]; } });
     // waiting room seating: a bench along the right wall and two chairs near the door
-    bx(g, 0.75, 0.12, 2.5, '#8A5A3B', 9.0, 0.5, 5.25); bx(g, 0.6, 0.1, 2.35, '#0E9A8E', 8.98, 0.6, 5.25); bx(g, 0.12, 0.8, 2.5, '#8A5A3B', 9.4, 0.95, 5.25);
-    [4.2, 6.3].forEach(zz => { bx(g, 0.6, 0.45, 0.1, '#6D4630', 9.0, 0.22, zz); });
+    bx(g, 0.75, 0.12, 2.7, '#8A5A3B', 9.0, 0.5, 2.2); bx(g, 0.6, 0.1, 2.55, '#0E9A8E', 8.98, 0.6, 2.2); bx(g, 0.12, 0.8, 2.7, '#8A5A3B', 9.4, 0.95, 2.2);
+    [[0.9, 1.0], [0.9, 3.4]].forEach(l => { bx(g, 0.6, 0.45, 0.1, '#6D4630', 9.0, 0.22, l[0] + (l[1] > 3 ? 0.0 : 0.4)); });
     [6.6, 7.7].forEach(x => { bx(g, 0.75, 0.1, 0.75, '#F2A516', x, 0.5, 5.45); bx(g, 0.75, 0.75, 0.1, '#F2A516', x, 0.9, 5.82); [[-0.3, -0.3], [0.3, -0.3], [-0.3, 0.3], [0.3, 0.3]].forEach(o => bx(g, 0.08, 0.45, 0.08, '#6D4630', x + o[0], 0.22, 5.45 + o[1])); });
     bx(g, 0.6, 0.05, 0.6, '#F4F9F9', 7.15, 0.6, 6.7); cy(g, 0.05, 0.05, 0.55, 6, '#6D4630', 7.15, 0.3, 6.7);
     // scenery
@@ -2218,24 +2243,26 @@ const World = (function () {
   }
   function buildCounsel(lv) {
     const G = ug.counsel; clear(G);
+    // the room sticks out past the left wall of the pharmacy, on its own little platform
+    bx(G, 3.5, 0.7, 3.5, '#2F5256', 0, -0.35, 0);
     if (lv < 1) { ghostBox(G, 3.2, 2.8, 3.2, 'counsel'); return; }
     bx(G, 3.2, 0.05, 3.2, '#BFE3DF', 0, 0.04, 0, 'counsel');
     const glass = { transparent: true, opacity: 0.22, roughness: 0.2 };
-    // glass walls: back, right and front are solid; the DOOR is the gap in the left wall, facing into the pharmacy
-    bx(G, 3.2, 2.7, 0.06, '#9FE8E0', 0, 1.35, -1.55, 'counsel', glass); bx(G, 0.06, 2.7, 3.2, '#9FE8E0', 1.55, 1.35, 0, 'counsel', glass);
+    // glass walls: back, left and front are solid; the DOORWAY is the gap in the right wall, leading into the pharmacy
+    bx(G, 3.2, 2.7, 0.06, '#9FE8E0', 0, 1.35, -1.55, 'counsel', glass); bx(G, 0.06, 2.7, 3.2, '#9FE8E0', -1.55, 1.35, 0, 'counsel', glass);
     bx(G, 3.2, 2.7, 0.06, '#9FE8E0', 0, 1.35, 1.55, 'counsel', glass);
-    bx(G, 0.06, 2.7, 1.1, '#9FE8E0', -1.55, 1.35, -1.0, 'counsel', glass); bx(G, 0.06, 2.7, 0.4, '#9FE8E0', -1.55, 1.35, 1.35, 'counsel', glass);
+    bx(G, 0.06, 2.7, 1.1, '#9FE8E0', 1.55, 1.35, -1.0, 'counsel', glass); bx(G, 0.06, 2.7, 0.4, '#9FE8E0', 1.55, 1.35, 1.35, 'counsel', glass);
     [[-1.55, -1.55], [1.55, -1.55], [-1.55, 1.55], [1.55, 1.55]].forEach(p => bx(G, 0.12, 2.8, 0.12, '#0E9A8E', p[0], 1.4, p[1], 'counsel'));
-    bx(G, 0.14, 2.1, 0.1, '#F2A516', -1.55, 1.05, -0.45, 'counsel'); bx(G, 0.14, 2.1, 0.1, '#F2A516', -1.55, 1.05, 1.15, 'counsel');
-    bx(G, 0.14, 0.18, 1.8, '#F2A516', -1.55, 2.2, 0.35, 'counsel');
-    bx(G, 0.08, 0.34, 1.1, '#0E9A8E', -1.62, 2.5, 0.35, 'counsel', { emissive: new T.Color(0x1FB5A5), emissiveIntensity: 0.5 });
-    bx(G, 0.9, 0.03, 1.5, '#E04F3A', -2.1, 0.03, 0.35, 'counsel');
+    bx(G, 0.14, 2.1, 0.1, '#F2A516', 1.55, 1.05, -0.45, 'counsel'); bx(G, 0.14, 2.1, 0.1, '#F2A516', 1.55, 1.05, 1.15, 'counsel');
+    bx(G, 0.14, 0.18, 1.8, '#F2A516', 1.55, 2.2, 0.35, 'counsel');
+    bx(G, 0.08, 0.34, 1.1, '#0E9A8E', 1.0, 2.5, 0.35, 'counsel', { emissive: new T.Color(0x1FB5A5), emissiveIntensity: 0.5 });
+    bx(G, 0.9, 0.03, 1.5, '#E04F3A', 1.5, 0.07, 0.35, 'counsel');
     bx(G, 3.3, 0.12, 3.3, '#0E9A8E', 0, 2.82, 0, 'counsel', { transparent: true, opacity: 0.35 });
-    bx(G, 1.3, 0.7, 0.7, '#F1F6F6', 0.2, 0.38, -1.0, 'counsel');
-    bx(G, 0.7, 0.14, 0.7, '#F2A516', 0.5, 0.55, 0.3, 'counsel'); bx(G, 0.12, 0.8, 0.7, '#F2A516', 0.9, 0.95, 0.3, 'counsel');
-    bx(G, 0.7, 0.14, 0.7, '#E04F3A', 0.5, 0.55, 1.0, 'counsel'); bx(G, 0.12, 0.8, 0.7, '#E04F3A', 0.9, 0.95, 1.0, 'counsel');
-    cy(G, 0.22, 0.17, 0.35, 6, '#E04F3A', 1.2, 0.18, -1.2, 'counsel'); ico(G, 0.4, '#3E8E41', 1.2, 0.65, -1.2, 'counsel');
-    for (let i = 0; i < Math.min(lv, 6); i++) bx(G, 0.14, 0.14, 0.14, '#F2A516', -0.6 + i * 0.25, 1.4, -1.45, 'counsel', { emissive: new T.Color(0xF2A516), emissiveIntensity: 0.8 });
+    bx(G, 1.3, 0.7, 0.7, '#F1F6F6', -0.2, 0.38, -1.0, 'counsel');
+    bx(G, 0.7, 0.14, 0.7, '#F2A516', -0.5, 0.55, 0.3, 'counsel'); bx(G, 0.12, 0.8, 0.7, '#F2A516', -0.9, 0.95, 0.3, 'counsel');
+    bx(G, 0.7, 0.14, 0.7, '#E04F3A', -0.5, 0.55, 1.0, 'counsel'); bx(G, 0.12, 0.8, 0.7, '#E04F3A', -0.9, 0.95, 1.0, 'counsel');
+    cy(G, 0.22, 0.17, 0.35, 6, '#E04F3A', -1.2, 0.18, -1.2, 'counsel'); ico(G, 0.4, '#3E8E41', -1.2, 0.65, -1.2, 'counsel');
+    for (let i = 0; i < Math.min(lv, 6); i++) bx(G, 0.14, 0.14, 0.14, '#F2A516', 0.6 - i * 0.25, 1.4, -1.45, 'counsel', { emissive: new T.Color(0xF2A516), emissiveIntensity: 0.8 });
   }
   function buildLibrary(lv) {
     const G = ug.library; clear(G);
@@ -2406,8 +2433,8 @@ const World = (function () {
     return c;
   }
   /* ---- waiting room: seats, and a few people who sit or wander while they wait ---- */
-  const SEATS = [[8.8, 4.45, -PI / 2], [8.8, 5.25, -PI / 2], [8.8, 6.05, -PI / 2], [6.6, 5.45, PI], [7.7, 5.45, PI]];
-  const IDLE_PTS = [[-2.8, 4.6], [3.4, 3.4], [5.3, 3.2], [6.9, 4.9], [0.9, 6.0], [-3.0, 6.1], [5.4, 2.0], [2.2, 5.6]];
+  const SEATS = [[8.8, 1.35, -PI / 2], [8.8, 2.2, -PI / 2], [8.8, 3.05, -PI / 2], [6.6, 5.45, PI], [7.7, 5.45, PI]];
+  const IDLE_PTS = [[-2.8, 4.6], [3.4, 3.4], [6.0, 3.2], [6.9, 4.4], [0.9, 6.0], [-3.0, 6.1], [5.4, 2.0], [2.2, 5.6]];
   const idleCap = () => 3 + (Math.floor(time / 35) % 2);
   function endIdle(c) { c.idl = null; c.sit = false; c.seat = -1; }
   function idleTick(c, i, w, dt) {
@@ -2643,7 +2670,7 @@ const World = (function () {
   api.setPharmacist = function (me) {
     if (!api.ok || !pharmG) return;
     if (pharm) pharmG.remove(pharm.g);
-    const g = person(1, false, false, false, me.body === 'normal' ? undefined : me.body, { skin: me.skin, hair: me.hairCol, shirt: '#F7FBFB', hairStyle: HAIR_MAP[me.hair] === undefined ? 0 : HAIR_MAP[me.hair], gender: me.gender, coat: true, scrub: me.scrub, acc: me.acc || 0, tag: { pharm: true } });
+    const g = person(1, false, false, false, me.body === 'normal' ? undefined : me.body, { skin: me.skin, hair: me.hairCol, shirt: '#F7FBFB', hairStyle: HAIR_MAP[me.hair] === undefined ? 0 : HAIR_MAP[me.hair], gender: me.gender, coat: true, scrub: me.scrub, acc: me.acc, accOn: me.accOn || 0, tag: { pharm: true } });
     g.position.set(-1.5, 0, -1.85); pharmG.add(g);
     lastMe = me; if (labOn) buildLabPerson();
     pharm = { g, wp: [], r: 0.5, phase: 0, dy: 3.1 };
@@ -3166,7 +3193,7 @@ const World = (function () {
     try {
       const W = 240, H = 300, ps = new T.Scene(), pc = new T.PerspectiveCamera(27, W / H, 0.1, 40);
       ps.add(new T.HemisphereLight(0xffffff, 0x8899aa, 0.95)); const dl = new T.DirectionalLight(0xffffff, 0.75); dl.position.set(2.5, 4, 5); ps.add(dl);
-      p = person(1, false, false, false, me.body === 'normal' ? undefined : me.body, { skin: me.skin, hair: me.hairCol, shirt: '#F7FBFB', hairStyle: HAIR_MAP[me.hair] === undefined ? 0 : HAIR_MAP[me.hair], gender: me.gender, coat: true, scrub: me.scrub, acc: me.acc || 0, tag: { pharm: true } });
+      p = person(1, false, false, false, me.body === 'normal' ? undefined : me.body, { skin: me.skin, hair: me.hairCol, shirt: '#F7FBFB', hairStyle: HAIR_MAP[me.hair] === undefined ? 0 : HAIR_MAP[me.hair], gender: me.gender, coat: true, scrub: me.scrub, acc: me.acc, accOn: me.accOn || 0, tag: { pharm: true } });
       p.rotation.y = -0.35; ps.add(p); pc.position.set(0, 1.35, 6.6); pc.lookAt(0, 1.2, 0);
       rt = new T.WebGLRenderTarget(W, H, { samples: 4 });
       const oldRT = renderer.getRenderTarget(), oc = renderer.getClearColor(new T.Color()), oa = renderer.getClearAlpha();
@@ -3592,7 +3619,7 @@ const World = (function () {
     if (!lastMe || !labG) return;
     if (labPerson) { labG.remove(labPerson); const i = labItems.indexOf(labPerson); if (i >= 0) labItems.splice(i, 1); labPerson = null; }
     const me = lastMe;
-    const g = person(1, false, false, false, me.body === 'normal' ? undefined : me.body, { skin: me.skin, hair: me.hairCol, shirt: '#F7FBFB', hairStyle: HAIR_MAP[me.hair] === undefined ? 0 : HAIR_MAP[me.hair], gender: me.gender, coat: true, scrub: me.scrub, acc: me.acc || 0, tag: { pharm: true } });
+    const g = person(1, false, false, false, me.body === 'normal' ? undefined : me.body, { skin: me.skin, hair: me.hairCol, shirt: '#F7FBFB', hairStyle: HAIR_MAP[me.hair] === undefined ? 0 : HAIR_MAP[me.hair], gender: me.gender, coat: true, scrub: me.scrub, acc: me.acc, accOn: me.accOn || 0, tag: { pharm: true } });
     g.position.set(0.5, 0, -1.9); labG.add(g); labPerson = g; g.userData.lab = 'pharm'; g.userData.g = g; g.userData.busy = 0; labItems.push(g);
   }
   function wpos(G) { let x = 0, y = 0, z = 0, o = G; while (o && o !== scene) { x = o.position.x + o.scale.x * x; y = o.position.y + o.scale.y * y; z = o.position.z + o.scale.z * z; o = o.parent; } return { x, y, z }; }
@@ -4030,7 +4057,7 @@ const World = (function () {
       bunt(['#D8283A', '#2F8F4E', '#FFFFFF'], 6.4);
       const giftC = ['#D8283A', '#2F8F4E', '#3E7BD1', '#F2C94C', '#8A63C9', '#2CCDBB'];
       const gift = (g, x, y, z, s, ci, ry) => { const b = bx(g, 0.6 * s, 0.5 * s, 0.6 * s, giftC[ci % 6], x, y + 0.25 * s, z); b.rotation.y = ry || 0; const rb = '#FFFFFF'; const r1 = bx(g, 0.64 * s, 0.52 * s, 0.1 * s, rb, x, y + 0.25 * s, z); r1.rotation.y = ry || 0; const r2 = bx(g, 0.1 * s, 0.52 * s, 0.64 * s, rb, x, y + 0.25 * s, z); r2.rotation.y = ry || 0; ico(g, 0.1 * s, rb, x, y + 0.56 * s, z); };
-      const tree = holMk(g => { const gx = -8.8, gz = 2.6; cy(g, 0.22, 0.28, 0.5, 6, '#6B4423', gx, 0.25, gz); [[1.15, 1.3, 0.5], [0.9, 1.15, 1.25], [0.62, 1.0, 2.0], [0.36, 0.8, 2.7]].forEach((t, i) => cone(g, t[0], t[1], 8, i % 2 ? '#2F8F4E' : '#237A3F', gx, t[2] + t[1] / 2, gz)); const star = ico(g, 0.25, '#FFD23F', gx, 3.62, gz, null); star.material = star.material.clone(); star.material.emissive = new T.Color('#FFD23F'); star.material.emissiveIntensity = 0.9; star.scale.set(1, 1, 0.5);
+      const tree = holMk(g => { const gx = -8.8, gz = 2.0; cy(g, 0.22, 0.28, 0.5, 6, '#6B4423', gx, 0.25, gz); [[1.15, 1.3, 0.5], [0.9, 1.15, 1.25], [0.62, 1.0, 2.0], [0.36, 0.8, 2.7]].forEach((t, i) => cone(g, t[0], t[1], 8, i % 2 ? '#2F8F4E' : '#237A3F', gx, t[2] + t[1] / 2, gz)); const star = ico(g, 0.25, '#FFD23F', gx, 3.62, gz, null); star.material = star.material.clone(); star.material.emissive = new T.Color('#FFD23F'); star.material.emissiveIntensity = 0.9; star.scale.set(1, 1, 0.5);
         const lights = []; ['#D8283A', '#F2C94C', '#3E7BD1', '#FFFFFF', '#2CCDBB', '#D8283A', '#F2C94C', '#3E7BD1'].forEach((c, i) => { const a = i * 2.4, h = 0.9 + i * 0.3, r = Math.max(0.2, 1.05 - h * 0.3); const l = ico(g, 0.08, c, gx + Math.cos(a) * r, h, gz + Math.sin(a) * r); l.material = l.material.clone(); l.material.emissive = new T.Color(c); l.material.emissiveIntensity = 0.8; lights.push(l); });
         holAnim.push(dt => lights.forEach((l, i) => { l.material.emissiveIntensity = 0.3 + 0.7 * (0.5 + 0.5 * Math.sin(time * 3 + i * 1.3)); })); });
       holItems.push(tree);
@@ -4625,7 +4652,7 @@ const World = (function () {
   }
   function hubTabs(active) {
     const n = customCount();
-    return `<div class="hubtabs" role="tablist"><button type="button" role="tab" aria-selected="${active === 'set'}" data-act="tab-set">Settings &amp; topics</button><button type="button" role="tab" aria-selected="${active === 'studies'}" data-act="tab-studies">My studies${n ? ' (' + n + ')' : ''}</button></div>`;
+    return `<div class="hubtabs" role="tablist"><button type="button" role="tab" aria-selected="${active === 'set'}" data-act="tab-set">Topics</button><button type="button" role="tab" aria-selected="${active === 'studies'}" data-act="tab-studies">My studies${n ? ' (' + n + ')' : ''}</button></div>`;
   }
   function settingsHTML() {
     const st = S.set, mc = missedByCat(), ms = masteryByCat();
@@ -4635,8 +4662,7 @@ const World = (function () {
     const diffs = [[1, 'Level 1 easy'], [2, 'Level 2 medium'], [3, 'Level 3 hard']].map(d => `<button type="button" class="chip" data-act="diff" data-v="${d[0]}" aria-pressed="${st.diffs.indexOf(d[0]) >= 0}">${d[1]}</button>`).join('');
     const modes = MODES.map(m => `<button type="button" class="chip" data-act="mode" data-v="${m[0]}" aria-pressed="${st.mode === m[0]}">${m[1]}</button>`).join('');
     const n = poolQs().length;
-    return `<div class="pane nbk ${nbClosing ? 'closing' : ''}"><div class="nbcover"><span class="nbtitle">Study hub</span></div><div class="nbsheet">${hubTabs('set')}<h3>Question settings</h3><p class="sub">Changes apply to the next patient.</p>
-      ${S.shop ? '' : '<div class="grp"><b>Name your pharmacy</b><div class="btnrow"><input id="shopname2" class="field" type="text" maxlength="24" autocomplete="off" placeholder="Corner Rx" aria-label="Pharmacy name"><button type="button" class="btn go" data-act="shop-save">Save name</button></div><p class="note">Shown on the sign above your shelves. Set once.</p></div>'}
+    return `<div class="pane nbk ${nbClosing ? 'closing' : ''}"><div class="nbcover"><span class="nbtitle">Topics</span></div><div class="nbsheet">${hubTabs('set')}<h3>Question settings</h3><p class="sub">Changes apply to the next patient.</p>
       <div class="grp"><b>Focus mode</b><div class="chips"><button type="button" class="chip" data-act="focus" aria-pressed="${!!st.focus}">Focus mode ${st.focus ? 'on' : 'off'}</button></div><p class="note">Hides the 3D pharmacy and turns off the timer, patient events, phone calls, Karen and Jim, so it is only questions.</p></div>
       <div class="grp"><b>Topics <span><button type="button" class="link" data-act="topics-all">All</button> &middot; <button type="button" class="link" data-act="topics-none">None</button></span></b><div class="chips">${topics}</div>${tox ? '<div class="subgrp"><b class="subh">PharmTox</b><div class="chips">' + tox + '</div></div>' : ''}</div>
       <div class="grp"><b>Difficulty</b><div class="chips">${diffs}</div></div>
@@ -4679,7 +4705,8 @@ const World = (function () {
   const ME_BODIES = [['slim', 'Slim'], ['normal', 'Average'], ['jacked', 'Jacked'], ['obese', 'Round']];
   const ME_GENDERS = [['f', 'Woman'], ['m', 'Man'], ['n', 'Nonbinary']];
   const ME_HAIRS = ['Short', 'Bob', 'Long', 'Bun', 'Curly', 'Spiky', 'Bald'];
-  function meSpec() { const m = S.me; return { body: m.body, gender: m.gender, hair: m.hair, skin: ME_SKIN[m.skin], hairCol: ME_HAIR[m.hairColor], scrub: ME_SCRUB[m.scrub], acc: S.acc || 0 }; }
+  function meSpec() { const m = S.me; return { body: m.body, gender: m.gender, hair: m.hair, skin: ME_SKIN[m.skin], hairCol: ME_HAIR[m.hairColor], scrub: ME_SCRUB[m.scrub], acc: S.acc || 0, accOn: accOnList() }; }
+  function accOnList() { const off = S.accOff || [], out = []; for (let k = 1; k <= (S.acc || 0); k++) if (off.indexOf(k) < 0) out.push(k); return out; }
   function meSVG() {
     const m = S.me, skin = ME_SKIN[m.skin], hair = ME_HAIR[m.hairColor], scrub = ME_SCRUB[m.scrub];
     const w = ({ slim: 24, normal: 32, jacked: 46, obese: 50 }[m.body] || 32) * (m.gender === 'f' ? 0.92 : m.gender === 'm' ? 1.06 : 1);
@@ -4706,15 +4733,16 @@ const World = (function () {
     const chips = (k, list) => list.map(o => `<button type="button" class="chip" data-act="me" data-k="${k}" data-v="${o[0]}" aria-pressed="${m[k] === o[0]}">${o[1]}</button>`).join('');
     const hairChips = ME_HAIRS.map((n, i) => `<button type="button" class="chip" data-act="me" data-k="hair" data-v="${i}" aria-pressed="${m.hair === i}">${n}</button>`).join('');
     const sw = (k, arr, label) => arr.map((c, i) => `<button type="button" class="swatch" data-act="me" data-k="${k}" data-v="${i}" style="background:${c}" aria-pressed="${m[k] === i}" aria-label="${label} ${i + 1}"></button>`).join('');
-    return `<div class="pane"><h3>Your pharmacist</h3><p class="sub">You always stand at the counter. Changes appear in the shop right away.</p>
+    return `<div class="pane"><h3>Your character</h3><p class="sub">You always stand at the counter. Changes appear in the shop right away.</p>
       <div class="mepv">${mePreview()}</div>
-      <div class="grp"><b>Name your pharmacy</b><input id="shopname" class="field" type="text" maxlength="24" autocomplete="off" placeholder="Corner Rx" value="${esc(S.shop || '')}" aria-label="Pharmacy name"><p class="note">It goes on the sign above your shelves. You can only set it here, once.</p></div>
+      <div class="grp"><b>Name your pharmacy</b><input id="shopname" class="field" type="text" maxlength="24" autocomplete="off" placeholder="Corner Rx" value="${esc(S.shop || '')}" aria-label="Pharmacy name"><p class="note">It goes on the sign above your shelves. Change it any time here.</p></div>
       <div class="grp"><b>Gender</b><div class="chips">${chips('gender', ME_GENDERS)}</div></div>
       <div class="grp"><b>Body type</b><div class="chips">${chips('body', ME_BODIES)}</div></div>
       <div class="grp"><b>Hair style</b><div class="chips">${hairChips}</div></div>
       <div class="grp"><b>Skin tone</b><div class="chips">${sw('skin', ME_SKIN, 'Skin tone')}</div></div>
       <div class="grp"><b>Hair color</b><div class="chips">${sw('hairColor', ME_HAIR, 'Hair color')}</div></div>
       <div class="grp"><b>Scrubs color</b><div class="chips">${sw('scrub', ME_SCRUB, 'Scrubs color')}</div></div>
+      ${(S.acc || 0) < 1 ? '' : ''}<div class="grp"${(S.acc || 0) < 1 ? ' hidden' : ''}><b>Accessories</b><div class="chips">${ACCS.map((a, i) => { const k = i + 1, un = k <= (S.acc || 0), onN = un && (S.accOff || []).indexOf(k) < 0; return un ? `<button type="button" class="chip" data-act="acc-tog" data-v="${k}" aria-pressed="${onN}">${a[1]} ${a[0]}</button>` : ''; }).join('')}</div><p class="note">Tap an accessory to wear it or take it off. New ones unlock as you rank up.</p></div>
       <div class="btnrow"><button type="button" class="btn go" data-act="me-done">${m.done ? 'Done' : 'Start working'}</button></div></div>`;
   }
 
@@ -5279,12 +5307,12 @@ const World = (function () {
     streak: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2c1 4 5 6 5 11a5 5 0 0 1-10 0c0-2 1-3 2-4 0 2 1 3 2 3 0-4-1-6 1-10z" fill="#F1A20E" stroke="#10292C" stroke-width="2" stroke-linejoin="round"/></svg>',
     tips: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M13 2L5 14h6l-1 8 8-12h-6z" fill="#0E9A8E" stroke="#10292C" stroke-width="2" stroke-linejoin="round"/></svg>'
   };
+  function fireCls() { const s = S.streak || 0, l = s >= 30 ? 5 : s >= 20 ? 4 : s >= 10 ? 3 : s >= 5 ? 2 : s >= 2 ? 1 : 0; return l ? ' fire f' + l : ''; }
   function renderStats() {
     $('#stats').innerHTML = `
       <div class="stat cash" title="Cash"><i class="ic">${IC.coin}</i><span class="lbl">Cash</span><b id="cashv">${money(S.cash)}</b></div>
       <div class="stat rep" title="Reputation"><i class="ic">${IC.rep}</i><span class="lbl">Reputation</span><b>${Math.round(S.rep)}<small>/100</small></b><div class="repbar"><i class="${S.rep < 30 ? 'low' : ''}" style="width:${S.rep}%"></i></div></div>
-      <div class="stat" title="Answers in a row"><i class="ic">${IC.streak}</i><span class="lbl">Streak</span><b>${S.streak}<small>best ${S.best}</small></b></div>
-      <div class="stat tips" title="Tips per second"><i class="ic">${IC.tips}</i><span class="lbl">Tips / sec</span><b id="pasv">${passive().toFixed(1)}</b></div>`;
+      <div class="stat${fireCls()}" title="Answers in a row"><i class="ic">${IC.streak}</i><span class="lbl">Streak</span><b>${S.streak}<small>best ${S.best}</small></b></div>`;
   }
   function sceneSVG() {
     const L = S.up, nb = Math.min(30, 6 + L.shelf * 2), cols = ['var(--teal)', 'var(--amber)', 'var(--coral)', 'var(--teal-ink)'];
@@ -5373,7 +5401,7 @@ const World = (function () {
   /* ---- study decks ---- */
   function findDeck(name) { const n = name.trim().toLowerCase(); return S.decks.find(d => d.name.toLowerCase() === n); }
   function syncBrand() { const h = document.querySelector('.brand h1'); if (h) h.textContent = shopName(); }
-  function readShop() { const el = $('#shopname'); if (el && !S.me.done) { S.shop = el.value.replace(/\s+/g, ' ').trim().slice(0, 24); save(); } }
+  function readShop() { const el = $('#shopname'); if (el) { S.shop = el.value.replace(/\s+/g, ' ').trim().slice(0, 24); save(); syncBrand(); } }
   function readDraft() {
     const t = $('#studytext'), n = $('#deckname');
     if (t) draft.text = t.value; if (n) draft.name = n.value; const dd = $('#deckdate'); if (dd) draft.from = dd.value;
@@ -5409,7 +5437,7 @@ const World = (function () {
   let tourEl = null, tourStep = 0, tourPaused = 0;
   const TOUR = [
     { t: 'Welcome to Corner Rx', p: 'You are the pharmacist at the counter. Each patient asks one question. Pick the right answer to earn cash and reputation, and read the explanation when you miss one. Take your time at first.' },
-    { t: 'The menu', p: 'Tap the menu button in the top right.', l: [['Upgrades', 'spend your cash on the pharmacy'], ['Progress & awards', 'mastery, photos, pets and the weekly calendar'], ['Study hub', 'choose topics and weekly drugs, or add your own questions'], ['Focus mode', 'just the questions, no 3D world'], ['Drug reference', 'the weekly drug lists']] },
+    { t: 'The menu', p: 'Tap the menu button in the top right.', l: [['Upgrades', 'spend your cash on the pharmacy'], ['Progress & awards', 'mastery, photos, pets and the weekly calendar'], ['Topics', 'choose topics and weekly drugs, or add your own questions'], ['Focus mode', 'just the questions, no 3D world'], ['Drug reference', 'the weekly drug lists']] },
     { t: 'Look around', p: 'Drag to look around the pharmacy and pinch to zoom. Tap glowing spots to build upgrades. The corner button makes the game full screen, and the bar above the question card hides it so you can see the shop.' },
     { t: 'Your progress', p: 'Everything saves in this browser. To back up or move to another device, open Progress and copy your save code. Good luck out there.' }
   ];
@@ -6088,7 +6116,7 @@ const World = (function () {
       <div class="btnrow"><button type="button" class="btn go" data-act="back">Back to the pharmacy</button></div></div>`;
   }
 
-  const GAME_VERSION = 67;
+  const GAME_VERSION = 71;
   const b64u = (u8) => { let s = ''; for (let i = 0; i < u8.length; i += 0x8000) s += String.fromCharCode.apply(null, u8.subarray(i, i + 0x8000)); return btoa(s).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); };
   const unb64u = (t) => { const s = atob(t.replace(/-/g, '+').replace(/_/g, '/')), u = new Uint8Array(s.length); for (let i = 0; i < s.length; i++) u[i] = s.charCodeAt(i); return u; };
   const chk = (t) => { let h = 2166136261; for (let i = 0; i < t.length; i++) { h ^= t.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36); };
@@ -6143,7 +6171,8 @@ const World = (function () {
     switch (a) {
       case 'settings': openView(view === 'set' ? 'q' : 'set'); if (view === 'q') { resumeTimers(); renderPanel(); } return;
       case 'studies': openView(view === 'studies' ? 'q' : 'studies'); if (view === 'q') { resumeTimers(); renderPanel(); } return;
-      case 'create': if (S.me.done) return; openView(view === 'create' ? 'q' : 'create'); if (view === 'q') { resumeTimers(); renderPanel(); } return;
+      case 'acc-tog': { readShop(); const k = +v; S.accOff = S.accOff || []; const i = S.accOff.indexOf(k); if (i >= 0) S.accOff.splice(i, 1); else S.accOff.push(k); save(); World.setPharmacist(meSpec()); renderPanel(); return; }
+      case 'create': openView(view === 'create' ? 'q' : 'create'); if (view === 'q') { resumeTimers(); renderPanel(); } return;
       case 'awards': openView(view === 'awards' ? 'q' : 'awards'); if (view === 'q') { resumeTimers(); renderPanel(); } return;
       case 'me': { readShop(); const k = t.dataset.k, v = t.dataset.v; S.me[k] = (k === 'hair' || k === 'hairColor' || k === 'skin' || k === 'scrub') ? +v : v; save(); World.setPharmacist(meSpec()); renderPanel(); return; }
       case 'me-done': readShop(); S.me.done = true; save(); syncBrand(); backToQ(); maybeTour(); return;
@@ -6278,7 +6307,6 @@ const World = (function () {
   setInterval(() => {
     if (S.up.tech > 0) { const g = passive() * 0.25; S.cash += g; S.earned += g; }
     const c = $('#cashv'); if (c) c.textContent = money(S.cash);
-    const p = $('#pasv'); if (p) p.textContent = passive().toFixed(1);
     document.querySelectorAll('[data-buy]').forEach(b => { const max = b.textContent === 'MAX'; b.disabled = max || S.cash < +b.dataset.cost; });
     const fb = $('#frbtn'); if (fb) fb.disabled = S.cash < frCost();
     const rb = $('#retirebtn'); if (rb) rb.disabled = S.cash < RETIRE_AT;
