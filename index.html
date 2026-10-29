@@ -3756,6 +3756,7 @@ const World = (function () {
   // id: [short label, categories, location, x or angle, kind, colour]
   const SSITES = {
     sert: ['SERT', ['ad'], 'pre', -2.8, 'trans', '#B26CF0'], net: ['NET', ['ad'], 'pre', -2.25, 'trans', '#F08A3C'], dat: ['DAT', ['ad'], 'pre', -1.7, 'trans', '#E85D7A'],
+    kcnq: ['KCNQ K⁺', ['epi'], 'pre', -1.15, 'chan', '#C9A7FF'],
     vgcc: ['VGCC Ca²⁺', ['epi', 'cbd'], 'pre', -0.5, 'chan', '#FFD23F'], a2d: ['α2δ', ['epi'], 'pre', 0.35, 'enz', '#FF7AC8'],
     cb1: ['CB1', ['cbd'], 'pre', 1.7, 'rec', '#7DDC6B'], gat1: ['GAT-1', ['epi'], 'pre', 2.3, 'trans', '#6EE38A'], a2auto: ['α2 auto', ['ad'], 'pre', 2.9, 'rec', '#F2A516'],
     nav: ['Voltage-gated Na⁺ channel', ['epi'], 'dome', 0.55, 'chan', '#F2A516'], cavt: ['T-type Ca²⁺', ['epi'], 'dome', 2.55, 'chan', '#FF7A59'], ent1: ['ENT1', ['cbd'], 'dome', 0.14, 'trans', '#5ED3F3'],
@@ -3764,7 +3765,7 @@ const World = (function () {
     ampa: ['AMPA', ['epi'], 'post', -0.7, 'chan', '#FFB347'], nmda: ['NMDA', ['ad', 'epi'], 'post', 2.2, 'chan', '#FF6B6B'], trpv1: ['TRPV1', ['cbd'], 'post', 2.0, 'chan', '#FF8F5A'], gpr55: ['GPR55', ['cbd'], 'post', 2.7, 'rec', '#5ED3F3'],
     faah: ['FAAH', ['cbd'], 'pint', [-0.9, 0.55], 'enz', '#E5E266'], dagl: ['DAGL', ['cbd'], 'pint', [1.9, 0.65], 'enz', '#C7E86A']
   };
-  const ION = { vgcc: ['Ca²⁺', '#FFD23F'], nav: ['Na⁺', '#F2A516'], cavt: ['Ca²⁺', '#FF7A59'], gabaa: ['Cl⁻', '#5FE08A'], ampa: ['Na⁺', '#FFB347'], nmda: ['Ca²⁺', '#FF6B6B'], trpv1: ['Ca²⁺', '#FF8F5A'], sert: ['5-HT', '#B26CF0'], net: ['NE', '#F08A3C'], dat: ['DA', '#E85D7A'], gat1: ['GABA', '#6EE38A'], ent1: ['AEA', '#5ED3F3'] };
+  const ION = { kcnq: ['K⁺', '#C9A7FF'], vgcc: ['Ca²⁺', '#FFD23F'], nav: ['Na⁺', '#F2A516'], cavt: ['Ca²⁺', '#FF7A59'], gabaa: ['Cl⁻', '#5FE08A'], ampa: ['Na⁺', '#FFB347'], nmda: ['Ca²⁺', '#FF6B6B'], trpv1: ['Ca²⁺', '#FF8F5A'], sert: ['5-HT', '#B26CF0'], net: ['NE', '#F08A3C'], dat: ['DA', '#E85D7A'], gat1: ['GABA', '#6EE38A'], ent1: ['AEA', '#5ED3F3'] };
   const synIonLabs = [], synInfo = {}; let synDrug = null, synDrugM = null, synDrugEl = null, tmpV = null;
   const SDECOR = [['vgcc', 'pre', 0.85], ['ampa', 'post', 1.2], ['gabaa', 'post', 3.1]];
   const SSTRUCT = [['Presynaptic terminal', SX - 1.0, 5.55], ['Synaptic cleft', SX - 3.6, 2.05], ['Postsynaptic spine', SX, -0.3], ['Vesicle forming', SX + SG[0], SG[1] + 0.75], ['Docked vesicles fuse and release', SX + 0.35, 3.85]];
@@ -5953,6 +5954,7 @@ const World = (function () {
   /* ---------------- synapse lab ---------------- */
   const SYN_CATS = [['epi', 'Epilepsy targets'], ['ad', 'Antidepressants + NMDA'], ['cbd', 'CBD pathways']];
   const SYN_SITES = {
+    kcnq: { n: 'KCNQ (Kv7) K⁺ channel', c: ['epi'], i: 'Neuronal K⁺ channel that carries the M-current. Opening it lets K⁺ leave, which hyperpolarizes the neuron and makes it harder to fire.' },
     nav: { n: 'Voltage-gated Na⁺ channel', c: ['epi'], i: 'Fires the action potential down the axon. Fast, repetitive firing is what many seizures need.' },
     cavt: { n: 'T-type Ca²⁺ channel', c: ['epi'], i: 'Low-threshold channel that drives the 3 Hz thalamic rhythm of absence seizures.' },
     vgcc: { n: 'Voltage-gated Ca²⁺ channel (P/Q, N)', c: ['epi', 'cbd'], i: 'Ca²⁺ entry here triggers vesicles to fuse and release transmitter.' },
@@ -5981,6 +5983,8 @@ const World = (function () {
   const SD = (cat, name, ctx, act, sites, note) => ({ cat, name, ctx, act, sites, note });
   const SM = (cat, name, ctx, rows, note) => { const acts = {}, lab = {}; rows.forEach(r => { acts[r[0]] = r[1]; lab[r[0]] = r[2]; }); return { cat, name, ctx, act: null, acts, lab, sites: Object.keys(acts), note, multi: true }; };
   const SYN_DRUGS = [
+    SM('epi', 'Vigabatrin', 'set the arrow for its target', [['gabat', 'inh', 'GABA degradation (GABA-T)']], 'Irreversible GABA-T inhibitor, so less GABA is broken down and levels rise. Watch for visual field loss.'),
+    SM('epi', 'Felbamate', 'set the arrow for each target', [['nav', 'inh', 'Na⁺ channels'], ['gabaa', 'act', 'GABA-A receptors'], ['nmda', 'inh', 'NMDA receptors']], 'Multiple targets: blocks Na⁺ channels, enhances GABA-A, and blocks NMDA receptors. Reserved for refractory cases because of aplastic anemia and liver failure risk.'),
     SM('epi', 'Valproate', 'set the arrow for each target', [['gabat', 'act', 'GABA turnover (GABA-T)'], ['nav', 'inh', 'Na⁺ channels'], ['nmda', 'inh', 'NMDA receptors']], 'Broad spectrum: blocks Na⁺ channels, raises GABA turnover and levels (it inhibits GABA-T), and dampens NMDA-mediated excitation. (It also blocks T-type Ca²⁺ channels, which helps in absence seizures.)'),
     SM('epi', 'Topiramate', 'set the arrow for each target', [['nav', 'inh', 'Na⁺ channels'], ['ampa', 'inh', 'AMPA / kainate receptors'], ['gabaa', 'act', 'GABA-A receptors']], 'Multiple targets: blocks Na⁺ channels, antagonizes AMPA receptors, and enhances GABA-A. It also weakly inhibits carbonic anhydrase.'),
     SD('epi', 'Phenytoin', '', 'inh', ['nav'], 'Blocks Na⁺ channels in the inactivated state, so fast repetitive firing stops.'),
@@ -5992,6 +5996,9 @@ const World = (function () {
     SD('epi', 'Ethosuximide', 'absence seizures', 'inh', ['cavt'], 'Blocks T-type Ca²⁺ channels in thalamic neurons.'),
     SD('epi', 'Gabapentin', '', 'inh', ['a2d'], 'Binds the α2δ subunit and lowers Ca²⁺-dependent release. It does not act on GABA receptors.'),
     SD('epi', 'Pregabalin', '', 'inh', ['a2d'], 'Same target as gabapentin, with better absorption.'),
+    SD('epi', 'Retigabine (ezogabine)', '', 'act', ['kcnq'], 'Opens KCNQ2-5 (Kv7) K⁺ channels, which stabilizes the resting membrane. Withdrawn for retinal and skin discoloration.'),
+    SD('epi', 'Tiagabine', '', 'inh', ['gat1'], 'Blocks GABA reuptake through GAT-1, so more GABA stays in the cleft.'),
+    SD('epi', 'Perampanel', '', 'inh', ['ampa'], 'Non-competitive AMPA receptor antagonist.'),
     SD('epi', 'Levetiracetam', '', 'inh', ['sv2a'], 'Binds SV2A and reduces neurotransmitter release.'),
     SD('epi', 'Benzodiazepines', 'e.g. diazepam, clonazepam, lorazepam', 'act', ['gabaa'], 'Positive allosteric modulators: they increase how often the GABA-A Cl⁻ channel opens (barbiturates lengthen the opening instead).'),
     SD('epi', 'Phenobarbital', '', 'act', ['gabaa'], 'Barbiturate: lengthens GABA-A channel opening time.'),
@@ -6116,7 +6123,7 @@ const World = (function () {
       <div class="btnrow"><button type="button" class="btn go" data-act="back">Back to the pharmacy</button></div></div>`;
   }
 
-  const GAME_VERSION = 72;
+  const GAME_VERSION = 73;
   const b64u = (u8) => { let s = ''; for (let i = 0; i < u8.length; i += 0x8000) s += String.fromCharCode.apply(null, u8.subarray(i, i + 0x8000)); return btoa(s).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); };
   const unb64u = (t) => { const s = atob(t.replace(/-/g, '+').replace(/_/g, '/')), u = new Uint8Array(s.length); for (let i = 0; i < s.length; i++) u[i] = s.charCodeAt(i); return u; };
   const chk = (t) => { let h = 2166136261; for (let i = 0; i < t.length; i++) { h ^= t.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36); };
