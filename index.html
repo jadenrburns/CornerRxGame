@@ -4677,7 +4677,7 @@ const World = (function () {
       const wasDue = reviewDue(m);
       m.seen++;
       const wasNew = m.seen === 1;
-      if (ok) { m.ok++; m.box = Math.min(3, m.box + (wasNew ? 2 : 1)); } else { m.box = 0; }
+      if (ok) { m.ok++; m.lapse = 0; m.box = Math.min(3, m.box + (wasNew ? 2 : 1)); } else slip(m);
       if (ok) { if (wasDue) { m.iv = Math.min(IV.length - 1, (m.iv || 0) + 1); chips.push('<span>memory check passed, next in ' + IV[m.iv] + ' d</span>'); } if (!m.t || wasDue || m.box < 2) { m.t = Date.now(); if (m.iv === undefined) m.iv = 0; } } else { m.iv = 0; m.t = Date.now(); }
       if (S.set.mode === 'mixed') {
         const ri = retry.findIndex(r => r.k === q.k); if (ri >= 0) retry.splice(ri, 1);
@@ -4982,7 +4982,7 @@ const World = (function () {
     const calRow = `<div class="aw"><div class="awh"><b>\uD83D\uDCC5 Weekly drug calendar</b><span>${wm} week${wm === 1 ? '' : 's'} mastered</span></div><div class="awbar"><i style="width:${np ? Math.round(100 * np.done / Math.max(1, np.total)) : 100}%"></i></div><small class="awnote">${nextW ? 'Next: master all ' + np.total + ' questions of week ' + nextW.wk + ' (' + np.done + '/' + np.total + ')' : 'Every open week is mastered.'} Each mastered week raises the calendar one level.</small><div class="awt">${CAL_NAMES.map((c, i) => i < ct ? `<span class="tier on">${CAL_ICON[i]} ${c}${i === 3 && wm > 4 ? ' x' + (wm - 3) : ''}</span>` : `<span class="tier">\uD83D\uDD12 ${i + 1} week${i ? 's' : ''}</span>`).join('')}</div></div>`;
     const accN = S.acc || 0;
     const wardRow = `<div class="aw"><div class="awh"><b>\uD83E\uDDE5 Pharmacist wardrobe</b><span>${accN}/${ACCS.length}</span></div><div class="awbar"><i style="width:${Math.round(100 * accN / ACCS.length)}%"></i></div><div class="awt">${ACCS.map((a, i) => i < accN ? `<span class="tier on">${a[1]} ${a[0]}</span>` : `<span class="tier">\uD83D\uDD12 ${RANKS[i + 1][1]}</span>`).join('')}</div></div>`;
-    return `<div class="pane"><h3>Awards</h3><p class="sub">A question counts as mastered after two correct answers in a row. The top tier of a topic needs 90% of its questions mastered. Each tier hangs a framed photo on the pharmacy wall. Mastering several topics brings in pets. Each rank promotion adds an accessory to your pharmacist.</p>${calRow}${wardRow}${rows}<div class="grp"><b>Pets</b><div class="awps">${pets}${fcPetRow()}</div></div>${seasonHTML()}${capsHTML()}${shareHTML()}<div class="btnrow"><button type="button" class="btn" data-act="flash">Open flashcards</button></div>${saveBoxHTML()}<div class="btnrow"><button type="button" class="btn go" data-act="back">Back to counter</button></div></div>`;
+    return `<div class="pane"><h3>Awards</h3><p class="sub">A question counts as mastered after two correct answers in a row. One slip on a mastered question will not undo it, but two misses in a row will. The top tier of a topic needs 90% of its questions mastered. Each tier hangs a framed photo on the pharmacy wall. Mastering several topics brings in pets. Each rank promotion adds an accessory to your pharmacist.</p>${calRow}${wardRow}${rows}<div class="grp"><b>Pets</b><div class="awps">${pets}${fcPetRow()}</div></div>${seasonHTML()}${capsHTML()}${shareHTML()}<div class="btnrow"><button type="button" class="btn" data-act="flash">Open flashcards</button></div>${saveBoxHTML()}<div class="btnrow"><button type="button" class="btn go" data-act="back">Back to counter</button></div></div>`;
   }
 
 
@@ -5019,10 +5019,12 @@ const World = (function () {
     else if (fp.kind === 'prior') toast('You hung up on the portal. Prior auth denied.');
     save(); fpExit();
   }
+  // one slip on a mastered question does not undo it (it just comes back for a check tomorrow); a second miss in a row does
+  function slip(m) { if (m.box >= 2 && !m.lapse) m.lapse = 1; else { m.box = 0; m.lapse = 0; } }
   function recordMastery(q, ok) {
     if (!q || !q.k) return;
     const m = S.mastery[q.k] || { box: 0, seen: 0, ok: 0 };
-    m.seen++; if (ok) { m.ok++; m.box = Math.min(3, m.box + 1); } else m.box = 0;
+    m.seen++; if (ok) { m.ok++; m.lapse = 0; m.box = Math.min(3, m.box + 1); } else slip(m);
     S.mastery[q.k] = m;
     const mi = S.missed.indexOf(q.k);
     if (!ok && mi < 0) S.missed.push(q.k);
@@ -5333,7 +5335,7 @@ const World = (function () {
       head = 'Not quite. The caller sounds unsure and hangs up.';
     }
     const m = S.mastery[q.k] || { box: 0, seen: 0, ok: 0 };
-    m.seen++; if (ok) { m.ok++; m.box = Math.min(3, m.box + 1); } else m.box = 0;
+    m.seen++; if (ok) { m.ok++; m.lapse = 0; m.box = Math.min(3, m.box + 1); } else slip(m);
     S.mastery[q.k] = m;
     const mi = S.missed.indexOf(q.k);
     if (!ok && mi < 0) S.missed.push(q.k);
@@ -6330,7 +6332,7 @@ const World = (function () {
       <div class="btnrow"><button type="button" class="btn go" data-act="back">Back to the pharmacy</button></div></div>`;
   }
 
-  const GAME_VERSION = 77;
+  const GAME_VERSION = 78;
   const b64u = (u8) => { let s = ''; for (let i = 0; i < u8.length; i += 0x8000) s += String.fromCharCode.apply(null, u8.subarray(i, i + 0x8000)); return btoa(s).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); };
   const unb64u = (t) => { const s = atob(t.replace(/-/g, '+').replace(/_/g, '/')), u = new Uint8Array(s.length); for (let i = 0; i < s.length; i++) u[i] = s.charCodeAt(i); return u; };
   const chk = (t) => { let h = 2166136261; for (let i = 0; i < t.length; i++) { h ^= t.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36); };
