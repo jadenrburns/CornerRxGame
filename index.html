@@ -531,19 +531,154 @@ body.fx .fpq.mini { left: max(10px, env(safe-area-inset-left, 0px)); }
 .quick .qk:active { transform: translateY(2px); box-shadow: 0 1px 0 var(--ink); }
 .sr { position: absolute !important; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 body.fx .quick { gap: 6px; } body.fx .quick .qk { width: 40px; height: 40px; border-radius: 12px; }
-/* streak fire: the border burns brighter and thicker as the streak grows */
-@property --fa { syntax: '<angle>'; inherits: false; initial-value: 0deg; }
-.stat.fire { position: relative; isolation: isolate; --fw: 2px; --fg: 6px; --fspd: 3.2s; box-shadow: 0 0 var(--fg) calc(var(--fg) / 3) rgba(255, 120, 20, .55); animation: fireglow calc(var(--fspd) / 4) ease-in-out infinite alternate; }
-.stat.fire::before { content: ''; position: absolute; inset: calc(var(--fw) * -1); z-index: -1; border-radius: inherit; background: conic-gradient(from var(--fa), #FF3D00, #FFB300, #FFF176, #FF6D00, #E53900, #FFB300, #FF3D00); animation: firespin var(--fspd) linear infinite; filter: saturate(1.2); }
-.stat.fire::after { content: ''; position: absolute; inset: calc(var(--fw) * -1.6); z-index: -2; border-radius: inherit; background: conic-gradient(from calc(var(--fa) * -1), rgba(255, 90, 0, .0), rgba(255, 140, 0, .75), rgba(255, 220, 80, .0), rgba(255, 70, 0, .7), rgba(255, 90, 0, .0)); filter: blur(calc(var(--fg) / 2.2)); animation: firespin calc(var(--fspd) * 1.4) linear infinite reverse; opacity: .85; }
-.stat.fire.f1 { --fw: 2px; --fg: 6px; --fspd: 3.6s; }
-.stat.fire.f2 { --fw: 3px; --fg: 11px; --fspd: 2.8s; }
-.stat.fire.f3 { --fw: 4px; --fg: 17px; --fspd: 2.1s; }
-.stat.fire.f4 { --fw: 5px; --fg: 24px; --fspd: 1.5s; }
-.stat.fire.f5 { --fw: 7px; --fg: 34px; --fspd: 1s; }
-@keyframes firespin { to { --fa: 360deg; } }
-@keyframes fireglow { from { box-shadow: 0 0 var(--fg) calc(var(--fg) / 4) rgba(255, 110, 20, .45); } to { box-shadow: 0 0 calc(var(--fg) * 1.5) calc(var(--fg) / 2.5) rgba(255, 190, 40, .8); } }
-@media (prefers-reduced-motion: reduce) { .stat.fire, .stat.fire::before, .stat.fire::after { animation: none; } }
+/* streak coin: a round dark badge with just the number; from 10 it is a gold coin with an orange rim and a flame crown rising behind it */
+body.fx .stats .stat.streak { flex: none; width: 42px; height: 42px; padding: 0; gap: 0; justify-content: center; border: 0; border-radius: 50%; background: transparent; overflow: visible; position: relative; isolation: isolate; cursor: default; }
+body.fx .stats .stat.streak::before { content: ''; position: absolute; inset: 0; z-index: 0; border-radius: 50%; background: var(--surface); border: 4px solid var(--line); box-sizing: border-box; }
+body.fx .stats .stat.streak .ic { display: none; }
+body.fx .stats .stat.streak b { position: relative; z-index: 1; font-size: 17px; line-height: 1; }
+body.fx .stats .stat.streak.lit::before { background: radial-gradient(circle at 50% 38%, #FFD84A 0%, #FFC21A 70%, #F5A912 100%); border-color: #F58A2E; box-shadow: 0 2px 0 rgba(0,0,0,.25), inset 0 0 0 1.5px #FFE27A; }
+body.fx .stats .stat.streak.lit b { color: #3B2308; }
+.stat.streak .sfxcv { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -78%); width: 260px; height: 260px; z-index: -1; pointer-events: none; }
+
+body.fx { --tb: calc(56px + env(safe-area-inset-top, 0px)); padding: 0; overflow: hidden; overscroll-behavior: none; background: var(--stage); }
+body.fx .shell { display: block; max-width: none; margin: 0; }
+body.fx .stage { position: fixed; inset: 0; height: 100vh; height: 100dvh; border: 0; border-radius: 0; box-shadow: none; touch-action: none; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; }
+body.fx .stage canvas { touch-action: none; }
+body.fx .top { position: absolute; z-index: 6; left: 0; right: 0; top: 0; flex-wrap: nowrap; gap: 8px; padding: max(8px, env(safe-area-inset-top, 0px)) max(10px, env(safe-area-inset-right, 0px)) 0 max(10px, env(safe-area-inset-left, 0px)); pointer-events: none; }
+body.fx .brand { background: var(--surface); border: 1.5px solid var(--ink); border-radius: 14px; padding: 4px 12px 4px 7px; gap: 8px; }
+body.fx .brand svg { width: 28px; height: 28px; }
+body.fx .brand h1 { font-size: 17px; }
+body.fx .brand small { display: none; }
+body.fx .stats { flex-wrap: nowrap; gap: 6px; }
+body.fx .stat { min-width: 0; padding: 5px 10px; border-radius: 12px; border: 1.5px solid var(--ink); box-shadow: none; }
+body.fx .stat b { font-size: 16px; margin-top: 3px; }
+body.fx .stat span { font-size: 9px; }
+body.fx .stat .repbar { margin-top: 3px; }
+body.fx .drawerbtn { display: inline-flex; align-items: center; gap: 7px; pointer-events: auto; height: 44px; padding: 0 14px; border-radius: 14px; border: 2px solid var(--ink); background: var(--amber); color: #2B1D00; font: 800 14px/1 var(--f-display); box-shadow: 0 3px 0 var(--ink); }
+body.fx .drawerbtn span { font-size: 18px; }
+body.fx .drawerbtn:active { transform: translateY(2px); box-shadow: 0 1px 0 var(--ink); }
+body.fx .hud { left: max(10px, env(safe-area-inset-left, 0px)); top: var(--tb); }
+body.fx .hud button { width: 38px; height: 38px; }
+body.fx .line3d { top: calc(var(--tb) + 5px); left: calc(max(10px, env(safe-area-inset-left, 0px)) + 176px); }
+body.fx .phonebtn { top: calc(var(--tb) + 50px); left: max(10px, env(safe-area-inset-left, 0px)); }
+body.fx .rush3d { top: calc(var(--tb) + 2px); }
+body.fx .toast3d { top: calc(var(--tb) + 52px); z-index: 8; }
+body.fx .qpanel { top: calc(var(--tb) + 8px); right: max(12px, env(safe-area-inset-right, 0px)); bottom: max(12px, env(safe-area-inset-bottom, 0px)); }
+body.fx .hint3d { bottom: max(12px, env(safe-area-inset-bottom, 0px)); left: max(12px, env(safe-area-inset-left, 0px)); }
+body.fx .stage canvas.grabbing { cursor: grabbing; }
+/* the stats and upgrades slide up as a sheet inside the window */
+body.fx .below { position: fixed; left: 0; right: 0; bottom: 0; top: 8vh; top: 8dvh; z-index: 31; background: var(--bg); border-radius: 22px 22px 0 0; border-top: 2px solid var(--ink); padding: 62px max(14px, env(safe-area-inset-right, 0px)) max(28px, env(safe-area-inset-bottom, 0px)) max(14px, env(safe-area-inset-left, 0px)); overflow: auto; transform: translateY(110%); visibility: hidden; transition: transform .3s ease, visibility 0s .3s; box-shadow: 0 -10px 34px rgba(0,0,0,.3); overscroll-behavior: contain; -webkit-overflow-scrolling: touch; }
+body.fx.drawer .below { transform: none; visibility: visible; transition: transform .3s ease; }
+body.fx .drawerhead { display: flex; position: fixed; left: 0; right: 0; top: 8vh; top: 8dvh; z-index: 32; align-items: center; justify-content: space-between; padding: 12px max(14px, env(safe-area-inset-right, 0px)) 8px max(14px, env(safe-area-inset-left, 0px)); background: var(--bg); border-radius: 22px 22px 0 0; font: 800 17px/1 var(--f-display); transform: translateY(110%); visibility: hidden; transition: transform .3s ease, visibility 0s .3s; }
+body.fx.drawer .drawerhead { transform: none; visibility: visible; transition: transform .3s ease; }
+body.fx .scrim { display: block; position: fixed; inset: 0; border: 0; padding: 0; margin: 0; cursor: pointer; -webkit-tap-highlight-color: transparent; z-index: 30; background: rgba(5,15,18,.5); opacity: 0; pointer-events: none; transition: opacity .3s; }
+body.fx.drawer .scrim { opacity: 1; pointer-events: auto; }
+body.fx .below .btn, body.fx .qpanel button { touch-action: manipulation; }
+body.fx .opt, body.fx .qbar button, body.fx .mini, body.fx .btn { min-height: 40px; }
+@media (max-width: 900px) {
+  body.fx .qpanel { left: max(8px, env(safe-area-inset-left, 0px)); right: max(8px, env(safe-area-inset-right, 0px)); top: auto; bottom: max(8px, env(safe-area-inset-bottom, 0px)); width: auto; max-height: 58vh; max-height: 58dvh; }
+  body.fx .qgrab { display: flex; position: sticky; top: 0; z-index: 5; width: 100%; justify-content: center; align-items: center; border: 0; border-bottom: 1.5px solid var(--line); background: var(--surface2); padding: 7px 10px; font: 700 12px/1 var(--f-mono); letter-spacing: .06em; text-transform: uppercase; color: var(--muted); flex: none; }
+  body.fx .qgrab span::before { content: '\25BE  '; }
+  body.fx .qpanel.min .qgrab span::before { content: '\25B4  '; }
+  body.fx .qpanel.min { overflow: hidden; }
+  body.fx .qpanel.min #counter { display: none; }
+  body.fx .hint3d { display: block; top: calc(var(--tb) + 50px); bottom: auto; left: 50%; right: auto; transform: translateX(-50%); width: max-content; max-width: calc(100% - 24px); text-align: center; }
+  body.fx .rush3d { top: calc(var(--tb) + 50px); }
+  body.fx .phonebtn { left: auto; right: max(10px, env(safe-area-inset-right, 0px)); top: calc(var(--tb) + 4px); }
+}
+@media (max-width: 900px) {
+  body.fx .qbar { gap: 5px; padding: 6px 8px; top: 29px; }
+  body.fx .qbar button { min-height: 34px; padding: 5px 10px; font-size: 12.5px; }
+}
+@media (max-width: 640px) {
+  body.fx .brand { display: none; }
+  body.fx .top { gap: 6px; }
+  body.fx .stats { flex: 1; min-width: 0; }
+  body.fx .stat { flex: 1; min-width: 0; padding: 5px 8px; }
+  body.fx .stat:nth-child(4) { display: none; }
+  body.fx .stat span { font-size: 8.5px; letter-spacing: .06em; }
+  body.fx .stat b { font-size: 15px; }
+  body.fx .stat b small { display: none; }
+  body.fx .drawerbtn { padding: 0 11px; }
+  body.fx .drawerbtn b { display: none; }
+  body.fx .line3d { left: calc(max(10px, env(safe-area-inset-left, 0px)) + 186px); font-size: 11px; }
+}
+@media (max-height: 520px) and (orientation: landscape) {
+  body.fx { --tb: calc(56px + env(safe-area-inset-top, 0px)); }
+  body.fx .stat:nth-child(4), body.fx .drawerbtn b { display: none; }
+  body.fx .hint3d { max-width: calc(48% - 30px); }
+  body.fx .brand { display: none; }
+  body.fx .stat { padding: 3px 9px; } body.fx .stat b { font-size: 14px; margin-top: 2px; } body.fx .drawerbtn { height: 38px; }
+  body.fx .qpanel { left: auto; top: calc(var(--tb) + 4px); bottom: max(6px, env(safe-area-inset-bottom, 0px)); right: max(8px, env(safe-area-inset-right, 0px)); width: min(52%, 470px); max-height: none; }
+  body.fx .qgrab { display: none; }
+  body.fx .qbar { top: 0; }
+  body.fx .qpanel.min #counter { display: block; }
+  body.fx .hint3d { top: auto; bottom: 8px; left: max(10px, env(safe-area-inset-left, 0px)); transform: none; text-align: left; }
+  body.fx .phonebtn { left: max(10px, env(safe-area-inset-left, 0px)); right: auto; top: calc(var(--tb) + 46px); }
+  body.fx .rush3d { top: calc(var(--tb) + 2px); }
+  body.fx .below { top: 4px; border-radius: 14px 14px 0 0; padding-top: 56px; } body.fx .drawerhead { top: 4px; }
+}
+body.fx .stage.fpmode .top .drawerbtn { display: none; }
+
+body.fx .tag3d { display: none !important; }
+body.fx[data-sheet="ups"] .sh-prog, body.fx[data-sheet="prog"] .sh-ups { display: none; }
+body.fx .below { grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr)); }
+.menu { display: none; }
+body.fx .menu { position: fixed; z-index: 40; top: calc(var(--tb) - 2px); right: max(10px, env(safe-area-inset-right, 0px)); width: min(290px, calc(100vw - 20px)); display: grid; gap: 4px; padding: 8px; background: var(--surface); border: 2px solid var(--ink); border-radius: 18px; box-shadow: 0 10px 30px rgba(0,0,0,.3), 4px 4px 0 var(--teal); transform-origin: top right; transform: scale(.92); opacity: 0; visibility: hidden; transition: transform .18s, opacity .18s, visibility 0s .18s; max-height: calc(100dvh - var(--tb) - 14px); overflow: auto; }
+body.fx.menuopen .menu { transform: none; opacity: 1; visibility: visible; transition: transform .18s, opacity .18s; }
+.menu button { display: flex; align-items: center; gap: 12px; width: 100%; min-height: 48px; padding: 8px 12px; border: 0; border-radius: 12px; background: transparent; text-align: left; font: 700 15px/1.2 var(--f-display); }
+.menu button:hover, .menu button:active { background: var(--surface2); }
+.menu button i { display: grid; place-items: center; width: 28px; height: 28px; flex: none; color: var(--teal-ink, var(--ink)); }
+.menu button i svg { display: block; }
+.menu hr { border: 0; border-top: 1px solid var(--line); margin: 3px 6px; }
+body.fx.menuopen .scrim { opacity: 1; pointer-events: auto; background: rgba(5,15,18,.28); z-index: 39; }
+.awbtn { width: 100%; padding: 14px; font-size: 15px; }
+body.fx .qbar.slim { padding: 6px 8px; justify-content: flex-start; }
+
+.avatar.lp { border-radius: 18px; background: var(--surface2); object-fit: cover; display: block; }
+.avatar.lp.k { background: var(--coral-soft); } .avatar.lp.s { background: var(--amber-soft); }
+.avatar.lp.ok { background: var(--teal-soft); } .avatar.lp.bad { background: var(--coral-soft); }
+.fpx { position: absolute; left: 0; top: 0; pointer-events: none; will-change: transform; z-index: 6; }
+.fpx span { display: grid; place-items: center; width: 74px; height: 74px; border-radius: 50%; background: rgba(255,255,255,.92); border: 4px solid #E23B2E; color: #E23B2E; font: 900 52px/1 var(--f-display); animation: fpxs .5s ease-out; }
+@keyframes fpxs { 0% { transform: scale(.4); opacity: 0; } 30% { transform: scale(1.15); opacity: 1; } 45% { transform: translateX(-6px); } 60% { transform: translateX(6px); } 75% { transform: translateX(-4px); } 100% { transform: none; } }
+.fpleave { display: none; position: absolute; right: 12px; top: 12px; z-index: 7; align-items: center; gap: 6px; height: 40px; padding: 0 14px; border-radius: 12px; border: 2px solid var(--ink); background: var(--surface); font: 800 14px/1 var(--f-display); box-shadow: 0 3px 0 var(--ink); }
+.stage.fpmode .fpleave { display: inline-flex; }
+body.fx .fpleave { top: calc(var(--tb) + 6px); right: max(10px, env(safe-area-inset-right, 0px)); }
+.fpq.tip { transition: transform .4s cubic-bezier(.5,-0.3,.7,.4), opacity .4s; cursor: pointer; border-color: var(--amber); box-shadow: 0 0 0 4px rgba(241,162,14,.35), var(--shadow); }
+.fpq.tip .fptap { font: 700 12px/1 var(--f-mono); letter-spacing: .08em; text-transform: uppercase; color: var(--teal-ink); margin-top: 8px; animation: tapb 1s infinite alternate; }
+@keyframes tapb { to { opacity: .45; } }
+.fpq.tip.fly { transform: translate(60%, -170%) rotate(8deg) scale(.7); opacity: 0; pointer-events: none; }
+.fpq.mini { width: auto; max-width: calc(100% - 130px); padding: 6px 12px; font-size: 13px; display: flex; align-items: center; gap: 8px; white-space: nowrap; overflow: hidden; left: 12px; transform: none; border-radius: 12px; animation: minin .35s ease-out; }
+.fpq.mini .mt { font: 700 11px/1 var(--f-mono); background: var(--teal); color: var(--on-teal); padding: 3px 7px; border-radius: 999px; } .fpq.mini .mt.bad { background: var(--coral); color: #fff; }
+.fpq.mini b { font-weight: 800; }
+@keyframes minin { from { opacity: 0; transform: translateY(-14px); } to { opacity: 1; transform: none; } }
+body.fx .fpq:not(.portal) { top: calc(var(--tb) + 6px); }
+body.fx .fpq.mini { left: max(10px, env(safe-area-inset-left, 0px)); }
+@media (max-width: 900px) {
+  body.fx .qpanel { max-height: calc(100vh - var(--tb) - 14px); max-height: calc(100dvh - var(--tb) - 14px - env(safe-area-inset-bottom, 0px)); }
+  body.fx .qpanel .rx { margin-top: 0; box-shadow: none; border: 0; border-radius: 0; }
+  body.fx .rx-head { padding: 7px 14px; }
+  body.fx .rx-body { padding: 12px 14px 14px; gap: 10px; }
+  body.fx .patient { grid-template-columns: 56px minmax(0, 1fr); gap: 10px; }
+  body.fx .avatar { width: 56px; height: 56px; }
+  body.fx .bubble { padding: 9px 13px; } body.fx .bubble p { font-size: 17px; }
+  body.fx .opts { gap: 6px; } body.fx .opt { padding: 9px 12px; }
+}
+
+.stat .ic { display: none; }
+.quick { display: flex; gap: 8px; align-items: center; }
+.quick .qk { display: grid; place-items: center; width: 44px; height: 44px; padding: 0; border-radius: 14px; border: 2px solid var(--ink); background: var(--surface); color: var(--teal-ink, var(--ink)); box-shadow: 0 3px 0 var(--ink); cursor: pointer; pointer-events: auto; }
+.quick .qk i { display: grid; place-items: center; }
+.quick .qk[aria-pressed="true"] { background: var(--teal-soft); }
+#sfxbtn[aria-pressed="false"] { opacity: .6; text-decoration: line-through; }
+.quick .qk:active { transform: translateY(2px); box-shadow: 0 1px 0 var(--ink); }
+.sr { position: absolute !important; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+body.fx .quick { gap: 6px; } body.fx .quick .qk { width: 40px; height: 40px; border-radius: 12px; }
+/* streak badge: from a streak of 10 a canvas of flames sits behind it and rises off the top of the screen */
+.stat.burning { position: relative; isolation: isolate; overflow: visible !important; background: transparent !important; }
+.stat.burning::before { content: ''; position: absolute; inset: 0; z-index: 0; border-radius: inherit; background: var(--surface); }
+.stat.burning > :not(canvas) { position: relative; z-index: 1; }
+.stat.burning .sfxcv { position: absolute; left: 50%; bottom: -8px; transform: translateX(-50%); width: 260px; height: 260px; z-index: -1; pointer-events: none; }
 
 body.fx { --tb: calc(50px + env(safe-area-inset-top, 0px)); }
 body.fx .toast3d:not(.on) { transform: translate(-50%, calc(-100% - var(--tb) - 90px)); }
@@ -4162,7 +4297,8 @@ const World = (function () {
   ];
   const UPS = [
     { id: 'shelf', short: 'Shelves', name: 'Stocked Shelves', max: 20, cost: l => Math.round(40 * Math.pow(1.55, l)), desc: l => `Each sale pays +25% more. Now +${l * 25}%.` },
-    { id: 'tech', short: 'Techs', name: 'Pharmacy Technician', max: 20, cost: l => Math.round(80 * Math.pow(1.6, l)), desc: l => `Techs earn tips on their own, about $0.40/s each. Hired: ${l}.` },
+    { id: 'tech', short: 'Techs', name: 'Pharmacy Technician', max: 20, cost: l => Math.round(80 * Math.pow(1.6, l)), desc: l => `Techs earn tips on their own, about ${money(techRate())}/s each right now. Hired: ${l}.` },
+    { id: 'train', short: 'Training', name: 'Tech Training', max: 10, cost: l => Math.round(150 * Math.pow(1.7, l)), desc: l => `Technicians earn +40% per level. Techs now also gain from Stocked Shelves. Now +${l * 40}%. Needs hired techs.` },
     { id: 'counsel', short: 'Counseling', name: 'Counseling Room', max: 10, cost: l => Math.round(120 * Math.pow(1.8, l)), desc: l => `Streak bonus (+5% per answer) caps at ${5 + 3 * l} in a row. ${Math.min(60, l * 10)}% chance to talk Karen down.` },
     { id: 'library', short: 'Library', name: 'Reference Library', max: 5, cost: l => Math.round(150 * Math.pow(1.9, l)), desc: l => `Ask the pharmacist to remove two wrong answers. Holds ${2 * l} hints.` },
     { id: 'robot', short: 'Robot', name: 'Dispensing Robot', max: 5, cost: l => Math.round(300 * Math.pow(2, l)), desc: l => `${l * 6}% chance that a correct fill pays double.` }
@@ -4181,7 +4317,7 @@ const World = (function () {
       hintsLeft: 0, sinceHint: 0, calcOK: 0, mastery: {}, missed: [], karenCd: 0, karenWin: 0, karenLoss: 0, sweatyCd: 0, jimWin: 0, jimLoss: 0, phoneOK: 0, phoneBad: 0, phoneMiss: 0, lastShelve: 0, retired: 0, shelveOK: 0, shelveBad: 0, priorN: 0, decks: [],
       me: { done: false, body: 'normal', gender: 'n', hair: 0, hairColor: 0, skin: 1, scrub: 0 }, awards: { frames: [], pets: [] },
       set: { topics: topics, diffs: [1, 2, 3], mode: 'mixed', timer: true, focus: false },
-      up: { shelf: 0, tech: 0, counsel: 0, library: 0, robot: 0 } };
+      up: { shelf: 0, tech: 0, train: 0, counsel: 0, library: 0, robot: 0 } };
   }
   let S = load();
   if (S.playSec === undefined) S.playSec = S.served > 0 ? 300 : 0; // people who already play skip the slow start
@@ -4297,7 +4433,8 @@ const World = (function () {
     return '$' + (n / 1e15).toFixed(2) + 'Qa';
   }
   const franchiseMult = () => 1 + 0.25 * S.franchises + 0.5 * (S.retired || 0);
-  const passive = () => S.up.tech * 0.4 * (0.5 + S.rep / 100) * franchiseMult();
+  const techRate = () => 0.4 * (0.5 + S.rep / 100) * franchiseMult() * (1 + 0.25 * S.up.shelf) * (1 + 0.4 * S.up.train);
+  const passive = () => S.up.tech * techRate();
   const hintCap = () => 2 * S.up.library;
   const upTotal = () => Object.keys(S.up).reduce((a, k) => a + S.up[k], 0);
   const customCount = () => S.decks.reduce((a, d) => a + d.items.length, 0);
@@ -5308,12 +5445,12 @@ const World = (function () {
     streak: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2c1 4 5 6 5 11a5 5 0 0 1-10 0c0-2 1-3 2-4 0 2 1 3 2 3 0-4-1-6 1-10z" fill="#F1A20E" stroke="#10292C" stroke-width="2" stroke-linejoin="round"/></svg>',
     tips: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M13 2L5 14h6l-1 8 8-12h-6z" fill="#0E9A8E" stroke="#10292C" stroke-width="2" stroke-linejoin="round"/></svg>'
   };
-  function fireCls() { const s = S.streak || 0, l = s >= 30 ? 5 : s >= 20 ? 4 : s >= 10 ? 3 : s >= 5 ? 2 : s >= 2 ? 1 : 0; return l ? ' fire f' + l : ''; }
   function renderStats() {
     $('#stats').innerHTML = `
       <div class="stat cash" title="Cash"><i class="ic">${IC.coin}</i><span class="lbl">Cash</span><b id="cashv">${money(S.cash)}</b></div>
       <div class="stat rep" title="Reputation"><i class="ic">${IC.rep}</i><span class="lbl">Reputation</span><b>${Math.round(S.rep)}<small>/100</small></b><div class="repbar"><i class="${S.rep < 30 ? 'low' : ''}" style="width:${S.rep}%"></i></div></div>
-      <div class="stat${fireCls()}" title="Answers in a row"><i class="ic">${IC.streak}</i><span class="lbl">Streak</span><b>${S.streak}<small>best ${S.best}</small></b></div>`;
+      <div class="stat streak" id="streakstat" title="Answers in a row (best ${S.best})" role="img" aria-label="Streak ${S.streak}, best ${S.best}"><b style="${S.streak >= 100 ? 'font-size:13px' : S.streak >= 10 ? 'font-size:16px' : ''}">${S.streak}</b></div>`;
+    streakFx(S.streak || 0);
   }
   function sceneSVG() {
     const L = S.up, nb = Math.min(30, 6 + L.shelf * 2), cols = ['var(--teal)', 'var(--amber)', 'var(--coral)', 'var(--teal-ink)'];
@@ -5339,6 +5476,7 @@ const World = (function () {
     const g = {
       shelf: '<rect x="9" y="12" width="6" height="8" rx="1.5"/><rect x="17" y="9" width="6" height="11" rx="1.5"/><rect x="25" y="14" width="6" height="6" rx="1.5"/><rect x="7" y="22" width="26" height="3" rx="1.5"/>',
       tech: '<circle cx="20" cy="14" r="5.5"/><path d="M9 29c1-6 5-9 11-9s10 3 11 9z"/>',
+      train: '<path d="M20 9l14 7-14 7-14-7z"/><path d="M12 21v6c0 2 4 4 8 4s8-2 8-4v-6l-8 4z"/><rect x="32" y="17" width="2" height="9"/>',
       counsel: '<path d="M8 10h24a2 2 0 0 1 2 2v13a2 2 0 0 1-2 2H18l-7 5v-5H8a2 2 0 0 1-2-2V12a2 2 0 0 1 2-2z"/>',
       library: '<rect x="8" y="9" width="7" height="22" rx="1.5"/><rect x="17" y="9" width="7" height="22" rx="1.5"/><path d="M26 11l6-1.5 4 20-6 1.5z"/>',
       robot: '<rect x="9" y="14" width="22" height="17" rx="4"/><rect x="19" y="7" width="2.5" height="7"/><circle cx="20" cy="6" r="2.5"/><circle cx="15" cy="22" r="2.6" style="fill:var(--amber)"/><circle cx="25" cy="22" r="2.6" style="fill:var(--amber)"/>'
@@ -5502,6 +5640,75 @@ const World = (function () {
       }
     };
   })();
+
+  /* ---- streak coin: a round badge with the number; from a streak of 10 it turns gold with an orange rim and a flame crown that grows with every right answer ---- */
+  const SFX_ST = { cv: null, ctx: null, n: 0, shown: -1, pulse: 0, sparks: [], acc: 0, last: 0, run: false };
+  function streakFx(n) {
+    const S2 = SFX_ST, st = document.getElementById('streakstat');
+    if (!SFX_ST.cv) { SFX_ST.cv = document.createElement('canvas'); SFX_ST.cv.className = 'sfxcv'; SFX_ST.cv.setAttribute('aria-hidden', 'true'); SFX_ST.ctx = SFX_ST.cv.getContext('2d'); }
+    // renderStats rebuilds the badge each time, so the canvas moves into the fresh one
+    if (st) { if (n >= 10) { if (SFX_ST.cv.parentNode !== st) st.insertBefore(SFX_ST.cv, st.firstChild); st.classList.add('lit'); } else { st.classList.remove('lit'); st.style.boxShadow = ''; if (SFX_ST.cv.parentNode) SFX_ST.cv.parentNode.removeChild(SFX_ST.cv); } }
+    if (n > S2.n && S2.shown >= 0) S2.pulse = 1;
+    S2.n = n; S2.shown = n;
+    if (n >= 10 && !S2.run) { S2.run = true; S2.last = performance.now(); requestAnimationFrame(sfxFrame); }
+  }
+  function sfxFl(t, i) { return 0.5 + 0.5 * (Math.sin(t * 3.1 + i * 12.9898) * 0.5 + Math.sin(t * 5.3 + i * 78.233) * 0.3 + Math.sin(t * 8.7 + i * 37.719) * 0.2); }
+  function sfxLobe(ctx, x, y, ang, w, h, curl) {
+    ctx.save(); ctx.translate(x, y); ctx.rotate(ang);
+    const bx = -Math.sin(ang) * 0.85 * h, by = (1 - Math.cos(ang)) * 0.85 * h, tipx = curl * h * 0.3 + bx, tw = w * 0.55, tyo = by;
+    ctx.beginPath(); ctx.moveTo(-w, w * 1.6); ctx.lineTo(-w, 0);
+    ctx.bezierCurveTo(-w * 1.1 + bx * 0.25, -h * 0.45 + by * 0.35, -tw + tipx * 0.55, -h * 0.7 + tyo * 0.75, tipx - tw * 0.3, -h * 0.92 + tyo);
+    ctx.quadraticCurveTo(tipx, -h * 1.05 + tyo, tipx + tw * 0.3, -h * 0.92 + tyo);
+    ctx.bezierCurveTo(tw + tipx * 0.55, -h * 0.7 + tyo * 0.75, w * 1.1 + bx * 0.25, -h * 0.45 + by * 0.35, w, 0);
+    ctx.lineTo(w, w * 1.6); ctx.closePath(); ctx.restore();
+  }
+  function sfxCrown(ctx, b, n, baseH, baseW, tm, scale, fill, stroke, lw, seed, k) {
+    const items = [];
+    for (let i = 0; i < n; i++) {
+      const u = n === 1 ? 0.5 : i / (n - 1), a = -Math.PI * 0.5 + (u - 0.5) * 2.15, mid = 1 - Math.abs(u - 0.5) * 1.35;
+      const f1 = sfxFl(tm * 1.4, i + 1 + seed), h = baseH * (0.42 + 0.78 * mid) * (0.72 + 0.4 * f1) * scale, w = baseW * (0.8 + 0.3 * sfxFl(tm * 1.9, i + 9 + seed)) * (0.75 + 0.25 * scale);
+      const px = b.cx + Math.cos(a) * (b.r - 5 * k), py = b.cy + Math.sin(a) * (b.r - 5 * k), curl = (Math.sin(tm * 2.4 + i * 1.9) + (u - 0.5) * 1.2) * 0.5;
+      items.push([px, py, a + Math.PI / 2 + curl * 0.06, w, h, curl]);
+    }
+    if (stroke) { ctx.lineJoin = 'round'; ctx.lineWidth = lw; ctx.strokeStyle = stroke; items.forEach(o => { sfxLobe(ctx, o[0], o[1], o[2], o[3], o[4], o[5]); ctx.stroke(); }); }
+    items.forEach(o => { const g = ctx.createLinearGradient(o[0], o[1], o[0] + Math.cos(o[2] - Math.PI / 2) * o[4], o[1] + Math.sin(o[2] - Math.PI / 2) * o[4]); g.addColorStop(0, fill[1]); g.addColorStop(1, fill[0]); ctx.fillStyle = g; sfxLobe(ctx, o[0], o[1], o[2], o[3], o[4], o[5]); ctx.fill(); });
+  }
+  function sfxFrame(now) {
+    const S2 = SFX_ST, cv = S2.cv, st = document.getElementById('streakstat');
+    if (S2.n < 10 || !st || cv.parentNode !== st) { S2.run = false; S2.sparks.length = 0; return; }
+    requestAnimationFrame(sfxFrame);
+    const dt = Math.min(0.05, (now - S2.last) / 1000 || 0.016); S2.last = now;
+    const reduce = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches, tm = now / 1000 * (reduce ? 0.35 : 1);
+    const dpr = Math.min(2, window.devicePixelRatio || 1), W = cv.clientWidth, H = cv.clientHeight;
+    if (!W || !H) return;
+    if (cv.width !== Math.round(W * dpr)) { cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr); }
+    const ctx = S2.ctx; ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.clearRect(0, 0, W, H);
+    const sr = st.getBoundingClientRect(), cr = cv.getBoundingClientRect(), r = sr.width / 2, k = r / 32;
+    const b = { cx: sr.left - cr.left + r, cy: sr.top - cr.top + sr.height / 2, r: r };
+    const t = Math.min(1, (S2.n - 10) / 30); S2.pulse = Math.max(0, S2.pulse - dt * 2.2);
+    const nn = Math.round(3 + 2 * t) | 1, grow = 1 + S2.pulse * 0.3, baseH = (26 + 74 * Math.pow(t, 0.85)) * grow * k, baseW = (15 + 6 * t) * k;
+    const gl = ctx.createRadialGradient(b.cx, b.cy - r * 0.4, 4 * k, b.cx, b.cy - r * 0.4, r * 2.2 + baseH * 0.8);
+    gl.addColorStop(0, 'rgba(255,150,40,' + (0.22 + 0.28 * t) + ')'); gl.addColorStop(1, 'rgba(255,100,0,0)'); ctx.fillStyle = gl; ctx.fillRect(0, 0, W, H);
+    ctx.save(); ctx.beginPath();
+    const ty = b.cy - r * 0.55;
+    ctx.moveTo(0, 0); ctx.lineTo(W, 0); ctx.lineTo(W, ty); ctx.lineTo(b.cx + r + 10 * k, ty); ctx.lineTo(b.cx + r + k, b.cy); ctx.lineTo(b.cx - r - k, b.cy); ctx.lineTo(b.cx - r - 10 * k, ty); ctx.lineTo(0, ty); ctx.closePath();
+    ctx.moveTo(b.cx + r + k, b.cy); ctx.arc(b.cx, b.cy, r + k, 0, Math.PI * 2); ctx.clip();
+    sfxCrown(ctx, b, nn, baseH, baseW, tm, 1, ['#F0501A', '#F58A2E'], '#F58A2E', 7 * k, 0, k);
+    sfxCrown(ctx, b, nn, baseH, baseW, tm + 3, 0.68, ['#FF9F2A', '#FFB74A'], null, 0, 20, k);
+    sfxCrown(ctx, b, Math.max(1, nn - 2), baseH, baseW, tm + 6, 0.36, ['#FFC933', '#FFE27A'], null, 0, 40, k);
+    ctx.restore();
+    S2.acc += (0.3 + 1.8 * t) * dt * (reduce ? 0.4 : 1) * (1 + S2.pulse * 2);
+    while (S2.acc >= 1) { S2.acc -= 1; const a = -Math.PI / 2 + (Math.random() - 0.5) * 1.6; S2.sparks.push({ x: b.cx + Math.cos(a) * r * 0.9, y: b.cy - baseH * 0.7 * (0.6 + Math.random() * 0.6) - r * 0.4, vx: (Math.random() - 0.5) * 26 * k, vy: -(45 + 70 * t) * (0.7 + Math.random() * 0.6) * k, age: 0, life: 0.8 + Math.random() * 0.8, s: (2.2 + 2.2 * t + Math.random() * 1.3) * k, ph: Math.random() * 6.28 }); }
+    for (let i = S2.sparks.length - 1; i >= 0; i--) {
+      const sp = S2.sparks[i]; sp.age += dt; if (sp.age >= sp.life || sp.y < -10) { S2.sparks.splice(i, 1); continue; }
+      sp.x += (sp.vx + Math.sin(sp.age * 7 + sp.ph) * 20 * k) * dt; sp.y += sp.vy * dt; sp.vy *= (1 - dt * 0.35);
+      const q = sp.age / sp.life, s = sp.s * (1 - q * 0.55);
+      ctx.save(); ctx.translate(sp.x, sp.y); ctx.rotate(Math.atan2(sp.vx, -sp.vy) * 0.8); ctx.globalAlpha = Math.min(1, (1 - q) * 1.6);
+      ctx.beginPath(); ctx.moveTo(0, -2.1 * s); ctx.bezierCurveTo(0.35 * s, -1.1 * s, s, -0.6 * s, s, 0.25 * s); ctx.bezierCurveTo(s, 0.95 * s, 0.5 * s, 1.25 * s, 0, 1.25 * s); ctx.bezierCurveTo(-0.5 * s, 1.25 * s, -s, 0.95 * s, -s, 0.25 * s); ctx.bezierCurveTo(-s, -0.6 * s, -0.35 * s, -1.1 * s, 0, -2.1 * s); ctx.closePath();
+      const g = ctx.createLinearGradient(0, -2.1 * s, 0, 1.25 * s); g.addColorStop(0, '#FF8A2B'); g.addColorStop(0.55, '#FFB02E'); g.addColorStop(1, '#FFE27A'); ctx.fillStyle = g; ctx.fill(); ctx.restore();
+    }
+    st.style.boxShadow = '0 0 ' + (8 + 22 * t + S2.pulse * 8).toFixed(0) + 'px rgba(255,138,43,.7)';
+  }
   function sfxLabel() {
     const on = S.sfx !== false, l = $('#sfxlab'), b = $('#sfxbtn');
     if (l) l.textContent = 'Sound: ' + (on ? 'on' : 'off');
@@ -6123,7 +6330,7 @@ const World = (function () {
       <div class="btnrow"><button type="button" class="btn go" data-act="back">Back to the pharmacy</button></div></div>`;
   }
 
-  const GAME_VERSION = 73;
+  const GAME_VERSION = 77;
   const b64u = (u8) => { let s = ''; for (let i = 0; i < u8.length; i += 0x8000) s += String.fromCharCode.apply(null, u8.subarray(i, i + 0x8000)); return btoa(s).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); };
   const unb64u = (t) => { const s = atob(t.replace(/-/g, '+').replace(/_/g, '/')), u = new Uint8Array(s.length); for (let i = 0; i < s.length; i++) u[i] = s.charCodeAt(i); return u; };
   const chk = (t) => { let h = 2166136261; for (let i = 0; i < t.length; i++) { h ^= t.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36); };
@@ -6339,7 +6546,7 @@ const World = (function () {
 
   { const sc = $('#savecard'); if (sc) sc.innerHTML = saveBoxHTML(); }
   World.init({ host: $('#stage'), getS: () => S, tagInfo: tagInfo, onBuy: buyUp, onNotes: () => openView('studies'), notesInfo: customCount, karenRoll: karenRoll, sweatyRoll: sweatyRoll, elderRoll: elderRoll, eventRoll: eventRoll, onVisitor: visitClick, onVisitorArrive: visitArrive, capsuleOk: capsuleOk, onCapsule: onCapsule, onBrain: synEnter, onSynSite: onSynSite, onEvt: onEvt, onPhone: openPhone, onPolice: policeCome, onFp: fpClick, sign: () => shopName() + '|' + tierName() + ' #' + (S.franchises + 1) });
-  window.__rxDbg = () => ({ fp: fp, S: S, view: view, rush: rush, phoneR: phone.ringing, TOPQ: TOPQ, pool: poolQs, cur: cur, synQ: () => (typeof SYN !== 'undefined' ? SYN.q : null), synTap: id => onSynSite(id), offer: k => offerEvt(k, 'test'), onEvt: onEvt, holiday: () => holNow(), holN: () => holCount() });
+  window.__rxDbg = () => ({ fp: fp, S: S, view: view, rush: rush, phoneR: phone.ringing, TOPQ: TOPQ, pool: poolQs, cur: cur, synQ: () => (typeof SYN !== 'undefined' ? SYN.q : null), synTap: id => onSynSite(id), offer: k => offerEvt(k, 'test'), onEvt: onEvt, holiday: () => holNow(), holN: () => holCount(), renderStats: renderStats, passive: passive, techRate: techRate, buyUp: buyUp });
   if (!World.ok) $('#stage').classList.add('flat');
   else { document.body.classList.add('fx'); World.setPharmacist(meSpec()); World.setAwards(S.awards); World.setCalendar(Math.min(4, S.awards.calW || 0), false, S.awards.calW || 0); }
   applyFocus(); syncBrand(); sfxLabel();
