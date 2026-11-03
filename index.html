@@ -865,6 +865,21 @@ body.syn .synwrap { display: block; }
 .p3sched li small { color: var(--muted); }
 .p3sched li.now { border-color: var(--teal); background: var(--teal-soft); }
 .p3sched li.lock { opacity: .55; }
+/* Topics notebook, folder and tabs share the cream of the topic cards */
+.nbk { background: #8F6E22; }
+.nbcover { background: #8F6E22; border-bottom-color: #6E5318; }
+.nbsheet { background: #FFFDF4; box-shadow: inset 8px 0 10px -8px rgba(0,0,0,.25); }
+.nbsheet::before { background: #D9B56A; }
+.nbsheet::after { background: radial-gradient(circle, #8F6E22 3.5px, transparent 4px) 0 0 / 10px 46px repeat-y; }
+.nbsheet .hubtabs { background: #FFFDF4; border-color: #C79B3E; }
+.nbsheet .hubtabs button[aria-selected="true"] { background: #8F6E22; color: #fff; }
+.nbsheet .grp, .nbsheet .deckrow, .fbody .grp { background: #FFFDF4; box-shadow: 0 0 0 1.5px #E8D9A8; }
+.fbody { background: #FFFDF4; border: 0; box-shadow: none; padding: 20px 0 6px; border-radius: 0; }
+.ftab { background: #F3E8C2 !important; }
+.ftab:hover:not([aria-selected="true"]) { background: #F8EFCF !important; }
+.ftab[aria-selected="true"] { background: #FFFDF4 !important; }
+.ftab[aria-selected="true"]::after { display: none; }
+.fcab { margin-bottom: -3px; } .ftab { margin-bottom: 0 !important; } .ft2 { margin: 0 -1px; }
 .subgrp { margin-top: 10px; padding-top: 8px; border-top: 2px dashed var(--ink-soft, rgba(0,0,0,.25)); }
 .subgrp .subh { display: block; margin-bottom: 6px; font-size: 13px; letter-spacing: .06em; text-transform: uppercase; }
 .syntoggle { display: grid; grid-template-columns: 1fr 1fr; gap: 0; margin: 8px 0; border: 2px solid var(--ink); border-radius: 999px; overflow: hidden; }
@@ -1620,6 +1635,141 @@ T("IBS",3,"What is the boxed warning for alosetron?","Serious complications of c
 T("IBS",2,"Tenapanor treats IBS-C by:","Inhibiting the sodium/hydrogen exchanger NHE3",["Activating guanylate cyclase C","Blocking 5-HT3 receptors","Activating chloride channels"],"The usual dose is 50 mg twice daily, taken just before meals.");
 T("IBS",2,"Which statement about rifaximin for IBS-D is true?","It is a non-absorbed antibiotic, 550 mg three times daily for 2 weeks, which can be repeated",["It is absorbed systemically and given for life","It is for IBS-C only","It is a 5-HT3 blocker"],"It improves bloating, pain and watery stools but is costly.");
 T("IBS",1,"Which OTC option may help IBS symptoms and has some evidence?","Peppermint oil",["Aspirin","Bisacodyl","Docusate"],"Peppermint oil is an antispasmodic that can reduce cramping. Probiotics such as Bifidobacterium have limited evidence too.");
+/* P3 · Therapeutics III (PHAR 553 Fall 2026): disease-state questions by syllabus topic */
+const T5 = (t, d, q, a, w, e) => Q("T553", d, q, a, w, e, t);
+
+/* ---------- Asthma ---------- */
+T5("Asthma",2,"For adults and adolescents with asthma, which reliever approach is preferred by GINA?","Low-dose ICS-formoterol taken as needed",["Albuterol alone as needed","Daily montelukast with albuterol as needed","Oral prednisone at the first sign of symptoms"],"Treating symptoms with an inhaled corticosteroid plus formoterol lowers exacerbation risk compared with a SABA alone.");
+T5("Asthma",1,"Which drug class is the most effective controller for persistent asthma?","Inhaled corticosteroids",["Long-acting beta agonist monotherapy","Cromolyn","Theophylline"],"ICS reduce airway inflammation, symptoms and exacerbations more than any other single controller.");
+T5("Asthma",2,"Why is LABA monotherapy avoided in asthma?","It raises the risk of asthma-related death",["It causes tolerance to inhaled steroids","It has no bronchodilating effect","It causes adrenal suppression"],"A LABA must always be paired with an ICS in asthma (for example budesonide-formoterol).");
+T5("Asthma",1,"Which counseling point lowers the risk of oral thrush with an inhaled corticosteroid?","Rinse the mouth with water and spit after each dose",["Take the dose with milk","Use the inhaler only at night","Hold the breath for 60 seconds"],"Rinsing removes drug from the mouth and throat. A spacer also reduces deposition.");
+T5("Asthma",2,"Which asthma biologic targets IgE?","Omalizumab",["Mepolizumab","Dupilumab","Tezepelumab"],"Omalizumab binds IgE in allergic asthma. Mepolizumab targets IL-5, dupilumab IL-4 receptor alpha and tezepelumab TSLP.");
+
+/* ---------- COPD ---------- */
+T5("COPD",2,"What is the initial pharmacotherapy for GOLD group E COPD (high exacerbation risk)?","LABA + LAMA",["SABA alone as needed","ICS alone","Theophylline"],"Dual bronchodilation is preferred. Add an ICS if blood eosinophils are 300 cells/uL or more.");
+T5("COPD",2,"Which blood eosinophil count favors adding an ICS in COPD?","300 cells/uL or higher",["Below 50 cells/uL","Below 100 cells/uL","Any count"],"High eosinophils predict benefit from ICS. Counts below 100 cells/uL predict little benefit and more pneumonia risk.");
+T5("COPD",3,"Which drug is a selective PDE-4 inhibitor used for COPD with chronic bronchitis and exacerbations?","Roflumilast",["Tiotropium","Azithromycin","Formoterol"],"Roflumilast can cause weight loss, diarrhea, insomnia and psychiatric effects.");
+T5("COPD",3,"Long-term azithromycin to prevent COPD exacerbations requires monitoring for:","QT prolongation and hearing loss",["Pulmonary fibrosis and thyroid dysfunction","Hypoglycemia and weight gain","Tendon rupture and cough"],"Check an ECG for QT prolongation and screen hearing. It is used mainly in former smokers.");
+T5("COPD",2,"Long-term oxygen therapy is indicated when resting PaO2 is at or below:","55 mmHg (or SpO2 88% or lower)",["70 mmHg","80 mmHg","SpO2 94% or lower"],"Survival benefit is shown for at least 15 hours a day of oxygen in severe resting hypoxemia.");
+
+/* ---------- Renal and acid-base ---------- */
+T5("Renal and acid-base",2,"An eGFR of 30 to 44 mL/min/1.73 m2 is CKD stage:","G3b",["G2","G3a","G4"],"G3a is 45 to 59 and G4 is 15 to 29.");
+T5("Renal and acid-base",2,"Which class is first line for hypertension in CKD with albuminuria?","ACE inhibitor or ARB",["Dihydropyridine calcium channel blocker","Beta blocker","Loop diuretic"],"ACEi and ARBs reduce albuminuria and slow progression. Monitor creatinine and potassium after starting.");
+T5("Renal and acid-base",2,"How is the serum anion gap calculated?","Na - (Cl + HCO3)",["Na + K - Cl","(Na + Cl) - HCO3","Cl - (Na + HCO3)"],"A normal gap is about 8 to 12. A high gap suggests MUDPILES-type causes.");
+T5("Renal and acid-base",3,"Which cause produces a normal anion gap metabolic acidosis?","Severe diarrhea",["Diabetic ketoacidosis","Lactic acidosis","Methanol ingestion"],"Bicarbonate loss from the gut raises chloride, so the gap stays normal.");
+T5("Renal and acid-base",2,"Which therapy is given first to stabilize the heart in hyperkalemia with ECG changes?","IV calcium gluconate",["Insulin with dextrose","Sodium polystyrene sulfonate","Furosemide"],"Calcium protects the cardiac membrane within minutes. Insulin and dextrose then shift potassium into cells.");
+
+/* ---------- Type 2 diabetes ---------- */
+T5("Type 2 diabetes",2,"Which add-on is preferred for type 2 diabetes with heart failure with reduced ejection fraction?","An SGLT2 inhibitor",["Pioglitazone","Glipizide","Saxagliptin"],"SGLT2 inhibitors reduce heart failure hospitalization. Pioglitazone causes fluid retention.");
+T5("Type 2 diabetes",2,"Metformin is contraindicated when the eGFR falls below:","30 mL/min/1.73 m2",["60 mL/min/1.73 m2","45 mL/min/1.73 m2","15 mL/min/1.73 m2"],"The risk is lactic acidosis. Do not start it at an eGFR of 30 to 45 and reassess the dose.");
+T5("Type 2 diabetes",2,"Which boxed warning applies to semaglutide?","Risk of thyroid C-cell tumors",["Hepatotoxicity","Lactic acidosis","Bladder cancer"],"Avoid GLP-1 receptor agonists with a personal or family history of medullary thyroid carcinoma or MEN2.");
+T5("Type 2 diabetes",3,"Which rare serious adverse effect of SGLT2 inhibitors can occur with near-normal glucose?","Euglycemic diabetic ketoacidosis",["Severe hypoglycemia","Lactic acidosis","Acute pancreatitis"],"Hold the drug during acute illness, fasting or before surgery. Genital mycotic infections are the common effect.");
+T5("Type 2 diabetes",1,"Which oral drug class carries the highest hypoglycemia risk?","Sulfonylureas",["Metformin","DPP-4 inhibitors","SGLT2 inhibitors"],"Sulfonylureas force insulin release regardless of glucose and also cause weight gain.");
+T5("Type 2 diabetes",2,"Pioglitazone should be avoided in patients with:","Symptomatic heart failure",["Gout","Asthma","Hypothyroidism"],"Thiazolidinediones cause edema and heart failure. They also raise fracture risk.");
+T5("Type 2 diabetes",3,"Which combination gives no added benefit because of overlapping mechanisms?","A DPP-4 inhibitor with a GLP-1 receptor agonist",["Metformin with an SGLT2 inhibitor","A GLP-1 receptor agonist with basal insulin","Metformin with a GLP-1 receptor agonist"],"Both raise incretin signaling, so do not combine them.");
+T5("Type 2 diabetes",1,"What is the general A1c goal for most nonpregnant adults with diabetes?","Below 7%",["Below 6%","Below 8.5%","Below 9%"],"Individualize the goal. Less stringent goals suit older or frail patients.");
+
+/* ---------- Type 1 diabetes and insulin ---------- */
+T5("Type 1 diabetes and insulin",2,"Which insulin has no pronounced peak and lasts about 24 hours?","Insulin glargine",["NPH insulin","Insulin aspart","Regular insulin"],"Glargine is a basal analog. NPH peaks and aspart is a mealtime analog.");
+T5("Type 1 diabetes and insulin",2,"When does NPH insulin peak?","4 to 12 hours",["30 to 90 minutes","1 to 3 hours","It has no peak"],"The peak explains nocturnal hypoglycemia with an evening dose.");
+T5("Type 1 diabetes and insulin",1,"When should rapid-acting insulin lispro or aspart be given?","Within 15 minutes before eating",["30 to 45 minutes before eating","Only at bedtime","2 hours after eating"],"Regular insulin is the one given about 30 minutes before meals.");
+T5("Type 1 diabetes and insulin",1,"What is the rule of 15 for treating mild hypoglycemia?","Take 15 g of fast carbohydrate and recheck in 15 minutes",["Take 30 g of protein and recheck in 60 minutes","Eat a chocolate bar and recheck in 30 minutes","Take 15 g of fat and recheck in 15 minutes"],"Repeat until glucose is above 70 mg/dL, then eat a snack or meal.");
+
+/* ---------- DKA ---------- */
+T5("DKA",2,"What is the first priority in treating diabetic ketoacidosis?","Aggressive IV isotonic fluid replacement",["An insulin bolus","IV sodium bicarbonate","Oral potassium"],"Patients are volume depleted. Fluids come before insulin.");
+T5("DKA",3,"Insulin infusion in DKA is held until potassium is at least:","3.3 mEq/L",["2.5 mEq/L","4.5 mEq/L","5.5 mEq/L"],"Insulin drives potassium into cells and can cause dangerous hypokalemia.");
+T5("DKA",3,"Which finding shows DKA has resolved?","Anion gap closes and bicarbonate is 18 mEq/L or higher",["Glucose drops below 250 mg/dL","Urine ketones are negative","The insulin infusion has run for 6 hours"],"Resolution is based on the gap, bicarbonate and pH, not glucose alone.");
+
+/* ---------- Gout and arthritis ---------- */
+T5("Gout and arthritis",2,"Which urate-lowering drug is first line for gout?","Allopurinol",["Febuxostat","Probenecid","Pegloticase"],"Start low (100 mg daily or less) and titrate to a serum urate below 6 mg/dL.");
+T5("Gout and arthritis",3,"Which allele should be screened before allopurinol in higher-risk ancestries?","HLA-B*58:01",["HLA-B*15:02","HLA-B*57:01","CYP2C19*2"],"It predicts severe cutaneous reactions. HLA-B*15:02 is for carbamazepine and HLA-B*57:01 for abacavir.");
+T5("Gout and arthritis",2,"What is the colchicine dose for an acute gout flare?","1.2 mg, then 0.6 mg one hour later",["0.6 mg every hour until pain resolves","1.2 mg every 6 hours","2 mg every hour"],"Low-dose colchicine works as well as high dose with fewer GI effects.");
+T5("Gout and arthritis",2,"Which prophylaxis is given for 3 to 6 months when starting allopurinol?","Low-dose colchicine",["High-dose NSAIDs","Pegloticase","Probenecid"],"Starting urate-lowering therapy can trigger flares, so cover the start of therapy.");
+T5("Gout and arthritis",3,"Febuxostat carries a boxed warning for:","Cardiovascular death",["Hepatic failure","Agranulocytosis","Severe skin reactions"],"Use it when allopurinol fails or is not tolerated.");
+T5("Gout and arthritis",3,"Which test is required before pegloticase?","G6PD deficiency",["TPMT activity","DPD activity","HLA-B*58:01"],"G6PD deficiency risks hemolysis and methemoglobinemia.");
+T5("Gout and arthritis",2,"Which is a preferred first-line pharmacologic treatment for knee osteoarthritis?","A topical NSAID",["Tramadol","Glucosamine","Intra-articular hyaluronic acid"],"Topical NSAIDs are strongly recommended for knee OA with less systemic exposure.");
+
+/* ---------- Headache and migraine ---------- */
+T5("Headache and migraine",2,"What is first-line acute treatment for moderate to severe migraine?","A triptan",["An opioid","Butalbital combination","Daily propranolol"],"Triptans are 5-HT1B/1D agonists. Take early in the attack.");
+T5("Headache and migraine",2,"Triptans are contraindicated in:","Ischemic heart disease",["Asthma","Hypothyroidism","Gout"],"They constrict coronary and cerebral arteries. Also avoid in uncontrolled hypertension and hemiplegic migraine.");
+T5("Headache and migraine",3,"Erenumab prevents migraine by blocking the:","CGRP receptor",["5-HT1B/1D receptor","Angiotensin II receptor","Voltage-gated sodium channel"],"Fremanezumab, galcanezumab and eptinezumab bind the CGRP ligand instead.");
+T5("Headache and migraine",2,"Which migraine preventive drug is avoided in pregnancy because of neural tube defects?","Valproate",["Propranolol","Amitriptyline","Candesartan"],"Valproate is also teratogenic for cognitive outcomes.");
+T5("Headache and migraine",3,"Medication overuse headache can occur if triptans are used on at least how many days per month?","10 days",["2 days","4 days","20 days"],"Simple analgesics need 15 or more days per month to carry the same risk.");
+
+/* ---------- RA and SLE ---------- */
+T5("RA and SLE",1,"Which drug is the anchor DMARD for rheumatoid arthritis?","Methotrexate",["Hydroxychloroquine","Etanercept","Prednisone"],"Give it once weekly with folic acid.");
+T5("RA and SLE",2,"Which supplement reduces methotrexate toxicity?","Folic acid",["Vitamin K","Iron","Calcium"],"Folic acid lowers mucositis and liver effects without losing efficacy.");
+T5("RA and SLE",2,"What should be screened before starting a TNF inhibitor?","Latent tuberculosis and hepatitis B",["Thyroid function and lipid panel","Uric acid and ANA","Lung function tests only"],"TNF blockade can reactivate both infections.");
+T5("RA and SLE",2,"Which SLE drug requires baseline and routine retinal eye exams?","Hydroxychloroquine",["Belimumab","Azathioprine","Prednisone"],"Retinal toxicity risk rises with dose and duration. It is recommended for nearly all SLE patients.");
+T5("RA and SLE",3,"Belimumab inhibits which target?","BLyS (BAFF)",["CD20","TNF-alpha","IL-6 receptor"],"Rituximab targets CD20, tocilizumab the IL-6 receptor.");
+T5("RA and SLE",2,"Tofacitinib belongs to which class?","JAK inhibitor",["TNF inhibitor","IL-6 receptor antagonist","CTLA-4 fusion protein"],"JAK inhibitors have boxed warnings for serious infections, mortality, malignancy, MACE and thrombosis.");
+
+/* ---------- Thyroid ---------- */
+T5("Thyroid",2,"How long should levothyroxine be separated from calcium or iron supplements?","4 hours",["30 minutes","1 hour","No separation is needed"],"They bind levothyroxine and reduce absorption. Take it on an empty stomach 30 to 60 minutes before breakfast.");
+T5("Thyroid",2,"Which antithyroid drug is preferred in the first trimester of pregnancy?","Propylthiouracil",["Methimazole","Radioactive iodine","Levothyroxine"],"Methimazole is linked to birth defects early in pregnancy. Switch to it after the first trimester.");
+T5("Thyroid",3,"What is the boxed warning for propylthiouracil?","Severe liver injury",["Agranulocytosis","Pulmonary fibrosis","Lupus-like syndrome"],"This is why PTU is reserved for the first trimester and methimazole intolerance.");
+T5("Thyroid",3,"Which beta blocker also blocks peripheral conversion of T4 to T3?","Propranolol",["Metoprolol","Atenolol","Bisoprolol"],"It controls tremor and tachycardia in hyperthyroidism and in thyroid storm.");
+
+/* ---------- Liver ---------- */
+T5("Liver",2,"Which is NOT part of the Child-Pugh score?","Serum creatinine",["Albumin","Bilirubin","Hepatic encephalopathy"],"Child-Pugh uses bilirubin, albumin, INR, ascites and encephalopathy. MELD includes creatinine.");
+T5("Liver",1,"What is first-line therapy for hepatic encephalopathy?","Lactulose",["Rifaximin alone","Long-term metronidazole","Strict protein restriction"],"Lactulose lowers ammonia. Rifaximin is added to prevent recurrence.");
+T5("Liver",2,"What is the typical maximum acetaminophen dose in cirrhosis?","2 g per day",["4 g per day","5 g per day","6 g per day"],"It is still the safest analgesic here, but at a reduced dose.");
+T5("Liver",2,"Which drugs are used for primary prophylaxis of variceal bleeding?","Nonselective beta blockers such as propranolol, nadolol or carvedilol",["ACE inhibitors","Loop diuretics alone","Selective beta-1 blockers such as atenolol"],"They lower portal pressure.");
+T5("Liver",3,"What is the usual spironolactone to furosemide dose ratio for cirrhotic ascites?","100 mg to 40 mg",["40 mg to 100 mg","50 mg to 50 mg","200 mg to 20 mg"],"The ratio helps maintain normal potassium.");
+
+/* ---------- Hepatitis ---------- */
+T5("Hepatitis",2,"Which oral HBV agent has a high barrier to resistance and is preferred?","Entecavir",["Lamivudine","Adefovir","Telbivudine"],"Tenofovir (TDF or TAF) is the other preferred option.");
+T5("Hepatitis",3,"Which is a pangenotypic hepatitis C regimen?","Sofosbuvir/velpatasvir",["Ledipasvir/sofosbuvir","Peginterferon plus ribavirin","Boceprevir plus peginterferon"],"Ledipasvir/sofosbuvir covers only genotypes 1, 4, 5 and 6.");
+T5("Hepatitis",2,"What is the standard adult hepatitis B vaccine schedule for Engerix-B or Recombivax HB?","0, 1 and 6 months",["0, 2 and 12 months","A single dose","0, 7 and 21 days only"],"An accelerated schedule exists for some groups.");
+T5("Hepatitis",1,"After a positive HCV antibody test, active infection is confirmed with:","HCV RNA (PCR)",["ALT level","HCV genotype","Liver biopsy"],"The antibody can persist after clearing infection.");
+
+/* ---------- Hypertension ---------- */
+T5("Hypertension",1,"What is the ACC/AHA blood pressure goal for most adults?","Below 130/80 mmHg",["Below 140/90 mmHg","Below 120/70 mmHg","Below 150/90 mmHg"],"The goal applies to most adults with confirmed hypertension.");
+T5("Hypertension",2,"Blood pressure is 20/10 mmHg above goal. What is the recommended start?","Two first-line agents of different classes",["Monotherapy then titrate","A beta blocker plus an alpha blocker","A loop diuretic"],"A single-pill combination improves adherence.");
+T5("Hypertension",2,"Which is NOT a first-line class for general hypertension?","Beta blockers",["Thiazide-type diuretics","ACE inhibitors","Dihydropyridine calcium channel blockers"],"Beta blockers are used with compelling indications such as heart failure or angina.");
+T5("Hypertension",2,"What is initial therapy for a Black adult with hypertension and no heart failure or CKD?","A thiazide-type diuretic or calcium channel blocker",["An ACE inhibitor alone","An ARB alone","A beta blocker"],"These classes lower blood pressure more in this group.");
+T5("Hypertension",2,"Which antihypertensive classes are contraindicated in pregnancy?","ACE inhibitors and ARBs",["Labetalol and nifedipine","Methyldopa only","Thiazide diuretics only"],"They cause fetal renal toxicity. Labetalol, nifedipine and methyldopa are preferred.");
+T5("Hypertension",1,"ACE inhibitor cough is due to accumulation of:","Bradykinin",["Angiotensin II","Aldosterone","Renin"],"ARBs do not cause it. Angioedema also involves bradykinin.");
+T5("Hypertension",2,"Which is the preferred fourth-line add-on for resistant hypertension?","Spironolactone",["Hydralazine","Clonidine","Atenolol"],"Monitor potassium and creatinine.");
+T5("Hypertension",3,"In a hypertensive emergency, mean arterial pressure is lowered by no more than what in the first hour?","25%",["50%","75%","To normal"],"Rapid drops risk ischemia. Typical agents are nicardipine, clevidipine and labetalol.");
+
+/* ---------- Lipids ---------- */
+T5("Lipids",2,"Which regimen is a high-intensity statin?","Atorvastatin 80 mg",["Simvastatin 20 mg","Pravastatin 40 mg","Lovastatin 20 mg"],"High intensity lowers LDL by 50% or more: atorvastatin 40 to 80 mg or rosuvastatin 20 to 40 mg.");
+T5("Lipids",2,"At least what intensity of statin is recommended for diabetes aged 40 to 75?","Moderate intensity",["Low intensity","No statin","High intensity only"],"Use high intensity with multiple risk factors.");
+T5("Lipids",2,"Which agent is added next in very high-risk ASCVD with LDL 70 mg/dL or more on maximal statin?","Ezetimibe",["Niacin","Fenofibrate","Gemfibrozil"],"Ezetimibe is the usual first add-on, then a PCSK9 inhibitor.");
+T5("Lipids",2,"Alirocumab and evolocumab target:","PCSK9",["HMG-CoA reductase","NPC1L1","ATP citrate lyase"],"They raise LDL receptor recycling and are given subcutaneously.");
+T5("Lipids",3,"What is the maximum simvastatin dose with amlodipine?","20 mg daily",["40 mg daily","80 mg daily","No limit"],"Amlodipine raises simvastatin exposure through CYP3A4.");
+T5("Lipids",2,"Avoid combining a statin with which drug?","Gemfibrozil",["Ezetimibe","Icosapent ethyl","Colesevelam"],"Gemfibrozil raises rhabdomyolysis risk. Fenofibrate is less problematic.");
+T5("Lipids",2,"Triglycerides of 500 mg/dL or higher mainly raise the risk of:","Acute pancreatitis",["Stroke","Gout","Osteoporosis"],"A fibrate or omega-3 is used to lower triglycerides.");
+T5("Lipids",2,"Which counseling reduces niacin flushing?","Take aspirin 325 mg about 30 minutes before",["Take on an empty stomach","Take with a high-fat meal","Take with a hot drink"],"Flushing is prostaglandin mediated.");
+
+/* ---------- Pain ---------- */
+T5("Pain",2,"What is the oral to IV morphine dose ratio?","About 3 to 1 (30 mg oral is about 10 mg IV)",["1 to 1","2 to 1","10 to 1"],"First-pass metabolism lowers oral bioavailability.");
+T5("Pain",3,"When switching opioids, the calculated equianalgesic dose is usually reduced by:","25 to 50%",["0%","10%","75 to 90%"],"Incomplete cross-tolerance means a full conversion can cause overdose.");
+T5("Pain",2,"Which opioid adverse effect shows little tolerance over time?","Constipation",["Sedation","Nausea","Respiratory depression"],"Start a stimulant laxative with the opioid.");
+T5("Pain",2,"Which NSAID is the most COX-2 selective?","Celecoxib",["Ibuprofen","Naproxen","Ketorolac"],"It lowers GI bleeding risk but not cardiovascular risk.");
+T5("Pain",2,"Which is first-line for painful diabetic neuropathy?","Duloxetine",["Ibuprofen","Acetaminophen","Oxycodone"],"Gabapentinoids and TCAs are also first line.");
+T5("Pain",3,"Which opioid carries QT prolongation risk and a long, variable half-life?","Methadone",["Morphine","Hydromorphone","Oxymorphone"],"Obtain an ECG and titrate slowly.");
+T5("Pain",3,"Which opioid is avoided in renal impairment because of the toxic metabolite normeperidine?","Meperidine",["Fentanyl","Hydromorphone","Methadone"],"Normeperidine causes seizures and accumulates in kidney disease.");
+
+/* ---------- Nutritional support ---------- */
+T5("Nutritional support",1,"When the gut works, which route is preferred?","Enteral nutrition",["Parenteral nutrition","Both together","Neither, only oral fluids"],"Enteral feeding preserves gut integrity and has fewer infections.");
+T5("Nutritional support",2,"Which lab finding is the hallmark of refeeding syndrome?","Hypophosphatemia",["Hyperkalemia","Hypercalcemia","Hypernatremia"],"Give thiamine before dextrose and replace phosphorus, potassium and magnesium.");
+T5("Nutritional support",2,"How many kilocalories per gram does hydrated dextrose provide in parenteral nutrition?","3.4",["4","7","9"],"Lipid provides about 10 kcal/g as an emulsion, and amino acids 4 kcal/g.");
+T5("Nutritional support",2,"How many kilocalories per gram do amino acids provide?","4",["3.4","7","9"],"Amino acids are counted as protein calories.");
+T5("Nutritional support",2,"What prevents essential fatty acid deficiency in long-term parenteral nutrition?","Lipid emulsion",["Extra dextrose","More amino acids","Trace elements"],"It supplies linoleic and alpha-linolenic acid.");
+T5("Nutritional support",3,"Parenteral nutrition with an osmolarity above what must be given centrally?","900 mOsm/L",["300 mOsm/L","600 mOsm/L","1500 mOsm/L"],"Hyperosmolar solutions irritate peripheral veins.");
+
+/* ---------- Fluids and electrolytes ---------- */
+T5("Fluids and electrolytes",1,"How much sodium does 0.9% sodium chloride contain?","154 mEq/L",["77 mEq/L","130 mEq/L","0 mEq/L"],"Half-normal saline has 77 mEq/L, and lactated Ringer's has 130.");
+T5("Fluids and electrolytes",3,"What is the maximum sodium correction in chronic hyponatremia in 24 hours?","8 to 10 mEq/L",["20 to 24 mEq/L","15 to 20 mEq/L","1 to 2 mEq/L"],"Faster correction risks osmotic demyelination.");
+T5("Fluids and electrolytes",2,"Severe symptomatic hyponatremia with seizures is treated with:","3% hypertonic saline",["Fluid restriction alone","Oral salt tablets","Demeclocycline"],"A small bolus raises sodium quickly.");
+T5("Fluids and electrolytes",2,"What is the usual maximum peripheral IV potassium chloride rate?","10 mEq per hour",["20 mEq per hour","40 mEq per hour","60 mEq per hour"],"Faster rates need a central line and cardiac monitoring.");
+T5("Fluids and electrolytes",2,"By about how much does 10 mEq of KCl raise serum potassium?","0.1 mEq/L",["1 mEq/L","0.5 mEq/L","0.01 mEq/L"],"Total body deficits are large, so correct gradually.");
+T5("Fluids and electrolytes",2,"Hypokalemia that will not correct suggests replacing:","Magnesium",["Sodium","Phosphorus","Zinc"],"Low magnesium causes renal potassium wasting.");
+T5("Fluids and electrolytes",2,"What is first-line treatment for severe hypercalcemia of malignancy?","IV isotonic saline",["Furosemide first","Zoledronic acid first","Calcium acetate"],"Replace volume first, then give a bisphosphonate.");
+T5("Fluids and electrolytes",3,"Serum albumin is 2.0 g/dL and total calcium is 7.6 mg/dL. What is the corrected calcium?","9.2 mg/dL",["6.0 mg/dL","7.6 mg/dL (no correction needed)","10.8 mg/dL"],"Corrected Ca = measured + 0.8 x (4.0 - albumin) = 7.6 + 1.6 = 9.2 mg/dL.");
+T5("Fluids and electrolytes",2,"Using the 4-2-1 rule, what is the maintenance fluid rate for a 70 kg adult?","About 110 mL/hr",["70 mL/hr","150 mL/hr","90 mL/hr"],"40 + 20 + 50 mL/hr.");
 /* ---------- Compounding pharmacy: calculation + kinetics generators ---------- */
 function fmtS(n) { return String(Number(Number(n).toPrecision(3))); }
 function mkL(kind, d, q, correct, cands, unit, steps) {
@@ -4581,7 +4731,7 @@ const World = (function () {
   const CATS = [
     ['BG', 'Brand / Generic'], ['CL', 'Drug classes'], ['MOA', 'Mechanisms'], ['AE', 'Adverse effects'],
     ['DDI', 'Interactions'], ['CN', 'Counseling'], ['AD', 'Antidotes'], ['SIG', 'Sig & law'],
-    ['TOP', 'Weekly drugs'], ['TP3', 'Weekly drugs \u00B7 P3'], ['CALC', 'Calculations'], ['PT3', 'PharmTox \u00B7 Exam 3 questions'], ['PT3G', 'PharmTox \u00B7 Exam 3 drug practice'], ['PT4', 'PharmTox \u00B7 Exam 4 drug practice'], ['TH3', 'Therapeutics \u00B7 Exam 3'], ['MY', 'My studies']
+    ['TOP', 'Weekly drugs'], ['TP3', 'Weekly drugs \u00B7 P3'], ['CALC', 'Calculations'], ['PT3', 'PharmTox \u00B7 Exam 3 questions'], ['PT3G', 'PharmTox \u00B7 Exam 3 drug practice'], ['PT4', 'PharmTox \u00B7 Exam 4 drug practice'], ['TH3', 'Therapeutics \u00B7 Exam 3'], ['T553', 'Therapeutics III \u00B7 Syllabus topics'], ['MY', 'My studies']
   ];
   const CATNAME = {}; CATS.forEach(c => CATNAME[c[0]] = c[1]);
   const FLAVOR = {
@@ -4596,6 +4746,7 @@ const World = (function () {
     CALC: ['The nurse needs this calculation checked.', 'Please double-check this dose.', 'Compounding order just came in.'],
     TOP: ['This one is on this week\'s drug list.', 'Quiz week! Do you know this one?', 'Straight off the Top 300 sheet.'],
     TP3: ['P3 drug list: this one is on the sheet.', 'Quiz week! Do you know this one?', 'Straight off the Top 300 sheet.'],
+    T553: ['My doctor changed my plan, can you explain?', 'Quick therapy question before I go.', 'Is this the right treatment for me?'],
     MY: ['A question from your own notes.', 'Straight from your study sheet.', 'This one is on your exam list.']
   };
   const KAREN_LINES = ['I WANT TO SPEAK TO YOUR MANAGER!', 'This is UNACCEPTABLE. Answer me right now!', 'I have been coming here for twenty years!', 'Do you even know what you are doing?!'];
@@ -5205,8 +5356,8 @@ const World = (function () {
   }
   function settingsHTML() {
     const st = S.set, mc = missedByCat(), ms = masteryByCat();
-    const chipOf = c => `<button type="button" class="chip tp" data-act="topic" data-v="${c[0]}" aria-pressed="${!!st.topics[c[0]]}"><span class="cn">${c[0] === 'PT3' ? 'Exam 3: your exam questions' : c[0] === 'PT3G' ? 'Exam 3: drug-list practice' : c[0] === 'PT4' ? 'Exam 4: mania and psychosis drugs' : c[0] === 'TH3' ? 'Exam 3: diarrhea, constipation, IBS' : c[1]}${c[0] === 'TOP' && curWeek() ? ' <small class="mc wk">wk ' + curWeek() + '</small>' : ''}${mc[c[0]] ? ` <small class="mc">${mc[c[0]]} missed</small>` : ''}</span>${ms[c[0]] && ms[c[0]].n ? (() => { const pc = Math.round(100 * ms[c[0]].s / ms[c[0]].n); return `<span class="mbar" role="img" aria-label="${pc}% mastered"><i style="width:${pc}%"></i><em>${pc}%</em></span>`; })() : ''}</button>`;
-    const topics = CATS.filter(c => c[0] !== 'MY' && c[0] !== 'PT3' && c[0] !== 'PT3G' && c[0] !== 'PT4' && c[0] !== 'TH3' && c[0] !== 'TP3' || c[0] === 'MY' && S.decks.length).map(chipOf).join('');
+    const chipOf = c => `<button type="button" class="chip tp" data-act="topic" data-v="${c[0]}" aria-pressed="${!!st.topics[c[0]]}"><span class="cn">${c[0] === 'PT3' ? 'Exam 3: your exam questions' : c[0] === 'PT3G' ? 'Exam 3: drug-list practice' : c[0] === 'PT4' ? 'Exam 4: mania and psychosis drugs' : c[0] === 'TH3' ? 'Exam 3: diarrhea, constipation, IBS' : c[0] === 'T553' ? 'Relevant otherwise: Therapeutics III topics' : c[0] === 'TP3' ? 'Top 300 weekly drugs' : c[1]}${c[0] === 'TOP' && curWeek() ? ' <small class="mc wk">wk ' + curWeek() + '</small>' : ''}${mc[c[0]] ? ` <small class="mc">${mc[c[0]]} missed</small>` : ''}</span>${ms[c[0]] && ms[c[0]].n ? (() => { const pc = Math.round(100 * ms[c[0]].s / ms[c[0]].n); return `<span class="mbar" role="img" aria-label="${pc}% mastered"><i style="width:${pc}%"></i><em>${pc}%</em></span>`; })() : ''}</button>`;
+    const topics = CATS.filter(c => c[0] !== 'MY' && c[0] !== 'PT3' && c[0] !== 'PT3G' && c[0] !== 'PT4' && c[0] !== 'TH3' && c[0] !== 'TP3' && c[0] !== 'T553' || c[0] === 'MY' && S.decks.length).map(chipOf).join('');
     const tox = CATS.filter(c => c[0] === 'PT3' || c[0] === 'PT3G' || c[0] === 'PT4').map(chipOf).join('');
     const thx = CATS.filter(c => c[0] === 'TH3').map(chipOf).join('');
     const diffs = [[1, 'Level 1 easy'], [2, 'Level 2 medium'], [3, 'Level 3 hard']].map(d => `<button type="button" class="chip" data-act="diff" data-v="${d[0]}" aria-pressed="${st.diffs.indexOf(d[0]) >= 0}">${d[1]}</button>`).join('');
@@ -5214,6 +5365,7 @@ const World = (function () {
     const n = poolQs().length;
     const fold = st.folder === 'P1' || st.folder === 'P3' ? st.folder : 'P2';
     const p2 = `<h3>Question settings</h3><p class="sub">Changes apply to the next patient.</p>
+      <div class="grp"><b>Folder focus</b><div class="chips"><button type="button" class="chip" data-act="folder-only" data-v="P2">Only P2 topics</button></div><p class="note">Switches off the P3 weekly drugs so only the groups in this folder are asked.</p></div>
       <div class="grp"><b>Focus mode</b><div class="chips"><button type="button" class="chip" data-act="focus" aria-pressed="${!!st.focus}">Focus mode ${st.focus ? 'on' : 'off'}</button></div><p class="note">Hides the 3D pharmacy and turns off the timer, patient events, phone calls, Karen and Jim, so it is only questions.</p></div>
       <div class="grp"><b>Topics <span><button type="button" class="link" data-act="topics-all">All</button> &middot; <button type="button" class="link" data-act="topics-none">None</button></span></b><div class="chips">${topics}</div>${tox ? '<div class="subgrp"><b class="subh">PharmTox</b><div class="chips">' + tox + '</div></div>' : ''}${thx ? '<div class="subgrp"><b class="subh">Therapeutics</b><div class="chips">' + thx + '</div></div>' : ''}</div>
       <div class="grp"><b>Difficulty</b><div class="chips">${diffs}</div></div>
@@ -5225,10 +5377,11 @@ const World = (function () {
     const w3 = curWeek3();
     const sched = P3WEEKS.map(w => { const open = w.from <= todayStr() || st.ahead3, cnt = TOPQ.filter(q => q.wk === w.n && !wkTypeOff(q)).length; return `<li class="${w.n === w3 ? 'now' : open ? '' : 'lock'}"><b>${esc(w.d)}</b><span>${esc(w.topic)}</span><small>${w.ids.length} drugs${w.n === w3 ? ' \u00B7 this week' : open ? '' : ' \u00B7 locked'}</small></li>`; }).join('');
     const p3 = `<h3>P3 weekly drugs</h3><p class="sub">Drug list sheets by system, one set per week. Changes apply to the next patient.</p>
-      <div class="grp"><b>Weekly drugs</b><div class="chips">${CATS.filter(c => c[0] === 'TP3').map(chipOf).join('')}</div><div class="chips"><button type="button" class="chip" data-act="wkonly3" aria-pressed="${!!st.wkOnly3}">This week only</button><button type="button" class="chip" data-act="ahead3" aria-pressed="${!!st.ahead3}">Study ahead</button></div><div class="chips" aria-label="Weekly question types">${WK_TYPES.map(x => `<button type="button" class="chip" data-act="wktype" data-v="${x[0]}" aria-pressed="${!(st.wkTypes && st.wkTypes[x[0]] === false)}">${x[1]}</button>`).join('')}</div><p class="note">${weekNote3()}</p></div>
+      <div class="grp"><b>Top 300</b><div class="chips">${CATS.filter(c => c[0] === 'TP3').map(chipOf).join('')}</div><div class="chips"><button type="button" class="chip" data-act="wkonly3" aria-pressed="${!!st.wkOnly3}">This week only</button><button type="button" class="chip" data-act="ahead3" aria-pressed="${!!st.ahead3}">Study ahead</button></div><div class="chips" aria-label="Weekly question types">${WK_TYPES.map(x => `<button type="button" class="chip" data-act="wktype" data-v="${x[0]}" aria-pressed="${!(st.wkTypes && st.wkTypes[x[0]] === false)}">${x[1]}</button>`).join('')}</div><p class="note">${weekNote3()}</p></div>
+      <div class="grp"><b>Relevant otherwise</b><div class="chips">${CATS.filter(c => c[0] === 'T553').map(chipOf).join('')}</div><p class="note">Therapeutics III (PHAR 553) syllabus topics: asthma, COPD, renal, diabetes, gout, migraine, RA and SLE, thyroid, liver, hepatitis, blood pressure, lipids, pain, nutrition, fluids and electrolytes.</p></div>
       <div class="grp"><b>P3 schedule</b><ol class="p3sched">${sched}</ol></div>
-      <div class="grp"><b>Focus</b><div class="chips"><button type="button" class="chip" data-act="p3-only">Only P3 weekly drugs</button><button type="button" class="chip" data-act="topics-all">Turn every topic back on</button></div><p class="note">Only P3 weekly drugs switches off every other topic so the patients ask just this list.</p></div>`;
-    const p1 = `<h3>P1 folder</h3><p class="sub">Nothing is filed here yet.</p><div class="grp"><b>Empty folder</b><p class="note">P1 drug lists and exam questions will go in this folder. Your current question settings live in the P2 folder.</p></div>`;
+      <div class="grp"><b>Focus</b><div class="chips"><button type="button" class="chip" data-act="folder-only" data-v="P3">Only P3 topics</button><button type="button" class="chip" data-act="topics-all">Turn every topic back on</button></div><p class="note">Only P3 topics switches off the P2 groups so patients ask just Top 300 and the Therapeutics III topics.</p></div>`;
+    const p1 = `<h3>P1 folder</h3><p class="sub">Nothing is filed here yet.</p><div class="grp"><b>Empty folder</b><p class="note">P1 drug lists and exam questions will go in this folder. Your current question settings live in the P2 folder.</p><div class="chips"><button type="button" class="chip" data-act="folder-only" data-v="P1" disabled>Only P1 topics</button></div></div>`;
     return `<div class="pane nbk ${nbClosing ? 'closing' : ''}"><div class="nbcover"><span class="nbtitle">Topics</span></div><div class="nbsheet">${hubTabs('set')}${cabinetHTML(fold)}<div class="fbody fb-${fold}" role="tabpanel" aria-label="${fold} folder">${fold === 'P1' ? p1 : fold === 'P3' ? p3 : p2}</div>
       <p class="count">${n} question${n === 1 ? '' : 's'} match${calcOn() ? ' + endless calculations' : ''}</p>
       <div class="btnrow"><button type="button" class="btn go nbback" data-act="back">Close notebook and return to counter</button><button type="button" class="btn" data-act="tour">Replay tour</button><button type="button" class="btn" data-act="reset-set">Reset settings</button></div></div></div>`;
@@ -6904,7 +7057,7 @@ const World = (function () {
       <div class="btnrow"><button type="button" class="btn go" data-act="back">Back to the pharmacy</button></div></div>`;
   }
 
-  const GAME_VERSION = 82;
+  const GAME_VERSION = 84;
   const b64u = (u8) => { let s = ''; for (let i = 0; i < u8.length; i += 0x8000) s += String.fromCharCode.apply(null, u8.subarray(i, i + 0x8000)); return btoa(s).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); };
   const unb64u = (t) => { const s = atob(t.replace(/-/g, '+').replace(/_/g, '/')), u = new Uint8Array(s.length); for (let i = 0; i < s.length; i++) u[i] = s.charCodeAt(i); return u; };
   const chk = (t) => { let h = 2166136261; for (let i = 0; i < t.length; i++) { h ^= t.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36); };
@@ -7039,7 +7192,8 @@ const World = (function () {
       case 'wkonly3': st.wkOnly3 = !st.wkOnly3; break;
       case 'ahead3': st.ahead3 = !st.ahead3; break;
       case 'folder': st.folder = v === 'P1' || v === 'P3' ? v : 'P2'; break;
-      case 'p3-only': CATS.forEach(c => st.topics[c[0]] = c[0] === 'TP3'); break;
+      case 'p3-only': CATS.forEach(c => st.topics[c[0]] = c[0] === 'TP3' || c[0] === 'T553'); break;
+      case 'folder-only': if (v === 'P3') CATS.forEach(c => st.topics[c[0]] = c[0] === 'TP3' || c[0] === 'T553'); else if (v === 'P2') CATS.forEach(c => st.topics[c[0]] = c[0] !== 'TP3' && c[0] !== 'T553'); toast(v === 'P3' ? 'Only P3 topics are on.' : v === 'P2' ? 'Only P2 topics are on.' : 'P1 has no topics yet.'); break;
       case 'wktype': { st.wkTypes = st.wkTypes || {}; const on = WK_TYPES.filter(x => st.wkTypes[x[0]] !== false).length; if (st.wkTypes[v] !== false && on <= 1) { toast('Keep at least one kind of weekly question on.'); return; } st.wkTypes[v] = st.wkTypes[v] === false; break; }
       case 'ahead': st.ahead = !st.ahead; break;
       case 'reset-set': S.set = defaults().set; break;
