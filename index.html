@@ -857,6 +857,69 @@ body.syn .synwrap { display: block; }
 .syn .opt.sel { outline: 3px solid var(--amber); }
 .synguide { padding-left: 16px; margin: 6px 0; } .synguide li.sel span { font-size: 13px; }
 .linkbtn { background: none; border: 0; padding: 2px 0; color: inherit; text-align: left; cursor: pointer; font: inherit; text-decoration: underline dotted; }
+
+/* lost pills: vial button, dialogs, capsule reveal, tablet trip */
+#vialbtn { position: relative; }
+#vialbtn .vcount { position: absolute; right: -6px; top: -6px; min-width: 18px; height: 18px; padding: 0 4px; border-radius: 99px; background: var(--coral); color: #fff; border: 1.5px solid var(--ink); font: 800 11px/15px var(--f-mono); text-align: center; box-sizing: border-box; }
+#vialbtn .vcount[hidden] { display: none; }
+.vcard { width: min(400px, 100%); max-height: 92vh; overflow: auto; text-align: left; }
+.vgrid { display: flex; flex-wrap: wrap; gap: 8px; margin: 6px 0 10px; }
+.vpill { width: 52px; height: 52px; border-radius: 14px; border: 2px solid var(--line); background: var(--surface2); display: grid; place-items: center; cursor: pointer; padding: 0; color: var(--ink); }
+.vpill[aria-pressed="true"] { border-color: var(--ink); background: var(--amber-soft); box-shadow: 0 3px 0 var(--ink); }
+.vpill:focus-visible, .vcard .btn:focus-visible { outline: 3px solid var(--teal); outline-offset: 2px; }
+.vdesc { font-size: 13.5px; line-height: 1.4; }
+.capstage { position: relative; height: 110px; display: grid; place-items: center; margin: 6px 0 4px; }
+.capbig { width: 210px; height: 105px; overflow: visible; }
+.capbig .chalf { transition: transform .7s cubic-bezier(.2,.9,.3,1.2); transform-box: fill-box; }
+.capstage:not(.open) .capbig { animation: capshake .9s ease-in-out; }
+.capstage.open .chalf.l { transform: translate(-34px, -6px) rotate(-16deg); }
+.capstage.open .chalf.r { transform: translate(34px, -6px) rotate(16deg); }
+.reel { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%) scale(.2); font-size: 46px; line-height: 1; opacity: 0; transition: opacity .3s, transform .3s; }
+.capstage.open .reel { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+.reel.land { animation: reelland .6s cubic-bezier(.2,1.6,.4,1); }
+.rname { font-size: 14px; line-height: 1.4; margin: 6px 0 8px; min-height: 2.8em; }
+.capprev { display: block; margin: 0 auto 8px; max-height: 170px; width: auto; }
+@keyframes capshake { 0%,100% { transform: rotate(0); } 15% { transform: rotate(-9deg) translateX(-4px); } 30% { transform: rotate(8deg) translateX(4px); } 45% { transform: rotate(-7deg); } 60% { transform: rotate(6deg); } 75% { transform: rotate(-3deg); } }
+@keyframes reelland { 0% { transform: translate(-50%,-50%) scale(.6); } 60% { transform: translate(-50%,-50%) scale(1.5) rotate(8deg); } 100% { transform: translate(-50%,-50%) scale(1); } }
+.buffpill { position: fixed; left: 50%; transform: translateX(-50%); bottom: 14px; z-index: 70; max-width: calc(100vw - 24px); padding: 6px 14px; border-radius: 999px; background: #F2A516; color: #2B1D00; border: 2px solid var(--ink); box-shadow: 0 3px 0 var(--ink); font: 800 12px/1.25 var(--f-mono); text-align: center; pointer-events: none; }
+.tripfx { position: fixed; inset: 0; z-index: 60; pointer-events: none; opacity: 0; mix-blend-mode: soft-light; background: conic-gradient(from 0deg at 50% 50%, #ff3d81, #ffb02e, #3fd07f, #2fb6ff, #8a63c9, #ff3d81); transition: opacity 1.2s; }
+body.trip .tripfx { opacity: .55; animation: tripspin 9s linear infinite; }
+body.trip #stage canvas { animation: tripwarp 7s ease-in-out infinite; transform-origin: 50% 50%; }
+body.trip .stats .stat { animation: tripbob 1.4s ease-in-out infinite; }
+@keyframes tripspin { to { transform: rotate(360deg) scale(1.4); } }
+@keyframes tripwarp {
+  0% { filter: hue-rotate(0deg) saturate(1.6) contrast(1.1); transform: scale(1.03) rotate(0deg) skewX(0deg); }
+  25% { filter: hue-rotate(90deg) saturate(2) contrast(1.15) blur(.6px); transform: scale(1.06) rotate(.8deg) skewX(2deg); }
+  50% { filter: hue-rotate(180deg) saturate(1.8) contrast(1.1); transform: scale(1.02) rotate(-.6deg) skewX(-1.5deg); }
+  75% { filter: hue-rotate(270deg) saturate(2) contrast(1.2) blur(.6px); transform: scale(1.07) rotate(.5deg) skewX(2.5deg); }
+  100% { filter: hue-rotate(360deg) saturate(1.6) contrast(1.1); transform: scale(1.03) rotate(0deg) skewX(0deg); }
+}
+@keyframes tripbob { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-2px); } }
+@media (prefers-reduced-motion: reduce) {
+  body.trip .tripfx { animation: none; opacity: .3; }
+  body.trip #stage canvas { animation: none; filter: hue-rotate(40deg) saturate(1.5); }
+  body.trip .stats .stat { animation: none; }
+  .capstage:not(.open) .capbig { animation: none; } .capbig .chalf, .reel { transition: none; } .reel.land { animation: none; }
+}
+
+/* character screen: stacked slider rows */
+.cpane .mepv.sticky { position: sticky; top: 52px; z-index: 3; padding: 6px 0; background: var(--surface); display: flex; justify-content: center; border-bottom: 1.5px dashed var(--line); }
+.cpane .mepv.sticky .mepv-img, .cpane .mepv.sticky .mepv-svg { max-height: 150px; width: auto; height: 150px; }
+.crows { display: grid; gap: 8px; margin: 10px 0; }
+.crow { display: grid; grid-template-columns: 92px 1fr; gap: 8px; align-items: center; }
+.clab { font: 700 11px/1.2 var(--f-mono); letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+.cslide { display: grid; grid-template-columns: 44px 1fr 44px; gap: 6px; align-items: center; }
+.carr { width: 44px; height: 44px; border-radius: 12px; border: 2px solid var(--ink); background: var(--surface); color: var(--ink); font: 800 24px/1 var(--f-display); cursor: pointer; box-shadow: 0 3px 0 var(--ink); padding: 0; }
+.carr:active:not(:disabled) { transform: translateY(2px); box-shadow: 0 1px 0 var(--ink); }
+.carr:disabled { opacity: .35; cursor: default; box-shadow: none; }
+.carr:focus-visible { outline: 3px solid var(--teal); outline-offset: 2px; }
+.cval { display: flex; align-items: center; gap: 8px; min-width: 0; min-height: 44px; padding: 4px 10px; border-radius: 12px; background: var(--surface2); border: 1.5px solid var(--line); font: 700 14px/1.2 var(--f-display); }
+.cval span { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+.cval small { font: 500 10px/1 var(--f-mono); color: var(--muted); white-space: nowrap; }
+.csw { width: 22px; height: 22px; border-radius: 50%; border: 2px solid var(--ink); flex: none; }
+@media (max-width: 420px) { .crow { grid-template-columns: 1fr; gap: 4px; } }
+.reel img { width: 96px; height: 96px; display: block; filter: drop-shadow(0 3px 0 rgba(0,0,0,.18)); }
+.capstage { height: 120px; }
 </style>
 
 <div class="shell">
@@ -868,7 +931,7 @@ body.syn .synwrap { display: block; }
       <div><h1>Corner Rx</h1><small>Pharmacy tycoon study game</small></div>
     </div>
     <div class="stats" id="stats" aria-label="Your pharmacy stats"></div>
-    <div class="quick"><button type="button" class="qk" id="sfxbtn" data-act="sfx" aria-label="Sound" aria-pressed="true"><i aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9zM16 9a4 4 0 0 1 0 6M18.5 6.5a8 8 0 0 1 0 11"/></svg></i><span id="sfxlab" class="sr">Sound: on</span></button><button type="button" class="qk" id="focusbtn" data-act="focus" aria-label="Focus mode" aria-pressed="false"><i aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="2.5"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg></i><span id="focuslab" class="sr">Focus mode</span></button></div>
+    <div class="quick"><button type="button" class="qk" id="vialbtn" data-act="vial" aria-label="Lost pills vial" aria-haspopup="dialog"><i aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 3h8M9 3v3M15 3v3M7 6h10v13a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2z"/><path d="M7 11h10"/></svg></i><b class="vcount" hidden>0</b></button><button type="button" class="qk" id="sfxbtn" data-act="sfx" aria-label="Sound" aria-pressed="true"><i aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9zM16 9a4 4 0 0 1 0 6M18.5 6.5a8 8 0 0 1 0 11"/></svg></i><span id="sfxlab" class="sr">Sound: on</span></button><button type="button" class="qk" id="focusbtn" data-act="focus" aria-label="Focus mode" aria-pressed="false"><i aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="2.5"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg></i><span id="focuslab" class="sr">Focus mode</span></button></div>
     <button type="button" class="drawerbtn" data-act="menu" aria-label="Open menu" aria-haspopup="true"><span aria-hidden="true">&#9776;</span><b>Menu</b></button>
   </header>
     <div class="tags"></div>
@@ -1407,7 +1470,7 @@ P("Local anesthesia",2,"Which local anesthetic is commonly used in dentistry, is
 P("Local anesthesia",3,"Which amide is intermediate in duration and causes less vasodilation than lidocaine, making it useful in dental procedures without epinephrine?","Mepivacaine",["Bupivacaine","Procaine","Chloroprocaine"],"Mepivacaine is a good plain option when epinephrine is undesirable. Its duration is 2 to 3 hours with infiltration.");
 P("Local anesthesia",2,"Rank by duration: which choice lists the correct order from shortest to longest?","Chloroprocaine, then lidocaine, then bupivacaine",["Bupivacaine, then lidocaine, then chloroprocaine","Lidocaine, then bupivacaine, then chloroprocaine","Tetracaine, then lidocaine, then procaine"],"Chloroprocaine and procaine are short; lidocaine, mepivacaine and prilocaine are intermediate; bupivacaine and tetracaine are long.");
 P("Local anesthesia",2,"Early symptoms of local anesthetic systemic toxicity include:","Perioral numbness, metallic taste and ringing in the ears",["Fever and rigidity","Bradycardia and hypothermia","Wheezing and hives"],"As blood levels rise: CNS excitation, seizures and then CNS depression, followed by cardiovascular collapse. Treat early to stop progression.");
-/* PharmTox Exam 3: epilepsy, dopamine, psychosis and mania */
+/* PharmTox Exam 3: epilepsy and dopamine (psychosis and mania moved to pt4.js) */
 
 /* ---------- Epilepsy ---------- */
 P("Epilepsy",2,"Which drug is first-line for absence seizures when no generalized tonic-clonic seizures are present?","Ethosuximide",["Carbamazepine","Phenytoin","Gabapentin"],"Ethosuximide blocks T-type calcium channels in thalamic neurons. Carbamazepine, phenytoin and gabapentin can worsen absence and myoclonic seizures.");
@@ -1448,32 +1511,92 @@ P("Dopamine",2,"Which antidepressant is a norepinephrine-dopamine reuptake inhib
 P("Dopamine",3,"Which drugs inhibit COMT to prolong the effect of levodopa?","Entacapone and tolcapone",["Selegiline and rasagiline","Pramipexole and ropinirole","Benztropine and trihexyphenidyl"],"COMT inhibitors reduce peripheral breakdown of levodopa and treat wearing-off. Tolcapone is limited by liver toxicity.");
 P("Dopamine",3,"Which Parkinson disease drugs inhibit MAO-B?","Selegiline and rasagiline",["Entacapone and tolcapone","Amantadine and benztropine","Bromocriptine and pergolide"],"MAO-B inhibitors reduce dopamine breakdown. Avoid combining with meperidine, tramadol, SSRIs or other serotonergic drugs.");
 P("Dopamine",3,"Which Parkinson disease drug class is best avoided in older adults because of confusion, constipation and urinary retention?","Anticholinergics such as benztropine and trihexyphenidyl",["Dopamine agonists","COMT inhibitors","MAO-B inhibitors"],"Anticholinergics help tremor but are on the Beers list. They are also used for antipsychotic-induced parkinsonism and dystonia.");
+/* PharmTox Exam 4: psychosis and mania drug practice (moved from the Exam 3 drug list) */
+const P4 = (t, d, q, a, w, e) => Q("PT4", d, q, a, w, e, t);
+P4("Psychosis and mania",1,"Which antipsychotic is a high-potency first-generation (typical) drug with a high risk of extrapyramidal symptoms?","Haloperidol",["Quetiapine","Olanzapine","Clozapine"],"Haloperidol is a strong D2 antagonist and is available as a long-acting decanoate injection. It also prolongs QT. Low-potency typicals are more sedating and anticholinergic.");
+P4("Psychosis and mania",1,"Which antipsychotic is reserved for treatment-resistant schizophrenia and reduces suicide risk?","Clozapine",["Haloperidol","Aripiprazole","Risperidone"],"Clozapine has little EPS but boxed warnings for severe neutropenia, orthostasis, seizures, myocarditis and increased mortality in dementia. It is dispensed through a monitoring program.");
+P4("Psychosis and mania",2,"Which laboratory test is required regularly for patients taking clozapine?","Absolute neutrophil count",["Serum sodium","Serum creatinine only","INR"],"Severe neutropenia (agranulocytosis) can occur. Monitoring frequency decreases after the first months.");
+P4("Psychosis and mania",3,"A patient on stable clozapine quits smoking. What happens to the clozapine level?","It rises, because CYP1A2 induction from smoke is lost",["It falls","It is unchanged","It becomes unmeasurable"],"Tobacco smoke induces CYP1A2. Stopping smoking can cause toxicity, so reduce the dose. Ciprofloxacin and fluvoxamine also raise levels by inhibiting CYP1A2.");
+P4("Psychosis and mania",2,"Which atypical antipsychotic is most associated with hyperprolactinemia?","Risperidone",["Aripiprazole","Quetiapine","Clozapine"],"Strong D2 blockade in the tuberoinfundibular pathway raises prolactin, causing galactorrhea, amenorrhea and gynecomastia.");
+P4("Psychosis and mania",2,"Which atypical antipsychotics have the greatest risk of weight gain and metabolic syndrome?","Olanzapine and clozapine",["Aripiprazole and ziprasidone","Lurasidone and ziprasidone","Haloperidol and aripiprazole"],"Monitor weight, waist, glucose or A1c and lipids. Aripiprazole, ziprasidone and lurasidone are more weight-neutral.");
+P4("Psychosis and mania",2,"Aripiprazole is unusual among antipsychotics because it acts as a:","D2 partial agonist",["D2 antagonist only","5-HT2A inverse agonist","D1 agonist"],"Partial agonism gives lower rates of prolactin elevation and weight gain. Akathisia (restlessness) is a common side effect.");
+P4("Psychosis and mania",2,"Which antipsychotic is a 5-HT2A inverse agonist approved for Parkinson disease psychosis, with no dopamine blockade?","Pimavanserin",["Haloperidol","Olanzapine","Risperidone"],"Dopamine antagonists worsen parkinsonism. Pimavanserin avoids D2 blockade but still carries the boxed warning for increased mortality in elderly dementia patients.");
+P4("Psychosis and mania",3,"Lurasidone must be taken with food because:","Absorption is reduced without at least 350 calories",["Food prevents nausea only","It is destroyed by stomach acid","Food blocks CYP3A4"],"Absorption roughly doubles with food. It is a CYP3A4 substrate, so avoid strong inhibitors and inducers. It is also approved for bipolar depression.");
+P4("Psychosis and mania",2,"Which antipsychotic is the most sedating and is often used (off-label) for insomnia, with antihistamine and α1-blocking effects?","Quetiapine",["Aripiprazole","Lurasidone","Haloperidol"],"Quetiapine has low EPS but causes orthostatic hypotension, sedation and metabolic effects at low doses. It is also approved for bipolar depression.");
+P4("Psychosis and mania",1,"Which drug is the classic mood stabilizer with a narrow therapeutic index (about 0.6 to 1.2 mEq/L)?","Lithium",["Valproate","Lamotrigine","Quetiapine"],"Lithium is renally cleared. Toxicity causes coarse tremor, vomiting, confusion and ataxia. Check levels, kidney and thyroid function.");
+P4("Psychosis and mania",2,"Which drugs raise lithium levels and cause toxicity?","Thiazide diuretics, NSAIDs and ACE inhibitors",["Loop diuretics only","Acetaminophen and aspirin only","Calcium channel blockers"],"Lithium is reabsorbed with sodium in the proximal tubule. Any drug causing sodium or volume depletion, or reducing renal clearance, increases lithium levels. Aspirin and sulindac are the exceptions among NSAIDs.");
+P4("Psychosis and mania",2,"Long-term lithium commonly causes:","Hypothyroidism, nephrogenic diabetes insipidus and tremor",["Hepatic failure","Agranulocytosis","Pulmonary fibrosis only"],"Lithium also is teratogenic (Ebstein anomaly). Counsel patients to stay hydrated and keep salt intake steady.");
+P4("Psychosis and mania",2,"Which anticonvulsant is best for preventing the depressive pole of bipolar disorder and has weight-neutral effects but risks Stevens-Johnson syndrome?","Lamotrigine",["Valproate","Carbamazepine","Lithium"],"Lamotrigine is better for maintenance against depression than mania. It is not effective for acute mania.");
+P4("Psychosis and mania",2,"Which two anticonvulsants are used for acute mania?","Valproate (divalproex) and carbamazepine",["Gabapentin and levetiracetam","Lamotrigine and ethosuximide","Topiramate and phenobarbital"],"Valproate loads rapidly for acute mania. Carbamazepine requires watching interactions, sodium and blood counts.");
+P4("Psychosis and mania",2,"Which extrapyramidal reaction appears within hours to days after starting an antipsychotic and is treated with benztropine or diphenhydramine?","Acute dystonia",["Tardive dyskinesia","Neuroleptic malignant syndrome","Serotonin syndrome"],"Sudden muscle spasms of the neck, jaw or eyes (oculogyric crisis) respond quickly to an anticholinergic. Younger males on high-potency drugs are at highest risk.");
+P4("Psychosis and mania",2,"Which extrapyramidal side effect presents as inner restlessness and an inability to sit still, treated with propranolol, benzodiazepines or dose reduction?","Akathisia",["Acute dystonia","Tardive dyskinesia","Parkinsonism"],"Akathisia is common with aripiprazole and high-potency agents. Anticholinergics are less effective for it.");
+P4("Psychosis and mania",2,"Which movement disorder arises after months to years of antipsychotic therapy and may be treated with a VMAT2 inhibitor?","Tardive dyskinesia",["Acute dystonia","Akathisia","Neuroleptic malignant syndrome"],"Valbenazine and deutetrabenazine reduce involuntary movements of the face and tongue. Anticholinergics can worsen TD.");
+P4("Psychosis and mania",3,"A patient on haloperidol develops fever, severe muscle rigidity, altered mental status and a high creatine kinase. This is:","Neuroleptic malignant syndrome",["Serotonin syndrome","Malignant hyperthermia","Anticholinergic toxicity"],"NMS develops over days with lead-pipe rigidity and autonomic instability. Stop the antipsychotic and give supportive care. Dantrolene or bromocriptine are used in severe cases.");
+P4("Psychosis and mania",3,"Which feature helps separate serotonin syndrome from neuroleptic malignant syndrome?","Serotonin syndrome has hyperreflexia, clonus and rapid onset",["Serotonin syndrome has lead-pipe rigidity","NMS has diarrhea","NMS has rapid onset within hours"],"Serotonin syndrome develops within hours with hyperreflexia, clonus, diarrhea and mydriasis. NMS evolves over days with bradyreflexia and lead-pipe rigidity.");
+P4("Psychosis and mania",2,"What is the boxed warning for all antipsychotics in older adults with dementia?","Increased mortality",["Hepatic failure","Agranulocytosis","Seizures"],"Deaths were mostly cardiovascular or infectious. Antipsychotics are not approved for treating dementia-related psychosis.");
+P4("Psychosis and mania",2,"Which symptom group of schizophrenia is the least responsive to antipsychotic drugs?","Negative symptoms such as apathy and social withdrawal",["Hallucinations","Delusions","Agitation"],"Antipsychotics treat positive symptoms (hallucinations, delusions) mainly through D2 blockade. Negative symptoms remain hard to treat with any drug.");
+P4("Psychosis and mania",2,"Which antipsychotic combines with fluoxetine as an approved option for bipolar depression and treatment-resistant depression?","Olanzapine",["Haloperidol","Ziprasidone","Risperidone"],"The olanzapine-fluoxetine combination (Symbyax) is approved for both. Weight gain and metabolic monitoring remain essential.");
+P4("Psychosis and mania",3,"Which antipsychotic is chiefly associated with QT prolongation, and should be avoided with other QT-prolonging drugs?","Ziprasidone",["Aripiprazole","Lurasidone","Paliperidone"],"Ziprasidone should be taken with a meal of at least 500 calories. Haloperidol (especially IV) and citalopram are other QT concerns.");
+/* Therapeutics Exam 3: diarrhea, constipation, IBS (from the IRM slides and class questions) */
+const T = (t, d, q, a, w, e) => Q("TH3", d, q, a, w, e, t);
 
-/* ---------- Psychosis and mania ---------- */
-P("Psychosis and mania",1,"Which antipsychotic is a high-potency first-generation (typical) drug with a high risk of extrapyramidal symptoms?","Haloperidol",["Quetiapine","Olanzapine","Clozapine"],"Haloperidol is a strong D2 antagonist and is available as a long-acting decanoate injection. It also prolongs QT. Low-potency typicals are more sedating and anticholinergic.");
-P("Psychosis and mania",1,"Which antipsychotic is reserved for treatment-resistant schizophrenia and reduces suicide risk?","Clozapine",["Haloperidol","Aripiprazole","Risperidone"],"Clozapine has little EPS but boxed warnings for severe neutropenia, orthostasis, seizures, myocarditis and increased mortality in dementia. It is dispensed through a monitoring program.");
-P("Psychosis and mania",2,"Which laboratory test is required regularly for patients taking clozapine?","Absolute neutrophil count",["Serum sodium","Serum creatinine only","INR"],"Severe neutropenia (agranulocytosis) can occur. Monitoring frequency decreases after the first months.");
-P("Psychosis and mania",3,"A patient on stable clozapine quits smoking. What happens to the clozapine level?","It rises, because CYP1A2 induction from smoke is lost",["It falls","It is unchanged","It becomes unmeasurable"],"Tobacco smoke induces CYP1A2. Stopping smoking can cause toxicity, so reduce the dose. Ciprofloxacin and fluvoxamine also raise levels by inhibiting CYP1A2.");
-P("Psychosis and mania",2,"Which atypical antipsychotic is most associated with hyperprolactinemia?","Risperidone",["Aripiprazole","Quetiapine","Clozapine"],"Strong D2 blockade in the tuberoinfundibular pathway raises prolactin, causing galactorrhea, amenorrhea and gynecomastia.");
-P("Psychosis and mania",2,"Which atypical antipsychotics have the greatest risk of weight gain and metabolic syndrome?","Olanzapine and clozapine",["Aripiprazole and ziprasidone","Lurasidone and ziprasidone","Haloperidol and aripiprazole"],"Monitor weight, waist, glucose or A1c and lipids. Aripiprazole, ziprasidone and lurasidone are more weight-neutral.");
-P("Psychosis and mania",2,"Aripiprazole is unusual among antipsychotics because it acts as a:","D2 partial agonist",["D2 antagonist only","5-HT2A inverse agonist","D1 agonist"],"Partial agonism gives lower rates of prolactin elevation and weight gain. Akathisia (restlessness) is a common side effect.");
-P("Psychosis and mania",2,"Which antipsychotic is a 5-HT2A inverse agonist approved for Parkinson disease psychosis, with no dopamine blockade?","Pimavanserin",["Haloperidol","Olanzapine","Risperidone"],"Dopamine antagonists worsen parkinsonism. Pimavanserin avoids D2 blockade but still carries the boxed warning for increased mortality in elderly dementia patients.");
-P("Psychosis and mania",3,"Lurasidone must be taken with food because:","Absorption is reduced without at least 350 calories",["Food prevents nausea only","It is destroyed by stomach acid","Food blocks CYP3A4"],"Absorption roughly doubles with food. It is a CYP3A4 substrate, so avoid strong inhibitors and inducers. It is also approved for bipolar depression.");
-P("Psychosis and mania",2,"Which antipsychotic is the most sedating and is often used (off-label) for insomnia, with antihistamine and α1-blocking effects?","Quetiapine",["Aripiprazole","Lurasidone","Haloperidol"],"Quetiapine has low EPS but causes orthostatic hypotension, sedation and metabolic effects at low doses. It is also approved for bipolar depression.");
-P("Psychosis and mania",1,"Which drug is the classic mood stabilizer with a narrow therapeutic index (about 0.6 to 1.2 mEq/L)?","Lithium",["Valproate","Lamotrigine","Quetiapine"],"Lithium is renally cleared. Toxicity causes coarse tremor, vomiting, confusion and ataxia. Check levels, kidney and thyroid function.");
-P("Psychosis and mania",2,"Which drugs raise lithium levels and cause toxicity?","Thiazide diuretics, NSAIDs and ACE inhibitors",["Loop diuretics only","Acetaminophen and aspirin only","Calcium channel blockers"],"Lithium is reabsorbed with sodium in the proximal tubule. Any drug causing sodium or volume depletion, or reducing renal clearance, increases lithium levels. Aspirin and sulindac are the exceptions among NSAIDs.");
-P("Psychosis and mania",2,"Long-term lithium commonly causes:","Hypothyroidism, nephrogenic diabetes insipidus and tremor",["Hepatic failure","Agranulocytosis","Pulmonary fibrosis only"],"Lithium also is teratogenic (Ebstein anomaly). Counsel patients to stay hydrated and keep salt intake steady.");
-P("Psychosis and mania",2,"Which anticonvulsant is best for preventing the depressive pole of bipolar disorder and has weight-neutral effects but risks Stevens-Johnson syndrome?","Lamotrigine",["Valproate","Carbamazepine","Lithium"],"Lamotrigine is better for maintenance against depression than mania. It is not effective for acute mania.");
-P("Psychosis and mania",2,"Which two anticonvulsants are used for acute mania?","Valproate (divalproex) and carbamazepine",["Gabapentin and levetiracetam","Lamotrigine and ethosuximide","Topiramate and phenobarbital"],"Valproate loads rapidly for acute mania. Carbamazepine requires watching interactions, sodium and blood counts.");
-P("Psychosis and mania",2,"Which extrapyramidal reaction appears within hours to days after starting an antipsychotic and is treated with benztropine or diphenhydramine?","Acute dystonia",["Tardive dyskinesia","Neuroleptic malignant syndrome","Serotonin syndrome"],"Sudden muscle spasms of the neck, jaw or eyes (oculogyric crisis) respond quickly to an anticholinergic. Younger males on high-potency drugs are at highest risk.");
-P("Psychosis and mania",2,"Which extrapyramidal side effect presents as inner restlessness and an inability to sit still, treated with propranolol, benzodiazepines or dose reduction?","Akathisia",["Acute dystonia","Tardive dyskinesia","Parkinsonism"],"Akathisia is common with aripiprazole and high-potency agents. Anticholinergics are less effective for it.");
-P("Psychosis and mania",2,"Which movement disorder arises after months to years of antipsychotic therapy and may be treated with a VMAT2 inhibitor?","Tardive dyskinesia",["Acute dystonia","Akathisia","Neuroleptic malignant syndrome"],"Valbenazine and deutetrabenazine reduce involuntary movements of the face and tongue. Anticholinergics can worsen TD.");
-P("Psychosis and mania",3,"A patient on haloperidol develops fever, severe muscle rigidity, altered mental status and a high creatine kinase. This is:","Neuroleptic malignant syndrome",["Serotonin syndrome","Malignant hyperthermia","Anticholinergic toxicity"],"NMS develops over days with lead-pipe rigidity and autonomic instability. Stop the antipsychotic and give supportive care. Dantrolene or bromocriptine are used in severe cases.");
-P("Psychosis and mania",3,"Which feature helps separate serotonin syndrome from neuroleptic malignant syndrome?","Serotonin syndrome has hyperreflexia, clonus and rapid onset",["Serotonin syndrome has lead-pipe rigidity","NMS has diarrhea","NMS has rapid onset within hours"],"Serotonin syndrome develops within hours with hyperreflexia, clonus, diarrhea and mydriasis. NMS evolves over days with bradyreflexia and lead-pipe rigidity.");
-P("Psychosis and mania",2,"What is the boxed warning for all antipsychotics in older adults with dementia?","Increased mortality",["Hepatic failure","Agranulocytosis","Seizures"],"Deaths were mostly cardiovascular or infectious. Antipsychotics are not approved for treating dementia-related psychosis.");
-P("Psychosis and mania",2,"Which symptom group of schizophrenia is the least responsive to antipsychotic drugs?","Negative symptoms such as apathy and social withdrawal",["Hallucinations","Delusions","Agitation"],"Antipsychotics treat positive symptoms (hallucinations, delusions) mainly through D2 blockade. Negative symptoms remain hard to treat with any drug.");
-P("Psychosis and mania",2,"Which antipsychotic combines with fluoxetine as an approved option for bipolar depression and treatment-resistant depression?","Olanzapine",["Haloperidol","Ziprasidone","Risperidone"],"The olanzapine-fluoxetine combination (Symbyax) is approved for both. Weight gain and metabolic monitoring remain essential.");
-P("Psychosis and mania",3,"Which antipsychotic is chiefly associated with QT prolongation, and should be avoided with other QT-prolonging drugs?","Ziprasidone",["Aripiprazole","Lurasidone","Paliperidone"],"Ziprasidone should be taken with a meal of at least 500 calories. Haloperidol (especially IV) and citalopram are other QT concerns.");
+/* ---------- Diarrhea ---------- */
+T("Diarrhea",2,"A 26-year-old has had six loose stools and cramping for 18 hours, with no fever or blood. Yesterday they ate at a street fair. Ibuprofen and cannabis use were occasional. What is the most likely cause?","A food- or waterborne organism picked up at the street fair",["Early type 2 diabetes","HIV infection","An ibuprofen and cannabis interaction"],"Sudden onset, no red flags and a recent food exposure point to infectious acute diarrhea. Family history of diabetes does not explain it.");
+T("Diarrhea",1,"Diarrhea caused by a stimulating substance that increases secretion or decreases absorption of water and electrolytes is called:","Secretory diarrhea",["Osmotic diarrhea","Exudative diarrhea","Transitory diarrhea"],"Secretory diarrhea comes from toxins, hormones or stimulant laxatives that drive fluid into the lumen. Osmotic diarrhea is from poorly absorbed solutes.");
+T("Diarrhea",1,"Which statement about acute diarrhea is true?","It is self-limiting and usually subsides within 72 hours",["It is secondary to diseases such as diabetes","It is treated with bulk-forming laxatives","It is a chronic condition that waxes and wanes for life"],"Acute diarrhea lasts under 14 days and most cases resolve in about 72 hours with fluids and supportive care.");
+T("Diarrhea",1,"How long do symptoms last in acute, persistent and chronic diarrhea?","Acute under 14 days, persistent over 14 days, chronic over 30 days",["Acute under 3 days, persistent over 7 days, chronic over 14 days","Acute under 30 days, persistent over 60 days, chronic over 90 days","Acute under 7 days, persistent over 30 days, chronic over 60 days"],"Duration separates the types: acute under 14 days, persistent over 14 days and chronic over 30 days.");
+T("Diarrhea",2,"A patient asks how to prevent diarrhea on a trip to a developing country next month. What is the most appropriate advice?","Use bismuth subsalicylate as needed",["Eat fresh vegetables and drink tap water","Avoid all meat products","Take loperamide around the clock for 48 hours before travel"],"Bismuth subsalicylate can reduce traveler's diarrhea. Raw produce and tap water are the usual sources, and loperamide is for treatment, not routine prevention.");
+T("Diarrhea",3,"A 53-year-old has three loose stools, a fever of 101.7 F, normal vitals and hives with penicillin and aspirin. What is the best recommendation?","Increase fluid intake and rest the gut (withhold food) until symptoms resolve",["Bismuth subsalicylate 525 mg every hour as needed","Loperamide 4 mg then 2 mg after each loose stool","Stop home medications and start 5 days of antibiotics"],"Bismuth subsalicylate is contraindicated with aspirin allergy. Loperamide should be avoided with fever because that suggests infectious diarrhea. Fluids and a short gut rest are the safe choice.");
+T("Diarrhea",3,"A lethargic, irritable 3-year-old with fever has had diarrhea for 2 days, vomits after sips of water and refuses food. What is the most appropriate rehydration approach?","Obtain laboratory values and start IV fluids",["Switch to a commercial oral rehydration solution","Give a homemade WHO-recipe solution every hour","Continue bottled water only"],"Lethargy and failure of oral intake signal moderate to severe dehydration. This child needs evaluation and IV fluids rather than oral rehydration at home.");
+T("Diarrhea",2,"Which fluid is first line for rehydration in acute diarrhea?","Oral rehydration solution (ORS)",["Sports drinks","Apple juice","Plain water"],"ORS contains glucose and sodium for coupled absorption. Juice and sports drinks have too much sugar and too little sodium.");
+T("Diarrhea",2,"Which supplement is added to oral rehydration in children 5 years old or younger?","Zinc",["Iron","Vitamin C","Calcium"],"Zinc shortens the course of diarrhea and reduces recurrence in young children.");
+T("Diarrhea",2,"What are the OTC dosing and age limits for loperamide?","4 mg first dose, then 2 mg after each loose stool, for ages 2 and older, with a referral if it lasts beyond 48 hours",["2 mg every hour for ages 6 and older","8 mg first dose, then 4 mg daily, for adults only","4 mg every 4 hours for ages 12 and older"],"Loperamide is OTC at 4 mg then 2 mg per loose stool, to a maximum of 8 mg per day OTC. Refer if symptoms last over 48 hours.");
+T("Diarrhea",3,"When should loperamide be avoided?","Bloody diarrhea or fever suggesting infection",["Mild diarrhea after a large meal","Traveler's diarrhea without fever","Diarrhea in a patient on a PPI"],"Slowing motility in invasive infections can worsen illness. Loperamide at high doses also carries a boxed warning for torsades and cardiac events.");
+T("Diarrhea",2,"Diphenoxylate/atropine (Lomotil) is classified as which schedule and used from what age?","Schedule V, age 6 and older",["Schedule II, age 18 and older","Schedule IV, age 2 and older","Not scheduled, any age"],"Lomotil is C-V because diphenoxylate is an opioid. The atropine discourages misuse.");
+T("Diarrhea",2,"Which patient should NOT use bismuth subsalicylate?","A patient with aspirin allergy or on other salicylates",["A healthy adult with traveler's diarrhea","An adult with mild loose stools","A patient taking a multivitamin"],"Bismuth subsalicylate is a salicylate. Avoid it with aspirin allergy, other salicylates, ulcers, bloody stools, and in children with chickenpox or influenza because of Reye syndrome.");
+T("Diarrhea",1,"Bismuth subsalicylate can cause which harmless effect that patients should be warned about?","Black tongue and black stools",["Red urine","Green skin","Yellow eyes"],"Bismuth reacts with sulfur to form bismuth sulfide, which darkens the tongue and stool. It can be mistaken for bleeding.");
+T("Diarrhea",3,"Which drug treats secretory diarrhea from carcinoid tumors?","Octreotide",["Loperamide","Lactase","Kaolin-pectin"],"Octreotide is a somatostatin analog that reduces the hormone-driven secretion.");
+T("Diarrhea",1,"Which are common probiotic organisms used for diarrhea?","Lactobacillus and Saccharomyces",["Clostridium and Bacteroides","Escherichia and Salmonella","Staphylococcus and Streptococcus"],"Lactobacillus and Saccharomyces boulardii are commonly marketed, with modest benefit.");
+T("Diarrhea",1,"Lactase supplements help with which cause of diarrhea?","Lactose intolerance",["Celiac disease","Carcinoid syndrome","C. difficile infection"],"Lactase replaces the missing enzyme so lactose is not left to cause osmotic diarrhea.");
+
+/* ---------- Constipation ---------- */
+T("Constipation",1,"Which statement about constipation is true?","Decreased fiber intake can lead to constipation",["Patients describe it in easily quantified measures","A daily bowel movement is required for health","Healthy people pass at least six stools a week"],"Fiber adds bulk and softens stool. Normal frequency ranges widely, and constipation is generally fewer than three stools per week.");
+T("Constipation",1,"Which is a possible medical cause of constipation?","Hypothyroidism",["Osteoporosis","Hypertension","Inflammatory bowel syndrome"],"Hypothyroidism slows gut transit. Diabetes, Parkinson disease and depression are other examples.");
+T("Constipation",2,"Which drug classes are commonly constipating?","Anticholinergics, opioids and aluminum or calcium antacids",["Loop diuretics and ACE inhibitors","Penicillins and macrolides","Statins and fibrates"],"Anticholinergic effects and opioid mu agonism slow motility. Calcium, aluminum, iron and calcium channel blockers also contribute.");
+T("Constipation",2,"Which finding is an alarm symptom that calls for referral rather than self-treatment?","Blood in the stool, unintentional weight loss or anemia",["Hard stools for two days","Straining after a low-fiber meal","Mild bloating"],"Alarm features suggest organic disease such as colorectal cancer and need medical evaluation.");
+T("Constipation",3,"A 30-year-old eats 12-15 g of fiber a day, drinks plenty of water, exercises and has hard stools every 2-3 days. What is the best first recommendation?","Increase dietary fiber to 20 to 30 g per day",["Restrict fluids to 1.5 L per day","Start biofeedback therapy","Start bisacodyl 10 mg"],"Their fluid and activity are already good, but fiber is low. Adjust diet first and add fiber gradually.");
+T("Constipation",3,"The same patient returns after a few weeks with no relief from more fiber plus methylcellulose. What is the next step?","Polyethylene glycol 3350, 17 g by mouth once daily",["Magnesium citrate 300 mL once","Linaclotide 145 mcg daily","Referral for colonoscopy"],"PEG 3350 is the strongly recommended osmotic laxative for chronic constipation. Alarm symptoms are absent, so no colonoscopy is needed yet.");
+T("Constipation",1,"How should bulk-forming laxatives such as psyllium, methylcellulose and polycarbophil be taken?","With a full glass of water, separated from other medications by 2 hours",["On an empty stomach with no fluid","Only at bedtime without water","Together with all other medications"],"They need fluid to prevent obstruction and can bind other drugs, so separate doses.");
+T("Constipation",1,"What is the maximum daily dose of OTC polyethylene glycol 3350?","34 g (17 g once daily is standard)",["8.5 g","68 g","100 g"],"MiraLAX is 17 g in 8 oz of fluid daily, and up to 34 g per day is the most used.");
+T("Constipation",2,"Which laxative is a stool softener rather than a stimulant or osmotic?","Docusate",["Bisacodyl","Senna","Magnesium citrate"],"Docusate is an emollient with weak evidence. Prefer fiber or PEG for real constipation.");
+T("Constipation",2,"What caution applies to sodium phosphate (Fleet) enemas and magnesium laxatives?","Avoid in kidney disease, and use sodium phosphate cautiously, especially in older adults",["They are safest for long-term daily use","They require a pregnancy test","They should be taken with fiber only"],"Phosphate and magnesium can accumulate with renal impairment. Phosphate enemas are best avoided in older adults.");
+T("Constipation",2,"Which agents are stimulant laxatives?","Bisacodyl, senna and castor oil",["Psyllium, polycarbophil and methylcellulose","Lactulose, PEG and glycerin","Docusate and mineral oil"],"Stimulants act on the myenteric plexus. Guidelines support short-term use, for under 4 weeks.");
+T("Constipation",2,"Lubiprostone works by:","Activating type 2 chloride channels in the gut lumen",["Activating guanylate cyclase C","Agonizing 5-HT4 receptors","Blocking mu opioid receptors"],"Chloride secretion draws water into the lumen. Take it with food, and it is for women in IBS-C. Check a pregnancy test first.");
+T("Constipation",3,"Linaclotide and plecanatide are:","Guanylate cyclase-C agonists taken on an empty stomach",["Chloride channel activators taken with food","5-HT4 agonists","Mu opioid antagonists"],"Take them about 30 minutes before the first meal. Diarrhea is the main side effect, and they are contraindicated in young children.");
+T("Constipation",3,"Which 5-HT4 agonists are used for constipation, with a warning about suicidal thoughts?","Prucalopride and tegaserod",["Linaclotide and plecanatide","Naloxegol and naldemedine","Lubiprostone and tenapanor"],"Tegaserod was withdrawn in 2007 for cardiovascular risk and re-approved in 2019 with restrictions.");
+T("Constipation",3,"Which laxative recommendation for chronic idiopathic constipation is STRONG in the 2023 AGA guideline?","Polyethylene glycol",["Senna","Lactulose","Magnesium oxide"],"PEG, linaclotide, plecanatide and prucalopride are strong. Fiber, magnesium oxide, senna and lactulose are conditional.");
+T("Constipation",2,"What is the first-line treatment for constipation in children?","Polyethylene glycol",["Lubiprostone","Prucalopride","Domperidone"],"PEG is first line for pediatric constipation. Avoid lubiprostone, prucalopride and domperidone in children.");
+T("Constipation",2,"Which treatments are safe in pregnancy?","Fiber, bulk-forming laxatives, PEG and lactulose",["Castor oil and mineral oil","Magnesium citrate in large doses","Lubiprostone without testing"],"Castor oil can stimulate the uterus and mineral oil impairs vitamin absorption.");
+T("Constipation",3,"Which is the preferred option for an older adult with constipation?","Polyethylene glycol, or a glycerin suppository",["A sodium phosphate enema","Mineral oil at bedtime","Daily magnesium citrate"],"PEG is preferred over lactulose, and glycerin suppositories are safer than phosphate enemas.");
+T("Constipation",3,"A patient taking clozapine has constipation. Why is this important?","Clozapine causes severe GI hypomotility, which can lead to ileus",["Clozapine causes diarrhea only","It is a harmless nuisance","It only occurs in children"],"Serious hypomotility can lead to obstruction. Treat early and monitor.");
+
+/* ---------- Opioid-induced constipation ---------- */
+T("Opioid-induced constipation",2,"What is the first-line approach for opioid-induced constipation?","A laxative such as PEG, bisacodyl or lactulose",["A PAMORA","Loperamide","Bismuth subsalicylate"],"Start with laxatives, then add a peripherally acting mu-opioid receptor antagonist (PAMORA) if the response is inadequate.");
+T("Opioid-induced constipation",2,"Which drugs are PAMORAs?","Methylnaltrexone, naloxegol and naldemedine",["Naloxone, naltrexone and nalbuphine","Linaclotide, plecanatide and lubiprostone","Prucalopride, tegaserod and bisacodyl"],"PAMORAs block gut mu receptors without reversing analgesia. Naloxone and naltrexone cross into the brain and could cause withdrawal.");
+T("Opioid-induced constipation",3,"Which administration instruction is correct for naloxegol?","Take on an empty stomach",["Take with a high-fat meal","Inject subcutaneously","Take only at bedtime with food"],"Food increases absorption and the risk of abdominal pain. Naldemedine can be taken with or without food, and methylnaltrexone is injected subcutaneously with site rotation.");
+T("Opioid-induced constipation",3,"Which agent is approved for use only in the hospital for short-term use?","Alvimopan",["Lubiprostone","Methylnaltrexone","Naloxegol"],"Alvimopan is a peripheral mu antagonist limited to inpatient use for about 15 doses, labeled for postoperative ileus. The outpatient drugs are naloxegol, naldemedine and methylnaltrexone.");
+
+/* ---------- IBS ---------- */
+T("IBS",1,"Which foods are high in FODMAPs and may worsen IBS symptoms?","Dairy milk, yogurt and ice cream",["Eggs and meat","Rice, quinoa and oats","Grapes, oranges and strawberries"],"Lactose is a fermentable sugar. Eggs, meat, rice, oats and several fruits are low FODMAP.");
+T("IBS",2,"Which fiber is suggested for IBS, at what daily amount?","Soluble fiber such as psyllium, 20 to 30 g per day",["Insoluble bran, 5 g per day","No fiber, to avoid bloating","Methylcellulose only, 50 g per day"],"Increase slowly. Soluble fiber is better tolerated than bran.");
+T("IBS",2,"Which treatment is recommended for mild constipation-predominant IBS?","Polyethylene glycol",["Saline cathartics","Loperamide","Mineral oil"],"PEG is a first-line osmotic option for IBS-C. Linaclotide has the best evidence of the secretagogues.");
+T("IBS",2,"For IBS-associated abdominal pain, which drug class is recommended?","Tricyclic antidepressants such as amitriptyline",["Antispasmodics","Bupropion","SSRIs such as sertraline or escitalopram"],"TCAs are recommended for pain. The slides list antispasmodics and non-TCA antidepressants as not recommended.");
+T("IBS",3,"A 43-year-old with IBS-D has abdominal pain, bloating and loose stools. They had a cholecystectomy 4 years ago and cannot stay on a low-FODMAP diet. Which treatment is most appropriate?","Rifaximin 550 mg three times daily for 2 weeks",["Eluxadoline","Linaclotide","Alosetron"],"Eluxadoline must be avoided without a gallbladder. Linaclotide is for IBS-C. Alosetron is for women with severe IBS-D that failed other therapy, so rifaximin is the best choice here.");
+T("IBS",3,"Which patient should avoid eluxadoline?","One without a gallbladder, with pancreatitis, or drinking more than 3 alcoholic drinks per day",["One taking a multivitamin","One with IBS-C","One older than 40"],"Risk of pancreatitis, sphincter of Oddi spasm and constipation. It activates opioid receptors, so the Schedule IV status is relevant.");
+T("IBS",3,"What is the boxed warning for alosetron?","Serious complications of constipation, including ischemic colitis",["Hepatotoxicity","QT prolongation","Suicidality"],"Alosetron blocks 5-HT3 receptors. It is approved for women with severe IBS-D who failed other therapy. Stop it if constipation develops.");
+T("IBS",2,"Tenapanor treats IBS-C by:","Inhibiting the sodium/hydrogen exchanger NHE3",["Activating guanylate cyclase C","Blocking 5-HT3 receptors","Activating chloride channels"],"The usual dose is 50 mg twice daily, taken just before meals.");
+T("IBS",2,"Which statement about rifaximin for IBS-D is true?","It is a non-absorbed antibiotic, 550 mg three times daily for 2 weeks, which can be repeated",["It is absorbed systemically and given for life","It is for IBS-C only","It is a 5-HT3 blocker"],"It improves bloating, pain and watery stools but is costly.");
+T("IBS",1,"Which OTC option may help IBS symptoms and has some evidence?","Peppermint oil",["Aspirin","Bisacodyl","Docusate"],"Peppermint oil is an antispasmodic that can reduce cramping. Probiotics such as Bifidobacterium have limited evidence too.");
 /* ---------- Compounding pharmacy: calculation + kinetics generators ---------- */
 function fmtS(n) { return String(Number(Number(n).toPrecision(3))); }
 function mkL(kind, d, q, correct, cands, unit, steps) {
@@ -2020,8 +2143,8 @@ const World = (function () {
   const lerp = (a, b, t) => a + (b - a) * t;
   const reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   const UPIDS = ['shelf', 'tech', 'counsel', 'library', 'robot'];
-  const CLICK = UPIDS.concat(['notes']);
-  const BASE = { notes: [9.1, 1.26, -5.2], shelf: [-1.5, 0, -6.5], tech: [-6.9, 0, 0], counsel: [-11.55, 0, 3.85], library: [-9.0, 0, -4.0], robot: [6.8, 0, -5.4] };
+  const CLICK = UPIDS;
+  const BASE = { shelf: [-1.5, 0, -6.5], tech: [-6.9, 0, 0], counsel: [-11.55, 0, 3.85], library: [-9.0, 0, -4.0], robot: [8.7, 0, -5.4] };
   const TAGY = { notes: 2.5, shelf: 4.7, tech: 2.7, counsel: 3.3, library: 4.7, robot: 3.6 };
   const SKIN = ['#F2C9A5', '#E0A97E', '#C48A5E', '#8D5A3B', '#F6D7BD', '#6F4429'];
   const HAIR = ['#2B1B12', '#6B3A1E', '#B5651D', '#D9B25A', '#A8A8A8', '#1E1E2E'];
@@ -2034,10 +2157,9 @@ const World = (function () {
     { x0: -9.6, x1: 4.15, z0: -1.0, z1: 1.05 },    // counter, wall to wall, with the computer stations
     { x0: -13.3, x1: -10.0, z0: 2.2, z1: 5.5 },    // counseling room (outside the left wall)
     { x0: -9.6, x1: -8.4, z0: -5.8, z1: -2.2 },    // library
-    { x0: 8.3, x1: 9.9, z0: -5.8, z1: -4.6 },      // study desk
-    { x0: 5.5, x1: 8.1, z0: -6.7, z1: -4.1 },      // robot
+    { x0: 7.4, x1: 10.0, z0: -6.7, z1: -4.1 },     // robot (back-right corner)
     { x0: -6.2, x1: 6.2, z0: -7.1, z1: -6.0 },     // shelves
-    { x0: 1.2, x1: 5.2, z0: -5.7, z1: -4.1 }       // event table
+    { x0: 3.3, x1: 7.3, z0: -5.7, z1: -4.1 }       // event table
   ];
   const EXIT = [[-3.4, 2.8], [-3.4, 6.3], [4.4, 6.4], [5, 7.2], [5, 10.8]];
 
@@ -2083,6 +2205,47 @@ const World = (function () {
     return g;
   }
 
+  /* cosmetic items for the pharmacist: facial hair, hats, glasses and extras. put(geom, mat, x, y, z, onTorso) places a piece. */
+  function buildCosm(C, put, own, hairM, P, bz) {
+    const G = (a, b, c) => new T.BoxGeometry(a, b, c), mk = (col) => own(col), tw = (...a) => new T.TorusGeometry(...a), glass = (m) => { m.material.transparent = true; m.material.opacity = 0.4; return m; };
+    // facial hair (uses the hair colour)
+    if (C.face) {
+      const f = C.face, must = () => put(G(0.2, 0.05, 0.05), hairM, 0, 1.775, 0.318);
+      if (f === 'mustache') must();
+      else if (f === 'handlebar') { must(); [-1, 1].forEach(s => { const c = put(G(0.08, 0.04, 0.05), hairM, s * 0.135, 1.805, 0.318); c.rotation.z = s * 0.7; }); }
+      else if (f === 'goatee') put(G(0.1, 0.13, 0.05), hairM, 0, 1.655, 0.3);
+      else if (f === 'beard') { put(G(0.36, 0.2, 0.12), hairM, 0, 1.675, 0.27); [-1, 1].forEach(s => put(G(0.05, 0.3, 0.14), hairM, s * 0.29, 1.77, 0.2)); must(); }
+      else if (f === 'soulpatch') put(G(0.05, 0.06, 0.04), hairM, 0, 1.695, 0.318);
+      else if (f === 'chops') { [-1, 1].forEach(s => put(G(0.08, 0.3, 0.15), hairM, s * 0.29, 1.77, 0.2)); must(); }
+    }
+    // hats
+    if (C.hat) {
+      const h = C.hat;
+      if (h === 'beanie') { put(new T.CylinderGeometry(0.33, 0.34, 0.2, 8), mk('#D9467A'), 0, 2.12, 0); put(new T.CylinderGeometry(0.35, 0.35, 0.07, 8), mk('#8E2A52'), 0, 2.03, 0); put(new T.IcosahedronGeometry(0.07, 0), mk('#F4F4F0'), 0, 2.27, 0); }
+      else if (h === 'tophat') { put(new T.CylinderGeometry(0.44, 0.44, 0.03, 10), mk('#15151C'), 0, 2.06, 0); put(new T.CylinderGeometry(0.27, 0.28, 0.4, 10), mk('#15151C'), 0, 2.27, 0); put(new T.CylinderGeometry(0.285, 0.285, 0.07, 10), mk('#B32635'), 0, 2.13, 0); }
+      else if (h === 'cowboy') { const br = put(new T.CylinderGeometry(0.5, 0.5, 0.03, 10), mk('#A8743C'), 0, 2.07, 0); br.scale.set(1, 1, 0.9); put(new T.CylinderGeometry(0.22, 0.31, 0.2, 8), mk('#A8743C'), 0, 2.18, 0); put(new T.CylinderGeometry(0.315, 0.315, 0.05, 8), mk('#5B3A21'), 0, 2.1, 0); }
+      else if (h === 'party') { put(new T.ConeGeometry(0.2, 0.5, 7), mk('#7C4DDB'), 0, 2.33, 0); put(new T.IcosahedronGeometry(0.06, 0), mk('#F2C94C'), 0, 2.6, 0); [0.0, 0.14, -0.14].forEach((x, i) => put(new T.IcosahedronGeometry(0.03, 0), mk(['#F2C94C', '#3FD07F', '#E04F3A'][i]), x, 2.2 + i * 0.05, 0.14)); }
+      else if (h === 'crown') { put(new T.CylinderGeometry(0.3, 0.3, 0.12, 8), mk('#F2C94C'), 0, 2.12, 0); for (let i = 0; i < 5; i++) { const a = i / 5 * PI * 2; put(new T.ConeGeometry(0.06, 0.16, 4), mk('#F2C94C'), Math.cos(a) * 0.26, 2.26, Math.sin(a) * 0.26); put(new T.IcosahedronGeometry(0.03, 0), mk(['#E04F3A', '#3E72D9', '#2FAE66', '#8A63C9', '#E04F3A'][i]), Math.cos(a) * 0.26, 2.36, Math.sin(a) * 0.26); } }
+      else if (h === 'chef') { put(new T.CylinderGeometry(0.3, 0.32, 0.18, 8), mk('#FFFFFF'), 0, 2.1, 0); const pf = put(new T.IcosahedronGeometry(0.3, 0), mk('#FFFFFF'), 0, 2.32, 0); pf.scale.set(1.05, 0.85, 1.05); }
+      else if (h === 'propeller') { put(new T.CylinderGeometry(0.3, 0.33, 0.12, 8), mk('#3E72D9'), 0, 2.11, 0); put(new T.CylinderGeometry(0.02, 0.02, 0.14, 5), mk('#F4F4F0'), 0, 2.24, 0); const rot = put(G(0.5, 0.025, 0.08), mk('#E04F3A'), 0, 2.32, 0); const r2 = put(G(0.08, 0.025, 0.5), mk('#F2C94C'), 0, 2.32, 0); P.spin = [rot, r2]; }
+      else if (h === 'wizard') { put(new T.CylinderGeometry(0.46, 0.46, 0.03, 10), mk('#4A2E86'), 0, 2.07, 0); const cn = put(new T.ConeGeometry(0.3, 0.7, 8), mk('#4A2E86'), 0, 2.42, 0); cn.rotation.z = -0.12; put(new T.IcosahedronGeometry(0.045, 0), mk('#F2C94C'), 0.08, 2.5, 0.28); put(new T.IcosahedronGeometry(0.035, 0), mk('#F2C94C'), -0.1, 2.3, 0.26); }
+    }
+    if (C.eyes) {
+      const x = C.eyes, fr = mk('#2B2B33');
+      if (x === 'round') { [-1, 1].forEach(s => { put(tw(0.085, 0.014, 4, 12), fr, s * 0.11, 1.88, 0.318); const gl = put(new T.CylinderGeometry(0.078, 0.078, 0.01, 10), mk('#BFE3F0'), s * 0.11, 1.88, 0.318); gl.rotation.x = PI / 2; glass(gl); }); put(G(0.07, 0.014, 0.014), fr, 0, 1.9, 0.318); }
+      else if (x === 'square') { [-1, 1].forEach(s => { const cx = s * 0.11; put(G(0.17, 0.014, 0.016), fr, cx, 1.96, 0.318); put(G(0.17, 0.014, 0.016), fr, cx, 1.8, 0.318); put(G(0.014, 0.16, 0.016), fr, cx - 0.085, 1.88, 0.318); put(G(0.014, 0.16, 0.016), fr, cx + 0.085, 1.88, 0.318); glass(put(G(0.16, 0.15, 0.008), mk('#BFE3F0'), cx, 1.88, 0.318)); }); put(G(0.07, 0.014, 0.014), fr, 0, 1.91, 0.318); }
+      else if (x === 'monocle') { put(tw(0.08, 0.013, 4, 12), mk('#F2C94C'), 0.11, 1.88, 0.325); put(G(0.012, 0.22, 0.012), mk('#F2C94C'), 0.2, 1.74, 0.322); }
+      else if (x === 'eyepatch') { put(G(0.16, 0.14, 0.03), mk('#101018'), -0.11, 1.88, 0.318); const sd = put(G(0.025, 0.34, 0.02), mk('#101018'), -0.04, 1.97, 0.3); sd.rotation.z = -0.95; }
+      else if (x === 'goggles') { [-1, 1].forEach(s => { put(tw(0.085, 0.022, 5, 10), fr, s * 0.115, 2.0, 0.31); const gl = put(new T.CylinderGeometry(0.075, 0.075, 0.02, 8), mk('#7FD6E8'), s * 0.115, 2.0, 0.315); gl.rotation.x = PI / 2; }); const bd = put(tw(0.31, 0.022, 5, 12), fr, 0, 2.0, 0); bd.rotation.x = PI / 2; }
+    }
+    if (C.extra) {
+      const x = C.extra;
+      if (x === 'clownnose') put(new T.IcosahedronGeometry(0.065, 0), mk('#E0262F'), 0, 1.8, 0.345);
+      else if (x === 'headphones') { const bd = put(tw(0.33, 0.03, 5, 14, PI), mk('#2B2B33'), 0, 1.87, 0); bd.scale.set(1, 0.72, 1); [-1, 1].forEach(s => { const cup = put(new T.CylinderGeometry(0.11, 0.11, 0.09, 8), mk('#E04F3A'), s * 0.335, 1.87, 0); cup.rotation.z = PI / 2; }); }
+      else if (x === 'earring') { [-1, 1].forEach(s => put(new T.IcosahedronGeometry(0.035, 0), mk('#F2C94C'), s * 0.31, 1.73, 0.04)); }
+      else if (x === 'bowtie') { put(G(0.06, 0.07, 0.04), mk('#B32635'), 0, 1.55, bz, true); [-1, 1].forEach(s => { const fl = put(G(0.13, 0.09, 0.03), mk('#D9374A'), s * 0.095, 1.55, bz, true); fl.rotation.z = s * 0.28; }); }
+    }
+  }
   function person(seed, isStaff, karen, sweaty, body, o) {
     o = o || {};
     const g = new T.Group();
@@ -2205,9 +2368,10 @@ const World = (function () {
     }
     const A = o.acc || 0, goldM = own('#F2C94C');
     const on = k => o.accOn ? o.accOn.indexOf(k) >= 0 : A >= k;
-    if (on(2)) { const blk = own('#101018'); put(new T.BoxGeometry(0.17, 0.1, 0.05), blk, -0.11, 1.88, 0.31); put(new T.BoxGeometry(0.17, 0.1, 0.05), blk, 0.11, 1.88, 0.31); put(new T.BoxGeometry(0.1, 0.025, 0.05), blk, 0, 1.9, 0.31); }
+    if (on(2) && !(o.cosm && o.cosm.eyes)) { const blk = own('#101018'); put(new T.BoxGeometry(0.17, 0.1, 0.05), blk, -0.11, 1.88, 0.31); put(new T.BoxGeometry(0.17, 0.1, 0.05), blk, 0.11, 1.88, 0.31); put(new T.BoxGeometry(0.1, 0.025, 0.05), blk, 0, 1.9, 0.31); }
     if (on(4)) put(new T.BoxGeometry(0.17, 0.05, 0.04), goldM, 0, 1.735, 0.318);
-    if (on(5)) { const fm = own('#2B2B33'); put(new T.CylinderGeometry(0.5, 0.5, 0.03, 10), fm, 0, 2.06, 0); put(new T.CylinderGeometry(0.27, 0.3, 0.24, 8), fm, 0, 2.19, 0); put(new T.CylinderGeometry(0.305, 0.305, 0.05, 8), own('#8B1E2D'), 0, 2.1, 0); }
+    if (on(5) && !(o.cosm && o.cosm.hat)) { const fm = own('#2B2B33'); put(new T.CylinderGeometry(0.5, 0.5, 0.03, 10), fm, 0, 2.06, 0); put(new T.CylinderGeometry(0.27, 0.3, 0.24, 8), fm, 0, 2.19, 0); put(new T.CylinderGeometry(0.305, 0.305, 0.05, 8), own('#8B1E2D'), 0, 2.1, 0); }
+    if (o.cosm) buildCosm(o.cosm, (g, m, x, y, z, u) => put(g, m, x, y, z, u ? up : undefined), own, hairM, P, Math.max(tr[0], tr[1]) * tor.scale.z + 0.03);
     par = up;
     if (o.inspector) { put(new T.BoxGeometry(0.07, 0.46, 0.03), own('#B91C1C'), 0, 1.18, Math.max(tr[0], tr[1]) + 0.02); put(new T.BoxGeometry(0.2, 0.05, 0.04), own('#E8EDF2'), 0, 1.45, Math.max(tr[0], tr[1]) + 0.01); }
     if (o.driver) { put(new T.BoxGeometry(0.56, 0.42, 0.4), own('#C9A06A'), 0, 1.0, 0.5); put(new T.BoxGeometry(0.1, 0.43, 0.41), own('#8A5A2B'), 0, 1.0, 0.5); }
@@ -2220,6 +2384,7 @@ const World = (function () {
     [-1, 1].forEach(s => {
       const leg = new T.Group(); leg.position.set(s * (jacked ? 0.2 : obese ? 0.24 : slim ? 0.12 : 0.15), legL, 0); g.add(leg);
       put(new T.BoxGeometry(legW, legL, legW + 0.04), pants, 0, -legL / 2, 0, leg); P.legs.push(leg);
+      if (o.shoes) put(new T.BoxGeometry(legW + 0.06, 0.1, legW + 0.22), own(o.shoes), 0, -legL + 0.05, 0.07, leg);
       const arm = new T.Group(); arm.position.set(s * (jacked ? 0.86 : obese ? 0.78 : slim ? 0.38 : 0.46), 1.5, 0); up.add(arm);
       if (jacked) arm.scale.set(2.3, 1.15, 2.3); else if (obese) arm.scale.set(1.6, 1, 1.6); else if (slim) arm.scale.set(0.8, 1, 0.8);
       put(new T.BoxGeometry(0.15, 0.62, 0.16), jacked ? P.skinM : P.shirtM, 0, -0.3, 0, arm);
@@ -2281,11 +2446,6 @@ const World = (function () {
     for (let i = 0; i < 11; i++) bx(c, 0.9, 0.7, 0.05, '#0E9A8E', -6 + i * 1.2, 0.55, 0.57);
     station(c, cx(2.2), -0.25, null, 0.5); station(c, cx(3.5), -0.25, null, 0.5);
     cy(c, 0.25, 0.3, 0.5, 6, '#F2A516', cx(-2.8), 1.5, 0.1);
-    // study desk next to the robot: holds the notebook (My studies)
-    const dk = new T.Group(); dk.position.set(9.1, 0, -5.2); g.add(dk);
-    bx(dk, 1.5, 0.16, 1.1, '#F4F9F9', 0, 1.18, 0); bx(dk, 1.5, 0.06, 0.08, '#F2A516', 0, 1.12, 0.52);
-    bx(dk, 0.1, 1.1, 1.0, '#0A6F66', -0.65, 0.55, 0); bx(dk, 0.1, 1.1, 1.0, '#0A6F66', 0.65, 0.55, 0); bx(dk, 1.3, 0.9, 0.08, '#0E9A8E', 0, 0.62, -0.46);
-    cy(dk, 0.04, 0.12, 0.06, 8, '#27384F', 0.55, 1.29, -0.3); bx(dk, 0.04, 0.34, 0.04, '#27384F', 0.55, 1.47, -0.3); cy(dk, 0.1, 0.16, 0.14, 8, '#F2A516', 0.55, 1.68, -0.3);
     // desk phone (clickable while it rings)
     phoneG = new T.Group(); phoneG.position.set(0.9, 1.26, 0.3); g.add(phoneG);
     bx(phoneG, 0.8, 0.18, 0.6, '#27384F', 0, 0.09, 0, 'phone'); bx(phoneG, 0.5, 0.04, 0.3, '#DDE8E8', 0, 0.2, 0.12, 'phone');
@@ -2316,7 +2476,7 @@ const World = (function () {
     UPIDS.forEach(id => { const u = new T.Group(); u.position.set(BASE[id][0], BASE[id][1], BASE[id][2]); scene.add(u); ug[id] = u; });
     staffGroup = new T.Group(); scene.add(staffGroup);
     pharmG = new T.Group(); scene.add(pharmG); awardsG = new T.Group(); scene.add(awardsG); petG = new T.Group(); scene.add(petG);
-    custGroup = new T.Group(); scene.add(custGroup); capG = new T.Group(); scene.add(capG);
+    custGroup = new T.Group(); scene.add(custGroup); capG = new T.Group(); scene.add(capG); pillG = new T.Group(); scene.add(pillG);
     // floor receives shadow only on tiles via meshes already
     // coin pool
     for (let i = 0; i < 36; i++) {
@@ -2332,7 +2492,6 @@ const World = (function () {
       m.scale.set(0.8, 1.4, 0.8); m.visible = false; m.userData.fx = true; scene.add(m); drops.push({ m, life: 0, vx: 0, vz: 0, vy: 0 });
     }
     buildBrain(g); buildEvt(g);
-    ug.notes = new T.Group(); ug.notes.position.set(BASE.notes[0], BASE.notes[1], BASE.notes[2]); scene.add(ug.notes); buildNotes();
   }
   function drawSign(txt) {
     const x = sign.cv.getContext('2d'); x.clearRect(0, 0, 1024, 256);
@@ -2747,8 +2906,8 @@ const World = (function () {
     });
   }
   // Little personality moments. Purely cosmetic.
-  const FX_DUR = { wave: 1.6, hop: 0.9, sneeze: 1.1, cough: 1.0, smile: 0.8, sad: 1.4, angry: 1.2, tired: 1.6 };
-  const FX_SAY = { wave: ['👋'], sneeze: ['🤧 Achoo!'], cough: ['😷 *cough*'], smile: ['😊'], sad: ['😢'], angry: ['😠'], tired: ['😴'], hop: ['Boing!', 'Wheee!', 'Hop!'] };
+  const FX_DUR = { energy: 1.3, wave: 1.6, hop: 0.9, sneeze: 1.1, cough: 1.0, smile: 0.8, sad: 1.4, angry: 1.2, tired: 1.6 };
+  const FX_SAY = { energy: ['⚡ I feel so sharp!', '🧠 It all makes sense!', '🚀 So much energy!', '✨ I can see the whole formulary!', '💡 I get it now!', '🤩 Wow, I am on fire!'], wave: ['👋'], sneeze: ['🤧 Achoo!'], cough: ['😷 *cough*'], smile: ['😊'], sad: ['😢'], angry: ['😠'], tired: ['😴'], hop: ['Boing!', 'Wheee!', 'Hop!'] };
   function startFx(o, type) {
     if (o.fx && o.fx.type !== 'bump') return false;
     const dur = FX_DUR[type]; o.fx = { type, t: 0, dur }; o.lastFx = type;
@@ -2773,6 +2932,7 @@ const World = (function () {
     switch (f.type) {
       case 'bump': g.position.y = Math.abs(Math.sin(k * PI)) * 0.2; g.rotation.z = Math.sin(k * PI * 3) * 0.2 * (1 - k); break;
       case 'wave': arms(-0.7); P.arms[1].rotation.x = -2.7 + Math.sin(f.t * 11) * 0.45; break;
+      case 'energy': g.position.y = Math.abs(Math.sin(k * PI * 3)) * 0.45; g.rotation.y = Math.sin(f.t * 12) * 0.35; g.rotation.z = Math.sin(f.t * 22) * 0.06; arms(-2.7 + Math.sin(f.t * 20) * 0.4); break;
       case 'hop': g.position.y = Math.abs(Math.sin(k * PI * 2)) * (o.hopH || 0.7); g.rotation.z = Math.sin(f.t * 18) * 0.05 * (1 - k); arms(-2.6 + Math.sin(f.t * 14) * 0.3); break;
       case 'smile': g.position.y = Math.abs(Math.sin(k * PI * 2)) * 0.12; arms(-0.6 + Math.sin(f.t * 10) * 0.2); break;
       case 'sad': g.rotation.x = 0.32 * Math.sin(k * PI); g.position.y = -0.04 * Math.sin(k * PI); arms(0.15); break;
@@ -2805,7 +2965,7 @@ const World = (function () {
   api.setPharmacist = function (me) {
     if (!api.ok || !pharmG) return;
     if (pharm) pharmG.remove(pharm.g);
-    const g = person(1, false, false, false, me.body === 'normal' ? undefined : me.body, { skin: me.skin, hair: me.hairCol, shirt: '#F7FBFB', hairStyle: HAIR_MAP[me.hair] === undefined ? 0 : HAIR_MAP[me.hair], gender: me.gender, coat: true, scrub: me.scrub, acc: me.acc, accOn: me.accOn || 0, tag: { pharm: true } });
+    const g = person(1, false, false, false, me.body === 'normal' ? undefined : me.body, { skin: me.skin, hair: me.hairCol, shirt: me.shirtCol || '#F7FBFB', shoes: me.shoes || null, hairStyle: HAIR_MAP[me.hair] === undefined ? 0 : HAIR_MAP[me.hair], gender: me.gender, coat: true, scrub: me.scrub, acc: me.acc, accOn: me.accOn || 0, cosm: me.cosm || null, tag: { pharm: true } });
     g.position.set(-1.5, 0, -1.85); pharmG.add(g);
     lastMe = me; if (labOn) buildLabPerson();
     pharm = { g, wp: [], r: 0.5, phase: 0, dy: 3.1 };
@@ -2879,12 +3039,12 @@ const World = (function () {
   api.setCalendar = function (tier, anim, weeks) {
     if (!api.ok || !scene) return;
     if (calG) { clear(calG); scene.remove(calG); }
-    const t = Math.max(0, Math.min(4, tier | 0)), col = CALC[t][0]; calG = new T.Group(); calG.position.set(8.7, 3.0, -7.2); scene.add(calG);
+    const t = Math.max(0, Math.min(4, tier | 0)), col = CALC[t][0]; calG = new T.Group(); calG.position.set(-9.5, 3.0, 0.05); calG.rotation.y = PI / 2; scene.add(calG);
     const em = t === 4 ? { emissive: new T.Color(0x9FD8EE), emissiveIntensity: 0.55 } : t === 3 ? { emissive: new T.Color(0xF2A516), emissiveIntensity: 0.25 } : undefined;
     bx(calG, 1.4, 1.7, 0.07, '#FFFDF4', 0, 0, 0); bx(calG, 1.4, 0.46, 0.1, col, 0, 0.62, 0.03, null, em);
     [-0.4, 0.4].forEach(x => cy(calG, 0.05, 0.05, 0.2, 6, '#27384F', x, 0.88, 0.05));
     for (let r = 0; r < 4; r++) for (let c = 0; c < 5; c++) { const on = r * 5 + c < Math.min(20, weeks || 0); bx(calG, 0.2, 0.2, 0.04, on ? col : '#DCE6E8', -0.5 + c * 0.25, 0.24 - r * 0.27, 0.05, null, on ? em : undefined); }
-    if (anim) { popGroup(calG); burst(new T.Vector3(8.7, 3.0, -6.6), 16, 0xF2A516, 1.0); }
+    if (anim) { popGroup(calG); burst(new T.Vector3(-9.0, 3.0, 0.05), 16, 0xF2A516, 1.0); }
   };
   api.screenOf = function (x, y, z) {
     if (!api.ok || !camera || paused || !host) return null;
@@ -2894,7 +3054,7 @@ const World = (function () {
   };
   api.targetPos = function (kind, id) {
     if (kind === 'frame') { const q = WALL[id]; return q ? api.screenOf(q.x + (q.ry ? 0.15 : 0), q.y, q.z + (q.ry ? 0 : 0.15)) : null; }
-    if (kind === 'cal') return api.screenOf(8.7, 3.0, -7.0);
+    if (kind === 'cal') return api.screenOf(-9.5, 3.0, 0.05);
     if (kind === 'pet') return api.screenOf(5, 0.8, 9.0);
     if (kind === 'fish') return api.screenOf(FISH_AT[0], 1.3, FISH_AT[1]);
     if (kind === 'pharm') { if (!pharm) return null; const p = pharm.g.position; return api.screenOf(p.x, p.y + ({ 1: 1.55, 2: 1.9, 3: 0.85, 4: 1.75, 5: 2.15, 6: 0.6, 7: 1.2 }[id] || 1.3), p.z); }
@@ -3033,8 +3193,8 @@ const World = (function () {
     const r = canvas.getBoundingClientRect();
     ndc.x = ((e.clientX - r.left) / r.width) * 2 - 1; ndc.y = -((e.clientY - r.top) / r.height) * 2 + 1;
     raycaster.setFromCamera(ndc, camera);
-    const hits = raycaster.intersectObjects(synOn ? synItems.filter(g => g.visible) : labOn ? labItems : [].concat(CLICK.map(i => ug[i]), [staffGroup, custGroup, petG, pharmG], phoneG ? [phoneG] : [], capG ? [capG] : [], brainG ? [brainG] : [], evtG ? [evtG] : []), true);
-    for (const h of hits) { let o = h.object; while (o) { if (o.userData && (o.userData.up || o.userData.cust || o.userData.pet || o.userData.pharm || o.userData.vis || o.userData.cap || o.userData.lab || o.userData.site || o.userData.brain || o.userData.evt)) { pickObj = h.object; return o.userData; } o = o.parent; } }
+    const hits = raycaster.intersectObjects(synOn ? synItems.filter(g => g.visible) : labOn ? labItems : [].concat(CLICK.map(i => ug[i]), [staffGroup, custGroup, petG, pharmG], phoneG ? [phoneG] : [], capG ? [capG] : [], pillG ? [pillG] : [], brainG ? [brainG] : [], evtG ? [evtG] : []), true);
+    for (const h of hits) { let o = h.object; while (o) { if (o.userData && (o.userData.up || o.userData.cust || o.userData.pet || o.userData.pharm || o.userData.vis || o.userData.cap || o.userData.pill || o.userData.lab || o.userData.site || o.userData.brain || o.userData.evt)) { pickObj = h.object; return o.userData; } o = o.parent; } }
     return null;
   }
   function setHover(up) {
@@ -3096,6 +3256,7 @@ const World = (function () {
       if (h && h.evt) { if (B.onEvt) B.onEvt(h.evt); return; }
       if (h && h.lab) { labClick(h); return; }
       if (h && h.cap) { capClick(); return; }
+      if (h && h.pill) { pillClick(h.pill); return; }
       if (h && h.vis) { if (B.onVisitor) B.onVisitor(); return; }
       if (h && h.up) { if (h.up === 'notes') B.onNotes(); else if (h.up === 'phone') { if (B.onPhone) B.onPhone(); } else B.onBuy(h.up); }
       else if (h && (h.cust || h.pet || h.pharm)) {
@@ -3321,6 +3482,36 @@ const World = (function () {
   };
   /* the pharmacist editor preview: the same 3D model as the shop, full length */
   const meCache = {};
+
+  /* 3D render of one cosmetic item on a simple mannequin, as an image (cached) */
+  const cosmCache = {};
+  api.cosmIcon = function (slot, id) {
+    if (!api.ok || !renderer) return null;
+    const key = slot + ':' + id; if (key in cosmCache) return cosmCache[key];
+    let url = null, rt = null, grp = null;
+    try {
+      const W = 176, H = 176, ps = new T.Scene(), pc = new T.PerspectiveCamera(27, W / H, 0.1, 40);
+      ps.add(new T.HemisphereLight(0xffffff, 0x8899aa, 0.95)); const dl = new T.DirectionalLight(0xffffff, 0.8); dl.position.set(2.5, 4, 5); ps.add(dl);
+      const own = (c) => new T.MeshStandardMaterial({ color: c, flatShading: true, roughness: 0.85 }), skin = own('#E8B890'), hairM = own('#5B3A21');
+      grp = new T.Group();
+      const put = (g, m, x, y, z) => { const o = new T.Mesh(g, m); o.position.set(x, y, z); grp.add(o); return o; };
+      put(new T.BoxGeometry(0.6, 0.62, 0.6), skin, 0, 1.85, 0); put(new T.BoxGeometry(0.16, 0.16, 0.16), skin, 0, 1.52, 0);
+      put(new T.CylinderGeometry(0.4, 0.43, 0.9, 6), own('#F4FAFA'), 0, 1.1, 0);
+      [-1, 1].forEach(s => { put(new T.BoxGeometry(0.06, 0.06, 0.04), own('#2B2B33'), s * 0.12, 1.88, 0.31); });
+      const C = {}; C[slot] = id; buildCosm(C, put, own, hairM, {}, 0.4);
+      grp.rotation.y = -0.5; ps.add(grp); pc.position.set(0, 2.0, 3.5); pc.lookAt(0, 1.92, 0);
+      rt = new T.WebGLRenderTarget(W, H, { samples: 4 });
+      const oldRT = renderer.getRenderTarget(), oc = renderer.getClearColor(new T.Color()), oa = renderer.getClearAlpha();
+      renderer.setRenderTarget(rt); renderer.setClearColor(0x000000, 0); renderer.clear(); renderer.render(ps, pc);
+      const buf = new Uint8Array(W * H * 4); renderer.readRenderTargetPixels(rt, 0, 0, W, H, buf);
+      renderer.setRenderTarget(oldRT); renderer.setClearColor(oc, oa);
+      const cv = document.createElement('canvas'); cv.width = W; cv.height = H; const cx = cv.getContext('2d'), im = cx.createImageData(W, H);
+      for (let y = 0; y < H; y++) im.data.set(buf.subarray((H - 1 - y) * W * 4, (H - y) * W * 4), y * W * 4);
+      cx.putImageData(im, 0, 0); url = cv.toDataURL('image/png');
+    } catch (e) { url = null; try { renderer.setRenderTarget(null); } catch (_) { /* ignore */ } }
+    try { if (rt) rt.dispose(); if (grp) grp.traverse(o => { if (o.geometry) o.geometry.dispose(); if (o.material) o.material.dispose(); }); } catch (_) { /* ignore */ }
+    cosmCache[key] = url; return url;
+  };
   api.pharmPortrait = function (me) {
     if (!api.ok || !renderer) return null;
     const key = JSON.stringify(me); if (key in meCache) return meCache[key];
@@ -3328,7 +3519,7 @@ const World = (function () {
     try {
       const W = 240, H = 300, ps = new T.Scene(), pc = new T.PerspectiveCamera(27, W / H, 0.1, 40);
       ps.add(new T.HemisphereLight(0xffffff, 0x8899aa, 0.95)); const dl = new T.DirectionalLight(0xffffff, 0.75); dl.position.set(2.5, 4, 5); ps.add(dl);
-      p = person(1, false, false, false, me.body === 'normal' ? undefined : me.body, { skin: me.skin, hair: me.hairCol, shirt: '#F7FBFB', hairStyle: HAIR_MAP[me.hair] === undefined ? 0 : HAIR_MAP[me.hair], gender: me.gender, coat: true, scrub: me.scrub, acc: me.acc, accOn: me.accOn || 0, tag: { pharm: true } });
+      p = person(1, false, false, false, me.body === 'normal' ? undefined : me.body, { skin: me.skin, hair: me.hairCol, shirt: me.shirtCol || '#F7FBFB', shoes: me.shoes || null, hairStyle: HAIR_MAP[me.hair] === undefined ? 0 : HAIR_MAP[me.hair], gender: me.gender, coat: true, scrub: me.scrub, acc: me.acc, accOn: me.accOn || 0, cosm: me.cosm || null, tag: { pharm: true } });
       p.rotation.y = -0.35; ps.add(p); pc.position.set(0, 1.35, 6.6); pc.lookAt(0, 1.2, 0);
       rt = new T.WebGLRenderTarget(W, H, { samples: 4 });
       const oldRT = renderer.getRenderTarget(), oc = renderer.getClearColor(new T.Color()), oa = renderer.getClearAlpha();
@@ -3501,7 +3692,7 @@ const World = (function () {
     ragStep(dt); copStep(dt);
     // staff
     staffGroup.visible = !labOn && !synOn && !(fpT || fpK > 0.25);
-    capTick(dt); brainTick(dt); evtTick(dt); holTick(dt);
+    capTick(dt); pillTick(dt); brainTick(dt); evtTick(dt); holTick(dt);
     staff.forEach(s => {
       if (fpT || fpK > 0) return;
       keepOffPharm(s); const w = moveTo(s, 1.7, dt, stf); keepOffPharm(s); s.phase += dt; walkAnim(s.g, s.phase, w, dt);
@@ -3545,6 +3736,12 @@ const World = (function () {
     });
     if (pharm) {
       const P = pharm.g.userData.P, pp = pharm.g.position; pharm.phase += dt;
+      if (P.spin) P.spin.forEach(m => { m.rotation.y += dt * 18; });
+      if (buffOn) {
+        const pu = 0.5 + 0.5 * Math.sin(time * 9); P.skinM.emissive.setRGB(0.34 + 0.22 * pu, 0.24 + 0.1 * pu, 0.02); buffCd -= dt;
+        if (buffCd <= 0 && !pharm.fx) { buffCd = 2.6 + Math.random() * 1.6; startFx(pharm, Math.random() < 0.7 ? 'energy' : 'wave'); }
+      } else if (buffWas) { P.skinM.emissive.setHex(0); }
+      buffWas = buffOn;
       if (!pharm.fx) { P.arms[0].rotation.x = lerp(P.arms[0].rotation.x, -0.75 + Math.sin(pharm.phase * 5) * 0.12, 0.2); P.arms[1].rotation.x = lerp(P.arms[1].rotation.x, -0.75 + Math.sin(pharm.phase * 5 + 1.6) * 0.12, 0.2); }
       const tgt = queue[0] ? Math.atan2(queue[0].g.position.x - pp.x, queue[0].g.position.z - pp.z) : 0;
       pharm.g.rotation.y = lerpAngle(pharm.g.rotation.y, tgt * 0.7, Math.min(1, dt * 4));
@@ -3754,7 +3951,7 @@ const World = (function () {
     if (!lastMe || !labG) return;
     if (labPerson) { labG.remove(labPerson); const i = labItems.indexOf(labPerson); if (i >= 0) labItems.splice(i, 1); labPerson = null; }
     const me = lastMe;
-    const g = person(1, false, false, false, me.body === 'normal' ? undefined : me.body, { skin: me.skin, hair: me.hairCol, shirt: '#F7FBFB', hairStyle: HAIR_MAP[me.hair] === undefined ? 0 : HAIR_MAP[me.hair], gender: me.gender, coat: true, scrub: me.scrub, acc: me.acc, accOn: me.accOn || 0, tag: { pharm: true } });
+    const g = person(1, false, false, false, me.body === 'normal' ? undefined : me.body, { skin: me.skin, hair: me.hairCol, shirt: me.shirtCol || '#F7FBFB', shoes: me.shoes || null, hairStyle: HAIR_MAP[me.hair] === undefined ? 0 : HAIR_MAP[me.hair], gender: me.gender, coat: true, scrub: me.scrub, acc: me.acc, accOn: me.accOn || 0, cosm: me.cosm || null, tag: { pharm: true } });
     g.position.set(0.5, 0, -1.9); labG.add(g); labPerson = g; g.userData.lab = 'pharm'; g.userData.g = g; g.userData.busy = 0; labItems.push(g);
   }
   function wpos(G) { let x = 0, y = 0, z = 0, o = G; while (o && o !== scene) { x = o.position.x + o.scale.x * x; y = o.position.y + o.scale.y * y; z = o.position.z + o.scale.z * z; o = o.parent; } return { x, y, z }; }
@@ -3883,6 +4080,96 @@ const World = (function () {
   }
   api._capClick = function () { const had = !!capObj; capClick(); return had; };
   api.devCapsule = function (kind) { if (!api.ok || !capG) return false; capRemove(); return spawnCap(kind === 'plant' ? 'plant' : 'sky'); };
+
+  /* ---- lost pills: tablets and capsules pop out of bottles and other things; tap one to put it in the lost-pills vial ---- */
+  let pillG = null, pillT = 200 + Math.random() * 160, buffOn = false, buffWas = false, buffCd = 0;
+  const pills = [];
+  const TCOL = ['#F4F4F0', '#F2A516', '#E04F3A', '#4C7BD9', '#2FAE66', '#F29BC1', '#8A63C9', '#7FD6E8', '#F6E27A'];
+  const rndi = (n) => Math.floor(Math.random() * n);
+  function pillSpec() {
+    if (Math.random() < 0.55) return { k: 't', c: TCOL[rndi(TCOL.length)], c2: '', s: ['disc', 'oval', 'caplet', 'sq'][rndi(4)] };
+    const s = ['two', 'band', 'gel'][rndi(3)], a = TCOL[1 + rndi(TCOL.length - 1)]; let b = TCOL[rndi(TCOL.length)]; if (b === a) b = '#F4F4F0';
+    return { k: 'c', c: s === 'gel' ? '#F2A516' : a, c2: s === 'gel' ? '' : b, s };
+  }
+  function pillModel(sp) {
+    const g = new T.Group(), gl = (c) => ({ emissive: new T.Color(c), emissiveIntensity: 0.22 });
+    if (sp.k === 't') {
+      if (sp.s === 'disc') { const d = cy(g, 0.34, 0.34, 0.13, 14, sp.c, 0, 0, 0, null, gl(sp.c)); d.rotation.x = 0.35; }
+      else if (sp.s === 'oval') { const m = add(g, new T.SphereGeometry(0.3, 12, 9), sp.c, 0, 0, 0, null, gl(sp.c)); m.scale.set(1.5, 0.55, 0.85); m.rotation.y = 0.5; }
+      else if (sp.s === 'caplet') { const a = cy(g, 0.17, 0.17, 0.5, 10, sp.c, 0, 0, 0, null, gl(sp.c)); a.rotation.z = PI / 2; [-1, 1].forEach(s => add(g, new T.SphereGeometry(0.17, 10, 8), sp.c, s * 0.25, 0, 0, null, gl(sp.c))); g.rotation.y = 0.5; }
+      else { const b = bx(g, 0.5, 0.15, 0.5, sp.c, 0, 0, 0, null, gl(sp.c)); b.rotation.y = 0.6; }
+    } else {
+      const L = 0.52, r = 0.2;
+      if (sp.s === 'gel') { const m = add(g, new T.SphereGeometry(0.26, 12, 9), sp.c, 0, 0, 0, null, Object.assign(gl(sp.c), { transparent: true, opacity: 0.9 })); m.scale.set(1.55, 0.85, 0.85); add(g, new T.SphereGeometry(0.06, 6, 5), '#FFFFFF', -0.12, 0.13, 0.12); }
+      else {
+        const a = cy(g, r, r, L, 10, sp.c, -L / 2, 0, 0, null, gl(sp.c)); a.rotation.z = PI / 2; const b = cy(g, r, r, L, 10, sp.c2, L / 2, 0, 0, null, gl(sp.c2)); b.rotation.z = PI / 2;
+        add(g, new T.SphereGeometry(r, 10, 8), sp.c, -L, 0, 0, null, gl(sp.c)); add(g, new T.SphereGeometry(r, 10, 8), sp.c2, L, 0, 0, null, gl(sp.c2));
+        if (sp.s === 'band') { const bd = cy(g, r + 0.02, r + 0.02, 0.1, 10, '#F4F4F0', 0, 0, 0); bd.rotation.z = PI / 2; }
+      }
+      g.scale.set(0.8, 0.8, 0.8);
+    }
+    const hit = new T.Mesh(new T.SphereGeometry(0.95, 6, 5), new T.MeshBasicMaterial({ visible: false })); g.add(hit);
+    const ring = new T.Mesh(new T.RingGeometry(0.55, 0.7, 20), new T.MeshBasicMaterial({ color: 0xFFE27A, transparent: true, opacity: 0.8, side: T.DoubleSide, depthWrite: false })); ring.rotation.x = -PI / 2; ring.position.y = -0.13; g.add(ring);
+    const root = new T.Group(); root.add(g); root.userData.ring = ring; root.userData.body = g; return root;
+  }
+  function pillSources() {
+    const out = [];
+    const vis = shelfBottles.filter(b => b.visible);
+    if (vis.length) { const b = vis[rndi(vis.length)], sx = BASE.shelf[0], sz = BASE.shelf[2]; out.push({ w: 6, bottle: b, from: [sx + b.position.x, b.position.y + 0.55, sz + 0.2], land: [sx + b.position.x + (Math.random() - 0.5) * 2.6, 0.2, -4.7 + Math.random() * 1.8] }); }
+    out.push({ w: 1.5, from: [BASE.robot[0], 2.6, BASE.robot[2] + 0.5], land: [BASE.robot[0] - 1.4 - Math.random() * 1.6, 0.2, -3.8 + Math.random() * 1.5] });
+    out.push({ w: 1.2, from: [BASE.library[0] + 0.3, 2.9, BASE.library[2] + (Math.random() - 0.5) * 2], land: [BASE.library[0] + 1.6 + Math.random() * 1.4, 0.2, -3.6 + Math.random() * 1.6] });
+    out.push({ w: 1, from: [-8.6, 1.5, 5], land: [-7.2, 0.2, 4.1] });
+    out.push({ w: 1.2, from: [-3.2, 1.3, -2.4], land: [-2 + Math.random() * 3, 0.2, -3.2 - Math.random() * 1.2] });
+    return out;
+  }
+  function spawnPill(spec) {
+    if (!pillG) return false;
+    const src = pillSources(); let r = Math.random() * src.reduce((a, s) => a + s.w, 0), s = src[0];
+    for (const x of src) { r -= x.w; if (r <= 0) { s = x; break; } }
+    const sp = spec || pillSpec(), root = pillModel(sp); pillG.add(root); root.visible = false;
+    const o = { sp, g: root, from: s.from.slice(), to: s.land.slice(), t: -0.35, phase: 'pop', life: 30 + Math.random() * 8, bottle: s.bottle || null, id: 0 };
+    o.id = ++pillSeq; root.userData.pill = o.id; root.userData.body.traverse(m => { if (m.isMesh) m.userData.pill = o.id; });
+    root.traverse(m => { m.userData.pill = o.id; });
+    pills.push(o); root.position.set(o.from[0], o.from[1], o.from[2]); root.scale.set(0.01, 0.01, 0.01);
+    if (o.bottle) { const b = o.bottle, y0 = b.position.y; let u = 0; tweens.push(function (dt) { u += dt; const k = Math.min(1, u / 0.8); b.position.y = y0 + Math.abs(Math.sin(k * PI * 2)) * 0.18; b.rotation.z = Math.sin(k * PI * 7) * 0.35 * (1 - k); if (k >= 1) { b.position.y = y0; b.rotation.z = 0; return true; } return false; }); }
+    return true;
+  }
+  let pillSeq = 0;
+  function pillRemove(o) { pillG.remove(o.g); const i = pills.indexOf(o); if (i >= 0) pills.splice(i, 1); }
+  function pillTick(dt) {
+    if (!pillG) return;
+    const ok = !labOn && !synOn && !paused && !fpT && (!B.pillOk || B.pillOk());
+    if (ok && pills.length < 2) { pillT -= dt; if (pillT <= 0) { pillT = 480 + Math.random() * 120; spawnPill(); } }
+    for (let i = pills.length - 1; i >= 0; i--) {
+      const o = pills[i], g = o.g, body = g.userData.body; o.t += dt;
+      if (o.t < 0) continue; g.visible = true;
+      if (o.phase === 'pop') {
+        const k = Math.min(1, o.t / 0.95), e = k, s = Math.min(1, k * 4) * 0.62;
+        g.scale.set(s, s, s);
+        g.position.set(o.from[0] + (o.to[0] - o.from[0]) * e, o.from[1] + (o.to[1] - o.from[1]) * e + Math.sin(k * PI) * 1.9, o.from[2] + (o.to[2] - o.from[2]) * e);
+        body.rotation.z += dt * 11; body.rotation.x += dt * 5; g.userData.ring.visible = false;
+        if (k >= 1) { o.phase = 'bounce'; o.t = 0; body.rotation.x = 0; body.rotation.y = 0; body.rotation.z = 0; }
+      } else if (o.phase === 'bounce') {
+        const k = Math.min(1, o.t / 0.5); g.position.set(o.to[0], o.to[1] + Math.abs(Math.sin(k * PI * 2)) * 0.45 * (1 - k), o.to[2]);
+        if (k >= 1) { o.phase = 'sit'; o.t = 0; g.userData.ring.visible = true; }
+      } else {
+        const pu = 0.5 + 0.5 * Math.sin(o.t * 4); g.position.y = o.to[1] + 0.08 + Math.abs(Math.sin(o.t * 2.6)) * 0.1; body.rotation.y += dt * 1.4;
+        g.userData.ring.scale.set(1 + pu * 0.35, 1 + pu * 0.35, 1); g.userData.ring.material.opacity = 0.45 + 0.45 * pu;
+        if (o.t > o.life - 5) g.visible = Math.sin(o.t * 14) > -0.4;
+        if (o.t > o.life) pillRemove(o);
+      }
+    }
+  }
+  function pillClick(id) {
+    const o = pills.find(p => p.id === id); if (!o) return;
+    const p = o.g.position, pos = new T.Vector3(p.x, p.y + 0.3, p.z), spec = o.sp; pillRemove(o);
+    burst(pos, 12, 0xFFE27A, 1.0);
+    if (B.onPill) B.onPill(spec);
+  }
+  api.devPill = function (kind) { if (!api.ok || !pillG) return false; return spawnPill(kind === 'c' ? Object.assign(pillSpec(), { k: 'c', s: 'two', c: '#E04F3A', c2: '#F4F4F0' }) : kind === 't' ? { k: 't', c: '#4C7BD9', c2: '', s: 'disc' } : null); };
+  api._pillClick = function () { const o = pills.find(p => p.phase === 'sit') || pills[0]; if (!o) return false; pillClick(o.id); return true; };
+  api.pillCount = () => pills.length;
+  api.setBuff = function (on) { buffOn = !!on; buffCd = 0.3; };
   /* ---- synapse lab: a low-poly cross-section of a synapse ---- */
   let synDrugPos = null, synG = null, synOn = false, synHid = [], synCat = 'epi', synLabelsOn = true, synT = 0, synSaved = null, synWrap = null, synHLids = null, synHover = null, synRetro = 0;
   const synItems = [], synSite = {}, synVes = [], synParts = [], synLabs = [], synFlow = [];
@@ -4120,13 +4407,13 @@ const World = (function () {
   }
   /* clickable event objects on the counter: restock box, prior-auth folder, mystery pill bottle */
   let evtG = null; const evtO = {};
-  const EVT_DEF = { shelve: ['Restock', 2.0], prior: ['Prior auth', 3.2], bottle: ['Check bottle', 4.4] }, EVT_Y = 1.08, EVT_Z = -4.9;
+  const EVT_DEF = { shelve: ['Restock', 4.1], prior: ['Prior auth', 5.3], bottle: ['Check bottle', 6.5] }, EVT_Y = 1.08, EVT_Z = -4.9;
   function buildEvt(g) {
     evtG = new T.Group(); g.add(evtG);
-    // event table: between the bottle shelf and the robot, so the technician stations stay clear
-    bx(g, 3.9, 0.1, 1.4, '#F4F9F9', 3.2, 1.0, EVT_Z); bx(g, 3.9, 0.1, 0.1, '#F2A516', 3.2, 0.94, EVT_Z + 0.7);
-    [[-1.75, -0.5], [1.75, -0.5], [-1.75, 0.5], [1.75, 0.5]].forEach(l => bx(g, 0.12, 0.95, 0.12, '#0A6F66', 3.2 + l[0], 0.47, EVT_Z + l[1]));
-    bx(g, 3.7, 0.06, 1.2, '#0E9A8E', 3.2, 0.35, EVT_Z);
+    // event table: tucked toward the back-right corner next to the robot
+    bx(g, 3.9, 0.1, 1.4, '#F4F9F9', 5.3, 1.0, EVT_Z); bx(g, 3.9, 0.1, 0.1, '#F2A516', 5.3, 0.94, EVT_Z + 0.7);
+    [[-1.75, -0.5], [1.75, -0.5], [-1.75, 0.5], [1.75, 0.5]].forEach(l => bx(g, 0.12, 0.95, 0.12, '#0A6F66', 5.3 + l[0], 0.47, EVT_Z + l[1]));
+    bx(g, 3.7, 0.06, 1.2, '#0E9A8E', 5.3, 0.35, EVT_Z);
     Object.keys(EVT_DEF).forEach(k => {
       const o = new T.Group(); o.position.set(EVT_DEF[k][1], EVT_Y, EVT_Z); o.scale.set(1.25, 1.25, 1.25); o.visible = true; o.userData.evt = k; evtG.add(o);
       if (k === 'shelve') {
@@ -4270,7 +4557,7 @@ const World = (function () {
   const CATS = [
     ['BG', 'Brand / Generic'], ['CL', 'Drug classes'], ['MOA', 'Mechanisms'], ['AE', 'Adverse effects'],
     ['DDI', 'Interactions'], ['CN', 'Counseling'], ['AD', 'Antidotes'], ['SIG', 'Sig & law'],
-    ['TOP', 'Weekly drugs'], ['CALC', 'Calculations'], ['PT3', 'PharmTox \u00B7 Exam 3 questions'], ['PT3G', 'PharmTox \u00B7 Exam 3 drug practice'], ['MY', 'My studies']
+    ['TOP', 'Weekly drugs'], ['CALC', 'Calculations'], ['PT3', 'PharmTox \u00B7 Exam 3 questions'], ['PT3G', 'PharmTox \u00B7 Exam 3 drug practice'], ['PT4', 'PharmTox \u00B7 Exam 4 drug practice'], ['TH3', 'Therapeutics \u00B7 Exam 3'], ['MY', 'My studies']
   ];
   const CATNAME = {}; CATS.forEach(c => CATNAME[c[0]] = c[1]);
   const FLAVOR = {
@@ -4315,8 +4602,9 @@ const World = (function () {
     const topics = {}; CATS.forEach(c => topics[c[0]] = true);
     return { cash: 0, earned: 0, rep: 50, streak: 0, best: 0, correct: 0, wrong: 0, served: 0, franchises: 0,
       hintsLeft: 0, sinceHint: 0, calcOK: 0, mastery: {}, missed: [], karenCd: 0, karenWin: 0, karenLoss: 0, sweatyCd: 0, jimWin: 0, jimLoss: 0, phoneOK: 0, phoneBad: 0, phoneMiss: 0, lastShelve: 0, retired: 0, shelveOK: 0, shelveBad: 0, priorN: 0, decks: [],
-      me: { done: false, body: 'normal', gender: 'n', hair: 0, hairColor: 0, skin: 1, scrub: 0 }, awards: { frames: [], pets: [] },
+      me: { done: false, body: 'normal', gender: 'n', hair: 0, hairColor: 0, skin: 1, scrub: 0, shirt: 0, shoes: 3 }, awards: { frames: [], pets: [] },
       set: { topics: topics, diffs: [1, 2, 3], mode: 'mixed', timer: true, focus: false },
+      vial: [], cosm: [], cosmOn: {}, pillN: 0,
       up: { shelf: 0, tech: 0, train: 0, counsel: 0, library: 0, robot: 0 } };
   }
   let S = load();
@@ -4632,9 +4920,9 @@ const World = (function () {
       const base = 10 * [1, 1.6, 2.4][q.d - 1];
       const shelf = 1 + 0.25 * S.up.shelf;
       const speed = timerOn() ? 1 + 0.5 * Math.max(0, 1 - elapsed / 20) : 1;
-      const streakN = Math.min(S.streak, 5 + 3 * S.up.counsel), streak = 1 + 0.05 * streakN;
+      const bz = buffOn() ? 3 : 1, streakN = Math.min(S.streak * bz, (5 + 3 * S.up.counsel) * bz), streak = 1 + 0.05 * streakN;
       const lucky = Math.random() < 0.06 * S.up.robot, fr = franchiseMult();
-      pay = Math.max(1, Math.round(base * shelf * speed * streak * fr * (lucky ? 2 : 1) * (cur.hint ? 0.5 : 1) * (karen ? 2 : 1) * (sweaty ? 1.5 : 1) * (rush.on ? 1.5 : 1) * (cur.lab ? 1.5 : 1)));
+      pay = Math.max(1, Math.round(base * shelf * speed * streak * fr * buffPay() * (lucky ? 2 : 1) * (cur.hint ? 0.5 : 1) * (karen ? 2 : 1) * (sweaty ? 1.5 : 1) * (rush.on ? 1.5 : 1) * (cur.lab ? 1.5 : 1)));
       chips.push(`<span class="big">+${money(pay)}</span>`, `<span>base $${base.toFixed(0)}</span>`);
       if (S.up.shelf) chips.push(`<span>shelves x${shelf.toFixed(2)}</span>`);
       if (timerOn()) chips.push(`<span>speed x${speed.toFixed(2)}</span>`);
@@ -4656,8 +4944,8 @@ const World = (function () {
       extra += streakGift(pay); SFX.play('ok'); SFX.play('coin');
       head = karen ? 'Karen is satisfied. Big tip!' : sweaty ? 'Jim mops his brow. Thank you!' : pick(['Order filled!', 'Correct!', 'Nice catch!', 'Spot on!']);
     } else {
-      S.streak = 0; S.wrong++; S.rep = Math.max(0, S.rep - (karen ? 10 : 6)); SFX.play('bad');
-      chips.push(`<span>reputation -${karen ? 10 : 6}</span>`, '<span>streak reset</span>');
+      const kept = buffKeep(); if (!kept) S.streak = 0; S.wrong++; S.rep = Math.max(0, S.rep - (karen ? 10 : 6)); SFX.play('bad');
+      chips.push(`<span>reputation -${karen ? 10 : 6}</span>`, kept ? '<span>tablet buff kept your streak</span>' : '<span>streak reset</span>');
       if (idx < 0) chips.push("<span>time ran out</span>");
       if (!q.gen) chips.push('<span>queued for review</span>');
       head = karen ? 'Karen demands a refund!' : sweaty ? 'Jim sweats even harder.' : (idx < 0 ? 'Out of time.' : 'Not quite.');
@@ -4794,15 +5082,16 @@ const World = (function () {
   }
   function settingsHTML() {
     const st = S.set, mc = missedByCat(), ms = masteryByCat();
-    const chipOf = c => `<button type="button" class="chip tp" data-act="topic" data-v="${c[0]}" aria-pressed="${!!st.topics[c[0]]}"><span class="cn">${c[0] === 'PT3' ? 'Exam 3: your exam questions' : c[0] === 'PT3G' ? 'Exam 3: drug-list practice' : c[1]}${c[0] === 'TOP' && curWeek() ? ' <small class="mc wk">wk ' + curWeek() + '</small>' : ''}${mc[c[0]] ? ` <small class="mc">${mc[c[0]]} missed</small>` : ''}</span>${ms[c[0]] && ms[c[0]].n ? (() => { const pc = Math.round(100 * ms[c[0]].s / ms[c[0]].n); return `<span class="mbar" role="img" aria-label="${pc}% mastered"><i style="width:${pc}%"></i><em>${pc}%</em></span>`; })() : ''}</button>`;
-    const topics = CATS.filter(c => c[0] !== 'MY' && c[0] !== 'PT3' && c[0] !== 'PT3G' || c[0] === 'MY' && S.decks.length).map(chipOf).join('');
-    const tox = CATS.filter(c => c[0] === 'PT3' || c[0] === 'PT3G').map(chipOf).join('');
+    const chipOf = c => `<button type="button" class="chip tp" data-act="topic" data-v="${c[0]}" aria-pressed="${!!st.topics[c[0]]}"><span class="cn">${c[0] === 'PT3' ? 'Exam 3: your exam questions' : c[0] === 'PT3G' ? 'Exam 3: drug-list practice' : c[0] === 'PT4' ? 'Exam 4: mania and psychosis drugs' : c[0] === 'TH3' ? 'Exam 3: diarrhea, constipation, IBS' : c[1]}${c[0] === 'TOP' && curWeek() ? ' <small class="mc wk">wk ' + curWeek() + '</small>' : ''}${mc[c[0]] ? ` <small class="mc">${mc[c[0]]} missed</small>` : ''}</span>${ms[c[0]] && ms[c[0]].n ? (() => { const pc = Math.round(100 * ms[c[0]].s / ms[c[0]].n); return `<span class="mbar" role="img" aria-label="${pc}% mastered"><i style="width:${pc}%"></i><em>${pc}%</em></span>`; })() : ''}</button>`;
+    const topics = CATS.filter(c => c[0] !== 'MY' && c[0] !== 'PT3' && c[0] !== 'PT3G' && c[0] !== 'PT4' && c[0] !== 'TH3' || c[0] === 'MY' && S.decks.length).map(chipOf).join('');
+    const tox = CATS.filter(c => c[0] === 'PT3' || c[0] === 'PT3G' || c[0] === 'PT4').map(chipOf).join('');
+    const thx = CATS.filter(c => c[0] === 'TH3').map(chipOf).join('');
     const diffs = [[1, 'Level 1 easy'], [2, 'Level 2 medium'], [3, 'Level 3 hard']].map(d => `<button type="button" class="chip" data-act="diff" data-v="${d[0]}" aria-pressed="${st.diffs.indexOf(d[0]) >= 0}">${d[1]}</button>`).join('');
     const modes = MODES.map(m => `<button type="button" class="chip" data-act="mode" data-v="${m[0]}" aria-pressed="${st.mode === m[0]}">${m[1]}</button>`).join('');
     const n = poolQs().length;
     return `<div class="pane nbk ${nbClosing ? 'closing' : ''}"><div class="nbcover"><span class="nbtitle">Topics</span></div><div class="nbsheet">${hubTabs('set')}<h3>Question settings</h3><p class="sub">Changes apply to the next patient.</p>
       <div class="grp"><b>Focus mode</b><div class="chips"><button type="button" class="chip" data-act="focus" aria-pressed="${!!st.focus}">Focus mode ${st.focus ? 'on' : 'off'}</button></div><p class="note">Hides the 3D pharmacy and turns off the timer, patient events, phone calls, Karen and Jim, so it is only questions.</p></div>
-      <div class="grp"><b>Topics <span><button type="button" class="link" data-act="topics-all">All</button> &middot; <button type="button" class="link" data-act="topics-none">None</button></span></b><div class="chips">${topics}</div>${tox ? '<div class="subgrp"><b class="subh">PharmTox</b><div class="chips">' + tox + '</div></div>' : ''}</div>
+      <div class="grp"><b>Topics <span><button type="button" class="link" data-act="topics-all">All</button> &middot; <button type="button" class="link" data-act="topics-none">None</button></span></b><div class="chips">${topics}</div>${tox ? '<div class="subgrp"><b class="subh">PharmTox</b><div class="chips">' + tox + '</div></div>' : ''}${thx ? '<div class="subgrp"><b class="subh">Therapeutics</b><div class="chips">' + thx + '</div></div>' : ''}</div>
       <div class="grp"><b>Difficulty</b><div class="chips">${diffs}</div></div>
       <div class="grp"><b>Mode</b><div class="chips">${modes}</div><p class="note">${MODES.find(m => m[0] === st.mode)[2]}</p></div>
       <div class="grp"><b>Compounding pharmacy</b><div class="chips"><button type="button" class="chip" data-act="labk" data-v="comp" aria-pressed="${(S.labK || {}).comp !== false}">Compounding math</button><button type="button" class="chip" data-act="labk" data-v="pk" aria-pressed="${(S.labK || {}).pk !== false}">Kinetics</button></div><p class="note">Used when you tap Switch to compounding in the menu. Level chips above apply there too. ${S.labN ? 'Solved at the bench: ' + S.labOK + ' of ' + S.labN + '.' : ''}</p></div>
@@ -4840,10 +5129,13 @@ const World = (function () {
   const ME_SKIN = ['#F2C9A5', '#E0A97E', '#C48A5E', '#8D5A3B', '#F6D7BD', '#6F4429'];
   const ME_HAIR = ['#2B1B12', '#6B3A1E', '#B5651D', '#D9B25A', '#A8A8A8', '#1E1E2E'];
   const ME_SCRUB = ['#0E9A8E', '#27489C', '#D9467A', '#8A63C9', '#3E8E41', '#F1A20E'];
+  const ME_SKIN_N = ['Light', 'Tan', 'Medium', 'Deep', 'Fair', 'Rich'], ME_HAIR_N = ['Black', 'Brown', 'Auburn', 'Blonde', 'Gray', 'Midnight'], ME_SCRUB_N = ['Teal', 'Blue', 'Pink', 'Purple', 'Green', 'Amber'];
+  const ME_SHIRT = [['#F7FBFB', 'White coat'], ['#DCEBFA', 'Sky blue coat'], ['#FBE3EC', 'Blush coat'], ['#E6F4D9', 'Mint coat'], ['#FFF1C9', 'Cream coat'], ['#D9D4F5', 'Lavender coat'], ['#2B3A55', 'Navy coat']];
+  const ME_SHOES = [['#27384F', 'Navy shoes'], ['#F4F4F0', 'White sneakers'], ['#E04F3A', 'Red sneakers'], ['#2B2B33', 'Black shoes'], ['#F2C94C', 'Gold shoes'], ['#3FD07F', 'Green sneakers'], ['#8A63C9', 'Purple sneakers']];
   const ME_BODIES = [['slim', 'Slim'], ['normal', 'Average'], ['jacked', 'Jacked'], ['obese', 'Round']];
   const ME_GENDERS = [['f', 'Woman'], ['m', 'Man'], ['n', 'Nonbinary']];
   const ME_HAIRS = ['Short', 'Bob', 'Long', 'Bun', 'Curly', 'Spiky', 'Bald'];
-  function meSpec() { const m = S.me; return { body: m.body, gender: m.gender, hair: m.hair, skin: ME_SKIN[m.skin], hairCol: ME_HAIR[m.hairColor], scrub: ME_SCRUB[m.scrub], acc: S.acc || 0, accOn: accOnList() }; }
+  function meSpec() { const m = S.me; return { body: m.body, gender: m.gender, hair: m.hair, skin: ME_SKIN[m.skin], hairCol: ME_HAIR[m.hairColor], scrub: ME_SCRUB[m.scrub], shirtCol: (ME_SHIRT[m.shirt | 0] || ME_SHIRT[0])[0], shoes: (ME_SHOES[m.shoes === undefined ? 3 : m.shoes] || ME_SHOES[3])[0], acc: S.acc || 0, accOn: accOnList(), cosm: cosmSpec() }; }
   function accOnList() { const off = S.accOff || [], out = []; for (let k = 1; k <= (S.acc || 0); k++) if (off.indexOf(k) < 0) out.push(k); return out; }
   function meSVG() {
     const m = S.me, skin = ME_SKIN[m.skin], hair = ME_HAIR[m.hairColor], scrub = ME_SCRUB[m.scrub];
@@ -4866,21 +5158,42 @@ const World = (function () {
     const url = World.ok && World.pharmPortrait ? World.pharmPortrait(meSpec()) : null;
     return url ? '<img class="mepv-img" alt="Preview of your pharmacist" src="' + url + '">' : meSVG();
   }
+  /* ---- character screen: one slider row per part, top to bottom ---- */
+  function crows() {
+    const m = S.me, on = cosmSpec(), N = (arr) => arr.map((x, i) => ({ v: i, n: x[1] || x, c: x[0] && x[0][0] === '#' ? x[0] : '' }));
+    const cos = (slot, std) => [{ v: '', n: 'None' }].concat((std || []).map(c => ({ v: c[1], n: c[2] })), COSM.filter(c => c[0] === slot && cosmHave(c[1])).map(c => ({ v: c[1], n: c[2] })));
+    return [
+      { k: 'gender', t: 'Gender', cur: m.gender, o: ME_GENDERS.map(x => ({ v: x[0], n: x[1] })) },
+      { k: 'body', t: 'Body type', cur: m.body, o: ME_BODIES.map(x => ({ v: x[0], n: x[1] })) },
+      { k: 'skin', t: 'Skin tone', cur: m.skin, o: ME_SKIN.map((c, i) => ({ v: i, n: ME_SKIN_N[i], c })) },
+      { k: 'hair', t: 'Hair style', cur: m.hair, o: ME_HAIRS.map((n, i) => ({ v: i, n })) },
+      { k: 'hairColor', t: 'Hair color', cur: m.hairColor, o: ME_HAIR.map((c, i) => ({ v: i, n: ME_HAIR_N[i], c })) },
+      { k: 'face', t: 'Facial hair', cur: on.face, o: cos('face') },
+      { k: 'eyes', t: 'Glasses', cur: on.eyes, o: cos('eyes', STD_EYES) },
+      { k: 'hat', t: 'Hat', cur: on.hat, o: cos('hat') },
+      { k: 'shirt', t: 'Shirt', cur: m.shirt | 0, o: ME_SHIRT.map((x, i) => ({ v: i, n: x[1], c: x[0] })) },
+      { k: 'scrub', t: 'Pants', cur: m.scrub, o: ME_SCRUB.map((c, i) => ({ v: i, n: ME_SCRUB_N[i] + ' pants', c })) },
+      { k: 'shoes', t: 'Shoes', cur: m.shoes === undefined ? 3 : m.shoes, o: ME_SHOES.map((x, i) => ({ v: i, n: x[1], c: x[0] })) },
+      { k: 'extra', t: 'Extras', cur: on.extra, o: cos('extra') }
+    ];
+  }
+  function crowHTML(r) {
+    const n = r.o.length, i = Math.max(0, r.o.findIndex(x => x.v === r.cur)), c = r.o[i], dis = n < 2 ? ' disabled' : '';
+    return `<div class="crow" data-k="${r.k}"><span class="clab">${r.t}</span><div class="cslide"><button type="button" class="carr" data-act="cyc" data-k="${r.k}" data-d="-1" aria-label="Previous ${r.t.toLowerCase()}"${dis}>&#8249;</button><div class="cval" role="status" aria-live="polite">${c.c ? `<i class="csw" style="background:${c.c}"></i>` : ''}<span>${esc(c.n)}</span><small>${i + 1} of ${n}</small></div><button type="button" class="carr" data-act="cyc" data-k="${r.k}" data-d="1" aria-label="Next ${r.t.toLowerCase()}"${dis}>&#8250;</button></div></div>`;
+  }
+  function setCrow(k, v) {
+    if (['face', 'eyes', 'hat', 'extra'].indexOf(k) >= 0) { S.cosmOn = S.cosmOn || {}; const keep = {}; Object.keys(S.cosmOn).forEach(s => { const c = S.cosmOn[s] && cosmById(S.cosmOn[s]); if (c && c[0] !== k) keep[c[0]] = S.cosmOn[s]; }); S.cosmOn = keep; if (v) S.cosmOn[k] = v; }
+    else S.me[k] = (typeof v === 'number') ? v : v;
+  }
   function createHTML() {
-    const m = S.me;
-    const chips = (k, list) => list.map(o => `<button type="button" class="chip" data-act="me" data-k="${k}" data-v="${o[0]}" aria-pressed="${m[k] === o[0]}">${o[1]}</button>`).join('');
-    const hairChips = ME_HAIRS.map((n, i) => `<button type="button" class="chip" data-act="me" data-k="hair" data-v="${i}" aria-pressed="${m.hair === i}">${n}</button>`).join('');
-    const sw = (k, arr, label) => arr.map((c, i) => `<button type="button" class="swatch" data-act="me" data-k="${k}" data-v="${i}" style="background:${c}" aria-pressed="${m[k] === i}" aria-label="${label} ${i + 1}"></button>`).join('');
-    return `<div class="pane"><h3>Your character</h3><p class="sub">You always stand at the counter. Changes appear in the shop right away.</p>
-      <div class="mepv">${mePreview()}</div>
-      <div class="grp"><b>Name your pharmacy</b><input id="shopname" class="field" type="text" maxlength="24" autocomplete="off" placeholder="Corner Rx" value="${esc(S.shop || '')}" aria-label="Pharmacy name"><p class="note">It goes on the sign above your shelves. Change it any time here.</p></div>
-      <div class="grp"><b>Gender</b><div class="chips">${chips('gender', ME_GENDERS)}</div></div>
-      <div class="grp"><b>Body type</b><div class="chips">${chips('body', ME_BODIES)}</div></div>
-      <div class="grp"><b>Hair style</b><div class="chips">${hairChips}</div></div>
-      <div class="grp"><b>Skin tone</b><div class="chips">${sw('skin', ME_SKIN, 'Skin tone')}</div></div>
-      <div class="grp"><b>Hair color</b><div class="chips">${sw('hairColor', ME_HAIR, 'Hair color')}</div></div>
-      <div class="grp"><b>Scrubs color</b><div class="chips">${sw('scrub', ME_SCRUB, 'Scrubs color')}</div></div>
-      ${(S.acc || 0) < 1 ? '' : ''}<div class="grp"${(S.acc || 0) < 1 ? ' hidden' : ''}><b>Accessories</b><div class="chips">${ACCS.map((a, i) => { const k = i + 1, un = k <= (S.acc || 0), onN = un && (S.accOff || []).indexOf(k) < 0; return un ? `<button type="button" class="chip" data-act="acc-tog" data-v="${k}" aria-pressed="${onN}">${a[1]} ${a[0]}</button>` : ''; }).join('')}</div><p class="note">Tap an accessory to wear it or take it off. New ones unlock as you rank up.</p></div>
+    const m = S.me, rows = crows().map(crowHTML).join('');
+    const gear = (S.acc || 0) < 1 ? '' : `<div class="grp"><b>Rank gear</b><div class="chips">${ACCS.map((a, i) => { const k = i + 1, un = k <= (S.acc || 0), onN = un && (S.accOff || []).indexOf(k) < 0; return un ? `<button type="button" class="chip" data-act="acc-tog" data-v="${k}" aria-pressed="${onN}">${a[1]} ${a[0]}</button>` : ''; }).join('')}</div></div>`;
+    const found = (S.cosm || []).length;
+    return `<div class="pane cpane"><h3>Your character</h3>
+      <div class="mepv sticky">${mePreview()}</div>
+      <div class="grp"><b>Name your pharmacy</b><input id="shopname" class="field" type="text" maxlength="24" autocomplete="off" placeholder="Corner Rx" value="${esc(S.shop || '')}" aria-label="Pharmacy name"><p class="note">It goes on the sign above your shelves.</p></div>
+      <p class="note">Use the arrows on each row to flip through your options, top to bottom. ${found ? found + '/' + COSM.length + ' cosmetics found.' : 'Open capsules from the lost pills vial (top bar) to unlock facial hair, hats, glasses and more.'}</p>
+      <div class="crows">${rows}</div>${gear}
       <div class="btnrow"><button type="button" class="btn go" data-act="me-done">${m.done ? 'Done' : 'Start working'}</button></div></div>`;
   }
 
@@ -5452,7 +5765,7 @@ const World = (function () {
       <div class="stat cash" title="Cash"><i class="ic">${IC.coin}</i><span class="lbl">Cash</span><b id="cashv">${money(S.cash)}</b></div>
       <div class="stat rep" title="Reputation"><i class="ic">${IC.rep}</i><span class="lbl">Reputation</span><b>${Math.round(S.rep)}<small>/100</small></b><div class="repbar"><i class="${S.rep < 30 ? 'low' : ''}" style="width:${S.rep}%"></i></div></div>
       <div class="stat streak" id="streakstat" title="Answers in a row (best ${S.best})" role="img" aria-label="Streak ${S.streak}, best ${S.best}"><b style="${S.streak >= 100 ? 'font-size:13px' : S.streak >= 10 ? 'font-size:16px' : ''}">${S.streak}</b></div>`;
-    streakFx(S.streak || 0);
+    streakFx(S.streak || 0); vialSync();
   }
   function sceneSVG() {
     const L = S.up, nb = Math.min(30, 6 + L.shelf * 2), cols = ['var(--teal)', 'var(--amber)', 'var(--coral)', 'var(--teal-ink)'];
@@ -6121,6 +6434,131 @@ const World = (function () {
     showUnlock({ emoji: capSvg(id, 54), title: 'Secret capsule ' + n + ' of ' + CAPS.length + ' (' + (src === 'plant' ? 'from the plant' : 'from the sky') + ')', sub });
     renderStats(); if (view === 'awards') renderPanel();
   }
+  /* ---------------- lost pills: vial, tablet buff, capsule cosmetics ---------------- */
+  const COSM = [
+    ['face', 'mustache', 'Mustache', '🥸'], ['face', 'handlebar', 'Handlebar mustache', '🤵'], ['face', 'goatee', 'Goatee', '🧔'], ['face', 'beard', 'Full beard', '🧔‍♂️'], ['face', 'soulpatch', 'Soul patch', '😏'], ['face', 'chops', 'Mutton chops', '🤠'],
+    ['hat', 'beanie', 'Beanie', '🧶'], ['hat', 'tophat', 'Top hat', '🎩'], ['hat', 'cowboy', 'Cowboy hat', '🤠'], ['hat', 'party', 'Party hat', '🥳'], ['hat', 'crown', 'Gold crown', '👑'], ['hat', 'chef', 'Chef hat', '👨‍🍳'], ['hat', 'propeller', 'Propeller cap', '🚁'], ['hat', 'wizard', 'Wizard hat', '🧙'],
+    ['eyes', 'monocle', 'Monocle', '🧐'], ['eyes', 'eyepatch', 'Eyepatch', '🏴‍☠️'], ['extra', 'bowtie', 'Bow tie', '🎀'], ['extra', 'clownnose', 'Clown nose', '🤡'], ['extra', 'headphones', 'Headphones', '🎧'], ['extra', 'earring', 'Gold earrings', '💎'], ['eyes', 'goggles', 'Goggles', '🥽']
+  ];
+  const COSM_SLOT = { face: 'Facial hair', eyes: 'Glasses', hat: 'Hats', extra: 'Extras' };
+  const STD_EYES = [['eyes', 'round', 'Round glasses'], ['eyes', 'square', 'Square glasses']];
+  const cosmById = id => COSM.find(c => c[1] === id) || STD_EYES.find(c => c[1] === id);
+  const cosmHave = id => (S.cosm || []).indexOf(id) >= 0 || STD_EYES.some(c => c[1] === id);
+  function cosmSpec() { const on = S.cosmOn || {}, o = { face: '', eyes: '', hat: '', extra: '' }; Object.keys(on).forEach(k => { const id = on[k], c = id && cosmHave(id) ? cosmById(id) : null; if (c) o[c[0]] = id; }); return o; }
+  const PNAME = { '#F4F4F0': 'white', '#F2A516': 'orange', '#E04F3A': 'red', '#4C7BD9': 'blue', '#2FAE66': 'green', '#F29BC1': 'pink', '#8A63C9': 'purple', '#7FD6E8': 'sky blue', '#F6E27A': 'yellow' };
+  const PSHAPE = { disc: 'round tablet', oval: 'oval tablet', caplet: 'caplet tablet', sq: 'square tablet', two: 'two-tone capsule', band: 'banded capsule', gel: 'softgel capsule' };
+  function pillName(p) { const c = PNAME[p.c] || 'colorful'; return (p.k === 'c' && p.s !== 'gel' && p.c2 && p.c2 !== p.c ? c + ' and ' + (PNAME[p.c2] || 'white') + ' ' : c + ' ') + (PSHAPE[p.s] || (p.k === 't' ? 'tablet' : 'capsule')); }
+  function pillSvg(p, s) {
+    const ink = '#1d2b2e', st = 'stroke="' + ink + '" stroke-width="2"', c = p.c, c2 = p.c2 || p.c; let b;
+    if (p.k === 't') {
+      if (p.s === 'disc') b = '<circle cx="20" cy="20" r="13" fill="' + c + '" ' + st + '/><path d="M9 20h22" stroke="' + ink + '" stroke-width="1.6" opacity=".45"/>';
+      else if (p.s === 'oval') b = '<ellipse cx="20" cy="20" rx="16" ry="10" fill="' + c + '" ' + st + ' transform="rotate(-30 20 20)"/>';
+      else if (p.s === 'caplet') b = '<g transform="rotate(-30 20 20)"><rect x="4" y="13" width="32" height="14" rx="7" fill="' + c + '" ' + st + '/><path d="M20 13v14" stroke="' + ink + '" stroke-width="1.6" opacity=".45"/></g>';
+      else b = '<rect x="8" y="8" width="24" height="24" rx="5" fill="' + c + '" ' + st + ' transform="rotate(-15 20 20)"/>';
+    } else if (p.s === 'gel') b = '<ellipse cx="20" cy="20" rx="16" ry="10" fill="' + c + '" ' + st + ' transform="rotate(-35 20 20)"/><ellipse cx="14" cy="15" rx="4" ry="2" fill="#fff" opacity=".7" transform="rotate(-35 14 15)"/>';
+    else b = '<g transform="rotate(-40 20 20)"><rect x="4" y="12" width="32" height="16" rx="8" fill="' + c2 + '"/><path d="M20 12H12a8 8 0 0 0 0 16h8z" fill="' + c + '"/>' + (p.s === 'band' ? '<rect x="16" y="12" width="8" height="16" fill="#F4F4F0"/>' : '') + '<rect x="4" y="12" width="32" height="16" rx="8" fill="none" ' + st + '/></g>';
+    return '<svg viewBox="0 0 40 40" width="' + (s || 34) + '" height="' + (s || 34) + '" aria-hidden="true">' + b + '</svg>';
+  }
+  const vialBtnSvg = '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 3h8M9 3v3M15 3v3M7 6h10v13a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2z"/><path d="M7 11h10"/></svg>';
+  function vialSync() {
+    const b = $('#vialbtn'); if (!b) return; const n = (S.vial || []).length, c = b.querySelector('.vcount');
+    if (c) { c.textContent = n; c.hidden = !n; }
+    b.setAttribute('aria-label', 'Lost pills vial, ' + n + (n === 1 ? ' pill' : ' pills'));
+  }
+  const pillOk = () => !focusOn() && !labOn() && !learning() && view === 'q' && !document.querySelector('.vdlg');
+  function onPill(sp) {
+    S.vial = S.vial || []; S.vial.push({ k: sp.k, c: sp.c, c2: sp.c2 || '', s: sp.s }); if (S.vial.length > 24) S.vial.shift();
+    S.pillN = (S.pillN || 0) + 1; save(); vialSync(); SFX.play('ok');
+    toast('Added to the lost pills vial: ' + pillName(sp) + '.');
+  }
+  /* tablet buff */
+  const BUFF_MS = 90000; let buffUntil = 0, buffSlips = 0, buffTimer = null, buffEl = null;
+  const buffOn = () => Date.now() < buffUntil;
+  const buffPay = () => buffOn() ? 2 : 1;
+  function buffKeep() { if (buffOn() && buffSlips > 0) { buffSlips--; return true; } return false; }
+  function buffTick() {
+    const left = buffUntil - Date.now();
+    if (left <= 0) { endBuff(); return; }
+    if (buffEl) buffEl.textContent = '⚡ Tablet buff ' + Math.ceil(left / 1000) + 's · money ×2 · streak bonus ×3' + (buffSlips ? ' · ' + buffSlips + ' free slip' + (buffSlips > 1 ? 's' : '') : '');
+  }
+  function endBuff() {
+    clearInterval(buffTimer); buffTimer = null; buffUntil = 0; buffSlips = 0;
+    document.body.classList.remove('trip'); try { World.setBuff(false); } catch (e) { /* ignore */ }
+    if (buffEl) { buffEl.remove(); buffEl = null; }
+    toast('The tablet wears off. Back to normal.');
+  }
+  function tabletTake() {
+    buffUntil = Date.now() + BUFF_MS; buffSlips = 2;
+    if (!document.querySelector('.tripfx')) { const f = document.createElement('div'); f.className = 'tripfx'; f.setAttribute('aria-hidden', 'true'); document.body.appendChild(f); }
+    document.body.classList.add('trip');
+    if (!buffEl) { buffEl = document.createElement('div'); buffEl.className = 'buffpill'; buffEl.setAttribute('role', 'status'); document.body.appendChild(buffEl); }
+    try { World.setBuff(true); } catch (e) { /* ignore */ }
+    SFX.play('streak'); toast('⚡ You feel energized and sharp! Your pharmacist is buzzing.');
+    clearInterval(buffTimer); buffTimer = setInterval(buffTick, 250); buffTick();
+  }
+  /* the vial window */
+  let vdlg = null, vOpenAt = 0, vSel = -1, vBack = null;
+  function vdlgClose() {
+    if (!vdlg) return; vdlg.remove(); vdlg = null; document.removeEventListener('keydown', vdlgKey, true);
+    if (cur && !cur.done && !cur.empty && vOpenAt) cur.t0 += Date.now() - vOpenAt; vOpenAt = 0;
+    if (vBack && vBack.focus) try { vBack.focus(); } catch (e) { /* ignore */ }
+  }
+  function vdlgKey(e) { if (e.key === 'Escape' && vdlg) { e.stopPropagation(); vdlgClose(); } }
+  function openVial() {
+    if (vdlg) return; vBack = document.activeElement; vOpenAt = Date.now(); vSel = -1;
+    vdlg = document.createElement('div'); vdlg.className = 'tour vdlg'; document.body.appendChild(vdlg);
+    document.addEventListener('keydown', vdlgKey, true);
+    vdlg.addEventListener('click', ev => {
+      const t = ev.target.closest('button'); if (!t) { if (ev.target === vdlg) vdlgClose(); return; }
+      if (t.dataset.close !== undefined) { vdlgClose(); return; }
+      if (t.dataset.i !== undefined) { vSel = +t.dataset.i; vdraw(); const nb = vdlg && vdlg.querySelector('[data-take]'); if (nb) nb.focus(); return; }
+      if (t.dataset.take !== undefined) {
+        const p = (S.vial || [])[vSel]; if (!p) return; S.vial.splice(vSel, 1); save(); vialSync(); vdlgClose();
+        if (p.k === 't') tabletTake(p); else capsuleOpen(p); return;
+      }
+    });
+    vdraw(); const f = vdlg.querySelector('button'); if (f) f.focus();
+  }
+  function vdraw() {
+    if (!vdlg) return; const v = S.vial || [], sel = v[vSel];
+    vdlg.innerHTML = '<div class="tourcard vcard" role="dialog" aria-modal="true" aria-labelledby="vtitle"><h3 id="vtitle">Lost pills vial</h3>' +
+      (v.length ? '<p>Pills that popped out of bottles around the pharmacy. Pick one to take.</p><div class="vgrid">' + v.map((p, i) => '<button type="button" class="vpill" data-i="' + i + '" aria-pressed="' + (i === vSel) + '" aria-label="' + esc(pillName(p)) + '">' + pillSvg(p, 40) + '</button>').join('') + '</div>' : '<p>Empty. Watch the shelves and other spots around the pharmacy for pills that pop out, then tap them to collect.</p>') +
+      (sel ? '<p class="vdesc"><b>' + esc(pillName(sel)) + '.</b> ' + (sel.k === 't' ? 'Tablets are rare and strong. For 90 seconds the screen warps and your pharmacist feels sharp: money ×2, streak bonus ×3, and two free slips that keep your streak.' : 'Capsules pop open to reveal a cosmetic: facial hair, a hat, or an accessory.') + '</p>' : '') +
+      '<div class="tourbtns">' + (sel ? '<button type="button" class="btn go" data-take>Take it</button>' : '') + '<button type="button" class="btn" data-close>Close</button></div></div>';
+  }
+  /* capsule reveal */
+  function capsuleOpen(p) {
+    const left = COSM.filter(c => !cosmHave(c[1])), res = left.length ? pick(left) : null;
+    vOpenAt = Date.now(); vBack = document.activeElement;
+    const el = document.createElement('div'); el.className = 'tour vdlg capdlg'; document.body.appendChild(el); vdlg = el;
+    document.addEventListener('keydown', vdlgKey, true);
+    const c1 = p.c, c2 = p.c2 || p.c, st = 'stroke="#1d2b2e" stroke-width="2.4"';
+    el.innerHTML = '<div class="tourcard vcard" role="dialog" aria-modal="true" aria-labelledby="ctitle"><h3 id="ctitle">The capsule is opening...</h3><div class="capstage"><svg viewBox="0 0 120 60" class="capbig" aria-hidden="true"><g class="chalf l"><path d="M60 14H30a16 16 0 0 0 0 32h30z" fill="' + c1 + '" ' + st + '/></g><g class="chalf r"><path d="M60 14h30a16 16 0 0 1 0 32H60z" fill="' + c2 + '" ' + st + '/></g></svg><div class="reel" id="creel" aria-hidden="true">?</div></div><p class="rname" id="cname" aria-live="polite"></p><div id="cprev"></div><div class="tourbtns"><button type="button" class="btn go" data-close disabled id="cdone">Nice</button></div></div>';
+    el.addEventListener('click', ev => { const t = ev.target.closest('button'); if (t && t.dataset.close !== undefined && !t.disabled) vdlgClose(); });
+    const reel = el.querySelector('#creel'), nm = el.querySelector('#cname'), title = el.querySelector('#ctitle'), done = el.querySelector('#cdone');
+    const reduce = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const icons = {}; COSM.forEach(c => { icons[c[1]] = World.ok && World.cosmIcon ? World.cosmIcon(c[0], c[1]) : null; });
+    const showIt = (it) => { const u = icons[it[1]]; reel.innerHTML = u ? '<img alt="" src="' + u + '">' : it[3]; };
+    let ticks = reduce ? 4 : 22, i = 0, last = -1; const t0 = reduce ? 200 : 900;
+    setTimeout(() => { el.querySelector('.capstage').classList.add('open'); SFX.play('unlock'); step(); }, t0);
+    function step() {
+      if (!vdlg || vdlg !== el) return;
+      i++; let k; do { k = Math.floor(Math.random() * COSM.length); } while (k === last && COSM.length > 1); last = k;
+      const fin = i >= ticks; const it = fin ? (res || COSM[k]) : COSM[k];
+      showIt(it); reel.classList.toggle('land', fin);
+      if (!fin) { setTimeout(step, 70 + Math.pow(i / ticks, 2.4) * 380); return; }
+      let msg = '';
+      if (res) {
+        S.cosm = (S.cosm || []).concat([res[1]]); S.cosmOn = S.cosmOn || {}; S.cosmOn[res[0]] = res[1];
+        msg = 'New ' + COSM_SLOT[res[0]].toLowerCase().replace(/s$/, '') + ': ' + res[2] + '! It is on your pharmacist now (change it any time in Character). ' + S.cosm.length + '/' + COSM.length + ' found.';
+        if (S.cosm.length === COSM.length) { S.cash += 1000; S.earned += 1000; S.hintsLeft = Math.min(hintCap() + 3, S.hintsLeft + 3); msg += ' Every cosmetic found: +' + money(1000) + ' and 3 hints!'; }
+      } else { const b = Math.round(250 * franchiseMult()); S.cash += b; S.earned += b; msg = 'You found every cosmetic already, so the capsule held ' + money(b) + ' instead.'; }
+      save(); try { World.setPharmacist(meSpec()); } catch (e) { /* ignore */ }
+      title.textContent = res ? 'Unlocked: ' + res[2] : 'Cash capsule'; nm.textContent = msg; done.disabled = false; done.focus(); SFX.play('streak'); renderStats();
+      if (res && World.ok && World.pharmPortrait) { const u = World.pharmPortrait(meSpec()); if (u) el.querySelector('#cprev').innerHTML = '<img class="mepv-img capprev" alt="Your pharmacist wearing the new item" src="' + u + '">'; }
+      if (view === 'create') renderPanel();
+    }
+  }
   /* ---------------- seasonal events ---------------- */
   const HOLS = {
     halloween: { name: 'Halloween', emoji: '\uD83C\uDF83', start: [10, 24], end: [10, 31], deco: ['Pumpkins on the counter', 'Jack-o-lantern', 'Witch cauldron', 'Friendly ghost', 'Bat swarm', 'Spider web', 'Witch hat', 'Candy bowl'], intro: 'Halloween week! The pharmacy glows orange. Answer questions to unlock decorations, and watch for costumed patients.' },
@@ -6332,7 +6770,7 @@ const World = (function () {
       <div class="btnrow"><button type="button" class="btn go" data-act="back">Back to the pharmacy</button></div></div>`;
   }
 
-  const GAME_VERSION = 78;
+  const GAME_VERSION = 81;
   const b64u = (u8) => { let s = ''; for (let i = 0; i < u8.length; i += 0x8000) s += String.fromCharCode.apply(null, u8.subarray(i, i + 0x8000)); return btoa(s).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); };
   const unb64u = (t) => { const s = atob(t.replace(/-/g, '+').replace(/_/g, '/')), u = new Uint8Array(s.length); for (let i = 0; i < s.length; i++) u[i] = s.charCodeAt(i); return u; };
   const chk = (t) => { let h = 2166136261; for (let i = 0; i < t.length; i++) { h ^= t.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36); };
@@ -6388,6 +6826,9 @@ const World = (function () {
       case 'settings': openView(view === 'set' ? 'q' : 'set'); if (view === 'q') { resumeTimers(); renderPanel(); } return;
       case 'studies': openView(view === 'studies' ? 'q' : 'studies'); if (view === 'q') { resumeTimers(); renderPanel(); } return;
       case 'acc-tog': { readShop(); const k = +v; S.accOff = S.accOff || []; const i = S.accOff.indexOf(k); if (i >= 0) S.accOff.splice(i, 1); else S.accOff.push(k); save(); World.setPharmacist(meSpec()); renderPanel(); return; }
+      case 'vial': openVial(); return;
+      case 'cyc': { readShop(); const k = t.dataset.k, d = +t.dataset.d, r = crows().find(x => x.k === k); if (!r || r.o.length < 2) return; const i = Math.max(0, r.o.findIndex(x => x.v === r.cur)), nx = r.o[(i + d + r.o.length) % r.o.length]; setCrow(k, nx.v); save(); World.setPharmacist(meSpec());
+        const row = document.querySelector('.crow[data-k="' + k + '"]'), nr = crows().find(x => x.k === k); if (row && nr) { row.outerHTML = crowHTML(nr); const nb = document.querySelector('.crow[data-k="' + k + '"] [data-d="' + d + '"]'); if (nb) nb.focus(); } const pv = document.querySelector('.mepv'); if (pv) pv.innerHTML = mePreview(); return; }
       case 'create': openView(view === 'create' ? 'q' : 'create'); if (view === 'q') { resumeTimers(); renderPanel(); } return;
       case 'awards': openView(view === 'awards' ? 'q' : 'awards'); if (view === 'q') { resumeTimers(); renderPanel(); } return;
       case 'me': { readShop(); const k = t.dataset.k, v = t.dataset.v; S.me[k] = (k === 'hair' || k === 'hairColor' || k === 'skin' || k === 'scrub') ? +v : v; save(); World.setPharmacist(meSpec()); renderPanel(); return; }
@@ -6404,6 +6845,7 @@ const World = (function () {
       case 'sc-copy': case 'sc-load': return saveCodeAct(t, a);
       case 'dev-elder': { const ok = World.ok && World.devElder(); toast(ok ? 'An elder patient is next in line. Use "Test: skip to next patient".' : 'No patient could be swapped right now.'); return; }
       case 'dev-next': if (view === 'q') newCard(); return;
+      case 'dev-pill': { const ok = World.ok && World.devPill(); toast(ok ? 'A pill popped out. Tap it.' : 'Could not spawn one.'); return; }
       case 'dev-bottle': learnOff(); fp.cool = 0; return startBottles();
       case 'dev-shelve': learnOff(); return startShelve(false);
       case 'dev-prior': learnOff(); return startPrior();
@@ -6547,8 +6989,8 @@ const World = (function () {
   setInterval(() => { if (window.__rxLoading) return; try { localStorage.setItem(SAVE_KEY, JSON.stringify(S)); } catch (e) { /* ignore */ } }, 5000);
 
   { const sc = $('#savecard'); if (sc) sc.innerHTML = saveBoxHTML(); }
-  World.init({ host: $('#stage'), getS: () => S, tagInfo: tagInfo, onBuy: buyUp, onNotes: () => openView('studies'), notesInfo: customCount, karenRoll: karenRoll, sweatyRoll: sweatyRoll, elderRoll: elderRoll, eventRoll: eventRoll, onVisitor: visitClick, onVisitorArrive: visitArrive, capsuleOk: capsuleOk, onCapsule: onCapsule, onBrain: synEnter, onSynSite: onSynSite, onEvt: onEvt, onPhone: openPhone, onPolice: policeCome, onFp: fpClick, sign: () => shopName() + '|' + tierName() + ' #' + (S.franchises + 1) });
-  window.__rxDbg = () => ({ fp: fp, S: S, view: view, rush: rush, phoneR: phone.ringing, TOPQ: TOPQ, pool: poolQs, cur: cur, synQ: () => (typeof SYN !== 'undefined' ? SYN.q : null), synTap: id => onSynSite(id), offer: k => offerEvt(k, 'test'), onEvt: onEvt, holiday: () => holNow(), holN: () => holCount(), renderStats: renderStats, passive: passive, techRate: techRate, buyUp: buyUp });
+  World.init({ host: $('#stage'), getS: () => S, tagInfo: tagInfo, onBuy: buyUp, onNotes: () => openView('studies'), notesInfo: customCount, karenRoll: karenRoll, sweatyRoll: sweatyRoll, elderRoll: elderRoll, eventRoll: eventRoll, onVisitor: visitClick, onVisitorArrive: visitArrive, capsuleOk: capsuleOk, onCapsule: onCapsule, onBrain: synEnter, onSynSite: onSynSite, onEvt: onEvt, pillOk: pillOk, onPill: onPill, onPhone: openPhone, onPolice: policeCome, onFp: fpClick, sign: () => shopName() + '|' + tierName() + ' #' + (S.franchises + 1) });
+  window.__rxDbg = () => ({ fp: fp, S: S, view: view, rush: rush, phoneR: phone.ringing, TOPQ: TOPQ, pool: poolQs, cur: cur, synQ: () => (typeof SYN !== 'undefined' ? SYN.q : null), synTap: id => onSynSite(id), offer: k => offerEvt(k, 'test'), onEvt: onEvt, holiday: () => holNow(), holN: () => holCount(), renderStats: renderStats, passive: passive, techRate: techRate, buyUp: buyUp, openVial: openVial, tabletTake: tabletTake, capsuleOpen: capsuleOpen, buffOn: buffOn, COSM: COSM });
   if (!World.ok) $('#stage').classList.add('flat');
   else { document.body.classList.add('fx'); World.setPharmacist(meSpec()); World.setAwards(S.awards); World.setCalendar(Math.min(4, S.awards.calW || 0), false, S.awards.calW || 0); }
   applyFocus(); syncBrand(); sfxLabel();
@@ -6557,7 +6999,7 @@ const World = (function () {
     const menu = $('#menu'), close = menu && menu.querySelector('.menuclose');
     if (menu && close) {
       const hr = document.createElement('hr'); menu.insertBefore(hr, close);
-      [['dev-elder', 'Test: elder patient next'], ['dev-next', 'Test: skip to next patient'], ['dev-bottle', 'Test: bottle check'], ['dev-shelve', 'Test: restock'], ['dev-prior', 'Test: prior auth'], ['dev-rush', 'Test: rush hour'], ['dev-insp', 'Test: health inspector next'], ['dev-driver', 'Test: delivery next'], ['dev-sky', 'Test: sky capsule'], ['dev-plant', 'Test: plant capsule'], ['dev-fast', 'Test: skip slow start']].forEach(b => {
+      [['dev-pill', 'Test: pop a pill'], ['dev-elder', 'Test: elder patient next'], ['dev-next', 'Test: skip to next patient'], ['dev-bottle', 'Test: bottle check'], ['dev-shelve', 'Test: restock'], ['dev-prior', 'Test: prior auth'], ['dev-rush', 'Test: rush hour'], ['dev-insp', 'Test: health inspector next'], ['dev-driver', 'Test: delivery next'], ['dev-sky', 'Test: sky capsule'], ['dev-plant', 'Test: plant capsule'], ['dev-fast', 'Test: skip slow start']].forEach(b => {
         const el = document.createElement('button'); el.type = 'button'; el.dataset.act = b[0]; el.innerHTML = '<i aria-hidden="true">\u2699</i><span>' + b[1] + '</span>'; menu.insertBefore(el, close);
       });
     }
