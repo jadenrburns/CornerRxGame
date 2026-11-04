@@ -2480,7 +2480,7 @@ const World = (function () {
     // Body types: normal, jacked (huge upper body, tiny legs), obese. Upper body and head live in their own groups.
     const jacked = body === 'jacked', obese = body === 'obese', slim = body === 'slim';
     const tr = o.gender === 'f' ? [0.3, 0.43] : o.gender === 'm' ? [0.42, 0.35] : [0.34, 0.4];
-    const legL = o.him ? 0.95 : jacked ? 0.5 + 0.2 * rnd(7) : 0.68, legW = jacked || obese ? 0.3 : slim ? 0.15 : 0.2, headS = jacked ? 0.82 : obese ? 1.12 : 1;
+    const legL = o.him ? 1.12 : jacked ? 0.5 + 0.2 * rnd(7) : 0.68, legW = jacked || obese ? 0.3 : slim ? 0.15 : 0.2, headS = jacked ? 0.82 : obese ? 1.12 : 1;
     const up = new T.Group(); up.position.y = legL - 0.68; g.add(up);
     const hd = new T.Group(); hd.position.y = 1.85 * (1 - headS); hd.scale.set(headS, headS, headS); up.add(hd); P.head = hd; P.up = up; P.him = !!o.him;
     let par = up;
@@ -2634,7 +2634,7 @@ const World = (function () {
     });
     if (isStaff || o.cap) put(new T.BoxGeometry(0.13, 0.13, 0.04), own(o.cap ? '#F2C94C' : '#0E9A8E'), 0.17, 1.35, 0.36);
     if (o.elder) g.scale.set(0.95, 0.9, 0.95);
-    if (o.him) g.scale.set(1.04, 1.04, 1.04);
+    if (o.him) g.scale.set(1.06, 1.06, 1.06);
     if (karen) g.scale.set(1.08, 1.08, 1.08);
     if (sweaty) g.scale.set(0.66, 1.1, 0.66);
     if (varied && !o.elder) { const gs = 0.9 + 0.24 * rnd(9); g.scale.set(gs, gs, gs); }
@@ -4340,6 +4340,8 @@ const World = (function () {
   const HIM_GOLD = 0xFFD54A, HIM_SEED = 4242;
   function himOpts(extra) { return Object.assign({ him: true, skin: '#F1C9A8', hair: '#D4AE55', hairStyle: 0, shirt: '#2F5FA8', scrub: '#C2A878', shoes: '#5B4A38', gender: 'm' }, extra || {}); }
   const glowM = (col, op) => new T.MeshBasicMaterial({ color: col, transparent: true, opacity: op, depthWrite: false, blending: T.AdditiveBlending, side: T.DoubleSide });
+  // tilt the head about the neck (not the body origin) so it stays attached
+  function headX(P, a) { P.head.rotation.x = a; P.head.position.y = 1.65 * (1 - Math.cos(a)); P.head.position.z = -1.65 * Math.sin(a); }
   const easeIO = (k) => k * k * (3 - 2 * k);
   let himH = null, himA = null, himAsc = null, himT = 600;
   function himBubble(text) {
@@ -4374,7 +4376,7 @@ const World = (function () {
   /* ---- 1. walking in as a patient ---- */
   api.himArrive = function () {
     if (!api.ok || !custGroup || himAsc) return false;
-    const p = person(HIM_SEED, false, false, false, 'normal', himOpts());
+    const p = person(HIM_SEED, false, false, false, 'slim', himOpts());
     p.position.set(5, 0, 9.6); custGroup.add(p);
     const c = { g: p, seed: HIM_SEED, wp: [new T.Vector3(5, 0, 6.2)], mood: null, moodT: 0, phase: 0, hop: 0, face: 0, karen: false, sweaty: false, him: true, pusher: true, speed: 3.6, body: 'normal', r: 0.6, angry: false, puffT: 0, dripT: 0, jx: 0, jz: 0, faceJit: 0, wait: 0, emoteT: 999 };
     queue.splice(0, 0, c); assignSlots(); cur = c; setBubble('?', '');
@@ -4405,7 +4407,7 @@ const World = (function () {
       P.legs[i].rotation.x = lerp(P.legs[i].rotation.x, 0, Math.min(1, dt * 8)); P.knees[i].rotation.x = lerp(P.knees[i].rotation.x, rise > 0 ? 0.3 + Math.sin(t * 2 + i) * 0.1 : 0, Math.min(1, dt * 8));
       P.arms[i].rotation.x = lerp(P.arms[i].rotation.x, 0, Math.min(1, dt * 8)); P.arms[i].rotation.z = (i ? 1 : -1) * (0.08 * settle + 1.0 * spread);
     }
-    P.head.rotation.x = -0.75 * look;
+    headX(P, -0.75 * look);
     // wings and halo appear as the light takes hold
     const wk = easeIO(clamp((t - 2.0) / 1.2, 0, 1)); a.ap.grp.scale.set(Math.max(0.01, wk), Math.max(0.01, wk), Math.max(0.01, wk)); if (wk > 0) flapWings(a.ap, t, 0.18 + 0.12 * wk);
     // light
@@ -4429,12 +4431,11 @@ const World = (function () {
   /* ---- 3. the angel in the clouds ---- */
   function spawnAngel() {
     if (!capG || himA || himH || himAsc) return false;
-    const root = new T.Group(), fig = person(HIM_SEED, false, false, false, 'normal', himOpts({ tag: { himA: true } }));
-    fig.position.y = 0.4; fig.rotation.y = 0.55; root.add(fig);
-    const ap = angelParts(fig), cl = new T.Group(); cl.position.y = -0.1; root.add(cl);
-    [[0, 0, 0, 1.0], [1.0, -0.05, 0.15, 0.75], [-1.0, -0.05, -0.1, 0.8], [0.45, 0.12, 0.55, 0.62], [-0.45, 0.1, -0.55, 0.62], [1.7, -0.15, 0, 0.5], [-1.7, -0.15, 0.1, 0.5]].forEach(q => { const s = ico(cl, q[3], '#FFFFFF', q[0], q[1], q[2]); s.scale.set(1, 0.62, 1); s.userData.himA = true; });
-    const hit = new T.Mesh(new T.SphereGeometry(2.8, 6, 5), new T.MeshBasicMaterial({ visible: false })); hit.position.y = 1.4; hit.userData.himA = true; root.add(hit);
-    const P = fig.userData.P; P.arms[0].rotation.z = -1.15; P.arms[1].rotation.z = 1.15; P.head.rotation.x = -0.12;
+    const root = new T.Group(), fig = person(HIM_SEED, false, false, false, 'slim', himOpts({ tag: { himA: true } }));
+    fig.rotation.y = PI / 2; fig.rotation.x = PI / 2; fig.position.set(-1.3, 0, 0); root.add(fig);
+    const ap = angelParts(fig);
+    const hit = new T.Mesh(new T.SphereGeometry(2.8, 6, 5), new T.MeshBasicMaterial({ visible: false })); hit.userData.himA = true; root.add(hit);
+    const P = fig.userData.P; P.arms[0].rotation.x = P.arms[1].rotation.x = -3.0; P.legs[0].rotation.x = 0.1; P.legs[1].rotation.x = 0.3; P.knees[1].rotation.x = 0.3; headX(P, -0.35);
     root.scale.set(1.15, 1.15, 1.15); root.position.set(-24, 10.6, -2.5); capG.add(root);
     himA = { root, fig, ap, t: 0, sp: 1.8, spark: 0 };
     if (B.onHimSpawn) B.onHimSpawn();
@@ -4459,7 +4460,7 @@ const World = (function () {
   /* ---- 4. the superhero smash ---- */
   function startDive(from) {
     if (!api.ok || !custGroup || himH) return false;
-    const g = person(HIM_SEED, false, false, false, 'normal', himOpts({ tag: { himH: true } }));
+    const g = person(HIM_SEED, false, false, false, 'slim', himOpts({ tag: { himH: true } }));
     g.position.copy(from); custGroup.add(g);
     const to = new T.Vector3(2.5, 0, 2.3);
     g.rotation.y = Math.atan2(to.x - from.x, to.z - from.z);
@@ -4481,7 +4482,7 @@ const World = (function () {
     // superhero landing, blended out by blend 0 (crouched) to 1 (standing)
     const g = h.g, P = g.userData.P, c = 1 - blend;
     P.legs[0].rotation.x = -1.35 * c; P.knees[0].rotation.x = 1.5 * c; P.legs[1].rotation.x = 0.55 * c; P.knees[1].rotation.x = 1.7 * c;
-    g.position.y = -0.38 * c; P.up.rotation.x = 0.5 * c; P.head.rotation.x = 0.3 * c - 0.1 * blend;
+    g.position.y = -0.38 * c; P.up.rotation.x = 0.5 * c; headX(P, 0.3 * c - 0.1 * blend);
     P.arms[0].rotation.x = -0.4 * c; P.arms[1].rotation.x = 0.9 * c; P.arms[0].rotation.z = -0.6 * blend; P.arms[1].rotation.z = 0.6 * blend;
   }
   function himFly(h, k) {
@@ -4489,7 +4490,7 @@ const World = (function () {
     const g = h.g, P = g.userData.P, vx = h.fq.x - h.fp.x, vy = h.fq.y - h.fp.y, vz = h.fq.z - h.fp.z, hv = Math.hypot(vx, vz);
     g.position.set(h.fp.x + vx * k, h.fp.y + vy * k, h.fp.z + vz * k);
     g.rotation.y = Math.atan2(vx, vz); g.rotation.x = Math.atan2(hv, vy);
-    P.arms[0].rotation.x = P.arms[1].rotation.x = -3.0; P.arms[0].rotation.z = P.arms[1].rotation.z = 0; P.legs[0].rotation.x = 0.1; P.legs[1].rotation.x = 0.25; P.knees[0].rotation.x = 0.15; P.knees[1].rotation.x = 0.35; P.head.rotation.x = 0;
+    P.arms[0].rotation.x = P.arms[1].rotation.x = -3.0; P.arms[0].rotation.z = P.arms[1].rotation.z = 0; P.legs[0].rotation.x = 0.1; P.legs[1].rotation.x = 0.25; P.knees[0].rotation.x = 0.15; P.knees[1].rotation.x = 0.35; headX(P, 0);
   }
   function heroTick(dt) {
     const h = himH; if (!h) return;
@@ -4517,7 +4518,7 @@ const World = (function () {
     } else if (h.state === 'bless') {
       const k = easeIO(clamp(t / 0.7, 0, 1)), fadeOut = 1 - easeIO(clamp((t - 2.6) / 0.8, 0, 1));
       p.y = 0.9 * k * fadeOut + Math.sin(t * 3) * 0.08 * k; g.rotation.y += dt * 0.6 * k;
-      P.arms[0].rotation.x = P.arms[1].rotation.x = -2.8 * k; P.arms[0].rotation.z = -0.35 * k; P.arms[1].rotation.z = 0.35 * k; P.head.rotation.x = -0.5 * k; P.legs[0].rotation.x = P.legs[1].rotation.x = 0; P.knees[0].rotation.x = P.knees[1].rotation.x = 0.2 * k;
+      P.arms[0].rotation.x = P.arms[1].rotation.x = -2.8 * k; P.arms[0].rotation.z = -0.35 * k; P.arms[1].rotation.z = 0.35 * k; headX(P, -0.5 * k); P.legs[0].rotation.x = P.legs[1].rotation.x = 0; P.knees[0].rotation.x = P.knees[1].rotation.x = 0.2 * k;
       if (h.beam) { h.beam.material.opacity = 0.38 * k * fadeOut * (0.85 + 0.15 * Math.sin(t * 10)); h.beam.rotation.y += dt; h.ring.material.opacity = 0.5 * k * fadeOut; const rs = 1 + 0.2 * Math.sin(t * 5); h.ring.scale.set(rs, rs, rs); }
       h.spark -= dt; if (h.spark <= 0) { h.spark = 0.07; burst(new T.Vector3(-8 + Math.random() * 16, 5 + Math.random() * 2, -5 + Math.random() * 11), 2, HIM_GOLD, 0.15); }
       if (t > 3.4) { if (h.beam) { scene.remove(h.beam); scene.remove(h.ring); h.beam = null; } h.state = 'wait2'; h.t = 0; p.y = 0; }
@@ -7503,7 +7504,7 @@ const World = (function () {
       <div class="btnrow"><button type="button" class="btn go" data-act="back">Back to the pharmacy</button></div></div>`;
   }
 
-  const GAME_VERSION = 88;
+  const GAME_VERSION = 89;
   const b64u = (u8) => { let s = ''; for (let i = 0; i < u8.length; i += 0x8000) s += String.fromCharCode.apply(null, u8.subarray(i, i + 0x8000)); return btoa(s).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); };
   const unb64u = (t) => { const s = atob(t.replace(/-/g, '+').replace(/_/g, '/')), u = new Uint8Array(s.length); for (let i = 0; i < s.length; i++) u[i] = s.charCodeAt(i); return u; };
   const chk = (t) => { let h = 2166136261; for (let i = 0; i < t.length; i++) { h ^= t.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36); };
