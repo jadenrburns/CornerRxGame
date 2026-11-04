@@ -958,6 +958,7 @@ body.trip .stats .stat { animation: tripbob 1.4s ease-in-out infinite; }
 @media (max-width: 420px) { .crow { grid-template-columns: 1fr; gap: 4px; } }
 .reel img { width: 96px; height: 96px; display: block; filter: drop-shadow(0 3px 0 rgba(0,0,0,.18)); }
 .capstage { height: 120px; }
+.flaglink{display:inline-block;margin-left:10px;font-size:.85rem;color:#5b6b6b;text-decoration:underline;padding:8px 4px}.flaglink:hover{color:#0f766e}
 </style>
 
 <div class="shell">
@@ -5237,11 +5238,25 @@ const World = (function () {
     cur.resHTML = `<div class="result ${ok ? 'good' : 'fail'}" id="result"><h3>${esc(head)}</h3>
       ${ok ? '' : q.ms ? msMiss() : `<p><b>Answer:</b> ${esc(correctText)}</p>`}${!ok && idx >= 0 && !q.ms && whyNot(o.t) ? '<p class="whynot"><b>Why not \u201C' + esc(o.t) + '\u201D?</b> ' + whyNot(o.t) + '</p>' : ''}${extra}
       <div class="pay">${chips.join('')}</div>${explHTML(q)}
-      <div><button class="btn go" id="nextbtn" type="button">${cur.lab ? 'Next order' : 'Next patient'}</button></div></div>`;
+      <div><button class="btn go" id="nextbtn" type="button">${cur.lab ? 'Next order' : 'Next patient'}</button> ${flagLink(q, q.ms ? cur.opts.filter((x, i) => cur.sel[i]).map(x => x.t).join(' | ') : (o ? o.t : ''))}</div></div>`;
     renderPanel(); renderStats(); renderStore(); renderUpgrades(); renderMastery(); renderReview(); renderFranchise();
     if (ok) { const b = document.querySelector('.opt[data-i="' + idx + '"]'); if (b) pop(b, '+' + money(pay)); }
     const nb = $('#nextbtn'); if (nb) { nb.focus({ preventScroll: true }); nb.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); }
   }
+  const FLAG_REPO = 'Jadenrburns/CornerRxGame';
+  function flagURL(q, picked) {
+    const clip = (t, n) => { t = String(t == null ? '' : t); return t.length > n ? t.slice(0, n - 1) + '\u2026' : t; };
+    const ans = q.ms ? (q.as || []).join(' | ') : q.a;
+    const title = 'Question feedback: ' + clip(q.q, 80);
+    const body = ['**Question**', clip(q.q, 500), '', '**Marked correct**', clip(ans, 300), '', '**Player picked**', clip(picked || '(none)', 300), '',
+      '**Category**: ' + (q.c || '') + (q.t ? ' / ' + q.t : '') + (q.wk ? ' (week ' + q.wk + ')' : ''), '**Game version**: ' + GAME_VERSION, '', '**What is wrong or unclear?**', '', ''].join('\n');
+    return 'https://github.com/' + FLAG_REPO + '/issues/new?labels=' + encodeURIComponent('question-feedback') + '&title=' + encodeURIComponent(title) + '&body=' + encodeURIComponent(body);
+  }
+  function flagLink(q, picked) {
+    const done = (S.flagged || []).indexOf(q.k) >= 0;
+    return '<a class="flaglink" data-flagk="' + esc(q.k || '') + '" href="' + esc(flagURL(q, picked)) + '" target="_blank" rel="noopener noreferrer">' + (done ? 'Flagged \u2713 (open again)' : 'Flag this question') + '</a>';
+  }
+  document.addEventListener('click', (e) => { const a = e.target.closest && e.target.closest('.flaglink'); if (!a) return; const k = a.dataset.flagk; if (k) { S.flagged = S.flagged || []; if (S.flagged.indexOf(k) < 0) { S.flagged.push(k); save(); } a.textContent = 'Flagged \u2713 (open again)'; } });
   function pop(btn, text) {
     const rx = $('.rx'); if (!rx) return;
     const a = btn.getBoundingClientRect(), b = rx.getBoundingClientRect();
@@ -7057,7 +7072,7 @@ const World = (function () {
       <div class="btnrow"><button type="button" class="btn go" data-act="back">Back to the pharmacy</button></div></div>`;
   }
 
-  const GAME_VERSION = 84;
+  const GAME_VERSION = 85;
   const b64u = (u8) => { let s = ''; for (let i = 0; i < u8.length; i += 0x8000) s += String.fromCharCode.apply(null, u8.subarray(i, i + 0x8000)); return btoa(s).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); };
   const unb64u = (t) => { const s = atob(t.replace(/-/g, '+').replace(/_/g, '/')), u = new Uint8Array(s.length); for (let i = 0; i < s.length; i++) u[i] = s.charCodeAt(i); return u; };
   const chk = (t) => { let h = 2166136261; for (let i = 0; i < t.length; i++) { h ^= t.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36); };
