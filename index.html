@@ -959,6 +959,8 @@ body.trip .stats .stat { animation: tripbob 1.4s ease-in-out infinite; }
 .reel img { width: 96px; height: 96px; display: block; filter: drop-shadow(0 3px 0 rgba(0,0,0,.18)); }
 .capstage { height: 120px; }
 .flaglink{display:inline-block;margin-left:10px;font-size:.85rem;color:#5b6b6b;text-decoration:underline;padding:8px 4px}.flaglink:hover{color:#0f766e}
+.fsw{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:0 0 12px;padding:10px 12px;border-radius:12px;background:#F3E8C2;box-shadow:0 0 0 1.5px #E8D9A8}.fsw .fswl{font-weight:800;color:#3b2f10;line-height:1.2}.fsw small{display:block;font-weight:500;font-size:.78rem;color:#6b5b2a;margin-top:2px}.fsw.dis{opacity:.55}
+.swt{flex:none;position:relative;width:54px;height:30px;border-radius:999px;border:2px solid #8F6E22;background:#fff;cursor:pointer;padding:0;transition:background .18s}.swt i{position:absolute;top:2px;left:2px;width:22px;height:22px;border-radius:50%;background:#8F6E22;transition:transform .18s}.swt[aria-checked=true]{background:#0f766e;border-color:#0f766e}.swt[aria-checked=true] i{transform:translateX(24px);background:#fff}.swt:focus-visible{outline:3px solid #f59e0b;outline-offset:2px}.swt:disabled{cursor:not-allowed}
 </style>
 
 <div class="shell">
@@ -5443,8 +5445,10 @@ const World = (function () {
     const modes = MODES.map(m => `<button type="button" class="chip" data-act="mode" data-v="${m[0]}" aria-pressed="${st.mode === m[0]}">${m[1]}</button>`).join('');
     const n = poolQs().length;
     const fold = st.folder === 'P1' || st.folder === 'P3' ? st.folder : 'P2';
-    const p2 = `<h3>Question settings</h3><p class="sub">Changes apply to the next patient.</p>
-      <div class="grp"><b>Folder focus</b><div class="chips"><button type="button" class="chip" data-act="folder-only" data-v="P2">Only P2 topics</button></div><p class="note">Switches off the P3 weekly drugs so only the groups in this folder are asked.</p></div>
+    const inFold = (f, c) => f === 'P3' ? (c[0] === 'TP3' || c[0] === 'T553') : f === 'P2' ? !(c[0] === 'TP3' || c[0] === 'T553') : false;
+    const onlyOn = (f) => { const o = CATS.filter(c => !inFold(f, c)); return f !== 'P1' && o.length > 0 && o.every(c => !st.topics[c[0]]); };
+    const fsw = (f) => `<div class="fsw${f === 'P1' ? ' dis' : ''}"><span class="fswl" id="fsw-${f}">Only ${f} topics<small>${f === 'P1' ? 'Nothing is filed here yet' : onlyOn(f) ? 'Other folders are switched off' : 'Switch off the other folders\u2019 topics'}</small></span><button type="button" class="swt" role="switch" aria-labelledby="fsw-${f}" aria-checked="${onlyOn(f)}" data-act="folder-only" data-v="${f}"${f === 'P1' ? ' disabled' : ''}><i></i></button></div>`;
+    const p2 = `${fsw('P2')}<h3>Question settings</h3><p class="sub">Changes apply to the next patient.</p>
       <div class="grp"><b>Focus mode</b><div class="chips"><button type="button" class="chip" data-act="focus" aria-pressed="${!!st.focus}">Focus mode ${st.focus ? 'on' : 'off'}</button></div><p class="note">Hides the 3D pharmacy and turns off the timer, patient events, phone calls, Karen and Jim, so it is only questions.</p></div>
       <div class="grp"><b>Topics <span><button type="button" class="link" data-act="topics-all">All</button> &middot; <button type="button" class="link" data-act="topics-none">None</button></span></b><div class="chips">${topics}</div>${tox ? '<div class="subgrp"><b class="subh">PharmTox</b><div class="chips">' + tox + '</div></div>' : ''}${thx ? '<div class="subgrp"><b class="subh">Therapeutics</b><div class="chips">' + thx + '</div></div>' : ''}</div>
       <div class="grp"><b>Difficulty</b><div class="chips">${diffs}</div></div>
@@ -5455,12 +5459,12 @@ const World = (function () {
       `;
     const w3 = curWeek3();
     const sched = P3WEEKS.map(w => { const open = w.from <= todayStr() || st.ahead3, cnt = TOPQ.filter(q => q.wk === w.n && !wkTypeOff(q)).length; return `<li class="${w.n === w3 ? 'now' : open ? '' : 'lock'}"><b>${esc(w.d)}</b><span>${esc(w.topic)}</span><small>${w.ids.length} drugs${w.n === w3 ? ' \u00B7 this week' : open ? '' : ' \u00B7 locked'}</small></li>`; }).join('');
-    const p3 = `<h3>P3 weekly drugs</h3><p class="sub">Drug list sheets by system, one set per week. Changes apply to the next patient.</p>
+    const p3 = `${fsw('P3')}<h3>P3 weekly drugs</h3><p class="sub">Drug list sheets by system, one set per week. Changes apply to the next patient.</p>
       <div class="grp"><b>Top 300</b><div class="chips">${CATS.filter(c => c[0] === 'TP3').map(chipOf).join('')}</div><div class="chips"><button type="button" class="chip" data-act="wkonly3" aria-pressed="${!!st.wkOnly3}">This week only</button><button type="button" class="chip" data-act="ahead3" aria-pressed="${!!st.ahead3}">Study ahead</button></div><div class="chips" aria-label="Weekly question types">${WK_TYPES.map(x => `<button type="button" class="chip" data-act="wktype" data-v="${x[0]}" aria-pressed="${!(st.wkTypes && st.wkTypes[x[0]] === false)}">${x[1]}</button>`).join('')}</div><p class="note">${weekNote3()}</p></div>
       <div class="grp"><b>Relevant otherwise</b><div class="chips">${CATS.filter(c => c[0] === 'T553').map(chipOf).join('')}</div><p class="note">Therapeutics III (PHAR 553) syllabus topics: asthma, COPD, renal, diabetes, gout, migraine, RA and SLE, thyroid, liver, hepatitis, blood pressure, lipids, pain, nutrition, fluids and electrolytes.</p></div>
       <div class="grp"><b>P3 schedule</b><ol class="p3sched">${sched}</ol></div>
-      <div class="grp"><b>Focus</b><div class="chips"><button type="button" class="chip" data-act="folder-only" data-v="P3">Only P3 topics</button><button type="button" class="chip" data-act="topics-all">Turn every topic back on</button></div><p class="note">Only P3 topics switches off the P2 groups so patients ask just Top 300 and the Therapeutics III topics.</p></div>`;
-    const p1 = `<h3>P1 folder</h3><p class="sub">Nothing is filed here yet.</p><div class="grp"><b>Empty folder</b><p class="note">P1 drug lists and exam questions will go in this folder. Your current question settings live in the P2 folder.</p><div class="chips"><button type="button" class="chip" data-act="folder-only" data-v="P1" disabled>Only P1 topics</button></div></div>`;
+      <div class="grp"><b>Focus</b><div class="chips"><button type="button" class="chip" data-act="topics-all">Turn every topic back on</button></div><p class="note">Use the switch at the top of this folder to ask only P3 topics.</p></div>`;
+    const p1 = `${fsw('P1')}<h3>P1 folder</h3><p class="sub">Nothing is filed here yet.</p><div class="grp"><b>Empty folder</b><p class="note">P1 drug lists and exam questions will go in this folder. Your current question settings live in the P2 folder.</p></div>`;
     return `<div class="pane nbk ${nbClosing ? 'closing' : ''}"><div class="nbcover"><span class="nbtitle">Topics</span></div><div class="nbsheet">${hubTabs('set')}${cabinetHTML(fold)}<div class="fbody fb-${fold}" role="tabpanel" aria-label="${fold} folder">${fold === 'P1' ? p1 : fold === 'P3' ? p3 : p2}</div>
       <p class="count">${n} question${n === 1 ? '' : 's'} match${calcOn() ? ' + endless calculations' : ''}</p>
       <div class="btnrow"><button type="button" class="btn go nbback" data-act="back">Close notebook and return to counter</button><button type="button" class="btn" data-act="tour">Replay tour</button><button type="button" class="btn" data-act="reset-set">Reset settings</button></div></div></div>`;
@@ -7136,7 +7140,7 @@ const World = (function () {
       <div class="btnrow"><button type="button" class="btn go" data-act="back">Back to the pharmacy</button></div></div>`;
   }
 
-  const GAME_VERSION = 86;
+  const GAME_VERSION = 87;
   const b64u = (u8) => { let s = ''; for (let i = 0; i < u8.length; i += 0x8000) s += String.fromCharCode.apply(null, u8.subarray(i, i + 0x8000)); return btoa(s).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); };
   const unb64u = (t) => { const s = atob(t.replace(/-/g, '+').replace(/_/g, '/')), u = new Uint8Array(s.length); for (let i = 0; i < s.length; i++) u[i] = s.charCodeAt(i); return u; };
   const chk = (t) => { let h = 2166136261; for (let i = 0; i < t.length; i++) { h ^= t.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36); };
@@ -7272,7 +7276,14 @@ const World = (function () {
       case 'ahead3': st.ahead3 = !st.ahead3; break;
       case 'folder': st.folder = v === 'P1' || v === 'P3' ? v : 'P2'; break;
       case 'p3-only': CATS.forEach(c => st.topics[c[0]] = c[0] === 'TP3' || c[0] === 'T553'); break;
-      case 'folder-only': if (v === 'P3') CATS.forEach(c => st.topics[c[0]] = c[0] === 'TP3' || c[0] === 'T553'); else if (v === 'P2') CATS.forEach(c => st.topics[c[0]] = c[0] !== 'TP3' && c[0] !== 'T553'); toast(v === 'P3' ? 'Only P3 topics are on.' : v === 'P2' ? 'Only P2 topics are on.' : 'P1 has no topics yet.'); break;
+      case 'folder-only': {
+        if (v === 'P1') { toast('P1 has no topics yet.'); break; }
+        const inF = c => v === 'P3' ? (c[0] === 'TP3' || c[0] === 'T553') : !(c[0] === 'TP3' || c[0] === 'T553');
+        const outs = CATS.filter(c => !inF(c)), isOn = outs.every(c => !st.topics[c[0]]);
+        if (isOn) { const rs = st.restore || {}; outs.forEach(c => st.topics[c[0]] = rs[c[0]] !== false); delete st.restore; toast('Other folders are back on.'); }
+        else { st.restore = {}; outs.forEach(c => { st.restore[c[0]] = !!st.topics[c[0]]; st.topics[c[0]] = false; }); toast('Only ' + v + ' topics are on.'); }
+        break;
+      }
       case 'wktype': { st.wkTypes = st.wkTypes || {}; const on = WK_TYPES.filter(x => st.wkTypes[x[0]] !== false).length; if (st.wkTypes[v] !== false && on <= 1) { toast('Keep at least one kind of weekly question on.'); return; } st.wkTypes[v] = st.wkTypes[v] === false; break; }
       case 'ahead': st.ahead = !st.ahead; break;
       case 'reset-set': S.set = defaults().set; break;
