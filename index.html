@@ -961,6 +961,15 @@ body.trip .stats .stat { animation: tripbob 1.4s ease-in-out infinite; }
 .flaglink{display:inline-block;margin-left:10px;font-size:.85rem;color:#5b6b6b;text-decoration:underline;padding:8px 4px}.flaglink:hover{color:#0f766e}
 .fsw{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:0 0 12px;padding:10px 12px;border-radius:12px;background:#F3E8C2;box-shadow:0 0 0 1.5px #E8D9A8}.fsw .fswl{font-weight:800;color:#3b2f10;line-height:1.2}.fsw small{display:block;font-weight:500;font-size:.78rem;color:#6b5b2a;margin-top:2px}.fsw.dis{opacity:.55}
 .swt{flex:none;position:relative;width:54px;height:30px;border-radius:999px;border:2px solid #8F6E22;background:#fff;cursor:pointer;padding:0;transition:background .18s}.swt i{position:absolute;top:2px;left:2px;width:22px;height:22px;border-radius:50%;background:#8F6E22;transition:transform .18s}.swt[aria-checked=true]{background:#0f766e;border-color:#0f766e}.swt[aria-checked=true] i{transform:translateX(24px);background:#fff}.swt:focus-visible{outline:3px solid #f59e0b;outline-offset:2px}.swt:disabled{cursor:not-allowed}
+
+.himfx { position: absolute; pointer-events: none; z-index: 40; }
+.himfx.smash { left: 50%; top: 30%; font: 900 clamp(44px, 10vw, 104px)/1 var(--f-display); color: #FFD54A; -webkit-text-stroke: 3px var(--ink); paint-order: stroke fill; text-shadow: 5px 5px 0 var(--ink); animation: himpop 1.4s ease-out forwards; }
+.himfx.bless { left: 50%; top: 22%; font: 900 clamp(30px, 7vw, 64px)/1 var(--f-display); color: #FFF3B0; -webkit-text-stroke: 3px #8A5A00; paint-order: stroke fill; text-shadow: 0 0 18px #FFD54A, 4px 4px 0 #8A5A00; animation: himrise 2.4s ease-out forwards; }
+.himfx.flash { inset: 0; background: radial-gradient(circle at 50% 45%, rgba(255, 233, 150, .8), rgba(255, 213, 74, .22) 55%, transparent 80%); animation: himflash 2.6s ease-out forwards; }
+@keyframes himpop { 0% { transform: translate(-50%, -50%) scale(.2) rotate(-7deg); opacity: 0; } 14% { transform: translate(-50%, -50%) scale(1.3) rotate(-7deg); opacity: 1; } 28% { transform: translate(-50%, -50%) scale(1) rotate(-7deg); } 80% { opacity: 1; } 100% { transform: translate(-50%, -50%) scale(1.05) rotate(-7deg); opacity: 0; } }
+@keyframes himrise { 0% { transform: translate(-50%, 20px) scale(.6); opacity: 0; } 20% { transform: translate(-50%, 0) scale(1.1); opacity: 1; } 75% { opacity: 1; } 100% { transform: translate(-50%, -40px) scale(1); opacity: 0; } }
+@keyframes himflash { 0% { opacity: 0; } 15% { opacity: 1; } 100% { opacity: 0; } }
+.buffpill.bless { bottom: 58px; background: #FFE9A0; }
 </style>
 
 <div class="shell">
@@ -1773,6 +1782,32 @@ T5("Fluids and electrolytes",2,"Hypokalemia that will not correct suggests repla
 T5("Fluids and electrolytes",2,"What is first-line treatment for severe hypercalcemia of malignancy?","IV isotonic saline",["Furosemide first","Zoledronic acid first","Calcium acetate"],"Replace volume first, then give a bisphosphonate.");
 T5("Fluids and electrolytes",3,"Serum albumin is 2.0 g/dL and total calcium is 7.6 mg/dL. What is the corrected calcium?","9.2 mg/dL",["6.0 mg/dL","7.6 mg/dL (no correction needed)","10.8 mg/dL"],"Corrected Ca = measured + 0.8 x (4.0 - albumin) = 7.6 + 1.6 = 9.2 mg/dL.");
 T5("Fluids and electrolytes",2,"Using the 4-2-1 rule, what is the maintenance fluid rate for a 70 kg adult?","About 110 mL/hr",["70 mL/hr","150 mL/hr","90 mL/hr"],"40 + 20 + 50 mL/hr.");
+/* Himothy (event character): heart failure, HFrEF vs HFpEF. 20 test questions, easy to replace. */
+const HM = (t, d, q, a, w, e) => Q("HIM", d, q, a, w, e, t);
+
+HM("Defining HF",1,"Heart failure with reduced ejection fraction (HFrEF) is defined by an LVEF of:","40% or lower",["41% to 49%","50% or higher","Above 65%"],"HFrEF is an LVEF of 40% or less. Mildly reduced (HFmrEF) is 41% to 49% and preserved (HFpEF) is 50% or more.");
+HM("Defining HF",1,"Heart failure with preserved ejection fraction (HFpEF) is defined by an LVEF of:","50% or higher",["40% or lower","41% to 49%","Below 30%"],"HFpEF needs an LVEF of 50% or more plus signs of raised filling pressures, such as elevated natriuretic peptides or diastolic dysfunction.");
+HM("Defining HF",2,"Which LVEF range defines heart failure with mildly reduced ejection fraction (HFmrEF)?","41% to 49%",["30% to 40%","50% to 60%","Below 25%"],"HFmrEF sits between HFrEF (40% or less) and HFpEF (50% or more).");
+HM("Defining HF",2,"Which finding best points to HFpEF instead of HFrEF?","LVEF 50% or higher with diastolic dysfunction and elevated natriuretic peptides",["LVEF 38% with a dilated left ventricle","Normal LVEF with normal natriuretic peptides and no symptoms","LVEF below 25% with a left ventricular thrombus"],"HFpEF is a clinical syndrome with a preserved EF. The diagnosis needs symptoms plus objective evidence of high filling pressures.");
+
+HM("HFrEF therapy",1,"Which four drug classes make up foundational (GDMT) therapy for HFrEF?","ARNI (or ACE inhibitor/ARB), evidence-based beta blocker, MRA, SGLT2 inhibitor",["Loop diuretic, digoxin, nitrate, ivabradine","Non-dihydropyridine CCB, ACE inhibitor, thiazide, statin","Aspirin, statin, amlodipine, digoxin"],"These four classes reduce death or HF hospitalization in HFrEF. Loop diuretics treat congestion but do not improve survival.");
+HM("HFrEF therapy",2,"Which beta blockers have outcome evidence in HFrEF?","Carvedilol, metoprolol succinate and bisoprolol",["Atenolol, metoprolol tartrate and propranolol","Labetalol, sotalol and pindolol","Esmolol, nadolol and acebutolol"],"Only these three have mortality data in HFrEF. Metoprolol tartrate and atenolol do not count.");
+HM("HFrEF therapy",2,"How should a beta blocker be started in HFrEF?","Low dose in a euvolemic patient, then titrate slowly",["At the target dose for fast benefit","Only while the patient is volume overloaded and decompensated","Stop it permanently if fatigue develops"],"Beta blockers can worsen HF if started in a decompensated patient or raised too fast. Mild fatigue often improves.");
+HM("HFrEF therapy",2,"Sacubitril/valsartan must be separated from an ACE inhibitor by at least:","36 hours",["12 hours","24 hours","7 days"],"Taking an ACE inhibitor within 36 hours of neprilysin inhibition raises the risk of angioedema.");
+HM("HFrEF therapy",1,"Sacubitril/valsartan is contraindicated in patients with:","A history of angioedema",["Hypertension","Prior myocardial infarction","Type 2 diabetes"],"Angioedema history is the key contraindication. Never combine it with an ACE inhibitor.");
+HM("HFrEF therapy",2,"Which labs need close monitoring after starting an MRA such as spironolactone?","Potassium and serum creatinine",["TSH and free T4","INR","Liver enzymes and bilirubin"],"MRAs cause hyperkalemia and can raise creatinine, so check within the first week and again after dose changes.");
+HM("HFrEF therapy",2,"Gynecomastia is a known adverse effect of which HFrEF drug?","Spironolactone",["Eplerenone","Sacubitril/valsartan","Carvedilol"],"Spironolactone binds androgen and progesterone receptors. Eplerenone is more selective and is the usual switch.");
+HM("HFrEF therapy",2,"Which agents reduce HF hospitalization and cardiovascular death in HFrEF, with or without diabetes?","Dapagliflozin and empagliflozin",["Sitagliptin and saxagliptin","Pioglitazone and glimepiride","Metformin and glipizide"],"SGLT2 inhibitors are one of the four GDMT pillars. Saxagliptin and pioglitazone can worsen HF.");
+HM("HFrEF therapy",3,"Hydralazine plus isosorbide dinitrate is specifically recommended for which patients with HFrEF?","Self-identified Black patients with NYHA class III to IV symptoms on optimal therapy",["All patients with HFpEF","Patients with hyperkalemia only","Patients with atrial fibrillation only"],"The A-HeFT trial showed a survival benefit in this group. It is also an option for patients who cannot take ACE inhibitors, ARBs or ARNI.");
+HM("HFrEF therapy",3,"Ivabradine is appropriate for which patient?","HFrEF with LVEF 35% or less, sinus rhythm and resting heart rate 70 or more despite maximal beta blocker",["HFpEF with atrial fibrillation","Any heart failure with a resting heart rate below 50","HFrEF with atrial fibrillation and a rapid rate"],"Ivabradine slows the sinus node only, so it does not work in atrial fibrillation.");
+HM("HFrEF therapy",2,"What is the role of digoxin in HFrEF?","May reduce hospitalization in patients still symptomatic on GDMT, with no mortality benefit",["Improves survival and replaces beta blockers","Recommended first line in HFpEF","Used to lower potassium"],"Digoxin is add-on therapy with a narrow therapeutic range. Check levels and renal function.");
+
+HM("HFpEF therapy",2,"Which therapy has the strongest outcome evidence for reducing HF hospitalization in HFpEF?","An SGLT2 inhibitor",["Digoxin","A beta blocker","An ACE inhibitor"],"Empagliflozin and dapagliflozin reduced HF hospitalization in HFpEF. ACE inhibitors and beta blockers have not shown benefit.");
+HM("HFpEF therapy",1,"Which drug class relieves congestion in HFpEF with fluid overload?","Loop diuretics",["Digoxin","Diltiazem","Hydralazine/isosorbide dinitrate"],"Diuretics treat symptoms of volume overload in both HFpEF and HFrEF. They are used at the lowest effective dose.");
+
+HM("Drugs to avoid",2,"Which drug class should be avoided in HFrEF because it is negatively inotropic?","Non-dihydropyridine CCBs (diltiazem, verapamil)",["Beta blockers such as carvedilol","Mineralocorticoid receptor antagonists","SGLT2 inhibitors"],"Diltiazem and verapamil worsen outcomes in HFrEF. Amlodipine is neutral if a CCB is needed.");
+HM("Drugs to avoid",1,"Why are NSAIDs avoided in heart failure?","They cause sodium and water retention and can worsen HF",["They lower afterload too much","They raise heart rate through beta stimulation","They increase potassium loss"],"NSAIDs blunt diuretic and ACE inhibitor effects and raise the risk of HF hospitalization and kidney injury.");
+HM("Drugs to avoid",2,"Why is pioglitazone avoided in heart failure?","It causes fluid retention and can worsen HF",["It lowers potassium dangerously","It slows the heart rate","It raises LDL cholesterol sharply"],"Thiazolidinediones cause edema and are contraindicated in symptomatic HF.");
 /* ---------- Compounding pharmacy: calculation + kinetics generators ---------- */
 function fmtS(n) { return String(Number(Number(n).toPrecision(3))); }
 function mkL(kind, d, q, correct, cands, unit, steps) {
@@ -2445,9 +2480,9 @@ const World = (function () {
     // Body types: normal, jacked (huge upper body, tiny legs), obese. Upper body and head live in their own groups.
     const jacked = body === 'jacked', obese = body === 'obese', slim = body === 'slim';
     const tr = o.gender === 'f' ? [0.3, 0.43] : o.gender === 'm' ? [0.42, 0.35] : [0.34, 0.4];
-    const legL = jacked ? 0.5 + 0.2 * rnd(7) : 0.68, legW = jacked || obese ? 0.3 : slim ? 0.15 : 0.2, headS = jacked ? 0.82 : obese ? 1.12 : 1;
+    const legL = o.him ? 0.95 : jacked ? 0.5 + 0.2 * rnd(7) : 0.68, legW = jacked || obese ? 0.3 : slim ? 0.15 : 0.2, headS = jacked ? 0.82 : obese ? 1.12 : 1;
     const up = new T.Group(); up.position.y = legL - 0.68; g.add(up);
-    const hd = new T.Group(); hd.position.y = 1.85 * (1 - headS); hd.scale.set(headS, headS, headS); up.add(hd);
+    const hd = new T.Group(); hd.position.y = 1.85 * (1 - headS); hd.scale.set(headS, headS, headS); up.add(hd); P.head = hd; P.up = up; P.him = !!o.him;
     let par = up;
     const put = (geo, m, x, y, z, parent) => { const o = new T.Mesh(geo, m); o.position.set(x, y, z); o.castShadow = true; Object.assign(o.userData, tag); (parent || par).add(o); return o; };
     const tor = put(jacked ? new T.CylinderGeometry(0.46, 0.15, 0.95, 6) : new T.CylinderGeometry(tr[0], tr[1], 0.95, 6), P.shirtM, 0, 1.12, 0);
@@ -2522,6 +2557,17 @@ const World = (function () {
       if (o.gender !== 'f') { put(new T.BoxGeometry(0.1, 0.24, 0.2), hairM, -0.3, 1.82, -0.02); put(new T.BoxGeometry(0.1, 0.24, 0.2), hairM, 0.3, 1.82, -0.02); put(new T.BoxGeometry(0.2, 0.04, 0.04), hairM, 0, 1.79, 0.31); }
     }
     if (o.inspector) { const fr = own('#1b1b24'); [-0.11, 0.11].forEach(x => put(new T.TorusGeometry(0.075, 0.016, 4, 10), fr, x, 1.88, 0.3)); put(new T.BoxGeometry(0.08, 0.015, 0.02), fr, 0, 1.9, 0.3); }
+    if (o.him) {
+      const fr = own('#CFE3F2'); fr.transparent = true; fr.opacity = 0.8; const gl = own('#BFE3F0'); gl.transparent = true; gl.opacity = 0.3; const wh2 = own('#FFFFFF');
+      [-1, 1].forEach(s => {
+        put(new T.BoxGeometry(0.15, 0.125, 0.03), wh2, s * 0.11, 1.88, 0.284);
+        put(new T.TorusGeometry(0.098, 0.03, 4, 12), fr, s * 0.11, 1.88, 0.3);
+        const lens = put(new T.CylinderGeometry(0.095, 0.095, 0.012, 10), gl, s * 0.11, 1.88, 0.305); lens.rotation.x = PI / 2;
+        put(new T.BoxGeometry(0.03, 0.03, 0.34), fr, s * 0.225, 1.9, 0.14);
+      });
+      put(new T.BoxGeometry(0.07, 0.03, 0.03), fr, 0, 1.9, 0.305);
+      P.eyes.forEach(m => { m.scale.set(1.5, 1.5, 1); m.position.z = 0.31; });
+    }
     if (o.driver) { const cp = own('#5B3A21'); put(new T.CylinderGeometry(0.36, 0.4, 0.17, 8), cp, 0, 2.12, 0); put(new T.BoxGeometry(0.52, 0.04, 0.3), own('#3E2615'), 0, 2.03, 0.3); }
     if (o.cap) {
       const capM = own('#1C2F5A'), gold = own('#F2C94C');
@@ -2550,6 +2596,12 @@ const World = (function () {
     if (on(5) && !(o.cosm && o.cosm.hat)) { const fm = own('#2B2B33'); put(new T.CylinderGeometry(0.5, 0.5, 0.03, 10), fm, 0, 2.06, 0); put(new T.CylinderGeometry(0.27, 0.3, 0.24, 8), fm, 0, 2.19, 0); put(new T.CylinderGeometry(0.305, 0.305, 0.05, 8), own('#8B1E2D'), 0, 2.1, 0); }
     if (o.cosm) buildCosm(o.cosm, (g, m, x, y, z, u) => put(g, m, x, y, z, u ? up : undefined), own, hairM, P, Math.max(tr[0], tr[1]) * tor.scale.z + 0.03);
     par = up;
+    if (o.him) {
+      const fzh = (y) => (tr[1] + (tr[0] - tr[1]) * (y - 0.645) / 0.95) * tor.scale.z + 0.012, colM = own('#24508F');
+      put(new T.BoxGeometry(0.035, 0.56, 0.03), own('#E4ECF4'), 0, 1.3, fzh(1.3) + 0.004);
+      put(new T.BoxGeometry(0.075, 0.09, 0.04), dark, 0, 1.55, fzh(1.55) + 0.012);
+      put(new T.CylinderGeometry(0.19, 0.25, 0.16, 8), colM, 0, 1.64, 0);
+    }
     if (o.inspector) { put(new T.BoxGeometry(0.07, 0.46, 0.03), own('#B91C1C'), 0, 1.18, Math.max(tr[0], tr[1]) + 0.02); put(new T.BoxGeometry(0.2, 0.05, 0.04), own('#E8EDF2'), 0, 1.45, Math.max(tr[0], tr[1]) + 0.01); }
     if (o.driver) { put(new T.BoxGeometry(0.56, 0.42, 0.4), own('#C9A06A'), 0, 1.0, 0.5); put(new T.BoxGeometry(0.1, 0.43, 0.41), own('#8A5A2B'), 0, 1.0, 0.5); }
     if (on(7)) {
@@ -2560,12 +2612,21 @@ const World = (function () {
     if (on(1)) { const ch = put(new T.TorusGeometry(on(7) ? 0.5 : 0.31, 0.03, 5, 10), goldM, 0, on(7) ? 1.66 : 1.56, 0.02); ch.rotation.x = PI / 2; if (!on(7)) ch.scale.set(tor.scale.x, tor.scale.z, 1); put(new T.BoxGeometry(0.11, 0.11, 0.03), goldM, 0, on(7) ? 1.3 : 1.26, on(7) ? 0.56 : 0.4); }
     [-1, 1].forEach(s => {
       const leg = new T.Group(); leg.position.set(s * (jacked ? 0.2 : obese ? 0.24 : slim ? 0.12 : 0.15), legL, 0); g.add(leg);
-      put(new T.BoxGeometry(legW, legL, legW + 0.04), pants, 0, -legL / 2, 0, leg); P.legs.push(leg);
-      if (o.shoes) put(new T.BoxGeometry(legW + 0.06, 0.1, legW + 0.22), own(o.shoes), 0, -legL + 0.05, 0.07, leg);
+      if (o.him) {
+        put(new T.BoxGeometry(legW, legL / 2, legW + 0.04), pants, 0, -legL / 4, 0, leg);
+        const sh = new T.Group(); sh.position.y = -legL / 2; leg.add(sh); (P.knees = P.knees || []).push(sh);
+        put(new T.BoxGeometry(legW * 0.94, legL / 2, legW + 0.03), pants, 0, -legL / 4, 0, sh);
+        put(new T.BoxGeometry(legW + 0.06, 0.1, legW + 0.22), own(o.shoes), 0, -legL / 2 + 0.05, 0.07, sh);
+      } else {
+        put(new T.BoxGeometry(legW, legL, legW + 0.04), pants, 0, -legL / 2, 0, leg);
+        if (o.shoes) put(new T.BoxGeometry(legW + 0.06, 0.1, legW + 0.22), own(o.shoes), 0, -legL + 0.05, 0.07, leg);
+      }
+      P.legs.push(leg);
       const arm = new T.Group(); arm.position.set(s * (jacked ? 0.86 : obese ? 0.78 : slim ? 0.38 : 0.46), 1.5, 0); up.add(arm);
       if (jacked) arm.scale.set(2.3, 1.15, 2.3); else if (obese) arm.scale.set(1.6, 1, 1.6); else if (slim) arm.scale.set(0.8, 1, 0.8);
       put(new T.BoxGeometry(0.15, 0.62, 0.16), jacked ? P.skinM : P.shirtM, 0, -0.3, 0, arm);
       put(new T.IcosahedronGeometry(0.09, 0), P.skinM, 0, -0.66, 0, arm); P.arms.push(arm);
+      if (o.him) put(new T.BoxGeometry(0.17, 0.07, 0.18), own('#24508F'), 0, -0.585, 0, arm);
       if (on(3)) put(new T.BoxGeometry(0.2, 0.09, 0.13), goldM, 0, -0.7, 0.02, arm);
       if ((on(6) || o.elder) && s === 1) { put(new T.CylinderGeometry(0.025, 0.025, 1.05, 5), own('#5B3A21'), 0, -1.02, 0.06, arm); put(new T.IcosahedronGeometry(0.07, 0), goldM, 0, -0.5, 0.06, arm); }
       if (karen && s === 1) put(new T.BoxGeometry(0.34, 0.27, 0.13), own('#8A63C9'), 0, -0.82, 0.06, arm);
@@ -2573,6 +2634,7 @@ const World = (function () {
     });
     if (isStaff || o.cap) put(new T.BoxGeometry(0.13, 0.13, 0.04), own(o.cap ? '#F2C94C' : '#0E9A8E'), 0.17, 1.35, 0.36);
     if (o.elder) g.scale.set(0.95, 0.9, 0.95);
+    if (o.him) g.scale.set(1.04, 1.04, 1.04);
     if (karen) g.scale.set(1.08, 1.08, 1.08);
     if (sweaty) g.scale.set(0.66, 1.1, 0.66);
     if (varied && !o.elder) { const gs = 0.9 + 0.24 * rnd(9); g.scale.set(gs, gs, gs); }
@@ -2580,6 +2642,16 @@ const World = (function () {
   }
   function walkAnim(p, t, walking, dt) {
     const P = p.userData.P, k = Math.min(1, dt * 10);
+    if (P.him) {
+      // Himothy marches with his knees up high, opposite arm swinging back
+      const k2 = Math.min(1, dt * 14);
+      for (let i = 0; i < 2; i++) {
+        const u = walking ? Math.sin(t * 9 + i * PI) : 0, th = u > 0 ? -1.25 * u : -0.4 * u, sh = u > 0 ? 1.45 * u : -0.25 * u;
+        P.legs[i].rotation.x = lerp(P.legs[i].rotation.x, th, k2); P.knees[i].rotation.x = lerp(P.knees[i].rotation.x, sh, k2);
+        P.arms[i].rotation.x = lerp(P.arms[i].rotation.x, -th * 0.9, k2);
+      }
+      return;
+    }
     const a = walking ? Math.sin(t * 9) * 0.7 : 0;
     P.legs[0].rotation.x = lerp(P.legs[0].rotation.x, a, k); P.legs[1].rotation.x = lerp(P.legs[1].rotation.x, -a, k);
     P.arms[0].rotation.x = lerp(P.arms[0].rotation.x, -a * 0.8, k); P.arms[1].rotation.x = lerp(P.arms[1].rotation.x, a * 0.8, k);
@@ -2943,7 +3015,7 @@ const World = (function () {
     if (!queue.length) { for (let i = 0; i < 3; i++) queue.push(spawnCustomer(true, i)); }
     else {
       const c = queue.shift(); c.wp = EXIT.map(e => new T.Vector3(e[0], 0, e[1])); c.leaveFrom = c.g.position.clone();
-      if (c.mood === 'happy') c.hop = 0.6; leaving.push(c);
+      if (c.gone) custGroup.remove(c.g); else { if (c.mood === 'happy') c.hop = 0.6; leaving.push(c); }
       if (!queue.length) queue.push(spawnCustomer(false, 0));
       assignSlots();
     }
@@ -3076,7 +3148,7 @@ const World = (function () {
     if (a.pet || b.pet) return;
     let said = false;
     [a, b].forEach(o => {
-      if (o.bumpCd > 0) return;
+      if (o.bumpCd > 0 || o.noFx) return;
       o.bumpCd = 1.6; o.dodge = 1.8; o.stall = Math.max(o.stall || 0, 0.45);
       if (!o.fx) o.fx = { type: 'bump', t: 0, dur: 0.5 };
       if (!said && says.length < 2 && time - lastBumpSay > 7 && Math.random() < 0.1) { said = true; lastBumpSay = time; say(o, BUMP_SAY[Math.floor(Math.random() * BUMP_SAY.length)]); }
@@ -3104,7 +3176,7 @@ const World = (function () {
     startFx(c, t);
   }
   function fxPass(o, dt) {
-    const f = o.fx; if (!f) return;
+    const f = o.fx; if (!f || o.noFx) return;
     f.t += dt; const k = Math.min(1, f.t / f.dur), g = o.g, P = g.userData.P, arms = v => { P.arms[0].rotation.x = P.arms[1].rotation.x = v; };
     switch (f.type) {
       case 'bump': g.position.y = Math.abs(Math.sin(k * PI)) * 0.2; g.rotation.z = Math.sin(k * PI * 3) * 0.2 * (1 - k); break;
@@ -3371,7 +3443,7 @@ const World = (function () {
     ndc.x = ((e.clientX - r.left) / r.width) * 2 - 1; ndc.y = -((e.clientY - r.top) / r.height) * 2 + 1;
     raycaster.setFromCamera(ndc, camera);
     const hits = raycaster.intersectObjects(synOn ? synItems.filter(g => g.visible) : labOn ? labItems : [].concat(CLICK.map(i => ug[i]), [staffGroup, custGroup, petG, pharmG], phoneG ? [phoneG] : [], capG ? [capG] : [], pillG ? [pillG] : [], brainG ? [brainG] : [], evtG ? [evtG] : []), true);
-    for (const h of hits) { let o = h.object; while (o) { if (o.userData && (o.userData.up || o.userData.cust || o.userData.pet || o.userData.pharm || o.userData.vis || o.userData.cap || o.userData.pill || o.userData.lab || o.userData.site || o.userData.brain || o.userData.evt)) { pickObj = h.object; return o.userData; } o = o.parent; } }
+    for (const h of hits) { let o = h.object; while (o) { if (o.userData && (o.userData.up || o.userData.cust || o.userData.pet || o.userData.pharm || o.userData.vis || o.userData.cap || o.userData.himA || o.userData.pill || o.userData.lab || o.userData.site || o.userData.brain || o.userData.evt)) { pickObj = h.object; return o.userData; } o = o.parent; } }
     return null;
   }
   function setHover(up) {
@@ -3421,7 +3493,7 @@ const World = (function () {
       if (e.pointerType !== 'mouse' || (drag && drag.on)) return;
       if (fpT) { setFpHover(fpPick(e)); return; }
       const h = pick(e); setHover(h && h.up ? h.up : null);
-      if (!hovered) canvas.style.cursor = h && (h.cust || h.pet || h.pharm || h.vis || h.cap || h.lab || h.site || h.brain || h.evt) ? 'pointer' : 'default';
+      if (!hovered) canvas.style.cursor = h && (h.cust || h.pet || h.pharm || h.vis || h.cap || h.himA || h.lab || h.site || h.brain || h.evt) ? 'pointer' : 'default';
       if (synOn) synHover = h && h.site ? h.site : null;
     });
     canvas.addEventListener('click', e => {
@@ -3433,6 +3505,7 @@ const World = (function () {
       if (h && h.evt) { if (B.onEvt) B.onEvt(h.evt); return; }
       if (h && h.lab) { labClick(h); return; }
       if (h && h.cap) { capClick(); return; }
+      if (h && h.himA) { himAngelClick(); return; }
       if (h && h.pill) { pillClick(h.pill); return; }
       if (h && h.vis) { if (B.onVisitor) B.onVisitor(); return; }
       if (h && h.up) { if (h.up === 'notes') B.onNotes(); else if (h.up === 'phone') { if (B.onPhone) B.onPhone(); } else B.onBuy(h.up); }
@@ -3845,6 +3918,7 @@ const World = (function () {
     // customers
     const crowd = queue.concat(leaving, extras, pets, cops, visitor ? [visitor] : []), stf = pharm ? staff.concat([pharm]) : staff;
     queue.forEach((c, i) => {
+      if (c.asc) return;
       const w = moveTo(c, c.speed || 2.6, dt, crowd); c.phase += dt;
       walkAnim(c.g, c.phase, w, dt);
       c.wait += dt; idleTick(c, i, w, dt);
@@ -3895,7 +3969,7 @@ const World = (function () {
       if (e.leaving && !e.wp.length) { custGroup.remove(e.g); extras.splice(i, 1); }
     }
     if (queue.length) { arriveT -= dt; if (arriveT <= 0) { arriveT = rushOn ? 5 + Math.random() * 4 : (15 + Math.random() * 9) * (slowOn ? 2.4 : 1); arrive(); } }
-    const all = queue.concat(leaving, extras, pets, cops.filter(c => copJob && copJob.phase === 'in'), visitor ? [visitor] : []);
+    const all = queue.concat(leaving, extras, pets, cops.filter(c => copJob && copJob.phase === 'in'), visitor ? [visitor] : [], himH ? [himH] : []);
     if (lineEl && queue.length !== lineN) { lineN = queue.length; lineEl.textContent = 'Line ' + lineN + '/' + maxq(); lineEl.className = 'line3d' + (lineN >= maxq() ? ' full' : lineN >= maxq() - 2 ? ' busy' : ''); }
     Crowd.separate(all, 1.15, onBump); Crowd.separate(stf, 1.0, onBump);
     Crowd.pushOut(all, 0.55); Crowd.pushOut(stf, 0.5);
@@ -3905,7 +3979,7 @@ const World = (function () {
       if (m.t > 1.1) { m.el.remove(); says.splice(i, 1); } else place(m.el, q.x, q.y + (m.o.dy || 3.0), q.z);
     }
     if (fishG) fishTick(dt);
-    visitorTick(dt);
+    visitorTick(dt); himTick(dt);
     pets.forEach(pt => {
       const w = moveTo(pt, pt.speed, dt, crowd); pt.phase += dt;
       if (!pt.fx) { pt.g.position.y = w ? Math.abs(Math.sin(pt.phase * (pt.kind === 'bunny' ? 10 : 13))) * (pt.kind === 'bunny' ? 0.16 : 0.05) : 0; pt.g.rotation.z = w ? Math.sin(pt.phase * 9) * 0.05 : 0; }
@@ -4257,6 +4331,233 @@ const World = (function () {
   }
   api._capClick = function () { const had = !!capObj; capClick(); return had; };
   api.devCapsule = function (kind) { if (!api.ok || !capG) return false; capRemove(); return spawnCap(kind === 'plant' ? 'plant' : 'sky'); };
+
+  /* ---- Himothy: the heart failure event character ----
+     walk: he strides in with high knees and takes the next question
+     ascend: when his questions are mastered he says goodbye and a golden light carries him up
+     angel: every 10 minutes (after he has ascended) he passes over in the clouds; click him
+     smash: he dives into the pharmacy with a question; a correct answer earns a blessing */
+  const HIM_GOLD = 0xFFD54A, HIM_SEED = 4242;
+  function himOpts(extra) { return Object.assign({ him: true, skin: '#F1C9A8', hair: '#D4AE55', hairStyle: 0, shirt: '#2F5FA8', scrub: '#C2A878', shoes: '#5B4A38', gender: 'm' }, extra || {}); }
+  const glowM = (col, op) => new T.MeshBasicMaterial({ color: col, transparent: true, opacity: op, depthWrite: false, blending: T.AdditiveBlending, side: T.DoubleSide });
+  const easeIO = (k) => k * k * (3 - 2 * k);
+  let himH = null, himA = null, himAsc = null, himT = 600;
+  function himBubble(text) {
+    if (!tagsEl) return null;
+    const el = document.createElement('div'); el.className = 'say3d'; el.setAttribute('aria-hidden', 'true');
+    const sp = document.createElement('span'); sp.textContent = text; sp.style.animation = 'none'; el.appendChild(sp); tagsEl.appendChild(el); return el;
+  }
+  function himDom(cls, text, ms) {
+    if (!host) return;
+    const e = document.createElement('div'); e.className = cls; e.setAttribute('aria-hidden', 'true'); if (text) e.textContent = text; host.appendChild(e);
+    setTimeout(() => { if (e.parentNode) e.parentNode.removeChild(e); }, ms);
+  }
+  // halo + wings that are parented to a Himothy figure (figure space: shoulders about y 1.8, head top about y 2.5)
+  function angelParts(fig) {
+    const grp = new T.Group(), wing = []; fig.add(grp);
+    [-1, 1].forEach(s => {
+      const w = new T.Group(); w.position.set(s * 0.22, 1.86, -0.34); grp.add(w);
+      [1.5, 1.35, 1.15, 0.9].forEach((L, i) => {
+        const f = new T.Group(); f.rotation.z = -s * (0.2 + i * 0.42); w.add(f);
+        bx(f, 0.17, L, 0.05, i % 2 ? '#F4F7FB' : '#FFFFFF', 0, L / 2, 0, null, { emissive: new T.Color(0xFFF2C0), emissiveIntensity: 0.25 });
+      });
+      wing.push(w);
+    });
+    const halo = new T.Mesh(new T.TorusGeometry(0.27, 0.04, 6, 16), new T.MeshBasicMaterial({ color: HIM_GOLD })); halo.rotation.x = PI / 2 - 0.15; halo.position.set(0, 2.72, -0.05); grp.add(halo);
+    return { grp, wing, halo };
+  }
+  function flapWings(ap, t, amp) {
+    ap.wing.forEach((w, i) => { const s = i ? 1 : -1; w.rotation.z = -s * (0.25 + Math.sin(t * 3.2) * amp); w.rotation.y = s * 0.45; });
+    ap.halo.rotation.z += 0.03;
+  }
+
+  /* ---- 1. walking in as a patient ---- */
+  api.himArrive = function () {
+    if (!api.ok || !custGroup || himAsc) return false;
+    const p = person(HIM_SEED, false, false, false, 'normal', himOpts());
+    p.position.set(5, 0, 9.6); custGroup.add(p);
+    const c = { g: p, seed: HIM_SEED, wp: [new T.Vector3(5, 0, 6.2)], mood: null, moodT: 0, phase: 0, hop: 0, face: 0, karen: false, sweaty: false, him: true, pusher: true, speed: 3.6, body: 'normal', r: 0.6, angry: false, puffT: 0, dripT: 0, jx: 0, jz: 0, faceJit: 0, wait: 0, emoteT: 999 };
+    queue.splice(0, 0, c); assignSlots(); cur = c; setBubble('?', '');
+    let u = 0; tweens.push(function (dt) { u += dt; if (u > 0.5) { say(c, 'Heart failure!'); return true; } return false; });
+    return true;
+  };
+  api.himAtCounter = function () { const c = queue[0]; return !!(c && c.him && !c.asc); };
+
+  /* ---- 2. ascension ---- */
+  api.himAscend = function (done) {
+    const c = queue[0];
+    if (!api.ok || !c || !c.him || himAsc) { if (done) done(); return false; }
+    c.mood = null; c.asc = true; c.wp = []; c.g.position.y = 0;
+    const p = c.g.position, fig = c.g;
+    const beam = new T.Mesh(new T.CylinderGeometry(1.0, 1.0, 34, 16, 1, true), glowM(HIM_GOLD, 0)); beam.position.set(p.x, 17, p.z); scene.add(beam);
+    const ring = new T.Mesh(new T.RingGeometry(0.4, 1.5, 24), glowM(HIM_GOLD, 0)); ring.rotation.x = -PI / 2; ring.position.set(p.x, 0.09, p.z); scene.add(ring);
+    const ap = angelParts(fig); ap.grp.scale.set(0.01, 0.01, 0.01);
+    himAsc = { c, t: 0, beam, ring, ap, done, bub: himBubble('My work here is done.'), spark: 0 };
+    return true;
+  };
+  function ascTick(dt) {
+    const a = himAsc; if (!a) return;
+    a.t += dt; const t = a.t, c = a.c, g = c.g, P = g.userData.P, p = g.position;
+    const settle = easeIO(clamp(t / 0.8, 0, 1)), look = easeIO(clamp((t - 1.2) / 1.2, 0, 1)), rise = Math.max(0, t - 2.6), spread = easeIO(clamp((t - 2.2) / 1.4, 0, 1));
+    // turn to the camera, relax, then look up
+    g.rotation.y = lerpAngle(g.rotation.y, Math.atan2(camera.position.x - p.x, camera.position.z - p.z) + (rise > 0 ? rise * 0.5 : 0), Math.min(1, dt * 5));
+    for (let i = 0; i < 2; i++) {
+      P.legs[i].rotation.x = lerp(P.legs[i].rotation.x, 0, Math.min(1, dt * 8)); P.knees[i].rotation.x = lerp(P.knees[i].rotation.x, rise > 0 ? 0.3 + Math.sin(t * 2 + i) * 0.1 : 0, Math.min(1, dt * 8));
+      P.arms[i].rotation.x = lerp(P.arms[i].rotation.x, 0, Math.min(1, dt * 8)); P.arms[i].rotation.z = (i ? 1 : -1) * (0.08 * settle + 1.0 * spread);
+    }
+    P.head.rotation.x = -0.75 * look;
+    // wings and halo appear as the light takes hold
+    const wk = easeIO(clamp((t - 2.0) / 1.2, 0, 1)); a.ap.grp.scale.set(Math.max(0.01, wk), Math.max(0.01, wk), Math.max(0.01, wk)); if (wk > 0) flapWings(a.ap, t, 0.18 + 0.12 * wk);
+    // light
+    const bk = easeIO(clamp((t - 1.3) / 1.0, 0, 1)), fade = rise > 0 ? 1 - clamp((p.y - 8) / 5, 0, 1) : 1;
+    a.beam.material.opacity = 0.42 * bk * fade * (0.85 + 0.15 * Math.sin(t * 9)); a.beam.rotation.y += dt * 0.7;
+    a.ring.material.opacity = 0.55 * bk * fade; const rs = 1 + 0.15 * Math.sin(t * 6); a.ring.scale.set(rs, rs, rs); a.ring.rotation.z += dt;
+    a.spark -= dt; if (a.spark <= 0 && bk > 0) { a.spark = 0.1; burst(new T.Vector3(p.x + (Math.random() - 0.5) * 1.6, p.y + 0.4 + Math.random() * 1.6, p.z + (Math.random() - 0.5) * 1.6), 2, HIM_GOLD, 0.35); }
+    // rise slowly, then faster
+    p.y = 0.3 * rise * rise;
+    // goodbye bubble
+    if (a.bub) {
+      if (t > 4.6) { a.bub.remove(); a.bub = null; } else { a.bub.style.opacity = t < 0.3 ? String(t / 0.3) : t > 4.0 ? String(Math.max(0, (4.6 - t) / 0.6)) : '1'; place(a.bub, p.x, p.y + 3.6, p.z); }
+    }
+    if (p.y > 13.5 || t > 14) {
+      scene.remove(a.beam); scene.remove(a.ring); if (a.bub) a.bub.remove();
+      c.gone = true; custGroup.remove(g); himAsc = null;
+      if (a.done) a.done();
+    }
+  }
+
+  /* ---- 3. the angel in the clouds ---- */
+  function spawnAngel() {
+    if (!capG || himA || himH || himAsc) return false;
+    const root = new T.Group(), fig = person(HIM_SEED, false, false, false, 'normal', himOpts({ tag: { himA: true } }));
+    fig.position.y = 0.4; fig.rotation.y = 0.55; root.add(fig);
+    const ap = angelParts(fig), cl = new T.Group(); cl.position.y = -0.1; root.add(cl);
+    [[0, 0, 0, 1.0], [1.0, -0.05, 0.15, 0.75], [-1.0, -0.05, -0.1, 0.8], [0.45, 0.12, 0.55, 0.62], [-0.45, 0.1, -0.55, 0.62], [1.7, -0.15, 0, 0.5], [-1.7, -0.15, 0.1, 0.5]].forEach(q => { const s = ico(cl, q[3], '#FFFFFF', q[0], q[1], q[2]); s.scale.set(1, 0.62, 1); s.userData.himA = true; });
+    const hit = new T.Mesh(new T.SphereGeometry(2.8, 6, 5), new T.MeshBasicMaterial({ visible: false })); hit.position.y = 1.4; hit.userData.himA = true; root.add(hit);
+    const P = fig.userData.P; P.arms[0].rotation.z = -1.15; P.arms[1].rotation.z = 1.15; P.head.rotation.x = -0.12;
+    root.scale.set(1.15, 1.15, 1.15); root.position.set(-24, 10.6, -2.5); capG.add(root);
+    himA = { root, fig, ap, t: 0, sp: 1.8, spark: 0 };
+    if (B.onHimSpawn) B.onHimSpawn();
+    return true;
+  }
+  function angelTick(dt) {
+    const a = himA; if (!a) return;
+    a.t += dt; const r = a.root;
+    r.position.x += a.sp * dt; r.position.y = 10.6 + Math.sin(a.t * 1.1) * 0.45; r.rotation.z = Math.sin(a.t * 0.8) * 0.05;
+    flapWings(a.ap, a.t, 0.3);
+    a.spark -= dt; if (a.spark <= 0) { a.spark = 0.35; burst(new T.Vector3(r.position.x + (Math.random() - 0.5) * 2, r.position.y - 0.3, r.position.z), 1, HIM_GOLD, 0.2); }
+    if (r.position.x > 24) { capG.remove(r); himA = null; }
+  }
+  function himAngelClick() {
+    const a = himA; if (!a) return;
+    if (B.onHimAngel && B.onHimAngel() === false) return;
+    const wp = new T.Vector3(); a.root.getWorldPosition(wp); wp.y += 0.4;
+    capG.remove(a.root); himA = null; burst(wp, 14, HIM_GOLD, 1.1);
+    startDive(wp);
+  }
+
+  /* ---- 4. the superhero smash ---- */
+  function startDive(from) {
+    if (!api.ok || !custGroup || himH) return false;
+    const g = person(HIM_SEED, false, false, false, 'normal', himOpts({ tag: { himH: true } }));
+    g.position.copy(from); custGroup.add(g);
+    const to = new T.Vector3(2.5, 0, 2.3);
+    g.rotation.y = Math.atan2(to.x - from.x, to.z - from.z);
+    himH = { g: g, r: 0.75, wp: [], pusher: true, noFx: true, state: 'dive', t: 0, from: from.clone(), to: to, leave: false, spark: 0 };
+    return true;
+  }
+  function himImpact(h) {
+    const p = h.to; shake = 1.6;
+    burst(new T.Vector3(p.x, 0.3, p.z), 18, 0xCFCFD6, 1.8); burst(new T.Vector3(p.x, 0.3, p.z), 12, HIM_GOLD, 1.5);
+    const ring = new T.Mesh(new T.RingGeometry(0.4, 0.8, 24), glowM(0xFFFFFF, 0.8)); ring.rotation.x = -PI / 2; ring.position.set(p.x, 0.1, p.z); scene.add(ring);
+    let u = 0; tweens.push(function (dt) { u += dt / 0.8; const s = 1 + Math.min(1, u) * 7; ring.scale.set(s, s, s); ring.material.opacity = 0.8 * (1 - Math.min(1, u)); if (u >= 1) { scene.remove(ring); return true; } return false; });
+    const cr = new T.Group(); cr.position.set(p.x, 0.08, p.z); scene.add(cr);
+    for (let i = 0; i < 7; i++) { const L = 0.9 + Math.random() * 1.2, an = i / 7 * PI * 2 + Math.random() * 0.4, b = bx(cr, 0.08, 0.02, L, '#26323A', Math.sin(an) * L / 2, 0, Math.cos(an) * L / 2); b.rotation.y = an; b.castShadow = false; }
+    let uc = 0; tweens.push(function (dt) { uc += dt; if (uc > 3.5) cr.position.y = 0.08 - (uc - 3.5) * 0.06; if (uc > 5) { scene.remove(cr); return true; } return false; });
+    queue.concat(extras, leaving).forEach(c => { if (c.g && Math.hypot(c.g.position.x - p.x, c.g.position.z - p.z) < 6) { c.stall = Math.max(c.stall || 0, 1.0); if (says.length < 5) say(c, '😱', 'emo'); } });
+    himDom('himfx smash', 'SMASH!', 1400);
+  }
+  function himStand(h, blend) {
+    // superhero landing, blended out by blend 0 (crouched) to 1 (standing)
+    const g = h.g, P = g.userData.P, c = 1 - blend;
+    P.legs[0].rotation.x = -1.35 * c; P.knees[0].rotation.x = 1.5 * c; P.legs[1].rotation.x = 0.55 * c; P.knees[1].rotation.x = 1.7 * c;
+    g.position.y = -0.38 * c; P.up.rotation.x = 0.5 * c; P.head.rotation.x = 0.3 * c - 0.1 * blend;
+    P.arms[0].rotation.x = -0.4 * c; P.arms[1].rotation.x = 0.9 * c; P.arms[0].rotation.z = -0.6 * blend; P.arms[1].rotation.z = 0.6 * blend;
+  }
+  function himFly(h, k) {
+    // head-first flight along the line from h.fp to h.fq; k runs 0 to 1
+    const g = h.g, P = g.userData.P, vx = h.fq.x - h.fp.x, vy = h.fq.y - h.fp.y, vz = h.fq.z - h.fp.z, hv = Math.hypot(vx, vz);
+    g.position.set(h.fp.x + vx * k, h.fp.y + vy * k, h.fp.z + vz * k);
+    g.rotation.y = Math.atan2(vx, vz); g.rotation.x = Math.atan2(hv, vy);
+    P.arms[0].rotation.x = P.arms[1].rotation.x = -3.0; P.arms[0].rotation.z = P.arms[1].rotation.z = 0; P.legs[0].rotation.x = 0.1; P.legs[1].rotation.x = 0.25; P.knees[0].rotation.x = 0.15; P.knees[1].rotation.x = 0.35; P.head.rotation.x = 0;
+  }
+  function heroTick(dt) {
+    const h = himH; if (!h) return;
+    h.t += dt; const g = h.g, P = g.userData.P, p = g.position, t = h.t;
+    if (h.state === 'dive') {
+      const D = 1.0, k = Math.min(1, t / D), e = k * k, to = h.to;
+      p.set(lerp(h.from.x, to.x, k), lerp(h.from.y, 0, e), lerp(h.from.z, to.z, k));
+      const dy = h.from.y * (2 * k) / 1, hv = Math.hypot(to.x - h.from.x, to.z - h.from.z) + 0.001;
+      g.rotation.y = Math.atan2(to.x - h.from.x, to.z - h.from.z); g.rotation.x = lerp(0.4, Math.atan2(hv, -dy - 0.001), Math.min(1, t / 0.25));
+      P.arms[0].rotation.x = P.arms[1].rotation.x = -3.0; P.legs[0].rotation.x = 0.15; P.legs[1].rotation.x = 0.3; P.knees[0].rotation.x = 0.2; P.knees[1].rotation.x = 0.4;
+      h.spark -= dt; if (h.spark <= 0) { h.spark = 0.04; burst(new T.Vector3(p.x, p.y + 1, p.z), 1, 0xFFFFFF, 0.4); }
+      if (k >= 1) { h.state = 'land'; h.t = 0; g.rotation.x = 0; himImpact(h); }
+    } else if (h.state === 'land') {
+      g.rotation.y = lerpAngle(g.rotation.y, Math.atan2(PZ.x - p.x, PZ.z - p.z), Math.min(1, dt * 3));
+      himStand(h, t < 1.1 ? 0 : easeIO(clamp((t - 1.1) / 0.6, 0, 1)));
+      if (t > 1.8) {
+        h.state = 'ask'; h.t = 0; say(h, 'Quick question!');
+        if (B.onHimLand && B.onHimLand() === false) h.leave = true;
+      }
+    } else if (h.state === 'ask' || h.state === 'wait2') {
+      g.rotation.y = lerpAngle(g.rotation.y, Math.atan2(PZ.x - p.x, PZ.z - p.z), Math.min(1, dt * 4));
+      himStand(h, 1); p.y = Math.abs(Math.sin(t * 3)) * 0.04; P.arms[1].rotation.x = -0.3 + Math.sin(t * 2) * 0.1;
+      if (h.state === 'ask' && h.leave) { h.state = 'wait2'; }
+      if (h.state === 'wait2' && h.leave) startTakeoff(h);
+    } else if (h.state === 'bless') {
+      const k = easeIO(clamp(t / 0.7, 0, 1)), fadeOut = 1 - easeIO(clamp((t - 2.6) / 0.8, 0, 1));
+      p.y = 0.9 * k * fadeOut + Math.sin(t * 3) * 0.08 * k; g.rotation.y += dt * 0.6 * k;
+      P.arms[0].rotation.x = P.arms[1].rotation.x = -2.8 * k; P.arms[0].rotation.z = -0.35 * k; P.arms[1].rotation.z = 0.35 * k; P.head.rotation.x = -0.5 * k; P.legs[0].rotation.x = P.legs[1].rotation.x = 0; P.knees[0].rotation.x = P.knees[1].rotation.x = 0.2 * k;
+      if (h.beam) { h.beam.material.opacity = 0.38 * k * fadeOut * (0.85 + 0.15 * Math.sin(t * 10)); h.beam.rotation.y += dt; h.ring.material.opacity = 0.5 * k * fadeOut; const rs = 1 + 0.2 * Math.sin(t * 5); h.ring.scale.set(rs, rs, rs); }
+      h.spark -= dt; if (h.spark <= 0) { h.spark = 0.07; burst(new T.Vector3(-8 + Math.random() * 16, 5 + Math.random() * 2, -5 + Math.random() * 11), 2, HIM_GOLD, 0.15); }
+      if (t > 3.4) { if (h.beam) { scene.remove(h.beam); scene.remove(h.ring); h.beam = null; } h.state = 'wait2'; h.t = 0; p.y = 0; }
+    } else if (h.state === 'shrug') {
+      const k = easeIO(clamp(t / 0.4, 0, 1));
+      P.arms[0].rotation.x = P.arms[1].rotation.x = -0.5 * k; P.arms[0].rotation.z = -0.9 * k; P.arms[1].rotation.z = 0.9 * k; P.head.rotation.y = Math.sin(t * 4) * 0.3 * k;
+      if (t > 1.8) { P.head.rotation.y = 0; h.state = 'wait2'; h.t = 0; }
+    } else if (h.state === 'crouch') {
+      himStand(h, 1 - easeIO(clamp(t / 0.45, 0, 1)) * 0.75);
+      if (t > 0.5) { h.state = 'off'; h.t = 0; h.fp = p.clone(); h.fq = new T.Vector3(p.x + 15, 17, p.z - 9); burst(new T.Vector3(p.x, 0.3, p.z), 10, 0xFFFFFF, 1.2); shake = 0.4; P.up.rotation.x = 0; p.y = 0; }
+    } else if (h.state === 'off') {
+      const k = Math.min(1, t / 1.9), e = k * k;
+      himFly(h, e); h.spark -= dt; if (h.spark <= 0) { h.spark = 0.04; burst(new T.Vector3(p.x, p.y + 1, p.z), 1, HIM_GOLD, 0.4); }
+      if (k >= 1) { custGroup.remove(g); himH = null; if (B.onHimGone) B.onHimGone(); }
+    }
+  }
+  function startTakeoff(h) { h.state = 'crouch'; h.t = 0; }
+  // the answer is in: a blessing for a correct answer, a shrug otherwise
+  api.himReact = function (ok) {
+    const h = himH; if (!h || h.state !== 'ask') return;
+    h.t = 0;
+    if (!ok) { h.state = 'shrug'; say(h, 'Hmm...'); return; }
+    h.state = 'bless';
+    const p = h.g.position;
+    h.beam = new T.Mesh(new T.CylinderGeometry(2.2, 2.2, 34, 20, 1, true), glowM(HIM_GOLD, 0)); h.beam.position.set(p.x, 17, p.z); scene.add(h.beam);
+    h.ring = new T.Mesh(new T.RingGeometry(0.6, 3.2, 28), glowM(HIM_GOLD, 0)); h.ring.rotation.x = -PI / 2; h.ring.position.set(p.x, 0.1, p.z); scene.add(h.ring);
+    himDom('himfx flash', '', 2600); himDom('himfx bless', 'BLESSED!', 2400);
+    if (B.onHimBless) B.onHimBless();
+  };
+  // the player pressed Next: he flies off as soon as he is done
+  api.himFinish = function () { if (himH) himH.leave = true; };
+  api.himBusy = function () { return !!(himH || himAsc); };
+  api.devHimAngel = function () { if (!api.ok || !capG || himH || himAsc) return false; if (himA) { capG.remove(himA.root); himA = null; } return spawnAngel(); };
+  api.devHimSmash = function () { if (!api.ok || !capG || himH || himAsc) return false; if (himA) { capG.remove(himA.root); himA = null; } return startDive(new T.Vector3(-7, 13, -4)); };
+  function himTick(dt) {
+    if (himAsc) ascTick(dt);
+    if (himA) angelTick(dt);
+    else if (!himH && !himAsc && B.himOk && B.himOk() && !labOn && !synOn && !paused && !fpT) { himT -= dt; if (himT <= 0) { himT = 600; spawnAngel(); } }
+    if (himH) heroTick(dt);
+  }
 
   /* ---- lost pills: tablets and capsules pop out of bottles and other things; tap one to put it in the lost-pills vial ---- */
   let pillG = null, pillT = 200 + Math.random() * 160, buffOn = false, buffWas = false, buffCd = 0;
@@ -4734,7 +5035,7 @@ const World = (function () {
   const CATS = [
     ['BG', 'Brand / Generic'], ['CL', 'Drug classes'], ['MOA', 'Mechanisms'], ['AE', 'Adverse effects'],
     ['DDI', 'Interactions'], ['CN', 'Counseling'], ['AD', 'Antidotes'], ['SIG', 'Sig & law'],
-    ['TOP', 'Weekly drugs'], ['TP3', 'Weekly drugs \u00B7 P3'], ['CALC', 'Calculations'], ['PT3', 'PharmTox \u00B7 Exam 3 questions'], ['PT3G', 'PharmTox \u00B7 Exam 3 drug practice'], ['PT4', 'PharmTox \u00B7 Exam 4 drug practice'], ['TH3', 'Therapeutics \u00B7 Exam 3'], ['T553', 'Therapeutics III \u00B7 Syllabus topics'], ['MY', 'My studies']
+    ['TOP', 'Weekly drugs'], ['TP3', 'Weekly drugs \u00B7 P3'], ['CALC', 'Calculations'], ['PT3', 'PharmTox \u00B7 Exam 3 questions'], ['PT3G', 'PharmTox \u00B7 Exam 3 drug practice'], ['PT4', 'PharmTox \u00B7 Exam 4 drug practice'], ['TH3', 'Therapeutics \u00B7 Exam 3'], ['T553', 'Therapeutics III \u00B7 Syllabus topics'], ['HIM', 'Himothy \u00B7 Heart failure'], ['MY', 'My studies']
   ];
   const CATNAME = {}; CATS.forEach(c => CATNAME[c[0]] = c[1]);
   const FLAVOR = {
@@ -4750,6 +5051,7 @@ const World = (function () {
     TOP: ['This one is on this week\'s drug list.', 'Quiz week! Do you know this one?', 'Straight off the Top 300 sheet.'],
     TP3: ['P3 drug list: this one is on the sheet.', 'Quiz week! Do you know this one?', 'Straight off the Top 300 sheet.'],
     T553: ['My doctor changed my plan, can you explain?', 'Quick therapy question before I go.', 'Is this the right treatment for me?'],
+    HIM: ['*high knees* Quick heart failure question!', 'Is my ejection fraction a problem?', 'Which pills do I take for my heart?'],
     MY: ['A question from your own notes.', 'Straight from your study sheet.', 'This one is on your exam list.']
   };
   const KAREN_LINES = ['I WANT TO SPEAK TO YOUR MANAGER!', 'This is UNACCEPTABLE. Answer me right now!', 'I have been coming here for twenty years!', 'Do you even know what you are doing?!'];
@@ -5194,11 +5496,14 @@ const World = (function () {
     }
     if (!World.ok && !info.karen && !info.sweaty) info.elder = elderRoll();
     if (!info.karen && !info.sweaty && !info.elder && !info.evt && (forceEvt || !World.ok)) info.evt = eventRoll();
-    const calm = focusOn(), karen = !!info.karen && !calm, sweaty = !!info.sweaty && !karen && !calm, elder = !!info.elder && !karen && !sweaty && !calm, evt = !karen && !sweaty && !elder && !calm && info.evt ? info.evt : null, q = evt ? evQuestion(evt) : chooseQ(karen);
+    const calm = focusOn(), karen = !!info.karen && !calm, sweaty = !!info.sweaty && !karen && !calm, elder = !!info.elder && !karen && !sweaty && !calm, evt = !karen && !sweaty && !elder && !calm && info.evt ? info.evt : null, q = evt ? evQuestion(evt) : (forceHim && !karen && !sweaty && !elder && !calm && himPick()) || chooseQ(karen);
     view = 'q';
+    const himDev = forceHim; forceHim = false;
     if (!q) { cur = { empty: true, seed: info.seed, karen: false }; renderPanel(); return; }
+    const himWalk = q.c === 'HIM' && !evt && !karen && !sweaty && !elder && !calm && World.ok && !!World.himArrive && (!S.himDone || himDev);
     const opts = q.ms ? shuffle(q.as.map(t => ({ t, ok: true })).concat(q.w.map(t => ({ t, ok: false })))) : shuffle([q.a, ...q.w].map((t, i) => ({ t, ok: i === 0 })));
     cur = { q, sel: {}, wasMissed: S.missed.indexOf(q.k) >= 0, opts, t0: Date.now(), done: false, hint: false, karen, sweaty, elder, elderStage: elder ? 0 : 2, ask: pick(ELDER_ASK), caller: !!info.caller && !calm, name: karen ? 'Karen' : sweaty ? 'Jittery Jim' : elder ? pick(info.seed % 2 === 0 ? ELDER_F : ELDER_M) : evt && EV_NAME[evt] ? pick(EV_NAME[evt]) : pick(NAMES), flavor: info.caller ? pick(CALLER_LINES) : evt ? pick(EV_FLAVOR[evt]) : karen ? pick(KAREN_LINES) : sweaty ? pick(JIM_LINES) : pick(FLAVOR[q.c] || FLAVOR.MY), seed: info.seed, num: S.served + 1, picked: -1, ok: false, resHTML: '', interrupt: null, evt: evt, insp: evt === 'inspector' ? { n: 1, of: 3, ok: 0, used: [q.k] } : null, review: reviewDue(S.mastery[q.k]) };
+    if (q.c === 'HIM') { cur.name = 'Himothy'; if (himWalk) World.himArrive(); }
     if (evt === 'inspector') SFX.play('siren'); else if (evt === 'driver') SFX.play('thud'); else if (S.served > 0) SFX.play('bell');
     if (sweatyOwed && calm) sweatyOwed = false;
     if (sweatyOwed) { sweatyOwed = false; cur.interrupt = { t0: Date.now(), dur: 7000, a: Math.floor(Math.random() * 3), dismissed: false, line: pick(JIM_BREAK) }; World.interrupt(true); }
@@ -5242,6 +5547,7 @@ const World = (function () {
       const lucky = Math.random() < 0.06 * S.up.robot, fr = franchiseMult();
       pay = Math.max(1, Math.round(base * shelf * speed * streak * fr * buffPay() * (lucky ? 2 : 1) * (cur.hint ? 0.5 : 1) * (karen ? 2 : 1) * (sweaty ? 1.5 : 1) * (rush.on ? 1.5 : 1) * (cur.lab ? 1.5 : 1)));
       chips.push(`<span class="big">+${money(pay)}</span>`, `<span>base $${base.toFixed(0)}</span>`);
+      if (blessOn()) chips.push('<span>Himothy\u2019s blessing x' + BLESS_MULT.toFixed(2) + '</span>');
       if (S.up.shelf) chips.push(`<span>shelves x${shelf.toFixed(2)}</span>`);
       if (timerOn()) chips.push(`<span>speed x${speed.toFixed(2)}</span>`);
       if (streakN > 0) chips.push(`<span>streak x${streak.toFixed(2)} (${S.streak} in a row)</span>`);
@@ -5291,6 +5597,7 @@ const World = (function () {
         else if (m.box === 1) retry.push({ k: q.k, due: S.served + 6 });
       }
       S.mastery[q.k] = m;
+      if (ok && q.c === 'HIM' && !S.himDone && himAllMastered()) himPending = true;
       const i = S.missed.indexOf(q.k);
       if (!ok && i < 0) S.missed.push(q.k);
       if (ok && m.box >= 2 && i >= 0) S.missed.splice(i, 1);
@@ -5299,7 +5606,7 @@ const World = (function () {
     shiftNote(q, ok, pay, ok || idx < 0 ? '' : q.ms ? cur.opts.filter((x, i) => cur.sel[i]).map(x => x.t).join(' · ') : o.t);
     save();
     checkAwards();
-    if (cur.lab) { S.labN = (S.labN || 0) + 1; save(); } else if (cur.visit) World.visitorReact(ok); else World.react(ok, pay);
+    if (cur.lab) { S.labN = (S.labN || 0) + 1; save(); } else if (cur.visit) { if (cur.hero) World.himReact(ok); else World.visitorReact(ok); } else World.react(ok, pay);
     const correctText = q.ms ? cur.opts.filter(o2 => o2.ok).map(o2 => o2.t).join(' · ') : cur.opts.find(o2 => o2.ok).t;
     cur.resHTML = `<div class="result ${ok ? 'good' : 'fail'}" id="result"><h3>${esc(head)}</h3>
       ${ok ? '' : q.ms ? msMiss() : `<p><b>Answer:</b> ${esc(correctText)}</p>`}${!ok && idx >= 0 && !q.ms && whyNot(o.t) ? '<p class="whynot"><b>Why not \u201C' + esc(o.t) + '\u201D?</b> ' + whyNot(o.t) + '</p>' : ''}${extra}
@@ -5308,6 +5615,7 @@ const World = (function () {
     renderPanel(); renderStats(); renderStore(); renderUpgrades(); renderMastery(); renderReview(); renderFranchise();
     if (ok) { const b = document.querySelector('.opt[data-i="' + idx + '"]'); if (b) pop(b, '+' + money(pay)); }
     const nb = $('#nextbtn'); if (nb) { nb.focus({ preventScroll: true }); nb.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); }
+    if (himPending) { himPending = false; himFarewell(false); }
   }
   const FLAG_REPO = 'Jadenrburns/CornerRxGame';
   function flagURL(q, picked) {
@@ -6052,7 +6360,7 @@ const World = (function () {
   function renderPanel() {
     const pn = $('#qpanel'); if (!pn) return;
     pn.classList.toggle('karen', !!(cur && cur.karen && !cur.done && view === 'q'));
-    const body = view === 'create' ? createHTML() : view === 'awards' ? awardsHTML() : view === 'phone' ? phoneHTML() : view === 'fp' ? '' : view === 'shift' ? shiftHTML() : view === 'flash' ? fcHTML() : view === 'syn' ? synHTML() : view === 'ref' ? refHTML() : view === 'retire' ? retireHTML() : view === 'set' ? settingsHTML() : view === 'studies' ? studiesHTML() : (cur ? cardHTML() : '');
+    const body = view === 'create' ? createHTML() : view === 'awards' ? awardsHTML() : view === 'phone' ? phoneHTML() : view === 'fp' || view === 'him' ? '' : view === 'shift' ? shiftHTML() : view === 'flash' ? fcHTML() : view === 'syn' ? synHTML() : view === 'ref' ? refHTML() : view === 'retire' ? retireHTML() : view === 'set' ? settingsHTML() : view === 'studies' ? studiesHTML() : (cur ? cardHTML() : '');
     $('#counter').innerHTML = qbar() + body;
     const nb = document.querySelector('.nbk');
     if (nb) {
@@ -6719,10 +7027,65 @@ const World = (function () {
     SFX.play('bell'); qExpand(); renderPanel();
   }
   function endVisit() {
-    if (World.ok && World.visitorLeave) World.visitorLeave();
+    if (World.ok) { if (cur && cur.hero) World.himFinish(); else if (World.visitorLeave) World.visitorLeave(); }
     const s = visitSaved; visitSaved = null;
     if (s) { cur = s; resumeTimers(); view = 'q'; renderPanel(); } else newCard();
   }
+
+
+  /* ---------------- Himothy (heart failure event character) ---------------- */
+  let forceHim = false, himPending = false;
+  const BLESS_MS = 120000, BLESS_MULT = 1.5; // placeholder blessing: money x1.5 for 2 minutes
+  const blessOn = () => Date.now() < (S.blessUntil || 0);
+  const blessMult = () => blessOn() ? BLESS_MULT : 1;
+  const HIM_LINES = ['*lands in a cloud of dust* Heart failure emergency!', 'Citizens! I need one quick pharmacology answer!', 'Never fear, Himothy is here. One question!'];
+  const himQs = () => BANK.filter(x => x.c === 'HIM');
+  const himAllMastered = () => { const a = himQs(); return a.length > 0 && a.every(x => (S.mastery[x.k] || {}).box >= 2); };
+  function himPick() {
+    const all = himQs(); if (!all.length) return null;
+    let pool = all.filter(x => ((S.mastery[x.k] || {}).box || 0) < 2); if (!pool.length) pool = all;
+    if (pool.length > 1) pool = pool.filter(x => x.k !== lastKey);
+    return pick(pool);
+  }
+  // his questions are mastered: the panel closes, he says goodbye and a golden light carries him up
+  function himFarewell(dev) {
+    if (!dev) { S.himDone = true; save(); }
+    if (!(World.ok && World.himAscend && World.himAtCounter && World.himAtCounter())) { toast('Himothy’s work here is done. He will pass over in the clouds now and then.'); return; }
+    view = 'him'; renderPanel();
+    setTimeout(() => { World.himAscend(() => { newCard(); }); }, 1100);
+  }
+  const himOk = () => !!S.himDone && !focusOn() && !labOn() && !learning() && view === 'q' && !document.querySelector('.vdlg');
+  function onHimSpawn() { toast('✨ An angel is passing over the pharmacy. Click him!'); SFX.play('streak'); }
+  function himAngelOk() {
+    if (focusOn() || labOn()) return false;
+    if (view !== 'q' || !cur || cur.empty) { toast('Finish what you are doing first, then click him.'); return false; }
+    if (cur.elder && cur.elderStage < 2) { toast('Finish saying hello to the patient first.'); return false; }
+    if (cur.visit) return false;
+    return true;
+  }
+  // he has landed behind the dust: hand him the counter and ask a question
+  function himLand() {
+    if (view !== 'q' || !cur || cur.visit) return false;
+    const q = himPick(); if (!q) return false;
+    visitSaved = cur; if (!cur.done && !cur.empty && !cur.pausedAt) cur.pausedAt = Date.now();
+    endInterrupt();
+    const opts = shuffle([q.a, ...q.w].map((t, i) => ({ t, ok: i === 0 })));
+    cur = { q: q, wasMissed: S.missed.indexOf(q.k) >= 0, opts: opts, t0: Date.now(), done: false, hint: false, karen: false, sweaty: false, elder: false, elderStage: 2, ask: '', caller: false, name: 'Himothy', flavor: pick(HIM_LINES), seed: 4242, num: S.served + 1, picked: -1, ok: false, resHTML: '', interrupt: null, evt: null, insp: null, review: false, visit: true, hero: true };
+    SFX.play('thud'); qExpand(); renderPanel(); return true;
+  }
+  let blessEl = null, blessTimer = null;
+  function blessTick() {
+    const left = (S.blessUntil || 0) - Date.now();
+    if (left <= 0) { clearInterval(blessTimer); blessTimer = null; if (blessEl) { blessEl.remove(); blessEl = null; } toast('Himothy’s blessing fades.'); return; }
+    const s = Math.ceil(left / 1000);
+    if (blessEl) blessEl.textContent = '✨ Himothy’s blessing ' + Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0') + ' · money x' + BLESS_MULT.toFixed(2);
+  }
+  function blessStart(fresh) {
+    if (fresh !== false) { S.blessUntil = Date.now() + BLESS_MS; save(); }
+    if (!blessEl) { blessEl = document.createElement('div'); blessEl.className = 'buffpill bless'; blessEl.setAttribute('role', 'status'); document.body.appendChild(blessEl); }
+    clearInterval(blessTimer); blessTimer = setInterval(blessTick, 500); blessTick();
+  }
+  function onHimBless() { blessStart(true); SFX.play('streak'); toast('✨ Blessed! Money earned x' + BLESS_MULT.toFixed(1) + ' for ' + Math.round(BLESS_MS / 60000) + ' minutes.'); }
 
   /* ---------------- compounding pharmacy ---------------- */
   const LAB_FLAVOR = {
@@ -6844,7 +7207,7 @@ const World = (function () {
   /* tablet buff */
   const BUFF_MS = 90000; let buffUntil = 0, buffSlips = 0, buffTimer = null, buffEl = null;
   const buffOn = () => Date.now() < buffUntil;
-  const buffPay = () => buffOn() ? 2 : 1;
+  const buffPay = () => (buffOn() ? 2 : 1) * blessMult();
   function buffKeep() { if (buffOn() && buffSlips > 0) { buffSlips--; return true; } return false; }
   function buffTick() {
     const left = buffUntil - Date.now();
@@ -7140,7 +7503,7 @@ const World = (function () {
       <div class="btnrow"><button type="button" class="btn go" data-act="back">Back to the pharmacy</button></div></div>`;
   }
 
-  const GAME_VERSION = 87;
+  const GAME_VERSION = 88;
   const b64u = (u8) => { let s = ''; for (let i = 0; i < u8.length; i += 0x8000) s += String.fromCharCode.apply(null, u8.subarray(i, i + 0x8000)); return btoa(s).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); };
   const unb64u = (t) => { const s = atob(t.replace(/-/g, '+').replace(/_/g, '/')), u = new Uint8Array(s.length); for (let i = 0; i < s.length; i++) u[i] = s.charCodeAt(i); return u; };
   const chk = (t) => { let h = 2166136261; for (let i = 0; i < t.length; i++) { h ^= t.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36); };
@@ -7248,6 +7611,10 @@ const World = (function () {
       case 'fc-no': return fcRate(false);
       case 'dev-sky': case 'dev-plant': { const ok = World.ok && World.devCapsule(a === 'dev-sky' ? 'sky' : 'plant'); toast(ok ? 'A capsule is out. Tap it.' : 'Could not spawn one.'); return; }
       case 'dev-insp': case 'dev-driver': { const k = { 'dev-insp': 'inspector', 'dev-driver': 'driver' }[a]; learnOff(); if (!(World.ok && World.devEvent && World.devEvent(k))) forceEvt = k; toast(!World.ok ? 'A visitor is next in line. Use "Test: skip to next patient".' : 'The visitor is walking in. Wait for them behind the counter, then click them.'); return; }
+      case 'dev-him-walk': learnOff(); forceHim = true; if (cur && (cur.done || cur.empty) && view === 'q') newCard(); else toast('Himothy is the next patient. Finish this one first (or use "skip to next patient").'); return;
+      case 'dev-him-asc': { learnOff(); if (!World.ok || !World.himArrive) { toast('Needs the 3D pharmacy (turn off Focus mode).'); return; } if (!World.himAtCounter()) World.himArrive(); toast('Himothy is walking in. Watch the counter.'); setTimeout(() => himFarewell(true), 4500); return; }
+      case 'dev-him-angel': { learnOff(); toast(World.ok && World.devHimAngel() ? 'The angel is up in the clouds. Click him!' : 'Could not start the flyover.'); return; }
+      case 'dev-him-smash': { learnOff(); toast(World.ok && World.devHimSmash() ? 'Himothy is diving in...' : 'Could not start the smash.'); return; }
       case 'tour': return showTour();
       case 'shop-save': { const el = $('#shopname2'); const v = el ? el.value.replace(/\s+/g, ' ').trim().slice(0, 24) : ''; if (v) { S.shop = v; save(); syncBrand(); toast('Your pharmacy is now ' + v + '.'); renderPanel(); } return; }
       case 'tour-next': if (tourStep >= TOUR.length - 1) endTour(); else { tourStep++; drawTour(); } return;
@@ -7373,7 +7740,7 @@ const World = (function () {
   setInterval(() => { if (window.__rxLoading) return; try { localStorage.setItem(SAVE_KEY, JSON.stringify(S)); } catch (e) { /* ignore */ } }, 5000);
 
   { const sc = $('#savecard'); if (sc) sc.innerHTML = saveBoxHTML(); }
-  World.init({ host: $('#stage'), getS: () => S, tagInfo: tagInfo, onBuy: buyUp, onNotes: () => openView('studies'), notesInfo: customCount, karenRoll: karenRoll, sweatyRoll: sweatyRoll, elderRoll: elderRoll, eventRoll: eventRoll, onVisitor: visitClick, onVisitorArrive: visitArrive, capsuleOk: capsuleOk, onCapsule: onCapsule, onBrain: synEnter, onSynSite: onSynSite, onEvt: onEvt, pillOk: pillOk, onPill: onPill, onPhone: openPhone, onPolice: policeCome, onFp: fpClick, sign: () => shopName() + '|' + tierName() + ' #' + (S.franchises + 1) });
+  World.init({ host: $('#stage'), getS: () => S, tagInfo: tagInfo, onBuy: buyUp, onNotes: () => openView('studies'), notesInfo: customCount, karenRoll: karenRoll, sweatyRoll: sweatyRoll, elderRoll: elderRoll, eventRoll: eventRoll, onVisitor: visitClick, onVisitorArrive: visitArrive, capsuleOk: capsuleOk, onCapsule: onCapsule, onBrain: synEnter, onSynSite: onSynSite, onEvt: onEvt, pillOk: pillOk, onPill: onPill, onPhone: openPhone, onPolice: policeCome, himOk: himOk, onHimSpawn: onHimSpawn, onHimAngel: himAngelOk, onHimLand: himLand, onHimBless: onHimBless, onFp: fpClick, sign: () => shopName() + '|' + tierName() + ' #' + (S.franchises + 1) });
   window.__rxDbg = () => ({ fp: fp, S: S, view: view, rush: rush, phoneR: phone.ringing, TOPQ: TOPQ, pool: poolQs, cur: cur, synQ: () => (typeof SYN !== 'undefined' ? SYN.q : null), synTap: id => onSynSite(id), offer: k => offerEvt(k, 'test'), onEvt: onEvt, holiday: () => holNow(), holN: () => holCount(), renderStats: renderStats, passive: passive, techRate: techRate, buyUp: buyUp, openVial: openVial, tabletTake: tabletTake, capsuleOpen: capsuleOpen, buffOn: buffOn, COSM: COSM });
   if (!World.ok) $('#stage').classList.add('flat');
   else { document.body.classList.add('fx'); World.setPharmacist(meSpec()); World.setAwards(S.awards); World.setCalendar(Math.min(4, S.awards.calW || 0), false, S.awards.calW || 0); }
@@ -7383,12 +7750,13 @@ const World = (function () {
     const menu = $('#menu'), close = menu && menu.querySelector('.menuclose');
     if (menu && close) {
       const hr = document.createElement('hr'); menu.insertBefore(hr, close);
-      [['dev-pill', 'Test: pop a pill'], ['dev-elder', 'Test: elder patient next'], ['dev-next', 'Test: skip to next patient'], ['dev-bottle', 'Test: bottle check'], ['dev-shelve', 'Test: restock'], ['dev-prior', 'Test: prior auth'], ['dev-rush', 'Test: rush hour'], ['dev-insp', 'Test: health inspector next'], ['dev-driver', 'Test: delivery next'], ['dev-sky', 'Test: sky capsule'], ['dev-plant', 'Test: plant capsule'], ['dev-fast', 'Test: skip slow start']].forEach(b => {
+      [['dev-pill', 'Test: pop a pill'], ['dev-elder', 'Test: elder patient next'], ['dev-next', 'Test: skip to next patient'], ['dev-bottle', 'Test: bottle check'], ['dev-shelve', 'Test: restock'], ['dev-prior', 'Test: prior auth'], ['dev-rush', 'Test: rush hour'], ['dev-insp', 'Test: health inspector next'], ['dev-driver', 'Test: delivery next'], ['dev-sky', 'Test: sky capsule'], ['dev-him-walk', 'Test: Himothy walks in next'], ['dev-him-asc', 'Test: Himothy ascension'], ['dev-him-angel', 'Test: Himothy angel flyover'], ['dev-him-smash', 'Test: Himothy smash (skip click)'], ['dev-plant', 'Test: plant capsule'], ['dev-fast', 'Test: skip slow start']].forEach(b => {
         const el = document.createElement('button'); el.type = 'button'; el.dataset.act = b[0]; el.innerHTML = '<i aria-hidden="true">\u2699</i><span>' + b[1] + '</span>'; menu.insertBefore(el, close);
       });
     }
   }
   checkAwards(true);
+  if (blessOn()) blessStart(false);
   if (S.lab && World.ok && World.setLab) World.setLab(true);
   syncLab();
   renderAll();
