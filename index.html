@@ -2486,7 +2486,7 @@ const World = (function () {
     let par = up;
     const put = (geo, m, x, y, z, parent) => { const o = new T.Mesh(geo, m); o.position.set(x, y, z); o.castShadow = true; Object.assign(o.userData, tag); (parent || par).add(o); return o; };
     const tor = put(jacked ? new T.CylinderGeometry(0.46, 0.15, 0.95, 6) : new T.CylinderGeometry(tr[0], tr[1], 0.95, 6), P.shirtM, 0, 1.12, 0);
-    if (slim) tor.scale.set(0.8, 1, 0.8);
+    if (slim) tor.scale.set(o.him ? 0.6 : 0.8, 1, o.him ? 0.6 : 0.8);
     if (jacked) tor.scale.set(2.0, 1.12, 1.5);
     if (obese) { tor.scale.set(1.8, 1, 1.75); const belly = put(new T.IcosahedronGeometry(0.62, 0), P.shirtM, 0, 0.95, 0.3); belly.scale.set(1.25, 1, 1.05); }
     if (o.coat) put(new T.BoxGeometry(0.2, 0.62, 0.03), own(o.scrub), 0, 1.22, Math.max(tr[0], tr[1]) * tor.scale.z + 0.005);
@@ -2561,8 +2561,10 @@ const World = (function () {
       const fr = own('#CFE3F2'); fr.transparent = true; fr.opacity = 0.8; const gl = own('#BFE3F0'); gl.transparent = true; gl.opacity = 0.3; const wh2 = own('#FFFFFF');
       [-1, 1].forEach(s => {
         put(new T.BoxGeometry(0.15, 0.125, 0.03), wh2, s * 0.11, 1.88, 0.284);
-        put(new T.TorusGeometry(0.098, 0.03, 4, 12), fr, s * 0.11, 1.88, 0.3);
-        const lens = put(new T.CylinderGeometry(0.095, 0.095, 0.012, 10), gl, s * 0.11, 1.88, 0.305); lens.rotation.x = PI / 2;
+        const fx = s * 0.11;
+        put(new T.BoxGeometry(0.225, 0.034, 0.034), fr, fx, 1.88 + 0.085, 0.3); put(new T.BoxGeometry(0.225, 0.034, 0.034), fr, fx, 1.88 - 0.085, 0.3);
+        put(new T.BoxGeometry(0.034, 0.17, 0.034), fr, fx - 0.1, 1.88, 0.3); put(new T.BoxGeometry(0.034, 0.17, 0.034), fr, fx + 0.1, 1.88, 0.3);
+        put(new T.BoxGeometry(0.17, 0.13, 0.01), gl, fx, 1.88, 0.305);
         put(new T.BoxGeometry(0.03, 0.03, 0.34), fr, s * 0.225, 1.9, 0.14);
       });
       put(new T.BoxGeometry(0.07, 0.03, 0.03), fr, 0, 1.9, 0.305);
@@ -2598,6 +2600,7 @@ const World = (function () {
     par = up;
     if (o.him) {
       const fzh = (y) => (tr[1] + (tr[0] - tr[1]) * (y - 0.645) / 0.95) * tor.scale.z + 0.012, colM = own('#24508F');
+      put(new T.BoxGeometry(0.8, 0.17, 0.3), P.shirtM, 0, 1.51, 0); // broader shoulders
       put(new T.BoxGeometry(0.035, 0.56, 0.03), own('#E4ECF4'), 0, 1.3, fzh(1.3) + 0.004);
       put(new T.BoxGeometry(0.075, 0.09, 0.04), dark, 0, 1.55, fzh(1.55) + 0.012);
       put(new T.CylinderGeometry(0.19, 0.25, 0.16, 8), colM, 0, 1.64, 0);
@@ -2622,7 +2625,7 @@ const World = (function () {
         if (o.shoes) put(new T.BoxGeometry(legW + 0.06, 0.1, legW + 0.22), own(o.shoes), 0, -legL + 0.05, 0.07, leg);
       }
       P.legs.push(leg);
-      const arm = new T.Group(); arm.position.set(s * (jacked ? 0.86 : obese ? 0.78 : slim ? 0.38 : 0.46), 1.5, 0); up.add(arm);
+      const arm = new T.Group(); arm.position.set(s * (jacked ? 0.86 : obese ? 0.78 : slim ? (o.him ? 0.37 : 0.38) : 0.46), 1.5, 0); up.add(arm);
       if (jacked) arm.scale.set(2.3, 1.15, 2.3); else if (obese) arm.scale.set(1.6, 1, 1.6); else if (slim) arm.scale.set(0.8, 1, 0.8);
       put(new T.BoxGeometry(0.15, 0.62, 0.16), jacked ? P.skinM : P.shirtM, 0, -0.3, 0, arm);
       put(new T.IcosahedronGeometry(0.09, 0), P.skinM, 0, -0.66, 0, arm); P.arms.push(arm);
@@ -2927,7 +2930,8 @@ const World = (function () {
   }
   function pickBody() { const r = Math.random(); return r < 0.15 ? 'jacked' : r < 0.3 ? 'obese' : 'normal'; }
   function bodyR(b) { return b === 'obese' ? 0.85 : b === 'jacked' ? 0.8 : 0.575; }
-  function slotPos(i, c) { if (rushOn) { if (i <= 2) return new T.Vector3(-1.5 + (c ? c.jx * 0.2 : 0), 0, 1.9 + i * 1.2); if (i <= 4) return new T.Vector3(-0.3 + (i - 3) * 1.25, 0, 4.3 + (c ? c.jz * 0.2 : 0)); const k = Math.min(i - 5, SEATS.length - 1); return new T.Vector3(SEATS[k][0], 0, SEATS[k][1]); } const s = SLOTS[Math.min(i, SLOTS.length - 1)]; return new T.Vector3(s[0] + (c ? c.jx : 0), 0, s[1] + (c ? c.jz : 0)); }
+  const HIM_SPOT = [4.9, 1.3];
+  function slotPos(i, c) { if (c && c.him) return new T.Vector3(HIM_SPOT[0], 0, HIM_SPOT[1]); if (queue.length && queue[0].him) i = Math.max(0, i - 1); if (rushOn) { if (i <= 2) return new T.Vector3(-1.5 + (c ? c.jx * 0.2 : 0), 0, 1.9 + i * 1.2); if (i <= 4) return new T.Vector3(-0.3 + (i - 3) * 1.25, 0, 4.3 + (c ? c.jz * 0.2 : 0)); const k = Math.min(i - 5, SEATS.length - 1); return new T.Vector3(SEATS[k][0], 0, SEATS[k][1]); } const s = SLOTS[Math.min(i, SLOTS.length - 1)]; return new T.Vector3(s[0] + (c ? c.jx : 0), 0, s[1] + (c ? c.jz : 0)); }
   function rollEvt() { const k = B.eventRoll(); if (k === 'inspector' || k === 'driver') { spawnVisitor(k); return null; } return k; }
   /* inspector and delivery driver: walk in, go behind the counter and wait to be clicked */
   let visitor = null; const VIS_AT = [2.4, -2.1];
@@ -3705,16 +3709,16 @@ const World = (function () {
   };
   /* A low-poly head-and-shoulders portrait of a patient, rendered from the same model the 3D world uses. */
   const portraitCache = {};
-  api.portrait = function (seed, karen, sweaty, elder) {
+  api.portrait = function (seed, karen, sweaty, elder, him) {
     if (!api.ok || !renderer) return null;
-    const key = seed + '|' + (karen ? 1 : 0) + (sweaty ? 1 : 0) + (elder ? 1 : 0);
+    const key = seed + '|' + (karen ? 1 : 0) + (sweaty ? 1 : 0) + (elder ? 1 : 0) + (him ? 'H' : '');
     if (key in portraitCache) return portraitCache[key];
     let url = null, rt = null, p = null;
     try {
       const S = 256, ps = new T.Scene(), pc = new T.PerspectiveCamera(28, 1, 0.1, 30);
       ps.add(new T.HemisphereLight(0xffffff, 0x8899aa, 0.95)); const dl = new T.DirectionalLight(0xffffff, 0.75); dl.position.set(2.5, 4, 5); ps.add(dl);
-      p = person(seed, false, !!karen, !!sweaty, 'normal', elder ? { elder: true, gender: seed % 2 === 0 ? 'f' : 'm' } : undefined); p.rotation.y = -0.4; ps.add(p);
-      const ty = (karen || sweaty ? 2.0 : 1.82) - 0.02;
+      p = him ? person(4242, false, false, false, 'slim', himOpts()) : person(seed, false, !!karen, !!sweaty, 'normal', elder ? { elder: true, gender: seed % 2 === 0 ? 'f' : 'm' } : undefined); p.rotation.y = -0.4; ps.add(p);
+      const ty = (him ? 2.42 : karen || sweaty ? 2.0 : 1.82) - 0.02;
       pc.position.set(0, ty + 0.12, 2.9); pc.lookAt(0, ty, 0);
       rt = new T.WebGLRenderTarget(S, S, { samples: 4 });
       const oldRT = renderer.getRenderTarget(), oc = renderer.getClearColor(new T.Color()), oa = renderer.getClearAlpha();
@@ -4013,7 +4017,9 @@ const World = (function () {
       camera.position.set(lerp(px, e.x, s2), lerp(py, e.y, s2), lerp(pz, e.z, s2));
       camera.lookAt(lerp(TX, l.x, s2), lerp(TY, l.y, s2), lerp(TZ, l.z, s2));
       const fv = 40 + (fpTF - 40) * s2; if (Math.abs(fv - fpFov) > 0.05) { fpFov = fv; camera.fov = fv; camera.updateProjectionMatrix(); }
-    } else { camera.lookAt(TX, TY, TZ); if (fpFov !== 40) { fpFov = 40; camera.fov = 40; camera.updateProjectionMatrix(); } }
+    } else {
+      if (hcam.k > 0.001) { const s = easeIO(hcam.k); camera.position.set(lerp(camera.position.x, hcam.ex, s), lerp(camera.position.y, hcam.ey, s), lerp(camera.position.z, hcam.ez, s)); camera.lookAt(lerp(TX, hcam.tx, s), lerp(TY, hcam.ty, s), lerp(TZ, hcam.tz, s)); } else camera.lookAt(TX, TY, TZ);
+      if (fpFov !== 40) { fpFov = 40; camera.fov = 40; camera.updateProjectionMatrix(); } }
     if (fpG && fpK === 0 && !fpT) fpClear();
     if (synOn) {
       // nothing from the pharmacy (patient puffs, drips, coins) may draw over the synapse
@@ -4343,6 +4349,12 @@ const World = (function () {
   // tilt the head about the neck (not the body origin) so it stays attached
   function headX(P, a) { P.head.rotation.x = a; P.head.position.y = 1.65 * (1 - Math.cos(a)); P.head.position.z = -1.65 * Math.sin(a); }
   const easeIO = (k) => k * k * (3 - 2 * k);
+  const hcam = { sup: 0, k: 0, want: 0, ex: 0, ey: 0, ez: 0, tx: 0, ty: 0, tz: 0 };
+  // zoom the camera in on Himothy, in front of him (on the side the normal camera looks from)
+  function himCam(p, on) {
+    hcam.want = on && hcam.sup <= 0 ? 1 : 0; if (!on) return;
+    hcam.tx = p.x; hcam.ty = p.y + 1.7; hcam.tz = p.z; hcam.ex = p.x + Math.sin(th) * 6.4; hcam.ey = p.y + 2.8; hcam.ez = p.z + Math.cos(th) * 6.4;
+  }
   let himH = null, himA = null, himAsc = null, himT = 600;
   function himBubble(text) {
     if (!tagsEl) return null;
@@ -4402,7 +4414,7 @@ const World = (function () {
     a.t += dt; const t = a.t, c = a.c, g = c.g, P = g.userData.P, p = g.position;
     const settle = easeIO(clamp(t / 0.8, 0, 1)), look = easeIO(clamp((t - 1.2) / 1.2, 0, 1)), rise = Math.max(0, t - 2.6), spread = easeIO(clamp((t - 2.2) / 1.4, 0, 1));
     // turn to the camera, relax, then look up
-    g.rotation.y = lerpAngle(g.rotation.y, Math.atan2(camera.position.x - p.x, camera.position.z - p.z) + (rise > 0 ? rise * 0.5 : 0), Math.min(1, dt * 5));
+    g.rotation.y = lerpAngle(g.rotation.y, th + (rise > 0 ? rise * 0.5 : 0), Math.min(1, dt * 5)); himCam(p, t < 11 && p.y < 12);
     for (let i = 0; i < 2; i++) {
       P.legs[i].rotation.x = lerp(P.legs[i].rotation.x, 0, Math.min(1, dt * 8)); P.knees[i].rotation.x = lerp(P.knees[i].rotation.x, rise > 0 ? 0.3 + Math.sin(t * 2 + i) * 0.1 : 0, Math.min(1, dt * 8));
       P.arms[i].rotation.x = lerp(P.arms[i].rotation.x, 0, Math.min(1, dt * 8)); P.arms[i].rotation.z = (i ? 1 : -1) * (0.08 * settle + 1.0 * spread);
@@ -4423,7 +4435,7 @@ const World = (function () {
     }
     if (p.y > 13.5 || t > 14) {
       scene.remove(a.beam); scene.remove(a.ring); if (a.bub) a.bub.remove();
-      c.gone = true; custGroup.remove(g); himAsc = null;
+      c.gone = true; custGroup.remove(g); himAsc = null; himCam(p, false);
       if (a.done) a.done();
     }
   }
@@ -4504,20 +4516,20 @@ const World = (function () {
       h.spark -= dt; if (h.spark <= 0) { h.spark = 0.04; burst(new T.Vector3(p.x, p.y + 1, p.z), 1, 0xFFFFFF, 0.4); }
       if (k >= 1) { h.state = 'land'; h.t = 0; g.rotation.x = 0; himImpact(h); }
     } else if (h.state === 'land') {
-      g.rotation.y = lerpAngle(g.rotation.y, Math.atan2(PZ.x - p.x, PZ.z - p.z), Math.min(1, dt * 3));
+      g.rotation.y = lerpAngle(g.rotation.y, t > 0.9 ? th : Math.atan2(PZ.x - p.x, PZ.z - p.z), Math.min(1, dt * 3)); if (t > 0.9) himCam(p, true);
       himStand(h, t < 1.1 ? 0 : easeIO(clamp((t - 1.1) / 0.6, 0, 1)));
       if (t > 1.8) {
         h.state = 'ask'; h.t = 0; say(h, 'Quick question!');
         if (B.onHimLand && B.onHimLand() === false) h.leave = true;
       }
     } else if (h.state === 'ask' || h.state === 'wait2') {
-      g.rotation.y = lerpAngle(g.rotation.y, Math.atan2(PZ.x - p.x, PZ.z - p.z), Math.min(1, dt * 4));
+      g.rotation.y = lerpAngle(g.rotation.y, th, Math.min(1, dt * 4)); himCam(p, true);
       himStand(h, 1); p.y = Math.abs(Math.sin(t * 3)) * 0.04; P.arms[1].rotation.x = -0.3 + Math.sin(t * 2) * 0.1;
       if (h.state === 'ask' && h.leave) { h.state = 'wait2'; }
       if (h.state === 'wait2' && h.leave) startTakeoff(h);
     } else if (h.state === 'bless') {
       const k = easeIO(clamp(t / 0.7, 0, 1)), fadeOut = 1 - easeIO(clamp((t - 2.6) / 0.8, 0, 1));
-      p.y = 0.9 * k * fadeOut + Math.sin(t * 3) * 0.08 * k; g.rotation.y += dt * 0.6 * k;
+      p.y = 0.9 * k * fadeOut + Math.sin(t * 3) * 0.08 * k; g.rotation.y = lerpAngle(g.rotation.y, th, Math.min(1, dt * 3)) + 0 * k; himCam(p, true);
       P.arms[0].rotation.x = P.arms[1].rotation.x = -2.8 * k; P.arms[0].rotation.z = -0.35 * k; P.arms[1].rotation.z = 0.35 * k; headX(P, -0.5 * k); P.legs[0].rotation.x = P.legs[1].rotation.x = 0; P.knees[0].rotation.x = P.knees[1].rotation.x = 0.2 * k;
       if (h.beam) { h.beam.material.opacity = 0.38 * k * fadeOut * (0.85 + 0.15 * Math.sin(t * 10)); h.beam.rotation.y += dt; h.ring.material.opacity = 0.5 * k * fadeOut; const rs = 1 + 0.2 * Math.sin(t * 5); h.ring.scale.set(rs, rs, rs); }
       h.spark -= dt; if (h.spark <= 0) { h.spark = 0.07; burst(new T.Vector3(-8 + Math.random() * 16, 5 + Math.random() * 2, -5 + Math.random() * 11), 2, HIM_GOLD, 0.15); }
@@ -4527,12 +4539,13 @@ const World = (function () {
       P.arms[0].rotation.x = P.arms[1].rotation.x = -0.5 * k; P.arms[0].rotation.z = -0.9 * k; P.arms[1].rotation.z = 0.9 * k; P.head.rotation.y = Math.sin(t * 4) * 0.3 * k;
       if (t > 1.8) { P.head.rotation.y = 0; h.state = 'wait2'; h.t = 0; }
     } else if (h.state === 'crouch') {
+      himCam(p, false);
       himStand(h, 1 - easeIO(clamp(t / 0.45, 0, 1)) * 0.75);
       if (t > 0.5) { h.state = 'off'; h.t = 0; h.fp = p.clone(); h.fq = new T.Vector3(p.x + 15, 17, p.z - 9); burst(new T.Vector3(p.x, 0.3, p.z), 10, 0xFFFFFF, 1.2); shake = 0.4; P.up.rotation.x = 0; p.y = 0; }
     } else if (h.state === 'off') {
       const k = Math.min(1, t / 1.9), e = k * k;
       himFly(h, e); h.spark -= dt; if (h.spark <= 0) { h.spark = 0.04; burst(new T.Vector3(p.x, p.y + 1, p.z), 1, HIM_GOLD, 0.4); }
-      if (k >= 1) { custGroup.remove(g); himH = null; if (B.onHimGone) B.onHimGone(); }
+      if (k >= 1) { custGroup.remove(g); himH = null; himCam(p, false); if (B.onHimGone) B.onHimGone(); }
     }
   }
   function startTakeoff(h) { h.state = 'crouch'; h.t = 0; }
@@ -4558,6 +4571,11 @@ const World = (function () {
     if (himA) angelTick(dt);
     else if (!himH && !himAsc && B.himOk && B.himOk() && !labOn && !synOn && !paused && !fpT) { himT -= dt; if (himT <= 0) { himT = 600; spawnAngel(); } }
     if (himH) heroTick(dt);
+    if (!himH && !himAsc) hcam.want = 0;
+    // someone else is talking: pull the camera back out until they are done
+    const mine = himH ? himH.g : himAsc ? himAsc.c.g : null;
+    if (mine && says.some(m => m.o.g !== mine)) hcam.sup = 1.0; else if (hcam.sup > 0) hcam.sup -= dt;
+    hcam.k += (hcam.want - hcam.k) * Math.min(1, dt * 2.5); if (hcam.want === 0 && hcam.k < 0.002) hcam.k = 0;
   }
 
   /* ---- lost pills: tablets and capsules pop out of bottles and other things; tap one to put it in the lost-pills vial ---- */
@@ -5352,8 +5370,8 @@ const World = (function () {
   const JIM_LINES = ['Sorry, sorry, can I ask something quick? *mops forehead*', 'It is a little warm in here, right? Anyway, question...', 'I am not nervous. You are nervous. Okay, question:'];
   const JIM_BREAK = ['Hey, uh, is my prescription ready yet?', 'Is my prescription ready? I have been here forever.', 'Excuse me, quick thing, is my prescription done?'];
   const CALLER_LINES = ['I TRIED TO CALL and nobody picked up!', 'I called three times! Where is the manager?', 'Your phone just rang and rang. Unacceptable!'];
-  function avatar(seed, mood, karen, sweaty, elder) {
-    const url = World.ok && World.portrait ? World.portrait(seed, karen, sweaty, elder) : null;
+  function avatar(seed, mood, karen, sweaty, elder, him) {
+    const url = World.ok && World.portrait ? World.portrait(seed, karen, sweaty, elder, him) : null;
     if (url) return '<img class="avatar lp ' + (karen ? 'k' : sweaty ? 's' : '') + ' ' + (mood || '') + '" src="' + url + '" alt="" width="64" height="64" aria-hidden="true">';
     const skins = ['#F2C9A5', '#E0A97E', '#C48A5E', '#8D5A3B', '#F6D7BD', '#6F4429'];
     const hairs = ['#2B1B12', '#6B3A1E', '#B5651D', '#D9B25A', '#A8A8A8', '#1E1E2E'];
@@ -5706,7 +5724,7 @@ const World = (function () {
         ${showTimer ? '<div class="timer" aria-hidden="true"><i id="timerbar"></i></div>' : ''}</div>
       ${isK ? `<div class="ktimer" role="timer" aria-label="Time before Karen leaves"><div class="timer"><i id="timerbar"></i></div><b id="tcount">${KAREN_SEC}</b><small>sec</small></div>` : ''}
       <div class="rx-body">
-        <div class="patient">${avatar(cur.seed, cur.done ? (cur.ok ? 'ok' : 'bad') : 'idle', cur.karen, cur.sweaty, cur.elder)}<div class="bubble"><em>${esc(cur.flavor)}</em><p>${esc(q.q)}</p></div></div>
+        <div class="patient">${avatar(cur.seed, cur.done ? (cur.ok ? 'ok' : 'bad') : 'idle', cur.karen, cur.sweaty, cur.elder, cur.name === 'Himothy')}<div class="bubble"><em>${esc(cur.flavor)}</em><p>${esc(q.q)}</p></div></div>
         <div class="opts" role="group" aria-label="Answer choices">${opts}${jimHTML()}</div>${q.ms && !cur.done ? `<div class="msbar"><span>Select all that apply (${Object.keys(cur.sel).length} picked)</span><button type="button" class="btn go" id="msgo" ${Object.keys(cur.sel).length ? '' : 'disabled'}>Submit answer</button></div>` : ''}${labToolsHTML()}
         <div class="tools"><button type="button" class="btn" id="hintbtn" ${S.hintsLeft < 1 || cur.hint || cur.done ? 'disabled' : ''}>Ask the pharmacist (${S.hintsLeft})</button>
           <span class="keyhint">${isK ? 'Karen leaves in ' + KAREN_SEC + ' s. A wrong answer costs an upgrade.' : cur.lab ? 'Lab bench: no timer. Pays x1.5.' : timerOn() ? 'Speed bonus fades over 20 s' : focusOn() ? 'Focus mode: no timer' : 'Timer bonus is off'}</span></div>
@@ -7504,7 +7522,7 @@ const World = (function () {
       <div class="btnrow"><button type="button" class="btn go" data-act="back">Back to the pharmacy</button></div></div>`;
   }
 
-  const GAME_VERSION = 89;
+  const GAME_VERSION = 92;
   const b64u = (u8) => { let s = ''; for (let i = 0; i < u8.length; i += 0x8000) s += String.fromCharCode.apply(null, u8.subarray(i, i + 0x8000)); return btoa(s).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); };
   const unb64u = (t) => { const s = atob(t.replace(/-/g, '+').replace(/_/g, '/')), u = new Uint8Array(s.length); for (let i = 0; i < s.length; i++) u[i] = s.charCodeAt(i); return u; };
   const chk = (t) => { let h = 2166136261; for (let i = 0; i < t.length; i++) { h ^= t.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36); };
