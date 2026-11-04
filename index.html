@@ -4837,8 +4837,72 @@ const World = (function () {
     const ABST = new Set(['and', 'the', 'for', 'with', 'not', 'use', 'due', 'any', 'off', 'its', 'all', 'may', 'can', 'are', 'who']);
     const abOvl = (a, b) => { const f = (t) => (String(t).toLowerCase().match(/\b[a-z][a-z0-9]{1,2}\b/g) || []).filter(w => !ABST.has(w)); const B = f(b); return f(a).filter(w => B.indexOf(w) >= 0); };
     const classClash = (d, x) => { const a = String(d.c || ''), b = String(x.c || ''); if (!a || !b) return false; if (nz(a) === nz(b)) return true; if ((bare(a) || bare(b)) && ovl((a.toLowerCase().match(/[a-z]{4,}/g) || []), (b.toLowerCase().match(/[a-z]{4,}/g) || [])).length) return true; return ovl(sig(a), sig(b)).length > 0; };
+    // Related-use screening: an indication that sits in the same clinical neighborhood as anything the drug (or its class) is used for cannot be a wrong choice.
+    const IND_CLUS = [
+      ['pain', /pain|analges|headache|migraine|arthrit|osteoarth|\boa\b|\bra\b|gout|spasm|fever|dysmenorr|inflamm|neuralg|neuropath|musculoskel|spondyl|bursit|tendin|sprain|fibromyalg|cluster/],
+      ['cardiac', /hypertens|\bhtn\b|heart failure|\bhf\b|\bchf\b|angina|\bcad\b|coronary|\baf\b|atrial|arrhythm|tachycard|edema|myocardial|\bmi\b|stroke|thrombo|\bdvt\b|\bvte\b|embol|clot|anticoag|pulmonary arterial|raynaud|cardiovascular|ventricular/],
+      ['lipid', /lipid|cholesterol|\bhld\b|triglycer|hyperlip/],
+      ['mood', /depress|anxiety|panic|\bocd\b|obsessive|\bptsd\b|posttraumatic|insomnia|sleep|smoking|bipolar|mania|manic|premenstrual|bulimia|binge|alcohol/],
+      ['psychosis', /schizo|psychos|psychotic|bipolar|mania|manic|agitation|tourette|tic disorder|irritability/],
+      ['attention', /adhd|attention deficit|narcolep|binge|obesity|weight/],
+      ['seizure', /seizure|epilep|convuls|lennox|status epil/],
+      ['neuro', /parkinson|alzheimer|dementia|restless leg|spastic|vertigo|motion sick|huntington|myasthenia|multiple sclerosis|neuropath|neuralg/],
+      ['diabetes', /diabet|\bt1dm\b|\bt2dm\b|glycem|insulin|weight|obesity/],
+      ['resp', /asthma|\bcopd\b|cough|rhinitis|allerg|urticaria|bronch|congestion|\bcold\b|anaphyl|hay fever|sinus|wheez|pulmonary|respiratory|hives|pruritus|itch/],
+      ['gi', /gerd|reflux|ulcer|pylori|nausea|vomit|emesis|\bn\/v\b|pancreat|steatorrh|malabsorp|gastropar|diarrhea|constipat|\bibs\b|\bibd\b|crohn|colitis|hemorrhoid|dyspep|heartburn|bowel|gastr|motion sick|hepatic enceph/],
+      ['immune', /psoria|arthrit|\bra\b|lupus|\bsle\b|crohn|colitis|\bibd\b|spondyl|eczema|atopic|dermatitis|transplant|rejection|multiple sclerosis|uveitis|vasculitis/],
+      ['gu', /\bbph\b|prostat|\bed\b|erectile|overactive bladder|incontinence|urinary|bladder|enuresis/],
+      ['hormone', /contracept|menopaus|endometri|hypogonad|testosterone|menstru|uterine bleeding|infertil|hormone|hirsut|pcos|polycystic|prostat/],
+      ['thyroid', /thyroid/],
+      ['bone', /osteopor|\bop\b|calcium|vitamin d|parathyroid|hypocalc|hypoparathyroid|bone|paget|rickets|hypophosph|phosphat/],
+      ['lytes', /potassium|hypokal|magnesium|hypomag|electrolyte|sodium|phosph/],
+      ['anemia', /anemi|iron|b12|folic|folate|cobalamin|pernicious|neural tube/],
+      ['cancer', /cancer|carcinoma|leukemi|lymphoma|malignan|tumor|chemo|myeloma|oncolog/],
+      ['vzv', /varicella|zoster|shingles|chickenpox|herpes zoster/],
+      ['tdap', /tetanus|diphtheria|pertussis|whooping|lockjaw/],
+      ['hep', /hepatitis/],
+      ['eye', /glaucoma|dry eye|conjunctiv|ocular|intraocular|\beye\b|uveitis/],
+      ['spasm', /spasm|spastic|cramp/],
+      ['derm', /psoria|eczema|acne|dermatitis|rosacea|alopecia|hair loss|skin|pruritus|itch|hives|urticaria/]
+    ];
+    const CLS_BAN = [
+      [/nsaid|cox|salicylate|acetaminophen|analges|paracetamol|ketorolac|ibuprofen|naproxen/, ['pain', 'immune', 'spasm']],
+      [/opioid/, ['pain', 'resp', 'gi']],
+      [/corticosteroid|glucocorticoid|steroid|\bics\b|prednis|dexameth|cortisone/, ['pain', 'resp', 'immune', 'gi', 'derm', 'eye', 'cancer', 'hormone']],
+      [/alpha.?2|clonidine|guanfacine|tizanidine|methyldopa/, ['cardiac', 'spasm', 'attention']],
+      [/erythropoie|esa\b|iron|vitamin b|folate|folic|cobalamin|supplement/, ['anemia']],
+      [/vitamin d|calcitriol|bisphosphonate|calcium|parathyroid|raloxifene|estrogen|supplement/, ['bone']],
+      [/cancer|antimetabolite|aromatase|antiestrogen|selective estrogen/, ['cancer']],
+      [/beta.?block|\bace\b|ace inhib|angiotensin|\barb\b|diuretic|calcium channel|alpha.?block|vasodilat|nitrate|antiarrhythm/, ['cardiac', 'pain', 'eye', 'gu', 'mood']],
+      [/ssri|snri|tricyclic|antidepress|mirtazapine|bupropion|trazodone|serotonin/, ['mood', 'pain', 'seizure', 'psychosis', 'attention', 'gi']],
+      [/anticonvuls|antiepilep|gaba|valpro|lamotrig|carbamaz|topiramate|phenytoin/, ['seizure', 'pain', 'mood', 'psychosis', 'neuro']],
+      [/antipsychotic|neuroleptic/, ['psychosis', 'mood', 'neuro', 'gi']],
+      [/benzodiaz|sedative|hypnotic|barbiturate/, ['mood', 'seizure', 'neuro', 'pain']],
+      [/antihistamine|h1/, ['resp', 'mood', 'gi', 'derm', 'eye']],
+      [/muscle relax|spasmolytic|gaba-b/, ['pain', 'neuro', 'spasm']],
+      [/triptan|cgrp|ergot/, ['pain']],
+      [/proton pump|h2 |histamine-2|antiemetic|5-ht3|antidiarrheal|laxative|prokinetic|dopamine receptor antag|stool|enzyme/, ['gi']],
+      [/anticoag|antiplatelet|thrombin|factor xa|heparin/, ['cardiac']],
+      [/statin|fibrate|lipid|cholesterol/, ['lipid', 'cardiac']],
+      [/insulin|metformin|sulfonylurea|sglt|glp|dpp|thiazolidinedione|biguanide|incretin|amylin/, ['diabetes', 'cardiac', 'attention', 'lipid']],
+      [/estrogen|progest|contracept|androgen|testosterone|selective estrogen|aromatase|5-alpha/, ['hormone', 'gu']],
+      [/anticholinergic|antimuscarinic|antispasmodic|atropine/, ['gu', 'neuro', 'resp', 'gi', 'spasm']],
+      [/dopamine|monoamine oxidase|mao/, ['neuro', 'mood', 'hormone']],
+      [/stimulant|amphetamine|methylphenidate/, ['attention', 'mood']],
+      [/bronchodilat|laba|lama|saba|sama|leukotriene|methylxanthine|inhaled|\bics\b/, ['resp', 'spasm']],
+      [/tnf|biologic|interleukin|dmard|immunosuppress|jak|monoclonal/, ['immune', 'derm', 'gi', 'pain', 'resp']],
+      [/pde.?5|phosphodiesterase/, ['gu', 'cardiac']],
+      [/carbonic anhydrase|prostaglandin analog|miotic/, ['eye']]
+    ];
+    const clusOf = (t) => { t = String(t || '').toLowerCase(); const o = {}; IND_CLUS.forEach(c => { if (c[1].test(t)) o[c[0]] = 1; }); return o; };
+    const relatedUse = (d, text) => {
+      const w = clusOf(text), mine = clusOf(d.i.join(' ; '));
+      if (Object.keys(w).some(k => mine[k])) return true;
+      const cs = String(d.c || '').toLowerCase() + ' ' + String(d.g || '').toLowerCase();
+      return CLS_BAN.some(r => r[0].test(cs) && r[1].some(k => w[k]));
+    };
     const conflict = (type, d, x, text) => {
-      if (type === 'ind') return ovl(sig(text), sig(d.i.join(' '))).length > 0 || abOvl(text, d.i.join(' ')).length > 0 || ovl(sig(text), sig(d.c + ' ' + d.g)).length > 0;
+      if (type === 'ind') return relatedUse(d, text) || ovl(sig(text), sig(d.i.join(' '))).length > 0 || abOvl(text, d.i.join(' ')).length > 0 || ovl(sig(text), sig(d.c + ' ' + d.g)).length > 0;
       if (type === 'class') return classClash(d, x) || abOvl(x.c, d.c).length > 0 || nz(d.c).indexOf(nz(x.c)) >= 0 || nz(x.c).indexOf(nz(d.c)) >= 0 || (nz(x.c).length > 3 && (nz(d.m).indexOf(nz(x.c)) >= 0 || nz(d.i.join(' ')).indexOf(nz(x.c)) >= 0));
       if (type === 'moa') return nz(d.c) === nz(x.c) || ovl(sig(x.m), sig(d.m)).length >= 3 || (sig(d.c).length > 0 && sig(d.c).join() === sig(x.c).join());
       if (type === 'gen') { const A = nz(d.g).split(' ').filter(w => w.length > 4), W = nz(x.g).split(' ').filter(w => w.length > 4); return ovl(A, W).length > 0; }
@@ -4858,9 +4922,9 @@ const World = (function () {
     // 3 wrong answers: other drugs from the same week first, then any drug. `field` returns the candidate text (or '').
     const wrongs = (d, field, r, reject, type) => {
       const same = shuf((byWeek[d.w] || []).filter(x => x !== d), r), rest = shuf(ALLD.filter(x => x !== d && x.w !== d.w && baseId(x) !== baseId(d)), r);
-      const out = [], seen = {}; const ok = field(d);
+      const out = [], seen = {}, usedCl = {}; const ok = field(d);
       seen[nz(ok)] = 1;
-      same.concat(rest).forEach(x => { if (out.length >= 3) return; const t = field(x); if (!t) return; const n = nz(t); if (!n || seen[n]) return; if (reject && reject(t, x)) return; if (type && conflict(type, d, x, t)) return; seen[n] = 1; out.push(t); });
+      same.concat(rest).forEach(x => { if (out.length >= 3) return; const t = field(x); if (!t) return; const n = nz(t); if (!n || seen[n]) return; if (reject && reject(t, x)) return; if (type && conflict(type, d, x, t)) return; if (type === 'ind') { const cl = Object.keys(clusOf(t)); if (cl.some(k => usedCl[k]) || out.some(o => ovl(sig(o), sig(t)).length > 0)) return; cl.forEach(k => usedCl[k] = 1); } seen[n] = 1; out.push(t); });
       return out.length === 3 ? out : null;
     };
     // ---- counseling (select all that apply): right answers are the workbook points, wrong answers contradict a point or belong to other drugs ----
@@ -7072,7 +7136,7 @@ const World = (function () {
       <div class="btnrow"><button type="button" class="btn go" data-act="back">Back to the pharmacy</button></div></div>`;
   }
 
-  const GAME_VERSION = 85;
+  const GAME_VERSION = 86;
   const b64u = (u8) => { let s = ''; for (let i = 0; i < u8.length; i += 0x8000) s += String.fromCharCode.apply(null, u8.subarray(i, i + 0x8000)); return btoa(s).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); };
   const unb64u = (t) => { const s = atob(t.replace(/-/g, '+').replace(/_/g, '/')), u = new Uint8Array(s.length); for (let i = 0; i < s.length; i++) u[i] = s.charCodeAt(i); return u; };
   const chk = (t) => { let h = 2166136261; for (let i = 0; i < t.length; i++) { h ^= t.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36); };
