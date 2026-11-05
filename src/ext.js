@@ -584,9 +584,10 @@
   ];
   const COSM_SLOT = { face: 'Facial hair', eyes: 'Glasses', hat: 'Hats', extra: 'Extras' };
   const STD_EYES = [['eyes', 'round', 'Round glasses'], ['eyes', 'square', 'Square glasses']];
-  const cosmById = id => COSM.find(c => c[1] === id) || STD_EYES.find(c => c[1] === id);
-  const cosmHave = id => (S.cosm || []).indexOf(id) >= 0 || STD_EYES.some(c => c[1] === id);
-  function cosmSpec() { const on = S.cosmOn || {}, o = { face: '', eyes: '', hat: '', extra: '' }; Object.keys(on).forEach(k => { const id = on[k], c = id && cosmHave(id) ? cosmById(id) : null; if (c) o[c[0]] = id; }); return o; }
+  const SHOP_COS = SHOP_CYBER.map(c => [c[0], c[1], c[2], c[3]]);
+  const cosmById = id => COSM.find(c => c[1] === id) || STD_EYES.find(c => c[1] === id) || SHOP_COS.find(c => c[1] === id);
+  const cosmHave = id => (S.cosm || []).indexOf(id) >= 0 || STD_EYES.some(c => c[1] === id) || ((S.store || {}).own || []).indexOf(id) >= 0;
+  function cosmSpec() { const on = S.cosmOn || {}, o = { face: '', eyes: '', hat: '', extra: '', cyber: '' }; Object.keys(on).forEach(k => { const id = on[k], c = id && cosmHave(id) ? cosmById(id) : null; if (c) o[c[0]] = id; }); return o; }
   const PNAME = { '#F4F4F0': 'white', '#F2A516': 'orange', '#E04F3A': 'red', '#4C7BD9': 'blue', '#2FAE66': 'green', '#F29BC1': 'pink', '#8A63C9': 'purple', '#7FD6E8': 'sky blue', '#F6E27A': 'yellow' };
   const PSHAPE = { disc: 'round tablet', oval: 'oval tablet', caplet: 'caplet tablet', sq: 'square tablet', two: 'two-tone capsule', band: 'banded capsule', gel: 'softgel capsule' };
   function pillName(p) { const c = PNAME[p.c] || 'colorful'; return (p.k === 'c' && p.s !== 'gel' && p.c2 && p.c2 !== p.c ? c + ' and ' + (PNAME[p.c2] || 'white') + ' ' : c + ' ') + (PSHAPE[p.s] || (p.k === 't' ? 'tablet' : 'capsule')); }
@@ -616,7 +617,7 @@
   /* tablet buff */
   const BUFF_MS = 90000; let buffUntil = 0, buffSlips = 0, buffTimer = null, buffEl = null;
   const buffOn = () => Date.now() < buffUntil;
-  const buffPay = () => (buffOn() ? 2 : 1) * blessMult();
+  const buffPay = () => (buffOn() ? 2 : 1) * blessMult() * (1 + (uniBuff().pay || 0));
   function buffKeep() { if (buffOn() && buffSlips > 0) { buffSlips--; return true; } return false; }
   function buffTick() {
     const left = buffUntil - Date.now();

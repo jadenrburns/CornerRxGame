@@ -56,7 +56,7 @@
       hintsLeft: 0, sinceHint: 0, calcOK: 0, mastery: {}, missed: [], karenCd: 0, karenWin: 0, karenLoss: 0, sweatyCd: 0, jimWin: 0, jimLoss: 0, phoneOK: 0, phoneBad: 0, phoneMiss: 0, lastShelve: 0, retired: 0, shelveOK: 0, shelveBad: 0, priorN: 0, decks: [],
       me: { done: false, body: 'normal', gender: 'n', hair: 0, hairColor: 0, skin: 1, scrub: 0, shirt: 0, shoes: 3 }, awards: { frames: [], pets: [] },
       set: { topics: topics, diffs: [1, 2, 3], mode: 'mixed', timer: true, focus: false },
-      vial: [], cosm: [], cosmOn: {}, pillN: 0,
+      vial: [], cosm: [], cosmOn: {}, pillN: 0, store: { own: [], walls: 'w0', floor: 'f0', uni: '', deco: [] },
       up: { shelf: 0, tech: 0, train: 0, counsel: 0, library: 0, robot: 0 } };
   }
   let S = load();
@@ -70,6 +70,7 @@
         const o = JSON.parse(raw); Object.assign(f, o);
         f.up = Object.assign(defaults().up, o.up || {});
         f.me = Object.assign(defaults().me, o.me || {});
+        f.store = Object.assign(defaults().store, o.store || {}); f.store.own = (f.store.own || []).slice(); f.store.deco = (f.store.deco || []).slice();
         f.awards = { frames: ((o.awards || {}).frames || []).slice(), pets: ((o.awards || {}).pets || []).slice(), calW: (o.awards || {}).calW || 0, wkDone: (o.awards || {}).wkDone ? o.awards.wkDone.slice() : null };
         const d = defaults().set, os = o.set || {};
         f.set = Object.assign(d, os); f.set.topics = Object.assign(defaults().set.topics, os.topics || {});
@@ -305,7 +306,10 @@
     return '$' + (n / 1e15).toFixed(2) + 'Qa';
   }
   const franchiseMult = () => 1 + 0.25 * S.franchises + 0.5 * (S.retired || 0);
-  const techRate = () => 0.4 * (0.5 + S.rep / 100) * franchiseMult() * (1 + 0.25 * S.up.shelf) * (1 + 0.4 * S.up.train);
+  const shopOwn = id => !!id && ((S.store || {}).own || []).indexOf(id) >= 0;
+  const uniOf = () => SHOP_UNI.find(u => u[0] === (S.store || {}).uni);
+  const uniBuff = () => { const u = uniOf(); return u && S.up.tech >= 1 ? u[5] : {}; };
+  const techRate = () => 0.4 * (0.5 + S.rep / 100) * franchiseMult() * (1 + 0.25 * S.up.shelf) * (1 + 0.4 * S.up.train) * (1 + (uniBuff().tech || 0));
   const passive = () => S.up.tech * techRate();
   const hintCap = () => 2 * S.up.library;
   const upTotal = () => Object.keys(S.up).reduce((a, k) => a + S.up[k], 0);
@@ -782,7 +786,7 @@
   const ME_SHOES = [['#27384F', 'Navy shoes'], ['#F4F4F0', 'White sneakers'], ['#E04F3A', 'Red sneakers'], ['#2B2B33', 'Black shoes'], ['#F2C94C', 'Gold shoes'], ['#3FD07F', 'Green sneakers'], ['#8A63C9', 'Purple sneakers']];
   const ME_BODIES = [['slim', 'Slim'], ['normal', 'Average'], ['jacked', 'Jacked'], ['obese', 'Round']];
   const ME_GENDERS = [['f', 'Woman'], ['m', 'Man'], ['n', 'Nonbinary']];
-  const ME_HAIRS = ['Short', 'Bob', 'Long', 'Bun', 'Curly', 'Spiky', 'Bald'];
+  const ME_HAIRS = ['Short', 'Bob', 'Long', 'Bun', 'Curly', 'Spiky', 'Bald'].concat(SHOP_HAIR.map(h => h[1]));
   function meSpec() { const m = S.me; return { body: m.body, gender: m.gender, hair: m.hair, skin: ME_SKIN[m.skin], hairCol: ME_HAIR[m.hairColor], scrub: ME_SCRUB[m.scrub], shirtCol: (ME_SHIRT[m.shirt | 0] || ME_SHIRT[0])[0], shoes: (ME_SHOES[m.shoes === undefined ? 3 : m.shoes] || ME_SHOES[3])[0], acc: S.acc || 0, accOn: accOnList(), cosm: cosmSpec() }; }
   function accOnList() { const off = S.accOff || [], out = []; for (let k = 1; k <= (S.acc || 0); k++) if (off.indexOf(k) < 0) out.push(k); return out; }
   function meSVG() {
@@ -796,7 +800,12 @@
       `<path d="M37 58c0-20 10-30 23-30s23 10 23 30c-4-9-12-13-23-13s-19 4-23 13z" fill="${hair}"/><circle cx="60" cy="24" r="9" fill="${hair}"/>`,
       `<g fill="${hair}"><circle cx="42" cy="42" r="12"/><circle cx="56" cy="32" r="13"/><circle cx="72" cy="33" r="13"/><circle cx="82" cy="46" r="11"/><circle cx="38" cy="54" r="9"/><circle cx="84" cy="58" r="8"/></g>`,
       `<path d="M37 56c0-16 9-24 23-24s23 8 23 24c-4-8-12-11-23-11s-19 3-23 11z" fill="${hair}"/><path d="M42 36l-3-14 11 9zM56 32l0-16 8 14zM72 33l6-14 3 15z" fill="${hair}"/>`,
-      ''
+      '',
+      `<path d="M55 20h10v26H55z" fill="${hair}"/><path d="M52 30h16v14H52z" fill="${hair}"/>`,
+      `<circle cx="60" cy="40" r="30" fill="${hair}"/>`,
+      `<path d="M37 58c0-20 10-30 23-30s23 10 23 30c-4-9-12-13-23-13s-19 4-23 13z" fill="${hair}"/><path d="M62 46l14 30-8 4z" fill="${hair}"/>`,
+      `<path d="M36 58c0-20 10-32 24-32s24 12 24 32c-4-9-12-14-24-14s-20 5-24 14z" fill="${hair}"/><path d="M42 30c8-12 28-12 38 0l-6 4c-8-6-18-6-26 0z" fill="${hair}"/>`,
+      `<path d="M37 58c0-20 10-30 23-30s23 10 23 30c-4-9-12-13-23-13s-19 4-23 13z" fill="${hair}"/><circle cx="40" cy="34" r="9" fill="${hair}"/><circle cx="80" cy="34" r="9" fill="${hair}"/>`
     ];
     const f = m.gender === 'f';
     const face = `<circle cx="60" cy="62" r="22" fill="${skin}"/>${hs[m.hair] || ''}<circle cx="51" cy="62" r="2.4" fill="#2b1b12"/><circle cx="69" cy="62" r="2.4" fill="#2b1b12"/>${f ? '<path d="M46 57l5-2M74 57l-5-2" stroke="#2b1b12" stroke-width="1.6" stroke-linecap="round"/><path d="M54 73q6 4 12 0" stroke="#D9677A" stroke-width="3" fill="none" stroke-linecap="round"/>' : '<path d="M54 72q6 4 12 0" stroke="#3a1f12" stroke-width="2.2" fill="none" stroke-linecap="round"/>'}`;
@@ -809,12 +818,12 @@
   /* ---- character screen: one slider row per part, top to bottom ---- */
   function crows() {
     const m = S.me, on = cosmSpec(), N = (arr) => arr.map((x, i) => ({ v: i, n: x[1] || x, c: x[0] && x[0][0] === '#' ? x[0] : '' }));
-    const cos = (slot, std) => [{ v: '', n: 'None' }].concat((std || []).map(c => ({ v: c[1], n: c[2] })), COSM.filter(c => c[0] === slot && cosmHave(c[1])).map(c => ({ v: c[1], n: c[2] })));
+    const cos = (slot, std) => [{ v: '', n: 'None' }].concat((std || []).map(c => ({ v: c[1], n: c[2] })), COSM.concat(SHOP_COS).filter(c => c[0] === slot && cosmHave(c[1])).map(c => ({ v: c[1], n: c[2] })));
     return [
       { k: 'gender', t: 'Gender', cur: m.gender, o: ME_GENDERS.map(x => ({ v: x[0], n: x[1] })) },
       { k: 'body', t: 'Body type', cur: m.body, o: ME_BODIES.map(x => ({ v: x[0], n: x[1] })) },
       { k: 'skin', t: 'Skin tone', cur: m.skin, o: ME_SKIN.map((c, i) => ({ v: i, n: ME_SKIN_N[i], c })) },
-      { k: 'hair', t: 'Hair style', cur: m.hair, o: ME_HAIRS.map((n, i) => ({ v: i, n })) },
+      { k: 'hair', t: 'Hair style', cur: m.hair, o: ME_HAIRS.map((n, i) => ({ v: i, n })).filter(x => x.v < 7 || shopOwn(SHOP_HAIR[x.v - 7][0])) },
       { k: 'hairColor', t: 'Hair color', cur: m.hairColor, o: ME_HAIR.map((c, i) => ({ v: i, n: ME_HAIR_N[i], c })) },
       { k: 'face', t: 'Facial hair', cur: on.face, o: cos('face') },
       { k: 'eyes', t: 'Glasses', cur: on.eyes, o: cos('eyes', STD_EYES) },
@@ -823,21 +832,66 @@
       { k: 'scrub', t: 'Pants', cur: m.scrub, o: ME_SCRUB.map((c, i) => ({ v: i, n: ME_SCRUB_N[i] + ' pants', c })) },
       { k: 'shoes', t: 'Shoes', cur: m.shoes === undefined ? 3 : m.shoes, o: ME_SHOES.map((x, i) => ({ v: i, n: x[1], c: x[0] })) },
       { k: 'extra', t: 'Extras', cur: on.extra, o: cos('extra') }
-    ];
+    ].concat(SHOP_CYBER.some(c => shopOwn(c[1])) ? [{ k: 'cyber', t: 'Cyborg parts', cur: on.cyber, o: cos('cyber') }] : []);
   }
   function crowHTML(r) {
     const n = r.o.length, i = Math.max(0, r.o.findIndex(x => x.v === r.cur)), c = r.o[i], dis = n < 2 ? ' disabled' : '';
     return `<div class="crow" data-k="${r.k}"><span class="clab">${r.t}</span><div class="cslide"><button type="button" class="carr" data-act="cyc" data-k="${r.k}" data-d="-1" aria-label="Previous ${r.t.toLowerCase()}"${dis}>&#8249;</button><div class="cval" role="status" aria-live="polite">${c.c ? `<i class="csw" style="background:${c.c}"></i>` : ''}<span>${esc(c.n)}</span><small>${i + 1} of ${n}</small></div><button type="button" class="carr" data-act="cyc" data-k="${r.k}" data-d="1" aria-label="Next ${r.t.toLowerCase()}"${dis}>&#8250;</button></div></div>`;
   }
   function setCrow(k, v) {
-    if (['face', 'eyes', 'hat', 'extra'].indexOf(k) >= 0) { S.cosmOn = S.cosmOn || {}; const keep = {}; Object.keys(S.cosmOn).forEach(s => { const c = S.cosmOn[s] && cosmById(S.cosmOn[s]); if (c && c[0] !== k) keep[c[0]] = S.cosmOn[s]; }); S.cosmOn = keep; if (v) S.cosmOn[k] = v; }
+    if (['face', 'eyes', 'hat', 'extra', 'cyber'].indexOf(k) >= 0) { S.cosmOn = S.cosmOn || {}; const keep = {}; Object.keys(S.cosmOn).forEach(s => { const c = S.cosmOn[s] && cosmById(S.cosmOn[s]); if (c && c[0] !== k) keep[c[0]] = S.cosmOn[s]; }); S.cosmOn = keep; if (v) S.cosmOn[k] = v; }
     else S.me[k] = (typeof v === 'number') ? v : v;
   }
+  /* ---- shop (a tab on the Character screen) ---- */
+  let cTab = 'me', shopCat = 'walls';
+  const buffText = b => [b.tech ? '+' + Math.round(b.tech * 100) + '% tech tips' : '', b.pay ? '+' + Math.round(b.pay * 100) + '% pay' : ''].filter(Boolean).join(', ');
+  function uniSpec() { const u = uniOf(); return u ? { shirt: u[2], scrub: u[3], cosm: { hat: u[4] || '', eyes: u[0] === 'u5' ? 'goggles' : '' } } : null; }
+  function applyShop() { if (!World.ok) return; World.setStore(S.store); World.setStaffLook(uniSpec()); World.setPharmacist(meSpec()); }
+  const SHOP_CATS = [['walls', 'Wall paint'], ['floors', 'Floors'], ['uni', 'Tech uniforms'], ['deco', 'Decor'], ['hair', 'Hairstyles'], ['cyber', 'Cyborg']];
+  function shopRows(cat) {
+    const st = S.store;
+    if (cat === 'walls') return SHOP_WALLS.map(w => ({ id: w[0], name: w[1], price: w[4], free: !w[4], on: st.walls === w[0], sw: [w[2], w[3]], note: '' }));
+    if (cat === 'floors') return SHOP_FLOORS.map(f => ({ id: f[0], name: f[1], price: f[4], free: !f[4], on: st.floor === f[0], sw: [f[2], f[3]], note: '' }));
+    if (cat === 'uni') return [{ id: '', name: 'Standard coats', price: 0, free: true, on: !st.uni, sw: ['#F4FAFA', '#27384F'], note: 'No bonus.' }].concat(SHOP_UNI.map(u => ({ id: u[0], name: u[1], price: u[6], on: st.uni === u[0], sw: [u[2], u[3]], note: buffText(u[5]) + '. ' + u[7] })));
+    if (cat === 'deco') return SHOP_DECOR.map(d => ({ id: d[0], name: d[1], price: d[2], on: (st.deco || []).indexOf(d[0]) >= 0, emoji: d[4], note: d[3], toggle: true }));
+    if (cat === 'hair') return SHOP_HAIR.map((h, i) => ({ id: h[0], name: h[1], price: h[3], on: S.me.hair === 7 + i, emoji: '💇', note: 'For your pharmacist.' }));
+    return SHOP_CYBER.map(c => ({ id: c[1], name: c[2], price: c[4], on: ((S.cosmOn || {}).cyber) === c[1], emoji: c[3], note: 'For your pharmacist.' }));
+  }
+  function shopHTML() {
+    const cash = S.cash, rows = shopRows(shopCat);
+    const cats = SHOP_CATS.map(c => `<button type="button" class="chip" data-act="shopcat" data-v="${c[0]}" aria-pressed="${shopCat === c[0]}">${c[1]}</button>`).join('');
+    const cards = rows.map(r => {
+      const own = r.free || shopOwn(r.id), sw = r.sw ? `<span class="spsw"><i style="background:${r.sw[0]}"></i><i style="background:${r.sw[1]}"></i></span>` : `<span class="spem" aria-hidden="true">${r.emoji || ''}</span>`;
+      let btn;
+      if (!own) btn = `<button type="button" class="btn go" data-act="shop-buy" data-k="${shopCat}" data-id="${r.id}"${cash < r.price ? ' disabled' : ''}>Buy ${money(r.price)}</button>`;
+      else if (r.toggle) btn = `<button type="button" class="btn" data-act="shop-use" data-k="${shopCat}" data-id="${r.id}" aria-pressed="${r.on}">${r.on ? 'Remove' : 'Place'}</button>`;
+      else btn = r.on ? '<span class="spon">Equipped</span>' : `<button type="button" class="btn" data-act="shop-use" data-k="${shopCat}" data-id="${r.id}">Use</button>`;
+      return `<div class="spcard${r.on ? ' on' : ''}">${sw}<div class="sptx"><b>${esc(r.name)}</b>${r.note ? `<small>${esc(r.note)}</small>` : ''}</div>${btn}</div>`;
+    }).join('');
+    const bf = buffText(uniBuff()), hasT = S.up.tech >= 1;
+    const note = shopCat === 'uni' ? `<p class="note">${hasT ? (bf ? 'Your techs are earning bonuses: ' + bf + '.' : 'Pick a uniform to give your techs a bonus.') : 'Hire a Pharmacy Technician first. Uniform bonuses work once you have at least one tech.'}</p>` : shopCat === 'cyber' || shopCat === 'hair' ? '<p class="note">Bought items show up in the Character tab, where you can mix and match.</p>' : '';
+    return `<div class="spcash">Cash <b>${money(cash)}</b></div><div class="chips spcats" role="group" aria-label="Shop sections">${cats}</div>${note}<div class="spgrid">${cards}</div>`;
+  }
+  function shopBuy(kind, id) {
+    const rows = shopRows(kind), r = rows.find(x => x.id === id); if (!r || r.free || shopOwn(id)) return;
+    if (S.cash < r.price) { toast('Not enough cash for ' + r.name + '.'); return; }
+    S.cash -= r.price; S.store.own.push(id); SFX.play('unlock'); shopUse(kind, id, true); save(); renderStats(); toast('Bought ' + r.name + '.');
+  }
+  function shopUse(kind, id, quiet) {
+    const st = S.store;
+    if (kind === 'walls') st.walls = id; else if (kind === 'floors') st.floor = id; else if (kind === 'uni') st.uni = id;
+    else if (kind === 'deco') { const i = st.deco.indexOf(id); if (i >= 0 && !quiet) st.deco.splice(i, 1); else if (i < 0) st.deco.push(id); }
+    else if (kind === 'hair') { const i = SHOP_HAIR.findIndex(h => h[0] === id); if (i >= 0) S.me.hair = 7 + i; }
+    else if (kind === 'cyber') { S.cosmOn = S.cosmOn || {}; S.cosmOn.cyber = id; }
+    save(); applyShop(); if (view === 'create') renderPanel();
+  }
   function createHTML() {
+    const tabs = S.me.done ? `<div class="chips ctabs" role="tablist" aria-label="Character screen"><button type="button" class="chip" role="tab" data-act="ctab" data-v="me" aria-pressed="${cTab === 'me'}">Character</button><button type="button" class="chip" role="tab" data-act="ctab" data-v="shop" aria-pressed="${cTab === 'shop'}">Shop</button></div>` : '';
+    if (S.me.done && cTab === 'shop') return `<div class="pane cpane"><h3>Pharmacy shop</h3>${tabs}${shopCat === 'hair' || shopCat === 'cyber' ? '<div class="mepv sticky">' + mePreview() + '</div>' : ''}${shopHTML()}<div class="btnrow"><button type="button" class="btn go" data-act="me-done">Done</button></div></div>`;
     const m = S.me, rows = crows().map(crowHTML).join('');
     const gear = (S.acc || 0) < 1 ? '' : `<div class="grp"><b>Rank gear</b><div class="chips">${ACCS.map((a, i) => { const k = i + 1, un = k <= (S.acc || 0), onN = un && (S.accOff || []).indexOf(k) < 0; return un ? `<button type="button" class="chip" data-act="acc-tog" data-v="${k}" aria-pressed="${onN}">${a[1]} ${a[0]}</button>` : ''; }).join('')}</div></div>`;
     const found = (S.cosm || []).length;
-    return `<div class="pane cpane"><h3>Your character</h3>
+    return `<div class="pane cpane"><h3>Your character</h3>${tabs}
       <div class="mepv sticky">${mePreview()}</div>
       <div class="grp"><b>Name your pharmacy</b><input id="shopname" class="field" type="text" maxlength="24" autocomplete="off" placeholder="Corner Rx" value="${esc(S.shop || '')}" aria-label="Pharmacy name"><p class="note">It goes on the sign above your shelves.</p></div>
       <p class="note">Use the arrows on each row to flip through your options, top to bottom. ${found ? found + '/' + COSM.length + ' cosmetics found.' : 'Open capsules from the lost pills vial (top bar) to unlock facial hair, hats, glasses and more.'}</p>
@@ -1574,7 +1628,7 @@
   function maybeTour() { if (S.me.done && !S.tutDone && !tourEl) showTour(); }
   /* ---- save code: the whole save as one long code, to move progress between devices or keep a backup ---- */
 /*@EXT@*/
-  const GAME_VERSION = 97;
+  const GAME_VERSION = 98;
   const b64u = (u8) => { let s = ''; for (let i = 0; i < u8.length; i += 0x8000) s += String.fromCharCode.apply(null, u8.subarray(i, i + 0x8000)); return btoa(s).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); };
   const unb64u = (t) => { const s = atob(t.replace(/-/g, '+').replace(/_/g, '/')), u = new Uint8Array(s.length); for (let i = 0; i < s.length; i++) u[i] = s.charCodeAt(i); return u; };
   const chk = (t) => { let h = 2166136261; for (let i = 0; i < t.length; i++) { h ^= t.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36); };
@@ -1636,6 +1690,10 @@
       case 'create': openView(view === 'create' ? 'q' : 'create'); if (view === 'q') { resumeTimers(); renderPanel(); } return;
       case 'awards': openView(view === 'awards' ? 'q' : 'awards'); if (view === 'q') { resumeTimers(); renderPanel(); } return;
       case 'me': { readShop(); const k = t.dataset.k, v = t.dataset.v; S.me[k] = (k === 'hair' || k === 'hairColor' || k === 'skin' || k === 'scrub') ? +v : v; save(); World.setPharmacist(meSpec()); renderPanel(); return; }
+      case 'ctab': readShop(); cTab = v === 'shop' ? 'shop' : 'me'; renderPanel(); return;
+      case 'shopcat': shopCat = v; renderPanel(); return;
+      case 'shop-buy': shopBuy(t.dataset.k, t.dataset.id); if (view === 'create') renderPanel(); return;
+      case 'shop-use': shopUse(t.dataset.k, t.dataset.id); return;
       case 'me-done': readShop(); S.me.done = true; save(); syncBrand(); backToQ(); maybeTour(); return;
       case 'back': if (view === 'syn') synExit(); if (view === 'shift') return shiftNext(false); readDraft(); const wasC = view === 'create' && !S.me.done; if (view === 'create') readShop(); if (wasC) { S.me.done = true; save(); } backToQ(); if (wasC) maybeTour(); return;
       case 'phone': return openPhone();
@@ -1814,7 +1872,7 @@
   World.init({ host: $('#stage'), getS: () => S, tagInfo: tagInfo, onBuy: buyUp, onNotes: () => openView('studies'), notesInfo: customCount, karenRoll: karenRoll, sweatyRoll: sweatyRoll, elderRoll: elderRoll, eventRoll: eventRoll, onVisitor: visitClick, onVisitorArrive: visitArrive, capsuleOk: capsuleOk, onCapsule: onCapsule, onBrain: synEnter, onSynSite: onSynSite, onEvt: onEvt, pillOk: pillOk, onPill: onPill, onPhone: openPhone, onPolice: policeCome, himOk: himOk, onHimSpawn: onHimSpawn, onHimAngel: himAngelOk, onHimLand: himLand, onHimBless: onHimBless, onFp: fpClick, sign: () => shopName() + '|' + tierName() + ' #' + (S.franchises + 1) });
   window.__rxDbg = () => ({ fp: fp, S: S, view: view, rush: rush, phoneR: phone.ringing, TOPQ: TOPQ, pool: poolQs, cur: cur, synQ: () => (typeof SYN !== 'undefined' ? SYN.q : null), synTap: id => onSynSite(id), offer: k => offerEvt(k, 'test'), onEvt: onEvt, holiday: () => holNow(), holN: () => holCount(), renderStats: renderStats, passive: passive, techRate: techRate, buyUp: buyUp, openVial: openVial, tabletTake: tabletTake, capsuleOpen: capsuleOpen, buffOn: buffOn, COSM: COSM });
   if (!World.ok) $('#stage').classList.add('flat');
-  else { document.body.classList.add('fx'); World.setPharmacist(meSpec()); World.setAwards(S.awards); World.setCalendar(Math.min(4, S.awards.calW || 0), false, S.awards.calW || 0); }
+  else { document.body.classList.add('fx'); World.setPharmacist(meSpec()); World.setStore(S.store); World.setStaffLook(uniSpec()); World.setAwards(S.awards); World.setCalendar(Math.min(4, S.awards.calW || 0), false, S.awards.calW || 0); }
   applyFocus(); syncBrand(); sfxLabel();
   /* test tools: open the game with ?dev=1 on the end of the link to get extra menu buttons for trying events quickly */
   if (/[?&]dev=1/.test(location.search)) {

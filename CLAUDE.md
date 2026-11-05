@@ -8,13 +8,16 @@
 3. Run the tests from `src/` (see below).
 4. `cp src/corner-rx.html ../index.html` and commit both `src/` and `index.html`.
 
-`build.sh` concatenates, in order: `head.html`, the three.js r128 CDN tag, then `bank.js pt3*.js pt4.js th3.js th553.js him.js lab.js ind.js drugs.js deck.js crowd.js world.js game.full.js` into one page. `ext.js` is spliced into `game.js` at the `/*@EXT@*/` marker to make `game.full.js`. Add new question files to the list in `build.sh`.
+`build.sh` concatenates, in order: `head.html`, the three.js r128 CDN tag, then `bank.js pt3*.js pt4.js th3.js th553.js him.js lab.js ind.js drugs.js shop.js deck.js crowd.js world.js game.full.js` into one page. `ext.js` is spliced into `game.js` at the `/*@EXT@*/` marker to make `game.full.js`. Add new question files to the list in `build.sh`.
 
 ## Files
 - Questions: `Q(category, difficulty 1-3, question, correct, [3 wrongs], explanation, section)` in `bank.js`. Category files: `pt3*.js`, `pt4.js` (PharmTox), `th3.js` (Therapeutics Exam 3, category `TH3`), `th553.js` (`T553`), `him.js` (`HIM`, Himothy's heart failure questions), `lab.js`, `ind.js`. Weekly drug questions are generated from `drugs.js`.
 - Categories are listed in `CATS` near the top of `game.js` (also `FLAVOR` and the topic chips). A new category needs entries there.
 - `world.js`: the 3D pharmacy (three.js) with patients, queue, sky events, Himothy. `crowd.js`: movement and collisions. `ext.js`: events (visitors, inspector, driver), Himothy game logic, blessing buff. `game.js`: everything else (cards, menus, saves, awards).
 - Dev mode: add `?dev=1` to the URL for the "Test:" buttons (events, Himothy walk / ascension / angel flyover / smash).
+
+## Shop
+`shop.js` holds the shop item lists (wall paint, floors, technician uniforms with buffs, decorations, pharmacist hairstyles, cyborg parts). Purchases are saved in `S.store` (`own` ids, equipped `walls`, `floor`, `uni`, `deco`). The UI is the Shop tab on the Character screen (`shopHTML`, `shopBuy`, `shopUse` in `game.js`). `world.js` draws it: `api.setStore` (walls, floor, decorations), `api.setStaffLook` (uniforms), cyborg parts in `buildCosm`/the arm loop, hair styles 12 and 13. Uniform buffs: `uniBuff()` feeds `techRate` and `buffPay`, and only applies with at least one technician. Never rename a shipped item id. Prices and buffs are placeholders; tune them in `shop.js`. Test: `te41`.
 
 ## Study sources
 `Q(...)` takes an optional 8th argument `s`, a short source like `IBD lecture, slides 33, 36`. It shows as "Study source" under the explanation. `th3.js`'s `T(section, d, q, a, w, e, s)` passes it through. When adding questions from a lecture deck, cite the slide numbers. The extracted slide text is not stored in the repo; ask the user to attach the deck again.
