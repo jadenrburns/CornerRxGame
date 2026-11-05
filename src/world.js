@@ -8,10 +8,10 @@ const World = (function () {
   const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
   const lerp = (a, b, t) => a + (b - a) * t;
   const reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const UPIDS = ['shelf', 'tech', 'counsel', 'library', 'robot'];
+  const UPIDS = ['shelf', 'tech', 'counsel', 'robot'];
   const CLICK = UPIDS;
-  const BASE = { shelf: [-1.5, 0, -6.5], tech: [-6.9, 0, 0], counsel: [-11.55, 0, 3.85], library: [-9.0, 0, -4.0], robot: [8.7, 0, -5.4] };
-  const TAGY = { notes: 2.5, shelf: 4.7, tech: 2.7, counsel: 3.3, library: 4.7, robot: 3.6 };
+  const BASE = { shelf: [-1.5, 0, -6.5], tech: [-6.9, 0, 0], counsel: [-11.55, 0, 3.85], mast: [-9.0, 0, -4.0], robot: [8.7, 0, -5.4] };
+  const TAGY = { notes: 2.5, shelf: 4.7, tech: 2.7, counsel: 3.3, robot: 3.6 };
   const SKIN = ['#F2C9A5', '#E0A97E', '#C48A5E', '#8D5A3B', '#F6D7BD', '#6F4429'];
   const HAIR = ['#2B1B12', '#6B3A1E', '#B5651D', '#D9B25A', '#A8A8A8', '#1E1E2E'];
   const SHIRT = ['#0E9A8E', '#F1A20E', '#E04F3A', '#5B7FD1', '#8A63C9', '#3E8E41'];
@@ -22,7 +22,7 @@ const World = (function () {
   const OBST = [
     { x0: -9.6, x1: 4.15, z0: -1.0, z1: 1.05 },    // counter, wall to wall, with the computer stations
     { x0: -13.3, x1: -10.0, z0: 2.2, z1: 5.5 },    // counseling room (outside the left wall)
-    { x0: -9.6, x1: -8.4, z0: -5.8, z1: -2.2 },    // library
+    { x0: -9.6, x1: -8.4, z0: -5.8, z1: -2.2 },    // mastery shelf (left wall)
     { x0: 7.4, x1: 10.0, z0: -6.7, z1: -4.1 },     // robot (back-right corner)
     { x0: -6.2, x1: 6.2, z0: -7.1, z1: -6.0 },     // shelves
     { x0: 3.3, x1: 7.3, z0: -5.7, z1: -4.1 }       // event table
@@ -475,39 +475,28 @@ const World = (function () {
     cy(G, 0.22, 0.17, 0.35, 6, '#E04F3A', -1.2, 0.18, -1.2, 'counsel'); ico(G, 0.4, '#3E8E41', -1.2, 0.65, -1.2, 'counsel');
     for (let i = 0; i < Math.min(lv, 6); i++) bx(G, 0.14, 0.14, 0.14, '#F2A516', 0.6 - i * 0.25, 1.4, -1.45, 'counsel', { emissive: new T.Color(0xF2A516), emissiveIntensity: 0.8 });
   }
-  function buildLibrary(lv) {
-    const G = ug.library; clear(G);
-    if (lv < 1) { ghostBox(G, 1.2, 4.2, 3.6, 'library'); return; }
-    const H = 4.2, L = 3.6, wood = '#7A5638', board = '#8A6240';
-    bx(G, 0.08, H, L, '#5E412A', -0.46, H / 2, 0, 'library');
-    bx(G, 1.0, 0.14, L + 0.1, wood, 0, H, 0, 'library');
-    bx(G, 0.95, H, 0.1, wood, 0.02, H / 2, -L / 2, 'library'); bx(G, 0.95, H, 0.1, wood, 0.02, H / 2, L / 2, 'library');
-    for (let k = 0; k < 5; k++) bx(G, 0.95, 0.09, L, board, 0.02, 0.05 + k * 0.82, 0, 'library');
-    const COL = ['#7A4B2A', '#5B3A29', '#2F4F3E', '#24364F', '#7B2D2D', '#B08D57', '#4A4A52', '#8C6A3F', '#3C5A4A', '#6D5B4B', '#D8C9A8', '#34495E'];
-    let sd = 11; const R = () => (sd = (sd * 16807) % 2147483647) / 2147483647;
-    const book = (z, base, h, t, col, tilt) => {
-      const bg = new T.Group(); bg.position.set(0.03, base, z); bg.rotation.x = tilt || 0; G.add(bg);
-      bx(bg, 0.6 - R() * 0.1, h, t, col, 0, h / 2, 0, 'library');
-    };
-    for (let r = 0; r < 5; r++) {
-      const frac = Math.max(0, Math.min(1, 0.22 + lv * 0.2 - r * 0.13)); if (frac < 0.08) continue;
-      const base = 0.05 + r * 0.82 + 0.045, z0 = -L / 2 + 0.16, zEnd = z0 + (L - 0.32) * frac, lean = frac < 0.95 ? 2 : 0;
-      let z = z0;
-      while (z < zEnd - lean * 0.14) {
-        const t = 0.06 + R() * 0.11, h = 0.42 + R() * 0.26;
-        if (R() < 0.07) z += 0.08;
-        book(z + t / 2, base, h, t, COL[Math.floor(R() * COL.length)], (R() - 0.5) * 0.03); z += t + 0.005;
-      }
-      for (let i = 0; i < lean; i++) {
-        const t = 0.07 + R() * 0.08, h = 0.46 + R() * 0.2, th = -(0.3 + R() * 0.12);
-        book(z + t / 2 + h * Math.abs(Math.sin(th)) * 0.85 + i * 0.03, base, h, t, COL[Math.floor(R() * COL.length)], th); z += t + 0.07;
-      }
-      if (frac < 0.8 && r < 4 && R() < 0.7) {
-        const fz = Math.min(z + 0.5, L / 2 - 0.35);
-        for (let i = 0; i < 2; i++) bx(G, 0.58, 0.09, 0.42 - i * 0.04, COL[Math.floor(R() * COL.length)], 0.03, base + 0.045 + i * 0.09, fz + (R() - 0.5) * 0.04, 'library');
+  /* mastery shelf: one jar per fully mastered week, on the left wall. Empty slots stay as faint outlines. */
+  let mastG = null, mastList = [];
+  function buildMastery() {
+    if (!mastG) { mastG = new T.Group(); mastG.position.set(BASE.mast[0], 0, BASE.mast[2]); scene.add(mastG); }
+    clear(mastG);
+    const wood = '#B98A5C', board = '#8B6239', ROWS = 4, COLS = 11, L = 3.5, dz = L / COLS;
+    bx(mastG, 0.08, 3.5, L + 0.2, '#5E412A', -0.46, 1.75, 0);
+    for (let r = 0; r < ROWS; r++) bx(mastG, 0.6, 0.08, L + 0.2, board, -0.18, 0.55 + r * 0.8, 0);
+    bx(mastG, 0.7, 0.14, L + 0.3, wood, -0.12, 3.6, 0);
+    bx(mastG, 0.1, 3.5, 0.1, wood, -0.12, 1.75, -(L + 0.2) / 2); bx(mastG, 0.1, 3.5, 0.1, wood, -0.12, 1.75, (L + 0.2) / 2);
+    for (let r = 0; r < ROWS; r++) for (let k = 0; k < COLS; k++) {
+      const idx = (ROWS - 1 - r) * COLS + k, z = -L / 2 + dz * (k + 0.5), y = 0.59 + r * 0.8, m = mastList[idx];
+      if (m) {
+        cy(mastG, 0.14, 0.15, 0.42, 8, m.c, -0.1, y + 0.21, z, undefined, { emissive: new T.Color(m.c), emissiveIntensity: 0.35 });
+        cy(mastG, 0.12, 0.12, 0.1, 8, '#FFFFFF', -0.1, y + 0.47, z);
+        bx(mastG, 0.02, 0.18, 0.16, '#FFFFFF', 0.06, y + 0.2, z);
+      } else {
+        cy(mastG, 0.1, 0.11, 0.32, 8, '#FFFFFF', -0.1, y + 0.16, z, undefined, { transparent: true, opacity: 0.16 });
       }
     }
   }
+  api.setMastery = function (list) { mastList = list || []; try { buildMastery(); } catch (e) { /* decor is cosmetic */ } };
   function buildRobot(lv) {
     const G = ug.robot; clear(G); robotRef = null;
     if (lv < 1) { ghostBox(G, 2.4, 3.6, 2.4, 'robot'); return; }
@@ -530,8 +519,8 @@ const World = (function () {
     notesStar = ico(G, 0.13, '#F2A516', 0, 0.8, 0, 'notes');
   }
   /* A small plaque bolted to each upgrade that shows its level. It lives inside the upgrade's group, so it stays with the model. */
-  const MAXLV = { shelf: 20, tech: 20, counsel: 10, library: 5, robot: 5 };
-  const PLATE = { shelf: [0, 4.65, 0.5, 0], tech: [0, 2.75, -0.3, 0], counsel: [0, 3.4, 0, 0], library: [0.03, 4.8, 0, PI / 2], robot: [0, 4.7, 0.2, 0] };
+  const MAXLV = { shelf: 20, tech: 20, counsel: 10, robot: 5 };
+  const PLATE = { shelf: [0, 4.65, 0.5, 0], tech: [0, 2.75, -0.3, 0], counsel: [0, 3.4, 0, 0], robot: [0, 4.7, 0.2, 0] };
   function addPlate(id, lv) {
     const G = ug[id], P = PLATE[id]; if (!G || !P) return;
     const max = MAXLV[id], full = lv >= max, cv = document.createElement('canvas'); cv.width = 256; cv.height = 128;
@@ -546,7 +535,7 @@ const World = (function () {
     const m = new T.Mesh(new T.PlaneGeometry(1.5, 0.75), new T.MeshBasicMaterial({ map: tex, transparent: true, side: T.DoubleSide }));
     m.position.set(P[0], P[1], P[2]); m.rotation.y = P[3]; m.userData.plate = true; G.add(m);
   }
-  const BUILD = { shelf: buildShelves, tech: buildTech, counsel: buildCounsel, library: buildLibrary, robot: buildRobot };
+  const BUILD = { shelf: buildShelves, tech: buildTech, counsel: buildCounsel, robot: buildRobot };
 
   /* ---- staff & customers ---- */
   Crowd.setBoxes(OBST);
@@ -637,8 +626,8 @@ const World = (function () {
     return undefined;
   }
   function spawnCustomer(instant, i) {
-    const seed = Math.floor(Math.random() * 100000), special = queue.some(q => q.karen || q.sweaty || q.elder || q.evt), karen = !instant && !special && !!B.karenRoll(), sweaty = !instant && !special && !karen && !!B.sweatyRoll(), elder = !instant && !special && !karen && !sweaty && !!(B.elderRoll && B.elderRoll()), evt = !instant && !special && !karen && !sweaty && !elder && !visitor && !!(B.eventRoll) ? rollEvt() : null, body = karen || sweaty || elder || evt ? 'normal' : pickBody(), p = person(seed, false, karen, sweaty, body, elder ? { elder: true, gender: seed % 2 === 0 ? 'f' : 'm' } : evtOpts(evt, seed));
-    const c = { g: p, seed, wp: [], mood: null, moodT: 0, phase: Math.random() * 6, hop: 0, face: 0, karen, sweaty, elder, evt, body, r: bodyR(body), angry: karen, puffT: 0, dripT: 0, jx: (Math.random() - 0.5) * 0.3, jz: (Math.random() - 0.5) * 0.3, faceJit: (Math.random() - 0.5) * 0.8, wait: 0, emoteT: 3 + Math.random() * 8 };
+    const seed0 = Math.floor(Math.random() * 100000), special = queue.some(q => q.karen || q.sweaty || q.elder || q.evt || q.recall || q.regular), karen = !instant && !special && !!B.karenRoll(), sweaty = !instant && !special && !karen && !!B.sweatyRoll(), elder = !instant && !special && !karen && !sweaty && !!(B.elderRoll && B.elderRoll()), evt = !instant && !special && !karen && !sweaty && !elder && !visitor && !!(B.eventRoll) ? rollEvt() : null, sp = !instant && !special && !karen && !sweaty && !elder && !evt && !visitor && B.specialRoll ? B.specialRoll() : null, seed = sp ? sp.seed : seed0, body = karen || sweaty || elder || evt ? 'normal' : sp ? sp.body : pickBody(), p = person(seed, false, karen, sweaty, body, elder ? { elder: true, gender: seed % 2 === 0 ? 'f' : 'm' } : evtOpts(evt, seed));
+    const c = { g: p, seed, wp: [], mood: null, moodT: 0, phase: Math.random() * 6, hop: 0, face: 0, karen, sweaty, elder, evt, recall: sp && sp.kind === 'recall' ? sp.k : null, regular: sp && sp.kind === 'regular' ? sp.n : null, body, r: bodyR(body), angry: karen, puffT: 0, dripT: 0, jx: (Math.random() - 0.5) * 0.3, jz: (Math.random() - 0.5) * 0.3, faceJit: (Math.random() - 0.5) * 0.8, wait: 0, emoteT: 3 + Math.random() * 8 };
     custGroup.add(p);
     if (instant) { const s = slotPos(i, c); p.position.set(s.x, 0, s.z); p.rotation.y = PI + c.faceJit; }
     else { p.position.set(5, 0, 9.6); c.wp.push(new T.Vector3(5, 0, 6.2)); }
@@ -650,7 +639,7 @@ const World = (function () {
   const idleCap = () => 3 + (Math.floor(time / 35) % 2);
   function endIdle(c) { c.idl = null; c.sit = false; c.seat = -1; }
   function idleTick(c, i, w, dt) {
-    const special = c.karen || c.sweaty || c.elder || c.evt || c.caller || c.pusher;
+    const special = c.karen || c.sweaty || c.elder || c.evt || c.caller || c.pusher || c.recall || c.regular;
     const P = c.g.userData.P;
     if (rushOn && i >= 5 && !special) {
       const k = Math.min(i - 5, SEATS.length - 1);
@@ -688,8 +677,8 @@ const World = (function () {
       if (!queue.length) queue.push(spawnCustomer(false, 0));
       assignSlots();
     }
-    cur = queue[0]; cur.mood = null; if (cur.karen) setBubble('!', 'kar'); else setBubble(cur.evt === 'inspector' ? '\u2714' : cur.evt === 'driver' ? '\uD83D\uDCE6' : '?', '');
-    return { seed: cur.seed, karen: !!cur.karen, sweaty: !!cur.sweaty, elder: !!cur.elder, evt: cur.evt || null, caller: !!cur.caller };
+    cur = queue[0]; cur.mood = null; if (cur.karen) setBubble('!', 'kar'); else if (cur.recall) setBubble('\u21A9', 'rec'); else if (cur.regular) setBubble('\u2605', 'reg'); else setBubble(cur.evt === 'inspector' ? '\u2714' : cur.evt === 'driver' ? '\uD83D\uDCE6' : '?', '');
+    return { seed: cur.seed, karen: !!cur.karen, sweaty: !!cur.sweaty, elder: !!cur.elder, evt: cur.evt || null, caller: !!cur.caller, body: cur.body || 'normal', recall: cur.recall || null, regular: cur.regular || null };
   };
   /* hard-of-hearing patient: eyes widen and question marks float off her head */
   function floatQ(c) {
@@ -2354,7 +2343,6 @@ const World = (function () {
     const vis = shelfBottles.filter(b => b.visible);
     if (vis.length) { const b = vis[rndi(vis.length)], sx = BASE.shelf[0], sz = BASE.shelf[2]; out.push({ w: 6, bottle: b, from: [sx + b.position.x, b.position.y + 0.55, sz + 0.2], land: [sx + b.position.x + (Math.random() - 0.5) * 2.6, 0.2, -4.7 + Math.random() * 1.8] }); }
     out.push({ w: 1.5, from: [BASE.robot[0], 2.6, BASE.robot[2] + 0.5], land: [BASE.robot[0] - 1.4 - Math.random() * 1.6, 0.2, -3.8 + Math.random() * 1.5] });
-    out.push({ w: 1.2, from: [BASE.library[0] + 0.3, 2.9, BASE.library[2] + (Math.random() - 0.5) * 2], land: [BASE.library[0] + 1.6 + Math.random() * 1.4, 0.2, -3.6 + Math.random() * 1.6] });
     out.push({ w: 1, from: [-8.6, 1.5, 5], land: [-7.2, 0.2, 4.1] });
     out.push({ w: 1.2, from: [-3.2, 1.3, -2.4], land: [-2 + Math.random() * 3, 0.2, -3.2 - Math.random() * 1.2] });
     return out;
@@ -2621,7 +2609,7 @@ const World = (function () {
   /* the floating brain next to the bookshelf opens the synapse lab */
   let brainG = null, brainTag = null;
   function buildBrain(g) {
-    brainG = new T.Group(); brainG.position.set(-7.7, 3.5, -3.9); g.add(brainG);
+    brainG = new T.Group(); brainG.position.set(-7.9, 4.6, -3.9); g.add(brainG);
     [-1, 1].forEach(sx => {
       const geo = new T.SphereGeometry(1, 56, 40), pa = geo.attributes.position;
       for (let k = 0; k < pa.count; k++) {

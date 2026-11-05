@@ -19,6 +19,13 @@
 ## Shop
 `shop.js` holds the shop item lists (wall paint, floors, technician uniforms with buffs, decorations, pharmacist hairstyles, cyborg parts). Purchases are saved in `S.store` (`own` ids, equipped `walls`, `floor`, `uni`, `deco`). The UI is the Shop tab on the Character screen (`shopHTML`, `shopBuy`, `shopUse` in `game.js`). `world.js` draws it: `api.setStore` (walls, floor, decorations), `api.setStaffLook` (uniforms), cyborg parts in `buildCosm`/the arm loop, hair styles 12 and 13. Uniform buffs: `uniBuff()` feeds `techRate` and `buffPay`, and only applies with at least one technician. Never rename a shipped item id. Prices and buffs are placeholders; tune them in `shop.js`. Test: `te41`.
 
+## Power-ups, daily goals, recall and regulars
+- Power-ups (`PW` in `game.js`): hint pill, second chance, reference binder. Counts in `S.pw`, bought in the Shop tab ("Power-ups", `shopBuy` kind `pow`), used from the buttons under each question. The old Reference Library upgrade is gone; saves are migrated in `load()` (cost refunded, `hintsLeft` becomes `pw.hint`). Its wall space on the left is now the mastery shelf.
+- Daily goals (`ext.js`, `DG`, `dailyState`, `dailyTick`): three goals per local day, seeded by date, stored in `S.daily`. Menu entry "Daily goals" opens view `daily`.
+- Recall patients (`S.recall`): a missed question returns about a day later with the same seed/body (same look). Regulars (`S.reg`): mastering a whole week unlocks one, who asks questions from that week. Both are rolled by `specialRoll` (passed to `World.init`), ignore topic filters on purpose, and the card shows a purple (recall) or gold (regular) banner (`spBanner`). `World.setMastery(list)` draws one jar per regular on the left-wall mastery shelf.
+- Dev (`?dev=1`): "Test: recall patient", "Test: regular patient". Tests: `te44` (power-ups), `te45` (daily goals), `te46` (recall and regulars).
+- CSS goes inside the `<style>` block in `head.html`, above `</style>`. Anything appended after the markup is not applied.
+
 ## Study sources
 `Q(...)` takes an optional 8th argument `s`, a short source like `IBD lecture, slides 33, 36`. It shows as "Study source" under the explanation. `th3.js`'s `T(section, d, q, a, w, e, s)` passes it through. When adding questions from a lecture deck, cite the slide numbers. The extracted slide text is not stored in the repo; ask the user to attach the deck again.
 

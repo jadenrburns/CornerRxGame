@@ -123,6 +123,8 @@ button { font: inherit; color: inherit; cursor: pointer; }
 @media (prefers-reduced-motion: reduce) { .say3d span { animation: none; } }
 .bub3d.ok { background: var(--teal); color: var(--on-teal); }
 .bub3d.bad, .bub3d.kar { background: var(--coral); color: #fff; }
+.bub3d.rec { background: #7C5CD6; color: #fff; animation: kar .9s infinite alternate; }
+.bub3d.reg { background: #F2C94C; color: #3B2F12; }
 .bub3d.kar { animation: kar .5s infinite alternate; }
 @keyframes kar { to { scale: 1.18; } }
 .hud { position: absolute; left: 10px; top: 10px; display: flex; gap: 6px; }
@@ -996,6 +998,38 @@ body.trip .stats .stat { animation: tripbob 1.4s ease-in-out infinite; }
 @keyframes himrise { 0% { transform: translate(-50%, 20px) scale(.6); opacity: 0; } 20% { transform: translate(-50%, 0) scale(1.1); opacity: 1; } 75% { opacity: 1; } 100% { transform: translate(-50%, -40px) scale(1); opacity: 0; } }
 @keyframes himflash { 0% { opacity: 0; } 15% { opacity: 1; } 100% { opacity: 0; } }
 .buffpill.bless { bottom: 58px; background: #FFE9A0; }
+.grphd { display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
+.grpr { margin-left: auto; display: inline-flex; align-items: center; gap: 6px; }
+.chip.sm { padding: 3px 10px; font-size: 12px; }
+.fold { all: unset; cursor: pointer; font: 800 15px/1.2 inherit; display: inline-flex; align-items: center; gap: 6px; }
+.fold i { font-style: normal; width: 14px; }
+.fold:focus-visible { outline: 2px solid var(--teal); outline-offset: 2px; border-radius: 6px; }
+.crshd > span { margin-left: auto; }
+.crshd { display: flex; align-items: center; justify-content: space-between; margin: 10px 0 4px; font: 800 11px/1 var(--f-mono); letter-spacing: .06em; color: var(--muted); }
+.upmore { display: block; margin: 8px 0 0; }
+.pwtools { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.pwtools .btn { padding: 6px 10px; font-size: 12px; }
+.pwtools .btn[aria-pressed="true"] { background: var(--amber-soft); border-color: var(--amber); }
+.binderbox { display: grid; gap: 2px; margin: 8px 0 0; padding: 8px 10px; border: 1.5px dashed var(--teal); border-radius: 10px; background: var(--teal-soft); font-size: 12px; line-height: 1.35; }
+.binderbox b { font: 800 11px/1 var(--f-mono); letter-spacing: .05em; }
+.pwn { font-style: normal; color: var(--muted); font: 700 12px/1 var(--f-mono); }
+.dgbadge { font: 800 11px/1 var(--f-mono); font-style: normal; background: var(--amber-soft); color: var(--ink); padding: 2px 6px; border-radius: 99px; margin-left: 4px; }
+.dgstreak { display: flex; align-items: baseline; gap: 8px; margin: 6px 0 12px; }
+.dgstreak b { font: 800 30px/1 var(--f-mono); }
+.dgstreak small { color: var(--muted); }
+.dglist { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.dglist li { display: grid; grid-template-columns: 32px minmax(0, 1fr) auto; gap: 10px; align-items: center; padding: 10px 12px; border: 1.5px solid var(--line); border-radius: 12px; background: #fff; font-size: 14px; }
+.dglist li.done { border-color: var(--teal); background: var(--teal-soft); }
+.dglist small { text-align: right; color: var(--muted); font: 700 11px/1.3 var(--f-mono); }
+.dgic { font-size: 22px; text-align: center; }
+.dgbar { height: 8px; border-radius: 99px; background: var(--surface2); margin-top: 6px; overflow: hidden; }
+.dgbar i { display: block; height: 100%; background: var(--teal); border-radius: 99px; transition: width .3s; }
+.spbanner { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; padding: 7px 12px; font-size: 12px; line-height: 1.3; }
+.spbanner b { font: 800 11px/1 var(--f-mono); letter-spacing: .06em; }
+.spbanner.recall { background: #7C5CD6; color: #fff; }
+.spbanner.regular { background: #F2C94C; color: #3B2F12; }
+.rx.recall { border-color: #7C5CD6; box-shadow: 0 0 0 3px rgba(124, 92, 214, .28); }
+.rx.regular { border-color: #E2B33A; box-shadow: 0 0 0 3px rgba(242, 201, 76, .35); }
 </style>
 
 <div class="shell">
@@ -1027,6 +1061,7 @@ body.trip .stats .stat { animation: tripbob 1.4s ease-in-out infinite; }
   <nav class="menu" id="menu" aria-label="Game menu">
     <button type="button" data-act="sheet-ups"><i aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg></i><span>Upgrades</span></button>
     <button type="button" data-act="sheet-prog"><i aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 4h8v5a4 4 0 0 1-8 0zM8 6H4v1a3 3 0 0 0 4 3M16 6h4v1a3 3 0 0 1-4 3M12 13v4M8 20h8"/></svg></i><span>Progress &amp; awards</span></button>
+    <button type="button" data-act="daily"><i aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="4"/><path d="M12 12l5-5"/></svg></i><span>Daily goals <em id="dailybadge" class="dgbadge"></em></span></button>
     <button type="button" data-act="settings"><i aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5.5A1.5 1.5 0 0 1 5.5 4H12v16H5.5A1.5 1.5 0 0 1 4 18.5zM12 4h6.5A1.5 1.5 0 0 1 20 5.5v13a1.5 1.5 0 0 1-1.5 1.5H12"/></svg></i><span>Topics</span></button>
     <button type="button" data-act="flash"><i aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="6" width="14" height="12" rx="2"/><path d="M7 3h12a2 2 0 0 1 2 2v10"/></svg></i><span>Flashcards</span></button>
     <button type="button" data-act="syn"><i aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 4a3 3 0 0 0-3 3 3 3 0 0 0-2 5 3 3 0 0 0 2 5 3 3 0 0 0 6 1V4a3 3 0 0 0-3 0zM15 4a3 3 0 0 1 3 3 3 3 0 0 1 2 5 3 3 0 0 1-2 5 3 3 0 0 1-6 1"/></svg></i><span>Synapse lab</span></button>
@@ -1045,13 +1080,3 @@ body.trip .stats .stat { animation: tripbob 1.4s ease-in-out infinite; }
     <div class="col sh-prog"><section class="card" id="review"></section><div id="savecard"></div><div class="foot"><span>Progress and your decks save in this browser.</span><span id="resetwrap"></span></div></div>
   </main>
 </div>
-
-.grphd { display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
-.grpr { margin-left: auto; display: inline-flex; align-items: center; gap: 6px; }
-.chip.sm { padding: 3px 10px; font-size: 12px; }
-.fold { all: unset; cursor: pointer; font: 800 15px/1.2 inherit; display: inline-flex; align-items: center; gap: 6px; }
-.fold i { font-style: normal; width: 14px; }
-.fold:focus-visible { outline: 2px solid var(--teal); outline-offset: 2px; border-radius: 6px; }
-.crshd > span { margin-left: auto; }
-.crshd { display: flex; align-items: center; justify-content: space-between; margin: 10px 0 4px; font: 800 11px/1 var(--f-mono); letter-spacing: .06em; color: var(--muted); }
-.upmore { display: block; margin: 8px 0 0; }
