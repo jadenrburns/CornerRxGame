@@ -1,6 +1,6 @@
 /* Question bank: Q(category, difficulty 1-3, question, correct, [3 wrong], explanation) */
 const BANK = [];
-function Q(c, d, q, a, w, e, t) { const o = { c, d, q, a, w, e }; if (t) o.t = t; BANK.push(o); }
+function Q(c, d, q, a, w, e, t, s) { const o = { c, d, q, a, w, e }; if (t) o.t = t; if (s) o.s = s; BANK.push(o); }
 
 /* ---------- Brand <-> Generic ---------- */
 Q("BG",1,"Lipitor is the brand name of which drug?","atorvastatin",["simvastatin","rosuvastatin","pravastatin"],"Lipitor = atorvastatin, a high-intensity statin at 40-80 mg.");

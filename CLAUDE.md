@@ -16,6 +16,9 @@
 - `world.js`: the 3D pharmacy (three.js) with patients, queue, sky events, Himothy. `crowd.js`: movement and collisions. `ext.js`: events (visitors, inspector, driver), Himothy game logic, blessing buff. `game.js`: everything else (cards, menus, saves, awards).
 - Dev mode: add `?dev=1` to the URL for the "Test:" buttons (events, Himothy walk / ascension / angel flyover / smash).
 
+## Study sources
+`Q(...)` takes an optional 8th argument `s`, a short source like `IBD lecture, slides 33, 36`. It shows as "Study source" under the explanation. `th3.js`'s `T(section, d, q, a, w, e, s)` passes it through. When adding questions from a lecture deck, cite the slide numbers. The extracted slide text is not stored in the repo; ask the user to attach the deck again.
+
 ## Tests
 Node + Playwright, run from `src/`: `node te38.js` etc. They load `corner-rx.html` with `three-stub2.js` standing in for three.js (so the 3D logic runs but nothing is drawn). Useful ones: `te19`, `te26`, `te28`, `te37` (folder switches), `te38` (Himothy events), `te39` (weekly quiz achievements). Look for `errs []` in the output. A `Failed to load resource` console line is just the blocked CDN.
 

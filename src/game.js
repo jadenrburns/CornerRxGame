@@ -683,7 +683,7 @@
       </div>${cur.resHTML || ''}</article>`;
   }
   function explHTML(q) {
-    if (!q.rows) return '<p class="why"><b>' + (q.lab ? 'Worked solution:' : 'Why:') + '</b> ' + esc(q.e) + '</p>';
+    if (!q.rows) return '<p class="why"><b>' + (q.lab ? 'Worked solution:' : 'Why:') + '</b> ' + esc(q.e) + '</p>' + (q.s ? '<p class="srcline"><b>Study source:</b> ' + esc(q.s) + '</p>' : '');
     return '<dl class="expl">' + q.rows.map(r => '<dt>' + esc(r[0]) + '</dt><dd>' + esc(r[1]) + '</dd>').join('') + '</dl>';
   }
   function weekNote() {
@@ -1574,7 +1574,7 @@
   function maybeTour() { if (S.me.done && !S.tutDone && !tourEl) showTour(); }
   /* ---- save code: the whole save as one long code, to move progress between devices or keep a backup ---- */
 /*@EXT@*/
-  const GAME_VERSION = 94;
+  const GAME_VERSION = 95;
   const b64u = (u8) => { let s = ''; for (let i = 0; i < u8.length; i += 0x8000) s += String.fromCharCode.apply(null, u8.subarray(i, i + 0x8000)); return btoa(s).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); };
   const unb64u = (t) => { const s = atob(t.replace(/-/g, '+').replace(/_/g, '/')), u = new Uint8Array(s.length); for (let i = 0; i < s.length; i++) u[i] = s.charCodeAt(i); return u; };
   const chk = (t) => { let h = 2166136261; for (let i = 0; i < t.length; i++) { h ^= t.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36); };
