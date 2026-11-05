@@ -881,7 +881,14 @@ body.syn .synwrap { display: block; }
 .p3sched { list-style: none; margin: 8px 0 0; padding: 0; display: grid; gap: 4px; }
 .p3sched li { display: grid; grid-template-columns: 58px minmax(0, 1fr) auto; gap: 8px; align-items: center; padding: 6px 10px; border: 1.5px solid var(--line); border-radius: 10px; background: #fff; font-size: 13px; }
 .p3sched li b { font: 800 12px/1 var(--f-mono); }
-.p3sched li small { color: var(--muted); }
+.p3sched li small { color: var(--muted); white-space: nowrap; line-height: 1.2; }
+.p3sched li span { line-height: 1.25; }
+.p3sched li { padding: 0; display: block; }
+.p3sched li button { all: unset; box-sizing: border-box; display: grid; grid-template-columns: 20px 52px minmax(0, 1fr) auto; gap: 6px; align-items: center; width: 100%; padding: 6px 10px; cursor: pointer; }
+.p3sched li button:focus-visible { outline: 2px solid var(--teal); outline-offset: 2px; border-radius: 10px; }
+.p3box { width: 18px; height: 18px; border: 2px solid var(--line); border-radius: 5px; display: grid; place-items: center; font: 800 12px/1 var(--f-mono); font-style: normal; color: #fff; background: var(--teal); }
+.p3sched li.off .p3box { background: #fff; }
+.p3sched li.off { opacity: .6; }
 .p3sched li.now { border-color: var(--teal); background: var(--teal-soft); }
 .p3sched li.lock { opacity: .55; }
 /* Topics notebook, folder and tabs share the cream of the topic cards */

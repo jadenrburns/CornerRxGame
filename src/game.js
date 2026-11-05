@@ -359,6 +359,7 @@
     if (q.from && q.from > todayStr() && !(isTop(q) && wkAhead(q))) return false;
     if (isTop(q) && (q.c === 'TP3' ? st.wkOnly3 : st.wkOnly) && q.wk !== wkNow(q)) return false;
     if (isTop(q) && wkTypeOff(q)) return false;
+    if (q.c === 'TP3' && st.p3off && st.p3off[q.wk]) return false;
     if (!st.topics[q.c] || st.diffs.indexOf(q.d) < 0) return false;
     if (st.mode === 'missed') return S.missed.indexOf(q.k) >= 0;
     if (st.mode === 'new') return !S.mastery[q.k];
@@ -372,6 +373,7 @@
     return arr;
   }
   const WK_TYPES = [['bg', 'Brand / generic'], ['ind', 'Indications'], ['moa', 'Mechanism'], ['cn', 'Counseling (select all)'], ['class', 'Drug class']];
+  const p3Off = (n) => !!(S.set.p3off && S.set.p3off[n]);
   const wkTypeOff = (q) => !!(S.set.wkTypes && S.set.wkTypes[q.wt] === false);
   const focusOn = () => !!S.set.focus;
   const labOn = () => !!S.lab;
@@ -741,11 +743,11 @@
       <div class="grp"><b>Speed bonus</b><div class="chips"><button type="button" class="chip" data-act="timer" aria-pressed="${st.timer}">Timer bonus ${st.timer ? 'on' : 'off'}</button></div><p class="note">Turn it off to study without time pressure. Karen still has a limit.</p></div>
       `;
     const w3 = curWeek3();
-    const sched = P3WEEKS.map(w => { const open = w.from <= todayStr() || st.ahead3, cnt = TOPQ.filter(q => q.wk === w.n && !wkTypeOff(q)).length; return `<li class="${w.n === w3 ? 'now' : open ? '' : 'lock'}"><b>${esc(w.d)}</b><span>${esc(w.topic)}</span><small>${w.ids.length} drugs${w.n === w3 ? ' \u00B7 this week' : open ? '' : ' \u00B7 locked'}</small></li>`; }).join('');
+    const sched = P3WEEKS.map(w => { const open = w.from <= todayStr() || st.ahead3, off = p3Off(w.n), cnt = TOPQ.filter(q => q.wk === w.n && !wkTypeOff(q)).length; return `<li class="${w.n === w3 ? 'now' : open ? '' : 'lock'}${off ? ' off' : ''}"><button type="button" data-act="p3wk" data-v="${w.n}" aria-pressed="${!off}" aria-label="${esc(w.d)} ${esc(w.topic)}: ${off ? 'off' : 'on'}"><i class="p3box">${off ? '' : '\u2713'}</i><b>${esc(w.d)}</b><span>${esc(w.topic)}</span><small>${off ? 'off' : w.ids.length + ' drugs' + (w.n === w3 ? ' \u00B7 this week' : open ? '' : ' \u00B7 locked')}</small></button></li>`; }).join('');
     const p3 = `${fsw('P3')}<h3>P3 weekly drugs</h3><p class="sub">Drug list sheets by system, one set per week. Changes apply to the next patient.</p>
       <div class="grp"><b>Top 300</b><div class="chips">${CATS.filter(c => c[0] === 'TP3').map(chipOf).join('')}</div><div class="chips"><button type="button" class="chip" data-act="wkonly3" aria-pressed="${!!st.wkOnly3}">This week only</button><button type="button" class="chip" data-act="ahead3" aria-pressed="${!!st.ahead3}">Study ahead</button></div><div class="chips" aria-label="Weekly question types">${WK_TYPES.map(x => `<button type="button" class="chip" data-act="wktype" data-v="${x[0]}" aria-pressed="${!(st.wkTypes && st.wkTypes[x[0]] === false)}">${x[1]}</button>`).join('')}</div><p class="note">${weekNote3()}</p></div>
       <div class="grp"><b>Relevant otherwise</b><div class="chips">${CATS.filter(c => c[0] === 'T553').map(chipOf).join('')}</div><p class="note">Therapeutics III (PHAR 553) syllabus topics: asthma, COPD, renal, diabetes, gout, migraine, RA and SLE, thyroid, liver, hepatitis, blood pressure, lipids, pain, nutrition, fluids and electrolytes.</p></div>
-      <div class="grp"><b>P3 schedule</b><ol class="p3sched">${sched}</ol></div>
+      <div class="grp"><b>P3 schedule <span><button type="button" class="link" data-act="p3wk-all">All</button> &middot; <button type="button" class="link" data-act="p3wk-none">None</button></span></b><ol class="p3sched">${sched}</ol><p class="note">Tap a week to choose which weeks you get questions from. Future weeks still need Study ahead.</p></div>
       <div class="grp"><b>Focus</b><div class="chips"><button type="button" class="chip" data-act="topics-all">Turn every topic back on</button></div><p class="note">Use the switch at the top of this folder to ask only P3 topics.</p></div>`;
     const p1 = `${fsw('P1')}<h3>P1 folder</h3><p class="sub">Nothing is filed here yet.</p><div class="grp"><b>Empty folder</b><p class="note">P1 drug lists and exam questions will go in this folder. Your current question settings live in the P2 folder.</p></div>`;
     return `<div class="pane nbk ${nbClosing ? 'closing' : ''}"><div class="nbcover"><span class="nbtitle">Topics</span></div><div class="nbsheet">${hubTabs('set')}${cabinetHTML(fold)}<div class="fbody fb-${fold}" role="tabpanel" aria-label="${fold} folder">${fold === 'P1' ? p1 : fold === 'P3' ? p3 : p2}</div>
@@ -1628,7 +1630,7 @@
   function maybeTour() { if (S.me.done && !S.tutDone && !tourEl) showTour(); }
   /* ---- save code: the whole save as one long code, to move progress between devices or keep a backup ---- */
 /*@EXT@*/
-  const GAME_VERSION = 98;
+  const GAME_VERSION = 99;
   const b64u = (u8) => { let s = ''; for (let i = 0; i < u8.length; i += 0x8000) s += String.fromCharCode.apply(null, u8.subarray(i, i + 0x8000)); return btoa(s).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); };
   const unb64u = (t) => { const s = atob(t.replace(/-/g, '+').replace(/_/g, '/')), u = new Uint8Array(s.length); for (let i = 0; i < s.length; i++) u[i] = s.charCodeAt(i); return u; };
   const chk = (t) => { let h = 2166136261; for (let i = 0; i < t.length; i++) { h ^= t.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36); };
@@ -1770,6 +1772,9 @@
       case 'wkonly': st.wkOnly = !st.wkOnly; break;
       case 'wkonly3': st.wkOnly3 = !st.wkOnly3; break;
       case 'ahead3': st.ahead3 = !st.ahead3; break;
+      case 'p3wk': { st.p3off = st.p3off || {}; if (st.p3off[v]) delete st.p3off[v]; else st.p3off[v] = true; break; }
+      case 'p3wk-all': st.p3off = {}; break;
+      case 'p3wk-none': st.p3off = {}; P3WEEKS.forEach(w => { st.p3off[w.n] = true; }); break;
       case 'folder': st.folder = v === 'P1' || v === 'P3' ? v : 'P2'; break;
       case 'p3-only': CATS.forEach(c => st.topics[c[0]] = c[0] === 'TP3' || c[0] === 'T553'); break;
       case 'folder-only': {
