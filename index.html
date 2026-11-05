@@ -1045,6 +1045,10 @@ body.trip .stats .stat { animation: tripbob 1.4s ease-in-out infinite; }
     <div class="col sh-prog"><section class="card" id="review"></section><div id="savecard"></div><div class="foot"><span>Progress and your decks save in this browser.</span><span id="resetwrap"></span></div></div>
   </main>
 </div>
+
+.grphd { display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
+.grpr { margin-left: auto; display: inline-flex; align-items: center; gap: 6px; }
+.chip.sm { padding: 3px 10px; font-size: 12px; }
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script>
 /* Question bank: Q(category, difficulty 1-3, question, correct, [3 wrong], explanation) */
@@ -5662,10 +5666,9 @@ const World = (function () {
   const todayStr = () => { const d = new Date(); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); };
   function eligible(q) {
     const st = S.set;
-    if (q.from && q.from > todayStr() && !(isTop(q) && wkAhead(q))) return false;
-    if (isTop(q) && (q.c === 'TP3' ? st.wkOnly3 : st.wkOnly) && q.wk !== wkNow(q)) return false;
+    if (q.c === 'TP3') { if (!p3On(q.wk)) return false; } else if (q.from && q.from > todayStr() && !(isTop(q) && wkAhead(q))) return false;
+    if (q.c !== 'TP3' && isTop(q) && st.wkOnly && q.wk !== wkNow(q)) return false;
     if (isTop(q) && wkTypeOff(q)) return false;
-    if (q.c === 'TP3' && st.p3off && st.p3off[q.wk]) return false;
     if (!st.topics[q.c] || st.diffs.indexOf(q.d) < 0) return false;
     if (st.mode === 'missed') return S.missed.indexOf(q.k) >= 0;
     if (st.mode === 'new') return !S.mastery[q.k];
@@ -5679,7 +5682,12 @@ const World = (function () {
     return arr;
   }
   const WK_TYPES = [['bg', 'Brand / generic'], ['ind', 'Indications'], ['moa', 'Mechanism'], ['cn', 'Counseling (select all)'], ['class', 'Drug class']];
-  const p3Off = (n) => !!(S.set.p3off && S.set.p3off[n]);
+  /* P3 week picker: S.set.p3sel = { weekNumber: true } once the player has chosen. Before that, the old rules apply (open weeks, Study ahead, This week only, p3off). */
+  const p3On = (n) => { const st = S.set; if (st.p3sel) return !!st.p3sel[n]; if (st.wkOnly3) return n === curWeek3(); const w = WK3[n]; return !!w && (w.from <= todayStr() || !!st.ahead3) && !(st.p3off && st.p3off[n]); };
+  const p3Off = (n) => !p3On(n);
+  const p3Sel = () => { const o = {}; P3WEEKS.forEach(w => { if (p3On(w.n)) o[w.n] = true; }); return o; };
+  const p3OpenSel = () => { const o = {}, t = todayStr(); P3WEEKS.forEach(w => { if (w.from <= t) o[w.n] = true; }); return o; };
+  const p3OnlyNow = () => { const c = curWeek3(), k = Object.keys(p3Sel()); return !!c && k.length === 1 && +k[0] === c; };
   const wkTypeOff = (q) => !!(S.set.wkTypes && S.set.wkTypes[q.wt] === false);
   const focusOn = () => !!S.set.focus;
   const labOn = () => !!S.lab;
@@ -6023,8 +6031,8 @@ const World = (function () {
   }
   function weekNote3() {
     const n = curWeek3(), w = WK3[n];
-    if (!w) { const f = P3WEEKS[0]; return 'P3 weekly drugs start on ' + esc(f.from) + ' (' + esc(f.topic) + '). Turn on Study ahead to preview them now.'; }
-    return 'Now: ' + esc(w.d) + ' \u00B7 ' + esc(w.topic) + '. Earlier weeks stay in the mix; this week is asked most. Study ahead also unlocks future weeks.';
+    if (!w) { const f = P3WEEKS[0]; return 'P3 weekly drugs start on ' + esc(f.from) + ' (' + esc(f.topic) + '). Tap a week to preview it now.'; }
+    return 'Now: ' + esc(w.d) + ' \u00B7 ' + esc(w.topic) + '. Tap a week to add or remove it, including upcoming weeks.';
   }
   function settingsHTML() {
     const st = S.set, mc = missedByCat(), ms = masteryByCat();
@@ -6049,11 +6057,10 @@ const World = (function () {
       <div class="grp"><b>Speed bonus</b><div class="chips"><button type="button" class="chip" data-act="timer" aria-pressed="${st.timer}">Timer bonus ${st.timer ? 'on' : 'off'}</button></div><p class="note">Turn it off to study without time pressure. Karen still has a limit.</p></div>
       `;
     const w3 = curWeek3();
-    const sched = P3WEEKS.map(w => { const open = w.from <= todayStr() || st.ahead3, off = p3Off(w.n), cnt = TOPQ.filter(q => q.wk === w.n && !wkTypeOff(q)).length; return `<li class="${w.n === w3 ? 'now' : open ? '' : 'lock'}${off ? ' off' : ''}"><button type="button" data-act="p3wk" data-v="${w.n}" aria-pressed="${!off}" aria-label="${esc(w.d)} ${esc(w.topic)}: ${off ? 'off' : 'on'}"><i class="p3box">${off ? '' : '\u2713'}</i><b>${esc(w.d)}</b><span>${esc(w.topic)}</span><small>${off ? 'off' : w.ids.length + ' drugs' + (w.n === w3 ? ' \u00B7 this week' : open ? '' : ' \u00B7 locked')}</small></button></li>`; }).join('');
+    const sched = P3WEEKS.map(w => { const open = w.from <= todayStr(), off = p3Off(w.n), cnt = TOPQ.filter(q => q.wk === w.n && !wkTypeOff(q)).length; return `<li class="${w.n === w3 ? 'now' : open || !off ? '' : 'lock'}${off ? ' off' : ''}"><button type="button" data-act="p3wk" data-v="${w.n}" aria-pressed="${!off}" aria-label="${esc(w.d)} ${esc(w.topic)}: ${off ? 'off' : 'on'}"><i class="p3box">${off ? '' : '\u2713'}</i><b>${esc(w.d)}</b><span>${esc(w.topic)}</span><small>${off ? 'off' : w.ids.length + ' drugs' + (w.n === w3 ? ' \u00B7 this week' : open ? '' : ' \u00B7 upcoming')}</small></button></li>`; }).join('');
     const p3 = `${fsw('P3')}<h3>P3 weekly drugs</h3><p class="sub">Drug list sheets by system, one set per week. Changes apply to the next patient.</p>
-      <div class="grp"><b>Top 300</b><div class="chips">${CATS.filter(c => c[0] === 'TP3').map(chipOf).join('')}</div><div class="chips"><button type="button" class="chip" data-act="wkonly3" aria-pressed="${!!st.wkOnly3}">This week only</button><button type="button" class="chip" data-act="ahead3" aria-pressed="${!!st.ahead3}">Study ahead</button></div><div class="chips" aria-label="Weekly question types">${WK_TYPES.map(x => `<button type="button" class="chip" data-act="wktype" data-v="${x[0]}" aria-pressed="${!(st.wkTypes && st.wkTypes[x[0]] === false)}">${x[1]}</button>`).join('')}</div><p class="note">${weekNote3()}</p></div>
+      <div class="grp"><div class="grphd"><b>Top 300</b><span class="grpr"><button type="button" class="chip sm" data-act="wkonly3" aria-pressed="${p3OnlyNow()}">This week only</button><button type="button" class="link" data-act="p3wk-all">All</button> &middot; <button type="button" class="link" data-act="p3wk-none">None</button></span></div><ol class="p3sched">${sched}</ol><p class="note">${weekNote3()}</p><div class="chips" aria-label="Weekly question types">${WK_TYPES.map(x => `<button type="button" class="chip" data-act="wktype" data-v="${x[0]}" aria-pressed="${!(st.wkTypes && st.wkTypes[x[0]] === false)}">${x[1]}</button>`).join('')}</div></div>
       <div class="grp"><b>Relevant otherwise</b><div class="chips">${CATS.filter(c => c[0] === 'T553').map(chipOf).join('')}</div><p class="note">Therapeutics III (PHAR 553) syllabus topics: asthma, COPD, renal, diabetes, gout, migraine, RA and SLE, thyroid, liver, hepatitis, blood pressure, lipids, pain, nutrition, fluids and electrolytes.</p></div>
-      <div class="grp"><b>P3 schedule <span><button type="button" class="link" data-act="p3wk-all">All</button> &middot; <button type="button" class="link" data-act="p3wk-none">None</button></span></b><ol class="p3sched">${sched}</ol><p class="note">Tap a week to choose which weeks you get questions from. Future weeks still need Study ahead.</p></div>
       <div class="grp"><b>Focus</b><div class="chips"><button type="button" class="chip" data-act="topics-all">Turn every topic back on</button></div><p class="note">Use the switch at the top of this folder to ask only P3 topics.</p></div>`;
     const p1 = `${fsw('P1')}<h3>P1 folder</h3><p class="sub">Nothing is filed here yet.</p><div class="grp"><b>Empty folder</b><p class="note">P1 drug lists and exam questions will go in this folder. Your current question settings live in the P2 folder.</p></div>`;
     return `<div class="pane nbk ${nbClosing ? 'closing' : ''}"><div class="nbcover"><span class="nbtitle">Topics</span></div><div class="nbsheet">${hubTabs('set')}${cabinetHTML(fold)}<div class="fbody fb-${fold}" role="tabpanel" aria-label="${fold} folder">${fold === 'P1' ? p1 : fold === 'P3' ? p3 : p2}</div>
@@ -7850,7 +7857,7 @@ const World = (function () {
       <div class="btnrow"><button type="button" class="btn go" data-act="back">Back to the pharmacy</button></div></div>`;
   }
 
-  const GAME_VERSION = 99;
+  const GAME_VERSION = 100;
   const b64u = (u8) => { let s = ''; for (let i = 0; i < u8.length; i += 0x8000) s += String.fromCharCode.apply(null, u8.subarray(i, i + 0x8000)); return btoa(s).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); };
   const unb64u = (t) => { const s = atob(t.replace(/-/g, '+').replace(/_/g, '/')), u = new Uint8Array(s.length); for (let i = 0; i < s.length; i++) u[i] = s.charCodeAt(i); return u; };
   const chk = (t) => { let h = 2166136261; for (let i = 0; i < t.length; i++) { h ^= t.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36); };
@@ -7990,11 +7997,10 @@ const World = (function () {
       case 'tab-set': flipTab = true; openView('set'); return;
       case 'tab-studies': flipTab = true; openView('studies'); return;
       case 'wkonly': st.wkOnly = !st.wkOnly; break;
-      case 'wkonly3': st.wkOnly3 = !st.wkOnly3; break;
-      case 'ahead3': st.ahead3 = !st.ahead3; break;
-      case 'p3wk': { st.p3off = st.p3off || {}; if (st.p3off[v]) delete st.p3off[v]; else st.p3off[v] = true; break; }
-      case 'p3wk-all': st.p3off = {}; break;
-      case 'p3wk-none': st.p3off = {}; P3WEEKS.forEach(w => { st.p3off[w.n] = true; }); break;
+      case 'wkonly3': { const c = curWeek3(); if (!c) { toast('No P3 week has started yet. Tap a week below to preview it.'); return; } if (p3OnlyNow()) { st.p3sel = st.p3prev && Object.keys(st.p3prev).length ? st.p3prev : p3OpenSel(); st.p3prev = null; } else { st.p3prev = p3Sel(); st.p3sel = {}; st.p3sel[c] = true; st.topics.TP3 = true; } st.wkOnly3 = false; break; }
+      case 'p3wk': { const o = p3Sel(); if (o[v]) delete o[v]; else { o[v] = true; st.topics.TP3 = true; } st.p3sel = o; st.wkOnly3 = false; break; }
+      case 'p3wk-all': { const o = {}; P3WEEKS.forEach(w => { o[w.n] = true; }); st.p3sel = o; st.wkOnly3 = false; st.topics.TP3 = true; break; }
+      case 'p3wk-none': st.p3sel = {}; st.wkOnly3 = false; break;
       case 'folder': st.folder = v === 'P1' || v === 'P3' ? v : 'P2'; break;
       case 'p3-only': CATS.forEach(c => st.topics[c[0]] = c[0] === 'TP3' || c[0] === 'T553'); break;
       case 'folder-only': {
