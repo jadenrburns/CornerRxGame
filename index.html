@@ -123,6 +123,8 @@ button { font: inherit; color: inherit; cursor: pointer; }
 @media (prefers-reduced-motion: reduce) { .say3d span { animation: none; } }
 .bub3d.ok { background: var(--teal); color: var(--on-teal); }
 .bub3d.bad, .bub3d.kar { background: var(--coral); color: #fff; }
+.bub3d.rec { background: #7C5CD6; color: #fff; animation: kar .9s infinite alternate; }
+.bub3d.reg { background: #F2C94C; color: #3B2F12; }
 .bub3d.kar { animation: kar .5s infinite alternate; }
 @keyframes kar { to { scale: 1.18; } }
 .hud { position: absolute; left: 10px; top: 10px; display: flex; gap: 6px; }
@@ -884,7 +886,7 @@ body.syn .synwrap { display: block; }
 .p3sched li small { color: var(--muted); white-space: nowrap; line-height: 1.2; }
 .p3sched li span { line-height: 1.25; }
 .p3sched li { padding: 0; display: block; }
-.p3sched li button { all: unset; box-sizing: border-box; display: grid; grid-template-columns: 20px 52px minmax(0, 1fr) auto; gap: 6px; align-items: center; width: 100%; padding: 6px 10px; cursor: pointer; }
+.p3sched li button { all: unset; box-sizing: border-box; display: grid; grid-template-columns: 20px minmax(52px, max-content) minmax(0, 1fr) auto; gap: 6px; align-items: center; width: 100%; padding: 6px 10px; cursor: pointer; }
 .p3sched li button:focus-visible { outline: 2px solid var(--teal); outline-offset: 2px; border-radius: 10px; }
 .p3box { width: 18px; height: 18px; border: 2px solid var(--line); border-radius: 5px; display: grid; place-items: center; font: 800 12px/1 var(--f-mono); font-style: normal; color: #fff; background: var(--teal); }
 .p3sched li.off .p3box { background: #fff; }
@@ -996,6 +998,38 @@ body.trip .stats .stat { animation: tripbob 1.4s ease-in-out infinite; }
 @keyframes himrise { 0% { transform: translate(-50%, 20px) scale(.6); opacity: 0; } 20% { transform: translate(-50%, 0) scale(1.1); opacity: 1; } 75% { opacity: 1; } 100% { transform: translate(-50%, -40px) scale(1); opacity: 0; } }
 @keyframes himflash { 0% { opacity: 0; } 15% { opacity: 1; } 100% { opacity: 0; } }
 .buffpill.bless { bottom: 58px; background: #FFE9A0; }
+.grphd { display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
+.grpr { margin-left: auto; display: inline-flex; align-items: center; gap: 6px; }
+.chip.sm { padding: 3px 10px; font-size: 12px; }
+.fold { all: unset; cursor: pointer; font: 800 15px/1.2 inherit; display: inline-flex; align-items: center; gap: 6px; }
+.fold i { font-style: normal; width: 14px; }
+.fold:focus-visible { outline: 2px solid var(--teal); outline-offset: 2px; border-radius: 6px; }
+.crshd > span { margin-left: auto; }
+.crshd { display: flex; align-items: center; justify-content: space-between; margin: 10px 0 4px; font: 800 11px/1 var(--f-mono); letter-spacing: .06em; color: var(--muted); }
+.upmore { display: block; margin: 8px 0 0; }
+.pwtools { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.pwtools .btn { padding: 6px 10px; font-size: 12px; }
+.pwtools .btn[aria-pressed="true"] { background: var(--amber-soft); border-color: var(--amber); }
+.binderbox { display: grid; gap: 2px; margin: 8px 0 0; padding: 8px 10px; border: 1.5px dashed var(--teal); border-radius: 10px; background: var(--teal-soft); font-size: 12px; line-height: 1.35; }
+.binderbox b { font: 800 11px/1 var(--f-mono); letter-spacing: .05em; }
+.pwn { font-style: normal; color: var(--muted); font: 700 12px/1 var(--f-mono); }
+.dgbadge { font: 800 11px/1 var(--f-mono); font-style: normal; background: var(--amber-soft); color: var(--ink); padding: 2px 6px; border-radius: 99px; margin-left: 4px; }
+.dgstreak { display: flex; align-items: baseline; gap: 8px; margin: 6px 0 12px; }
+.dgstreak b { font: 800 30px/1 var(--f-mono); }
+.dgstreak small { color: var(--muted); }
+.dglist { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.dglist li { display: grid; grid-template-columns: 32px minmax(0, 1fr) auto; gap: 10px; align-items: center; padding: 10px 12px; border: 1.5px solid var(--line); border-radius: 12px; background: #fff; font-size: 14px; }
+.dglist li.done { border-color: var(--teal); background: var(--teal-soft); }
+.dglist small { text-align: right; color: var(--muted); font: 700 11px/1.3 var(--f-mono); }
+.dgic { font-size: 22px; text-align: center; }
+.dgbar { height: 8px; border-radius: 99px; background: var(--surface2); margin-top: 6px; overflow: hidden; }
+.dgbar i { display: block; height: 100%; background: var(--teal); border-radius: 99px; transition: width .3s; }
+.spbanner { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; padding: 7px 12px; font-size: 12px; line-height: 1.3; }
+.spbanner b { font: 800 11px/1 var(--f-mono); letter-spacing: .06em; }
+.spbanner.recall { background: #7C5CD6; color: #fff; }
+.spbanner.regular { background: #F2C94C; color: #3B2F12; }
+.rx.recall { border-color: #7C5CD6; box-shadow: 0 0 0 3px rgba(124, 92, 214, .28); }
+.rx.regular { border-color: #E2B33A; box-shadow: 0 0 0 3px rgba(242, 201, 76, .35); }
 </style>
 
 <div class="shell">
@@ -1027,6 +1061,7 @@ body.trip .stats .stat { animation: tripbob 1.4s ease-in-out infinite; }
   <nav class="menu" id="menu" aria-label="Game menu">
     <button type="button" data-act="sheet-ups"><i aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg></i><span>Upgrades</span></button>
     <button type="button" data-act="sheet-prog"><i aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 4h8v5a4 4 0 0 1-8 0zM8 6H4v1a3 3 0 0 0 4 3M16 6h4v1a3 3 0 0 1-4 3M12 13v4M8 20h8"/></svg></i><span>Progress &amp; awards</span></button>
+    <button type="button" data-act="daily"><i aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="4"/><path d="M12 12l5-5"/></svg></i><span>Daily goals <em id="dailybadge" class="dgbadge"></em></span></button>
     <button type="button" data-act="settings"><i aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5.5A1.5 1.5 0 0 1 5.5 4H12v16H5.5A1.5 1.5 0 0 1 4 18.5zM12 4h6.5A1.5 1.5 0 0 1 20 5.5v13a1.5 1.5 0 0 1-1.5 1.5H12"/></svg></i><span>Topics</span></button>
     <button type="button" data-act="flash"><i aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="6" width="14" height="12" rx="2"/><path d="M7 3h12a2 2 0 0 1 2 2v10"/></svg></i><span>Flashcards</span></button>
     <button type="button" data-act="syn"><i aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 4a3 3 0 0 0-3 3 3 3 0 0 0-2 5 3 3 0 0 0 2 5 3 3 0 0 0 6 1V4a3 3 0 0 0-3 0zM15 4a3 3 0 0 1 3 3 3 3 0 0 1 2 5 3 3 0 0 1-2 5 3 3 0 0 1-6 1"/></svg></i><span>Synapse lab</span></button>
@@ -1045,13 +1080,6 @@ body.trip .stats .stat { animation: tripbob 1.4s ease-in-out infinite; }
     <div class="col sh-prog"><section class="card" id="review"></section><div id="savecard"></div><div class="foot"><span>Progress and your decks save in this browser.</span><span id="resetwrap"></span></div></div>
   </main>
 </div>
-
-.grphd { display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
-.grpr { margin-left: auto; display: inline-flex; align-items: center; gap: 6px; }
-.chip.sm { padding: 3px 10px; font-size: 12px; }
-.fold { all: unset; cursor: pointer; font: 800 15px/1.2 inherit; display: inline-flex; align-items: center; gap: 6px; }
-.fold i { font-style: normal; width: 14px; }
-.fold:focus-visible { outline: 2px solid var(--teal); outline-offset: 2px; border-radius: 6px; }
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script>
 /* Question bank: Q(category, difficulty 1-3, question, correct, [3 wrong], explanation) */
@@ -2533,10 +2561,10 @@ const World = (function () {
   const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
   const lerp = (a, b, t) => a + (b - a) * t;
   const reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const UPIDS = ['shelf', 'tech', 'counsel', 'library', 'robot'];
+  const UPIDS = ['shelf', 'tech', 'counsel', 'robot'];
   const CLICK = UPIDS;
-  const BASE = { shelf: [-1.5, 0, -6.5], tech: [-6.9, 0, 0], counsel: [-11.55, 0, 3.85], library: [-9.0, 0, -4.0], robot: [8.7, 0, -5.4] };
-  const TAGY = { notes: 2.5, shelf: 4.7, tech: 2.7, counsel: 3.3, library: 4.7, robot: 3.6 };
+  const BASE = { shelf: [-1.5, 0, -6.5], tech: [-6.9, 0, 0], counsel: [-11.55, 0, 3.85], mast: [-9.0, 0, -4.0], robot: [8.7, 0, -5.4] };
+  const TAGY = { notes: 2.5, shelf: 4.7, tech: 2.7, counsel: 3.3, robot: 3.6 };
   const SKIN = ['#F2C9A5', '#E0A97E', '#C48A5E', '#8D5A3B', '#F6D7BD', '#6F4429'];
   const HAIR = ['#2B1B12', '#6B3A1E', '#B5651D', '#D9B25A', '#A8A8A8', '#1E1E2E'];
   const SHIRT = ['#0E9A8E', '#F1A20E', '#E04F3A', '#5B7FD1', '#8A63C9', '#3E8E41'];
@@ -2547,7 +2575,7 @@ const World = (function () {
   const OBST = [
     { x0: -9.6, x1: 4.15, z0: -1.0, z1: 1.05 },    // counter, wall to wall, with the computer stations
     { x0: -13.3, x1: -10.0, z0: 2.2, z1: 5.5 },    // counseling room (outside the left wall)
-    { x0: -9.6, x1: -8.4, z0: -5.8, z1: -2.2 },    // library
+    { x0: -9.6, x1: -8.4, z0: -5.8, z1: -2.2 },    // mastery shelf (left wall)
     { x0: 7.4, x1: 10.0, z0: -6.7, z1: -4.1 },     // robot (back-right corner)
     { x0: -6.2, x1: 6.2, z0: -7.1, z1: -6.0 },     // shelves
     { x0: 3.3, x1: 7.3, z0: -5.7, z1: -4.1 }       // event table
@@ -3000,39 +3028,28 @@ const World = (function () {
     cy(G, 0.22, 0.17, 0.35, 6, '#E04F3A', -1.2, 0.18, -1.2, 'counsel'); ico(G, 0.4, '#3E8E41', -1.2, 0.65, -1.2, 'counsel');
     for (let i = 0; i < Math.min(lv, 6); i++) bx(G, 0.14, 0.14, 0.14, '#F2A516', 0.6 - i * 0.25, 1.4, -1.45, 'counsel', { emissive: new T.Color(0xF2A516), emissiveIntensity: 0.8 });
   }
-  function buildLibrary(lv) {
-    const G = ug.library; clear(G);
-    if (lv < 1) { ghostBox(G, 1.2, 4.2, 3.6, 'library'); return; }
-    const H = 4.2, L = 3.6, wood = '#7A5638', board = '#8A6240';
-    bx(G, 0.08, H, L, '#5E412A', -0.46, H / 2, 0, 'library');
-    bx(G, 1.0, 0.14, L + 0.1, wood, 0, H, 0, 'library');
-    bx(G, 0.95, H, 0.1, wood, 0.02, H / 2, -L / 2, 'library'); bx(G, 0.95, H, 0.1, wood, 0.02, H / 2, L / 2, 'library');
-    for (let k = 0; k < 5; k++) bx(G, 0.95, 0.09, L, board, 0.02, 0.05 + k * 0.82, 0, 'library');
-    const COL = ['#7A4B2A', '#5B3A29', '#2F4F3E', '#24364F', '#7B2D2D', '#B08D57', '#4A4A52', '#8C6A3F', '#3C5A4A', '#6D5B4B', '#D8C9A8', '#34495E'];
-    let sd = 11; const R = () => (sd = (sd * 16807) % 2147483647) / 2147483647;
-    const book = (z, base, h, t, col, tilt) => {
-      const bg = new T.Group(); bg.position.set(0.03, base, z); bg.rotation.x = tilt || 0; G.add(bg);
-      bx(bg, 0.6 - R() * 0.1, h, t, col, 0, h / 2, 0, 'library');
-    };
-    for (let r = 0; r < 5; r++) {
-      const frac = Math.max(0, Math.min(1, 0.22 + lv * 0.2 - r * 0.13)); if (frac < 0.08) continue;
-      const base = 0.05 + r * 0.82 + 0.045, z0 = -L / 2 + 0.16, zEnd = z0 + (L - 0.32) * frac, lean = frac < 0.95 ? 2 : 0;
-      let z = z0;
-      while (z < zEnd - lean * 0.14) {
-        const t = 0.06 + R() * 0.11, h = 0.42 + R() * 0.26;
-        if (R() < 0.07) z += 0.08;
-        book(z + t / 2, base, h, t, COL[Math.floor(R() * COL.length)], (R() - 0.5) * 0.03); z += t + 0.005;
-      }
-      for (let i = 0; i < lean; i++) {
-        const t = 0.07 + R() * 0.08, h = 0.46 + R() * 0.2, th = -(0.3 + R() * 0.12);
-        book(z + t / 2 + h * Math.abs(Math.sin(th)) * 0.85 + i * 0.03, base, h, t, COL[Math.floor(R() * COL.length)], th); z += t + 0.07;
-      }
-      if (frac < 0.8 && r < 4 && R() < 0.7) {
-        const fz = Math.min(z + 0.5, L / 2 - 0.35);
-        for (let i = 0; i < 2; i++) bx(G, 0.58, 0.09, 0.42 - i * 0.04, COL[Math.floor(R() * COL.length)], 0.03, base + 0.045 + i * 0.09, fz + (R() - 0.5) * 0.04, 'library');
+  /* mastery shelf: one jar per fully mastered week, on the left wall. Empty slots stay as faint outlines. */
+  let mastG = null, mastList = [];
+  function buildMastery() {
+    if (!mastG) { mastG = new T.Group(); mastG.position.set(BASE.mast[0], 0, BASE.mast[2]); scene.add(mastG); }
+    clear(mastG);
+    const wood = '#B98A5C', board = '#8B6239', ROWS = 4, COLS = 11, L = 3.5, dz = L / COLS;
+    bx(mastG, 0.08, 3.5, L + 0.2, '#5E412A', -0.46, 1.75, 0);
+    for (let r = 0; r < ROWS; r++) bx(mastG, 0.6, 0.08, L + 0.2, board, -0.18, 0.55 + r * 0.8, 0);
+    bx(mastG, 0.7, 0.14, L + 0.3, wood, -0.12, 3.6, 0);
+    bx(mastG, 0.1, 3.5, 0.1, wood, -0.12, 1.75, -(L + 0.2) / 2); bx(mastG, 0.1, 3.5, 0.1, wood, -0.12, 1.75, (L + 0.2) / 2);
+    for (let r = 0; r < ROWS; r++) for (let k = 0; k < COLS; k++) {
+      const idx = (ROWS - 1 - r) * COLS + k, z = -L / 2 + dz * (k + 0.5), y = 0.59 + r * 0.8, m = mastList[idx];
+      if (m) {
+        cy(mastG, 0.14, 0.15, 0.42, 8, m.c, -0.1, y + 0.21, z, undefined, { emissive: new T.Color(m.c), emissiveIntensity: 0.35 });
+        cy(mastG, 0.12, 0.12, 0.1, 8, '#FFFFFF', -0.1, y + 0.47, z);
+        bx(mastG, 0.02, 0.18, 0.16, '#FFFFFF', 0.06, y + 0.2, z);
+      } else {
+        cy(mastG, 0.1, 0.11, 0.32, 8, '#FFFFFF', -0.1, y + 0.16, z, undefined, { transparent: true, opacity: 0.16 });
       }
     }
   }
+  api.setMastery = function (list) { mastList = list || []; try { buildMastery(); } catch (e) { /* decor is cosmetic */ } };
   function buildRobot(lv) {
     const G = ug.robot; clear(G); robotRef = null;
     if (lv < 1) { ghostBox(G, 2.4, 3.6, 2.4, 'robot'); return; }
@@ -3055,8 +3072,8 @@ const World = (function () {
     notesStar = ico(G, 0.13, '#F2A516', 0, 0.8, 0, 'notes');
   }
   /* A small plaque bolted to each upgrade that shows its level. It lives inside the upgrade's group, so it stays with the model. */
-  const MAXLV = { shelf: 20, tech: 20, counsel: 10, library: 5, robot: 5 };
-  const PLATE = { shelf: [0, 4.65, 0.5, 0], tech: [0, 2.75, -0.3, 0], counsel: [0, 3.4, 0, 0], library: [0.03, 4.8, 0, PI / 2], robot: [0, 4.7, 0.2, 0] };
+  const MAXLV = { shelf: 20, tech: 20, counsel: 10, robot: 5 };
+  const PLATE = { shelf: [0, 4.65, 0.5, 0], tech: [0, 2.75, -0.3, 0], counsel: [0, 3.4, 0, 0], robot: [0, 4.7, 0.2, 0] };
   function addPlate(id, lv) {
     const G = ug[id], P = PLATE[id]; if (!G || !P) return;
     const max = MAXLV[id], full = lv >= max, cv = document.createElement('canvas'); cv.width = 256; cv.height = 128;
@@ -3071,7 +3088,7 @@ const World = (function () {
     const m = new T.Mesh(new T.PlaneGeometry(1.5, 0.75), new T.MeshBasicMaterial({ map: tex, transparent: true, side: T.DoubleSide }));
     m.position.set(P[0], P[1], P[2]); m.rotation.y = P[3]; m.userData.plate = true; G.add(m);
   }
-  const BUILD = { shelf: buildShelves, tech: buildTech, counsel: buildCounsel, library: buildLibrary, robot: buildRobot };
+  const BUILD = { shelf: buildShelves, tech: buildTech, counsel: buildCounsel, robot: buildRobot };
 
   /* ---- staff & customers ---- */
   Crowd.setBoxes(OBST);
@@ -3162,8 +3179,8 @@ const World = (function () {
     return undefined;
   }
   function spawnCustomer(instant, i) {
-    const seed = Math.floor(Math.random() * 100000), special = queue.some(q => q.karen || q.sweaty || q.elder || q.evt), karen = !instant && !special && !!B.karenRoll(), sweaty = !instant && !special && !karen && !!B.sweatyRoll(), elder = !instant && !special && !karen && !sweaty && !!(B.elderRoll && B.elderRoll()), evt = !instant && !special && !karen && !sweaty && !elder && !visitor && !!(B.eventRoll) ? rollEvt() : null, body = karen || sweaty || elder || evt ? 'normal' : pickBody(), p = person(seed, false, karen, sweaty, body, elder ? { elder: true, gender: seed % 2 === 0 ? 'f' : 'm' } : evtOpts(evt, seed));
-    const c = { g: p, seed, wp: [], mood: null, moodT: 0, phase: Math.random() * 6, hop: 0, face: 0, karen, sweaty, elder, evt, body, r: bodyR(body), angry: karen, puffT: 0, dripT: 0, jx: (Math.random() - 0.5) * 0.3, jz: (Math.random() - 0.5) * 0.3, faceJit: (Math.random() - 0.5) * 0.8, wait: 0, emoteT: 3 + Math.random() * 8 };
+    const seed0 = Math.floor(Math.random() * 100000), special = queue.some(q => q.karen || q.sweaty || q.elder || q.evt || q.recall || q.regular), karen = !instant && !special && !!B.karenRoll(), sweaty = !instant && !special && !karen && !!B.sweatyRoll(), elder = !instant && !special && !karen && !sweaty && !!(B.elderRoll && B.elderRoll()), evt = !instant && !special && !karen && !sweaty && !elder && !visitor && !!(B.eventRoll) ? rollEvt() : null, sp = !instant && !special && !karen && !sweaty && !elder && !evt && !visitor && B.specialRoll ? B.specialRoll() : null, seed = sp ? sp.seed : seed0, body = karen || sweaty || elder || evt ? 'normal' : sp ? sp.body : pickBody(), p = person(seed, false, karen, sweaty, body, elder ? { elder: true, gender: seed % 2 === 0 ? 'f' : 'm' } : evtOpts(evt, seed));
+    const c = { g: p, seed, wp: [], mood: null, moodT: 0, phase: Math.random() * 6, hop: 0, face: 0, karen, sweaty, elder, evt, recall: sp && sp.kind === 'recall' ? sp.k : null, regular: sp && sp.kind === 'regular' ? sp.n : null, body, r: bodyR(body), angry: karen, puffT: 0, dripT: 0, jx: (Math.random() - 0.5) * 0.3, jz: (Math.random() - 0.5) * 0.3, faceJit: (Math.random() - 0.5) * 0.8, wait: 0, emoteT: 3 + Math.random() * 8 };
     custGroup.add(p);
     if (instant) { const s = slotPos(i, c); p.position.set(s.x, 0, s.z); p.rotation.y = PI + c.faceJit; }
     else { p.position.set(5, 0, 9.6); c.wp.push(new T.Vector3(5, 0, 6.2)); }
@@ -3175,7 +3192,7 @@ const World = (function () {
   const idleCap = () => 3 + (Math.floor(time / 35) % 2);
   function endIdle(c) { c.idl = null; c.sit = false; c.seat = -1; }
   function idleTick(c, i, w, dt) {
-    const special = c.karen || c.sweaty || c.elder || c.evt || c.caller || c.pusher;
+    const special = c.karen || c.sweaty || c.elder || c.evt || c.caller || c.pusher || c.recall || c.regular;
     const P = c.g.userData.P;
     if (rushOn && i >= 5 && !special) {
       const k = Math.min(i - 5, SEATS.length - 1);
@@ -3213,8 +3230,8 @@ const World = (function () {
       if (!queue.length) queue.push(spawnCustomer(false, 0));
       assignSlots();
     }
-    cur = queue[0]; cur.mood = null; if (cur.karen) setBubble('!', 'kar'); else setBubble(cur.evt === 'inspector' ? '\u2714' : cur.evt === 'driver' ? '\uD83D\uDCE6' : '?', '');
-    return { seed: cur.seed, karen: !!cur.karen, sweaty: !!cur.sweaty, elder: !!cur.elder, evt: cur.evt || null, caller: !!cur.caller };
+    cur = queue[0]; cur.mood = null; if (cur.karen) setBubble('!', 'kar'); else if (cur.recall) setBubble('\u21A9', 'rec'); else if (cur.regular) setBubble('\u2605', 'reg'); else setBubble(cur.evt === 'inspector' ? '\u2714' : cur.evt === 'driver' ? '\uD83D\uDCE6' : '?', '');
+    return { seed: cur.seed, karen: !!cur.karen, sweaty: !!cur.sweaty, elder: !!cur.elder, evt: cur.evt || null, caller: !!cur.caller, body: cur.body || 'normal', recall: cur.recall || null, regular: cur.regular || null };
   };
   /* hard-of-hearing patient: eyes widen and question marks float off her head */
   function floatQ(c) {
@@ -4879,7 +4896,6 @@ const World = (function () {
     const vis = shelfBottles.filter(b => b.visible);
     if (vis.length) { const b = vis[rndi(vis.length)], sx = BASE.shelf[0], sz = BASE.shelf[2]; out.push({ w: 6, bottle: b, from: [sx + b.position.x, b.position.y + 0.55, sz + 0.2], land: [sx + b.position.x + (Math.random() - 0.5) * 2.6, 0.2, -4.7 + Math.random() * 1.8] }); }
     out.push({ w: 1.5, from: [BASE.robot[0], 2.6, BASE.robot[2] + 0.5], land: [BASE.robot[0] - 1.4 - Math.random() * 1.6, 0.2, -3.8 + Math.random() * 1.5] });
-    out.push({ w: 1.2, from: [BASE.library[0] + 0.3, 2.9, BASE.library[2] + (Math.random() - 0.5) * 2], land: [BASE.library[0] + 1.6 + Math.random() * 1.4, 0.2, -3.6 + Math.random() * 1.6] });
     out.push({ w: 1, from: [-8.6, 1.5, 5], land: [-7.2, 0.2, 4.1] });
     out.push({ w: 1.2, from: [-3.2, 1.3, -2.4], land: [-2 + Math.random() * 3, 0.2, -3.2 - Math.random() * 1.2] });
     return out;
@@ -5146,7 +5162,7 @@ const World = (function () {
   /* the floating brain next to the bookshelf opens the synapse lab */
   let brainG = null, brainTag = null;
   function buildBrain(g) {
-    brainG = new T.Group(); brainG.position.set(-7.7, 3.5, -3.9); g.add(brainG);
+    brainG = new T.Group(); brainG.position.set(-7.9, 4.6, -3.9); g.add(brainG);
     [-1, 1].forEach(sx => {
       const geo = new T.SphereGeometry(1, 56, 40), pa = geo.attributes.position;
       for (let k = 0; k < pa.count; k++) {
@@ -5352,7 +5368,6 @@ const World = (function () {
     { id: 'tech', short: 'Techs', name: 'Pharmacy Technician', max: 20, cost: l => Math.round(80 * Math.pow(1.6, l)), desc: l => `Techs earn tips on their own, about ${money(techRate())}/s each right now. Hired: ${l}.` },
     { id: 'train', short: 'Training', name: 'Tech Training', max: 10, cost: l => Math.round(150 * Math.pow(1.7, l)), desc: l => `Technicians earn +40% per level. Techs now also gain from Stocked Shelves. Now +${l * 40}%. Needs hired techs.` },
     { id: 'counsel', short: 'Counseling', name: 'Counseling Room', max: 10, cost: l => Math.round(120 * Math.pow(1.8, l)), desc: l => `Streak bonus (+5% per answer) caps at ${5 + 3 * l} in a row. ${Math.min(60, l * 10)}% chance to talk Karen down.` },
-    { id: 'library', short: 'Library', name: 'Reference Library', max: 5, cost: l => Math.round(150 * Math.pow(1.9, l)), desc: l => `Ask the pharmacist to remove two wrong answers. Holds ${2 * l} hints.` },
     { id: 'robot', short: 'Robot', name: 'Dispensing Robot', max: 5, cost: l => Math.round(300 * Math.pow(2, l)), desc: l => `${l * 6}% chance that a correct fill pays double.` }
   ];
   const ICON_GEAR = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1L7 17M17 7l2.1-2.1"/></svg>';
@@ -5366,11 +5381,11 @@ const World = (function () {
   function defaults() {
     const topics = {}; CATS.forEach(c => topics[c[0]] = true);
     return { cash: 0, earned: 0, rep: 50, streak: 0, best: 0, correct: 0, wrong: 0, served: 0, franchises: 0,
-      hintsLeft: 0, sinceHint: 0, calcOK: 0, mastery: {}, missed: [], karenCd: 0, karenWin: 0, karenLoss: 0, sweatyCd: 0, jimWin: 0, jimLoss: 0, phoneOK: 0, phoneBad: 0, phoneMiss: 0, lastShelve: 0, retired: 0, shelveOK: 0, shelveBad: 0, priorN: 0, decks: [],
+      pw: { hint: 0, second: 0, binder: 0 }, daily: null, recall: [], reg: {}, calcOK: 0, mastery: {}, missed: [], karenCd: 0, karenWin: 0, karenLoss: 0, sweatyCd: 0, jimWin: 0, jimLoss: 0, phoneOK: 0, phoneBad: 0, phoneMiss: 0, lastShelve: 0, retired: 0, shelveOK: 0, shelveBad: 0, priorN: 0, decks: [],
       me: { done: false, body: 'normal', gender: 'n', hair: 0, hairColor: 0, skin: 1, scrub: 0, shirt: 0, shoes: 3 }, awards: { frames: [], pets: [] },
       set: { topics: topics, diffs: [1, 2, 3], mode: 'mixed', timer: true, focus: false },
       vial: [], cosm: [], cosmOn: {}, pillN: 0, store: { own: [], walls: 'w0', floor: 'f0', uni: '', deco: [] },
-      up: { shelf: 0, tech: 0, train: 0, counsel: 0, library: 0, robot: 0 } };
+      up: { shelf: 0, tech: 0, train: 0, counsel: 0, robot: 0 } };
   }
   let S = load();
   if (S.playSec === undefined) S.playSec = S.served > 0 ? 300 : 0; // people who already play skip the slow start
@@ -5383,6 +5398,10 @@ const World = (function () {
         const o = JSON.parse(raw); Object.assign(f, o);
         f.up = Object.assign(defaults().up, o.up || {});
         f.me = Object.assign(defaults().me, o.me || {});
+        f.pw = Object.assign({ hint: 0, second: 0, binder: 0 }, o.pw || {});
+        if (!o.pw && o.hintsLeft) f.pw.hint = Math.min(9, o.hintsLeft);
+        if (f.up.library) { let r = 0; for (let l = 0; l < f.up.library; l++) r += Math.round(150 * Math.pow(1.9, l)); f.cash = (f.cash || 0) + r; f.libRefund = (f.libRefund || 0) + r; }
+        delete f.up.library; delete f.hintsLeft; delete f.sinceHint;
         f.store = Object.assign(defaults().store, o.store || {}); f.store.own = (f.store.own || []).slice(); f.store.deco = (f.store.deco || []).slice();
         f.awards = { frames: ((o.awards || {}).frames || []).slice(), pets: ((o.awards || {}).pets || []).slice(), calW: (o.awards || {}).calW || 0, wkDone: (o.awards || {}).wkDone ? o.awards.wkDone.slice() : null };
         const d = defaults().set, os = o.set || {};
@@ -5624,7 +5643,15 @@ const World = (function () {
   const uniBuff = () => { const u = uniOf(); return u && S.up.tech >= 1 ? u[5] : {}; };
   const techRate = () => 0.4 * (0.5 + S.rep / 100) * franchiseMult() * (1 + 0.25 * S.up.shelf) * (1 + 0.4 * S.up.train) * (1 + (uniBuff().tech || 0));
   const passive = () => S.up.tech * techRate();
-  const hintCap = () => 2 * S.up.library;
+  /* power-ups: consumables bought in the Shop (Power-ups). Counts live in S.pw. */
+  const PW_MAX = 9;
+  const PW = {
+    hint: { name: 'Hint pill', emoji: '💊', base: 60, note: 'Removes two wrong answers on one question. Pays half.' },
+    second: { name: 'Second chance', emoji: '🔁', base: 120, note: 'Arm it on a question. If your first pick is wrong, you get one more try. No streak or reputation loss, pays half, and it still counts as a miss for mastery.' },
+    binder: { name: 'Reference binder', emoji: '📘', base: 90, note: 'Shows where this question comes from (week, topic and study source). Pays 15% less.' }
+  };
+  const pwCost = (k) => Math.round(PW[k].base * franchiseMult());
+  const pwAdd = (k, n) => { S.pw[k] = Math.min(PW_MAX, (S.pw[k] || 0) + n); };
   const upTotal = () => Object.keys(S.up).reduce((a, k) => a + S.up[k], 0);
   const customCount = () => S.decks.reduce((a, d) => a + d.items.length, 0);
   const shopName = () => (S.shop && S.shop.trim()) || 'Corner Rx';
@@ -5669,8 +5696,7 @@ const World = (function () {
   const todayStr = () => { const d = new Date(); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); };
   function eligible(q) {
     const st = S.set;
-    if (q.c === 'TP3') { if (!p3On(q.wk)) return false; } else if (q.from && q.from > todayStr() && !(isTop(q) && wkAhead(q))) return false;
-    if (q.c !== 'TP3' && isTop(q) && st.wkOnly && q.wk !== wkNow(q)) return false;
+    if (q.c === 'TP3') { if (!p3On(q.wk)) return false; } else if (q.c === 'TOP') { if (!p2On(q.wk)) return false; } else if (q.from && q.from > todayStr()) return false;
     if (isTop(q) && wkTypeOff(q)) return false;
     if (!st.topics[q.c] || st.diffs.indexOf(q.d) < 0) return false;
     if (st.mode === 'missed') return S.missed.indexOf(q.k) >= 0;
@@ -5686,11 +5712,50 @@ const World = (function () {
   }
   const WK_TYPES = [['bg', 'Brand / generic'], ['ind', 'Indications'], ['moa', 'Mechanism'], ['cn', 'Counseling (select all)'], ['class', 'Drug class']];
   /* P3 week picker: S.set.p3sel = { weekNumber: true } once the player has chosen. Before that, the old rules apply (open weeks, Study ahead, This week only, p3off). */
-  const p3On = (n) => { const st = S.set; if (st.p3sel) return !!st.p3sel[n]; if (st.wkOnly3) return n === curWeek3(); const w = WK3[n]; return !!w && (w.from <= todayStr() || !!st.ahead3) && !(st.p3off && st.p3off[n]); };
-  const p3Off = (n) => !p3On(n);
-  const p3Sel = () => { const o = {}; P3WEEKS.forEach(w => { if (p3On(w.n)) o[w.n] = true; }); return o; };
-  const p3OpenSel = () => { const o = {}, t = todayStr(); P3WEEKS.forEach(w => { if (w.from <= t) o[w.n] = true; }); return o; };
-  const p3OnlyNow = () => { const c = curWeek3(), k = Object.keys(p3Sel()); return !!c && k.length === 1 && +k[0] === c; };
+  /* Week pickers for the weekly drug lists. k is 'p2' (WEEKS) or 'p3' (P3WEEKS). Selection is saved in S.set[k + 'sel'] = { weekNumber: true } once the player has chosen.
+     Before that, the old rules apply (started weeks, Study ahead, This week only, p3off) so older saves behave the same. */
+  const WKCFG = {
+    p2: { L: WEEKS, M: WK, cur: curWeek, only: 'wkOnly', ahead: 'ahead', topic: 'TOP' },
+    p3: { L: P3WEEKS, M: WK3, cur: curWeek3, only: 'wkOnly3', ahead: 'ahead3', topic: 'TP3' }
+  };
+  const wkOn = (k, n) => { const st = S.set, c = WKCFG[k], sel = st[k + 'sel']; if (sel) return !!sel[n]; if (st[c.only]) return n === c.cur(); const w = c.M[n]; return !!w && (w.from <= todayStr() || !!st[c.ahead]) && !(st[k + 'off'] && st[k + 'off'][n]); };
+  const wkSel = (k) => { const o = {}; WKCFG[k].L.forEach(w => { if (wkOn(k, w.n)) o[w.n] = true; }); return o; };
+  const wkOpenSel = (k) => { const o = {}, t = todayStr(); WKCFG[k].L.forEach(w => { if (w.from <= t) o[w.n] = true; }); return o; };
+  const wkOnlyNow = (k) => { const c = WKCFG[k].cur(), ks = Object.keys(wkSel(k)); return !!c && ks.length === 1 && +ks[0] === c; };
+  const p3On = (n) => wkOn('p3', n), p2On = (n) => wkOn('p2', n);
+  /* a week counts as unlocked once it has started or the player picked it */
+  const wk2Open = (w) => w.from <= todayStr() || p2On(w.n);
+  function wkPick(k, v, a) {
+    const st = S.set, c = WKCFG[k];
+    if (a === 'toggle') { const o = wkSel(k); if (o[v]) delete o[v]; else { o[v] = true; st.topics[c.topic] = true; } st[k + 'sel'] = o; }
+    else if (a === 'all') { const o = {}; c.L.forEach(w => { o[w.n] = true; }); st[k + 'sel'] = o; st.topics[c.topic] = true; }
+    else if (a === 'none') st[k + 'sel'] = {};
+    else if (a === 'only') {
+      const cw = c.cur(); if (!cw) { toast('No week has started yet. Tap a week below to preview it.'); return false; }
+      if (wkOnlyNow(k)) { st[k + 'sel'] = st[k + 'prev'] && Object.keys(st[k + 'prev']).length ? st[k + 'prev'] : wkOpenSel(k); st[k + 'prev'] = null; }
+      else { st[k + 'prev'] = wkSel(k); st[k + 'sel'] = {}; st[k + 'sel'][cw] = true; st.topics[c.topic] = true; }
+    } else if (a === 'course') { const o = wkSel(k), on = v.split('|')[1] === '1'; c.L.forEach(w => { if (w.t === v.split('|')[0]) { if (on) o[w.n] = true; else delete o[w.n]; } }); st[k + 'sel'] = o; if (on) st.topics[c.topic] = true; }
+    st[c.only] = false; return true;
+  }
+  function wkSchedHTML(k, title) {
+    const st = S.set, c = WKCFG[k], t = todayStr(), cw = c.cur(), n = c.L.filter(w => wkOn(k, w.n)).length;
+    const row = (w) => { const on = wkOn(k, w.n), started = w.from <= t, cnt = k === 'p3' ? w.ids.length : DRUGS.filter(d => d.w === w.n).length, lab = (w.t ? 'Wk ' + w.wk + ' · ' : '') + w.d;
+      return `<li class="${w.n === cw ? 'now' : started || on ? '' : 'lock'}${on ? '' : ' off'}"><button type="button" data-act="wkpick" data-v="${k}:${w.n}" aria-pressed="${on}" aria-label="${esc(lab)} ${esc(w.topic)}: ${on ? 'on' : 'off'}"><i class="p3box">${on ? '✓' : ''}</i><b>${esc(lab)}</b><span>${esc(w.topic)}</span><small>${on ? cnt + ' drugs' + (w.n === cw ? ' · this week' : started ? '' : ' · upcoming') : 'off'}</small></button></li>`; };
+    const started = c.L.filter(w => w.from <= t), up = c.L.filter(w => w.from > t), foldUp = up.length > 3 && !st[k + 'up'];
+    const shown = (w) => w.from <= t || !foldUp || wkOn(k, w.n);
+    let body = '';
+    const courses = [];
+    c.L.forEach(w => { if (w.t && courses.indexOf(w.t) < 0) courses.push(w.t); });
+    if (courses.length) courses.forEach(cr => {
+      const ws = c.L.filter(w => w.t === cr), vis = ws.filter(shown); if (!vis.length) return;
+      const allOn = ws.every(w => wkOn(k, w.n));
+      body += `<div class="crshd"><b>${esc(cr)}</b><span><button type="button" class="link" data-act="wkcourse" data-v="${k}:${esc(cr)}|1">All</button> &middot; <button type="button" class="link" data-act="wkcourse" data-v="${k}:${esc(cr)}|0">None</button></span></div><ol class="p3sched">${vis.map(row).join('')}</ol>`;
+    });
+    else body = `<ol class="p3sched">${c.L.filter(shown).map(row).join('')}</ol>`;
+    const hidden = c.L.filter(w => !shown(w)).length;
+    const more = up.length > 3 ? `<button type="button" class="link upmore" data-act="wkup" data-v="${k}">${st[k + 'up'] ? 'Hide' : 'Show'} upcoming weeks${hidden ? ' (' + hidden + ' more)' : ''}</button>` : '';
+    return `<div class="grp"><div class="grphd"><button type="button" class="fold" data-act="wkfold" data-v="${k}" aria-expanded="${!st[k + 'fold']}"><i>${st[k + 'fold'] ? '▸' : '▾'}</i> ${title}</button><span class="grpr"><button type="button" class="chip sm" data-act="wkpick" data-v="${k}:only" aria-pressed="${wkOnlyNow(k)}">This week only</button><button type="button" class="link" data-act="wkpick" data-v="${k}:all">All</button> &middot; <button type="button" class="link" data-act="wkpick" data-v="${k}:none">None</button></span></div>${st[k + 'fold'] ? `<p class="note">${n} of ${c.L.length} weeks on. Tap ${title} to show the schedule.</p>` : body + more + `<p class="note">${k === 'p3' ? weekNote3() : weekNote()}</p>`}<div class="chips" aria-label="Weekly question types">${WK_TYPES.map(x => `<button type="button" class="chip" data-act="wktype" data-v="${x[0]}" aria-pressed="${!(st.wkTypes && st.wkTypes[x[0]] === false)}">${x[1]}</button>`).join('')}</div></div>`;
+  }
   const wkTypeOff = (q) => !!(S.set.wkTypes && S.set.wkTypes[q.wt] === false);
   const focusOn = () => !!S.set.focus;
   const labOn = () => !!S.lab;
@@ -5758,7 +5823,6 @@ const World = (function () {
     const open = UPS.filter(u => S.up[u.id] < u.max);
     if (!open.length) { const bonus = Math.round(120 * franchiseMult()); S.cash += bonus; S.earned += bonus; return '<p class="gift"><b>' + esc(cur.name) + ' is delighted.</b> Everything is already maxed, so she tips ' + money(bonus) + '.</p>'; }
     const u = pick(open); S.up[u.id]++;
-    if (u.id === 'library') S.hintsLeft += 2;
     save(); renderStats(); renderStore(); renderUpgrades(); renderFranchise();
     return '<p class="gift"><b>' + esc(cur.name) + ' tells all her friends about you.</b> Free upgrade: ' + esc(u.name || u.short) + ' is now level ' + S.up[u.id] + '.</p>';
   }
@@ -5788,15 +5852,19 @@ const World = (function () {
       if (phone.pending && !focusOn()) { phone.pending = false; info.karen = true; info.caller = true; }
       if (!info.karen) info.sweaty = sweatyRoll();
     }
-    if (!World.ok && !info.karen && !info.sweaty) info.elder = elderRoll();
+    if (forceSp) { info.recall = forceSp.recall || null; info.regular = forceSp.regular || null; if (forceSp.seed) info.seed = forceSp.seed; info.body = forceSp.body || info.body; forceSp = null; }
+    if (!World.ok && !info.karen && !info.sweaty && !info.recall && !info.regular && !info.evt) { const x = specialRoll(); if (x) { info.seed = x.seed; info.body = x.body; if (x.kind === 'recall') info.recall = x.k; else info.regular = x.n; } }
+    if (!World.ok && !info.karen && !info.sweaty && !info.recall && !info.regular) info.elder = elderRoll();
     if (!info.karen && !info.sweaty && !info.elder && !info.evt && (forceEvt || !World.ok)) info.evt = eventRoll();
-    const calm = focusOn(), karen = !!info.karen && !calm, sweaty = !!info.sweaty && !karen && !calm, elder = !!info.elder && !karen && !sweaty && !calm, evt = !karen && !sweaty && !elder && !calm && info.evt ? info.evt : null, q = evt ? evQuestion(evt) : (forceHim && !karen && !sweaty && !elder && !calm && himPick()) || chooseQ(karen);
+    const calm = focusOn(), karen = !!info.karen && !calm, sweaty = !!info.sweaty && !karen && !calm, elder = !!info.elder && !karen && !sweaty && !calm, evt = !karen && !sweaty && !elder && !calm && info.evt ? info.evt : null, sp = (!karen && !sweaty && !elder && !evt && !calm) ? spResolve(info, false) : null, q = evt ? evQuestion(evt) : (sp && sp.q) || (forceHim && !karen && !sweaty && !elder && !calm && himPick()) || chooseQ(karen);
     view = 'q';
     const himDev = forceHim; forceHim = false;
     if (!q) { cur = { empty: true, seed: info.seed, karen: false }; renderPanel(); return; }
     const himWalk = q.c === 'HIM' && !evt && !karen && !sweaty && !elder && !calm && World.ok && !!World.himArrive && (!S.himDone || himDev);
     const opts = q.ms ? shuffle(q.as.map(t => ({ t, ok: true })).concat(q.w.map(t => ({ t, ok: false })))) : shuffle([q.a, ...q.w].map((t, i) => ({ t, ok: i === 0 })));
-    cur = { q, sel: {}, wasMissed: S.missed.indexOf(q.k) >= 0, opts, t0: Date.now(), done: false, hint: false, karen, sweaty, elder, elderStage: elder ? 0 : 2, ask: pick(ELDER_ASK), caller: !!info.caller && !calm, name: karen ? 'Karen' : sweaty ? 'Jittery Jim' : elder ? pick(info.seed % 2 === 0 ? ELDER_F : ELDER_M) : evt && EV_NAME[evt] ? pick(EV_NAME[evt]) : pick(NAMES), flavor: info.caller ? pick(CALLER_LINES) : evt ? pick(EV_FLAVOR[evt]) : karen ? pick(KAREN_LINES) : sweaty ? pick(JIM_LINES) : pick(FLAVOR[q.c] || FLAVOR.MY), seed: info.seed, num: S.served + 1, picked: -1, ok: false, resHTML: '', interrupt: null, evt: evt, insp: evt === 'inspector' ? { n: 1, of: 3, ok: 0, used: [q.k] } : null, review: reviewDue(S.mastery[q.k]) };
+    cur = { q, sel: {}, wasMissed: S.missed.indexOf(q.k) >= 0, opts, t0: Date.now(), done: false, hint: false, karen, sweaty, elder, elderStage: elder ? 0 : 2, ask: pick(ELDER_ASK), caller: !!info.caller && !calm, name: karen ? 'Karen' : sweaty ? 'Jittery Jim' : elder ? pick(info.seed % 2 === 0 ? ELDER_F : ELDER_M) : evt && EV_NAME[evt] ? pick(EV_NAME[evt]) : pick(NAMES), flavor: info.caller ? pick(CALLER_LINES) : evt ? pick(EV_FLAVOR[evt]) : karen ? pick(KAREN_LINES) : sweaty ? pick(JIM_LINES) : pick(FLAVOR[q.c] || FLAVOR.MY), seed: info.seed, num: S.served + 1, picked: -1, ok: false, resHTML: '', interrupt: null, evt: evt, insp: evt === 'inspector' ? { n: 1, of: 3, ok: 0, used: [q.k] } : null, review: reviewDue(S.mastery[q.k]), body: info.body || 'normal' };
+    if (info.recall) delete spOut['r' + info.recall]; if (info.regular) delete spOut['g' + info.regular];
+    if (sp) spApply(sp);
     if (q.c === 'HIM') { cur.name = 'Himothy'; if (himWalk) World.himArrive(); }
     if (evt === 'inspector') SFX.play('siren'); else if (evt === 'driver') SFX.play('thud'); else if (S.served > 0) SFX.play('bell');
     if (sweatyOwed && calm) sweatyOwed = false;
@@ -5812,7 +5880,6 @@ const World = (function () {
     let r = Math.random() * owned.reduce((a, u) => a + S.up[u.id], 0), u = owned[0];
     for (const x of owned) { r -= S.up[x.id]; if (r <= 0) { u = x; break; } }
     const from = S.up[u.id]; S.up[u.id]--;
-    if (u.id === 'library') S.hintsLeft = Math.min(S.hintsLeft, hintCap());
     World.karenLoss(u.id);
     return { lost: u, from, to: from - 1 };
   }
@@ -5829,8 +5896,14 @@ const World = (function () {
     } else if (idx >= 0 && (!o || o.gone || isBlocked(idx))) return;
     else if (q.ms && idx >= 0) return;
     endInterrupt();
+    if (cur.secArmed && !cur.secUsed && idx >= 0 && S.pw.second > 0 && !(msOk !== null ? msOk : o.ok)) {
+      cur.secUsed = true; cur.secArmed = false; S.pw.second--;
+      if (q.ms) cur.sel = {}; else o.gone = true;
+      SFX.play('bad'); toast('Second chance used. Try again.'); save(); renderPanel(); return;
+    }
     const ok = msOk !== null ? msOk : idx >= 0 && o.ok, elapsed = (Date.now() - cur.t0) / 1000, karen = cur.karen, sweaty = cur.sweaty;
     cur.done = true; cur.picked = idx; cur.ok = ok; S.served++;
+    const unseen = !q.gen && !(S.mastery[q.k] && S.mastery[q.k].seen);
     let pay = 0; const chips = []; let head = '', extra = '';
     if (ok) {
       S.streak++; S.best = Math.max(S.best, S.streak); S.correct++; holCorrect();
@@ -5839,7 +5912,7 @@ const World = (function () {
       const speed = timerOn() ? 1 + 0.5 * Math.max(0, 1 - elapsed / 20) : 1;
       const bz = buffOn() ? 3 : 1, streakN = Math.min(S.streak * bz, (5 + 3 * S.up.counsel) * bz), streak = 1 + 0.05 * streakN;
       const lucky = Math.random() < 0.06 * S.up.robot, fr = franchiseMult();
-      pay = Math.max(1, Math.round(base * shelf * speed * streak * fr * buffPay() * (lucky ? 2 : 1) * (cur.hint ? 0.5 : 1) * (karen ? 2 : 1) * (sweaty ? 1.5 : 1) * (rush.on ? 1.5 : 1) * (cur.lab ? 1.5 : 1)));
+      pay = Math.max(1, Math.round(base * shelf * speed * streak * fr * buffPay() * (lucky ? 2 : 1) * (cur.hint ? 0.5 : 1) * (cur.secUsed ? 0.5 : 1) * (cur.binder ? 0.85 : 1) * (cur.recall ? 1.5 : 1) * (cur.regular ? 1.25 : 1) * (karen ? 2 : 1) * (sweaty ? 1.5 : 1) * (rush.on ? 1.5 : 1) * (cur.lab ? 1.5 : 1)));
       chips.push(`<span class="big">+${money(pay)}</span>`, `<span>base $${base.toFixed(0)}</span>`);
       if (blessOn()) chips.push('<span>Himothy\u2019s blessing x' + BLESS_MULT.toFixed(2) + '</span>');
       if (S.up.shelf) chips.push(`<span>shelves x${shelf.toFixed(2)}</span>`);
@@ -5849,12 +5922,14 @@ const World = (function () {
       if (rush.on) chips.push('<span>rush hour x1.50</span>');
       if (cur.lab) chips.push('<span>compounding bench x1.50</span>');
       if (lucky) chips.push('<span>robot: double fill</span>');
-      if (cur.hint) chips.push('<span>hint used x0.5</span>');
+      if (cur.hint) chips.push('<span>hint pill x0.5</span>');
+      if (cur.secUsed) chips.push('<span>second chance x0.5</span>');
+      if (cur.binder) chips.push('<span>binder x0.85</span>');
+      if (cur.recall) chips.push('<span>recall bonus x1.50</span>');
+      if (cur.regular) chips.push('<span>regular x1.25</span>');
       if (karen) chips.push('<span>Karen calmed x2</span>');
       if (sweaty) chips.push('<span>Jim relieved x1.5</span>');
       S.cash += pay; S.earned += pay; S.rep = Math.min(100, S.rep + (karen ? 5 : sweaty ? 3 : 2));
-      S.sinceHint++;
-      if (S.sinceHint >= 5 && S.hintsLeft < hintCap()) { S.hintsLeft++; S.sinceHint = 0; }
       if (q.gen) S.calcOK++;
       if (cur.lab) { S.labOK = (S.labOK || 0) + 1; }
       if (karen) S.karenWin++;
@@ -5880,23 +5955,27 @@ const World = (function () {
     if (cur.elder) extra += ok ? elderGift() : '<p class="gift sad">She pats your hand anyway and shuffles off. No upgrade this time.</p>';
     if (!q.gen) {
       const m = S.mastery[q.k] || { box: 0, seen: 0, ok: 0 };
+      const mok = ok && !cur.secUsed;
       const wasDue = reviewDue(m);
       m.seen++;
       const wasNew = m.seen === 1;
-      if (ok) { m.ok++; m.lapse = 0; m.box = Math.min(3, m.box + (wasNew ? 2 : 1)); } else slip(m);
-      if (ok) { if (wasDue) { m.iv = Math.min(IV.length - 1, (m.iv || 0) + 1); chips.push('<span>memory check passed, next in ' + IV[m.iv] + ' d</span>'); } if (!m.t || wasDue || m.box < 2) { m.t = Date.now(); if (m.iv === undefined) m.iv = 0; } } else { m.iv = 0; m.t = Date.now(); }
+      if (mok) { m.ok++; m.lapse = 0; m.box = Math.min(3, m.box + (wasNew ? 2 : 1)); } else slip(m);
+      if (mok) { if (wasDue) { m.iv = Math.min(IV.length - 1, (m.iv || 0) + 1); chips.push('<span>memory check passed, next in ' + IV[m.iv] + ' d</span>'); } if (!m.t || wasDue || m.box < 2) { m.t = Date.now(); if (m.iv === undefined) m.iv = 0; } } else { m.iv = 0; m.t = Date.now(); }
       if (S.set.mode === 'mixed') {
         const ri = retry.findIndex(r => r.k === q.k); if (ri >= 0) retry.splice(ri, 1);
-        if (!ok) retry.push({ k: q.k, due: S.served + 3 });
+        if (!mok) retry.push({ k: q.k, due: S.served + 3 });
         else if (m.box === 1) retry.push({ k: q.k, due: S.served + 6 });
       }
       S.mastery[q.k] = m;
-      if (ok && q.c === 'HIM' && !S.himDone && himAllMastered()) himPending = true;
+      if (mok && q.c === 'HIM' && !S.himDone && himAllMastered()) himPending = true;
       const i = S.missed.indexOf(q.k);
-      if (!ok && i < 0) S.missed.push(q.k);
-      if (ok && m.box >= 2 && i >= 0) S.missed.splice(i, 1);
+      if (!mok && i < 0) S.missed.push(q.k);
+      if (mok && m.box >= 2 && i >= 0) S.missed.splice(i, 1);
       lastKey = q.k;
     } else lastKey = null;
+    if (!ok || cur.secUsed) recallAdd(q);
+    recallDone(ok && !cur.secUsed); regularDone(ok && !cur.secUsed); checkRegulars();
+    dailyTick({ ok: ok && !cur.secUsed, q: q, unseen: unseen, recall: !!cur.recall, regular: !!cur.regular });
     shiftNote(q, ok, pay, ok || idx < 0 ? '' : q.ms ? cur.opts.filter((x, i) => cur.sel[i]).map(x => x.t).join(' · ') : o.t);
     save();
     checkAwards();
@@ -5944,10 +6023,27 @@ const World = (function () {
     return '<p><b>Correct choices:</b> ' + esc(cur.opts.filter(x => x.ok).map(x => x.t).join(' \u00B7 ')) + '</p>' + (wrong.length ? '<p class="whynot"><b>Not true for ' + esc(cur.q.rows ? cur.q.rows[0][1].split(' (')[0] : 'this drug') + ':</b> ' + esc(wrong.join(' \u00B7 ')) + '</p>' : '') + (missed.length ? '<p class="whynot"><b>You missed:</b> ' + esc(missed.join(' \u00B7 ')) + '</p>' : '');
   }
   function useHint() {
-    if (!cur || cur.empty || cur.done || cur.hint || S.hintsLeft < 1) return;
-    cur.hint = true; S.hintsLeft--;
-    const wr = cur.opts.filter(o => !o.ok); shuffle(wr).slice(0, cur.q.ms ? Math.min(2, wr.length - 1) : 2).forEach(o => { o.gone = true; delete cur.sel[cur.opts.indexOf(o)]; });
+    if (!cur || cur.empty || cur.done || cur.hint || S.pw.hint < 1) return;
+    cur.hint = true; S.pw.hint--;
+    const wr = cur.opts.filter(o => !o.ok && !o.gone); shuffle(wr).slice(0, cur.q.ms ? Math.min(2, wr.length - 1) : Math.min(2, wr.length)).forEach(o => { o.gone = true; delete cur.sel[cur.opts.indexOf(o)]; });
     save(); renderPanel();
+  }
+  function useSecond() {
+    if (!cur || cur.empty || cur.done || cur.secUsed || (!cur.secArmed && S.pw.second < 1)) return;
+    cur.secArmed = !cur.secArmed; renderPanel();
+  }
+  function useBinder() {
+    if (!cur || cur.empty || cur.done || cur.binder || S.pw.binder < 1) return;
+    cur.binder = true; S.pw.binder--; save(); renderPanel();
+  }
+  /* where a question comes from, for the reference binder */
+  function binderNote(q) {
+    const cat = (CATS.find(c => c[0] === q.c) || [0, q.c || 'Question'])[1], parts = [cat];
+    const w = q.wk ? (q.c === 'TP3' ? WK3[q.wk] : WK[q.wk]) : null;
+    if (w) parts.push((w.t ? w.t + ' wk ' + w.wk + ' \u00B7 ' : '') + w.d + ' \u00B7 ' + w.topic);
+    else if (q.t) parts.push(q.t);
+    if (q.gen) return 'Calculation: set up the units first, then solve.';
+    return esc(parts.join(' \u00B7 ')) + (q.s ? '<br><b>Study source:</b> ' + esc(q.s) : '<br><small>No slide reference saved for this question yet.</small>');
   }
 
   /* ---- panel rendering ---- */
@@ -5991,7 +6087,8 @@ const World = (function () {
     }).join('');
     const label = cur.lab ? (cur.lab === 'pk' ? 'KINETICS CONSULT \u00B7 show your work' : 'COMPOUNDING ORDER \u00B7 show your work') : cur.elder ? cur.name.toUpperCase() + ' \u00B7 free upgrade if right' : cur.evt ? (cur.evt === 'inspector' ? 'HEALTH INSPECTOR \u00B7 question ' + cur.insp.n + ' of ' + cur.insp.of + ' \u00B7 need 2' : EV_LABEL[cur.evt]) : cur.caller ? 'KAREN · "I tried to call"' : cur.karen ? 'KAREN · wants the manager' : cur.sweaty ? 'JITTERY JIM · sweating buckets' : CATNAME[q.c] + (q.t ? ' · ' + q.t : '');
     const isK = cur.karen || cur.caller, showTimer = !isK && timerOn();
-    return `<article class="rx ${cur.lab ? 'labq' : ''} ${cur.karen ? 'karen' : cur.sweaty ? 'sweaty' : ''} ${cur.evt ? 'evt evt-' + cur.evt : ''}">
+    return `<article class="rx ${cur.lab ? 'labq' : ''} ${cur.karen ? 'karen' : cur.sweaty ? 'sweaty' : ''} ${cur.recall ? 'recall' : cur.regular ? 'regular' : ''} ${cur.evt ? 'evt evt-' + cur.evt : ''}">
+      ${spBanner()}
       <div class="rx-head"><span class="rx-sym" aria-hidden="true">&#8478;</span>
         <div class="rx-meta"><b>${esc(label)}</b><span>Rx #${pad} &middot; ${esc(cur.name)}</span></div>
         ${cur.wasMissed ? `<span class="missedtag" title="You missed this question before">Missed before</span>` : cur.review ? `<span class="missedtag rv" title="You mastered this a while ago. A quick memory check.">Memory check</span>` : ''}
@@ -6001,7 +6098,11 @@ const World = (function () {
       <div class="rx-body">
         <div class="patient">${avatar(cur.seed, cur.done ? (cur.ok ? 'ok' : 'bad') : 'idle', cur.karen, cur.sweaty, cur.elder, cur.name === 'Himothy')}<div class="bubble"><em>${esc(cur.flavor)}</em><p>${esc(q.q)}</p></div></div>
         <div class="opts" role="group" aria-label="Answer choices">${opts}${jimHTML()}</div>${q.ms && !cur.done ? `<div class="msbar"><span>Select all that apply (${Object.keys(cur.sel).length} picked)</span><button type="button" class="btn go" id="msgo" ${Object.keys(cur.sel).length ? '' : 'disabled'}>Submit answer</button></div>` : ''}${labToolsHTML()}
-        <div class="tools"><button type="button" class="btn" id="hintbtn" ${S.hintsLeft < 1 || cur.hint || cur.done ? 'disabled' : ''}>Ask the pharmacist (${S.hintsLeft})</button>
+        ${cur.binder ? `<div class="binderbox" role="note"><b>\uD83D\uDCD8 Reference binder</b><span>${binderNote(q)}</span></div>` : ''}
+        <div class="tools pwtools"><button type="button" class="btn" id="hintbtn" ${S.pw.hint < 1 || cur.hint || cur.done ? 'disabled' : ''}>\uD83D\uDC8A Hint pill (${S.pw.hint})</button>
+          <button type="button" class="btn" id="secbtn" aria-pressed="${!!cur.secArmed}" ${(S.pw.second < 1 && !cur.secArmed) || cur.secUsed || cur.done ? 'disabled' : ''}>\uD83D\uDD01 Second chance (${S.pw.second})${cur.secArmed ? ' ready' : ''}</button>
+          <button type="button" class="btn" id="bindbtn" ${S.pw.binder < 1 || cur.binder || cur.done ? 'disabled' : ''}>\uD83D\uDCD8 Binder (${S.pw.binder})</button>
+          ${S.pw.hint + S.pw.second + S.pw.binder < 1 && !cur.done ? '<button type="button" class="mini" data-act="pwshop">Get power-ups</button>' : ''}
           <span class="keyhint">${isK ? 'Karen leaves in ' + KAREN_SEC + ' s. A wrong answer costs an upgrade.' : cur.lab ? 'Lab bench: no timer. Pays x1.5.' : timerOn() ? 'Speed bonus fades over 20 s' : focusOn() ? 'Focus mode: no timer' : 'Timer bonus is off'}</span></div>
       </div>${cur.resHTML || ''}</article>`;
   }
@@ -6056,13 +6157,11 @@ const World = (function () {
       <div class="grp"><b>Difficulty</b><div class="chips">${diffs}</div></div>
       <div class="grp"><b>Mode</b><div class="chips">${modes}</div><p class="note">${MODES.find(m => m[0] === st.mode)[2]}</p></div>
       <div class="grp"><b>Compounding pharmacy</b><div class="chips"><button type="button" class="chip" data-act="labk" data-v="comp" aria-pressed="${(S.labK || {}).comp !== false}">Compounding math</button><button type="button" class="chip" data-act="labk" data-v="pk" aria-pressed="${(S.labK || {}).pk !== false}">Kinetics</button></div><p class="note">Used when you tap Switch to compounding in the menu. Level chips above apply there too. ${S.labN ? 'Solved at the bench: ' + S.labOK + ' of ' + S.labN + '.' : ''}</p></div>
-      <div class="grp"><b>Weekly drugs</b><div class="chips"><button type="button" class="chip" data-act="wkonly" aria-pressed="${!!st.wkOnly}">This week only</button><button type="button" class="chip" data-act="ahead" aria-pressed="${!!st.ahead}">Study ahead</button></div><div class="chips" aria-label="Weekly question types">${WK_TYPES.map(x => `<button type="button" class="chip" data-act="wktype" data-v="${x[0]}" aria-pressed="${!(st.wkTypes && st.wkTypes[x[0]] === false)}">${x[1]}</button>`).join('')}</div><p class="note">${weekNote()} Use the question-type buttons to pick which kinds of weekly questions you get.</p></div>
+      ${wkSchedHTML('p2', 'Weekly drugs')}
       <div class="grp"><b>Speed bonus</b><div class="chips"><button type="button" class="chip" data-act="timer" aria-pressed="${st.timer}">Timer bonus ${st.timer ? 'on' : 'off'}</button></div><p class="note">Turn it off to study without time pressure. Karen still has a limit.</p></div>
       `;
-    const w3 = curWeek3();
-    const sched = P3WEEKS.map(w => { const open = w.from <= todayStr(), off = p3Off(w.n), cnt = TOPQ.filter(q => q.wk === w.n && !wkTypeOff(q)).length; return `<li class="${w.n === w3 ? 'now' : open || !off ? '' : 'lock'}${off ? ' off' : ''}"><button type="button" data-act="p3wk" data-v="${w.n}" aria-pressed="${!off}" aria-label="${esc(w.d)} ${esc(w.topic)}: ${off ? 'off' : 'on'}"><i class="p3box">${off ? '' : '\u2713'}</i><b>${esc(w.d)}</b><span>${esc(w.topic)}</span><small>${off ? 'off' : w.ids.length + ' drugs' + (w.n === w3 ? ' \u00B7 this week' : open ? '' : ' \u00B7 upcoming')}</small></button></li>`; }).join('');
     const p3 = `${fsw('P3')}<h3>P3 weekly drugs</h3><p class="sub">Drug list sheets by system, one set per week. Changes apply to the next patient.</p>
-      <div class="grp"><div class="grphd"><button type="button" class="fold" data-act="p3fold" aria-expanded="${!st.p3fold}"><i>${st.p3fold ? '\u25B8' : '\u25BE'}</i> Top 300</button><span class="grpr"><button type="button" class="chip sm" data-act="wkonly3" aria-pressed="${p3OnlyNow()}">This week only</button><button type="button" class="link" data-act="p3wk-all">All</button> &middot; <button type="button" class="link" data-act="p3wk-none">None</button></span></div>${st.p3fold ? `<p class="note">${P3WEEKS.filter(w => p3On(w.n)).length} of ${P3WEEKS.length} weeks on. Tap Top 300 to show the schedule.</p>` : `<ol class="p3sched">${sched}</ol><p class="note">${weekNote3()}</p>`}<div class="chips" aria-label="Weekly question types">${WK_TYPES.map(x => `<button type="button" class="chip" data-act="wktype" data-v="${x[0]}" aria-pressed="${!(st.wkTypes && st.wkTypes[x[0]] === false)}">${x[1]}</button>`).join('')}</div></div>
+      ${wkSchedHTML('p3', 'Top 300')}
       <div class="grp"><b>Relevant otherwise</b><div class="chips">${CATS.filter(c => c[0] === 'T553').map(chipOf).join('')}</div><p class="note">Therapeutics III (PHAR 553) syllabus topics: asthma, COPD, renal, diabetes, gout, migraine, RA and SLE, thyroid, liver, hepatitis, blood pressure, lipids, pain, nutrition, fluids and electrolytes.</p></div>
       <div class="grp"><b>Focus</b><div class="chips"><button type="button" class="chip" data-act="topics-all">Turn every topic back on</button></div><p class="note">Use the switch at the top of this folder to ask only P3 topics.</p></div>`;
     const p1 = `${fsw('P1')}<h3>P1 folder</h3><p class="sub">Nothing is filed here yet.</p><div class="grp"><b>Empty folder</b><p class="note">P1 drug lists and exam questions will go in this folder. Your current question settings live in the P2 folder.</p></div>`;
@@ -6165,7 +6264,7 @@ const World = (function () {
   const buffText = b => [b.tech ? '+' + Math.round(b.tech * 100) + '% tech tips' : '', b.pay ? '+' + Math.round(b.pay * 100) + '% pay' : ''].filter(Boolean).join(', ');
   function uniSpec() { const u = uniOf(); return u ? { shirt: u[2], scrub: u[3], cosm: { hat: u[4] || '', eyes: u[0] === 'u5' ? 'goggles' : '' } } : null; }
   function applyShop() { if (!World.ok) return; World.setStore(S.store); World.setStaffLook(uniSpec()); World.setPharmacist(meSpec()); }
-  const SHOP_CATS = [['walls', 'Wall paint'], ['floors', 'Floors'], ['uni', 'Tech uniforms'], ['deco', 'Decor'], ['hair', 'Hairstyles'], ['cyber', 'Cyborg']];
+  const SHOP_CATS = [['walls', 'Wall paint'], ['floors', 'Floors'], ['uni', 'Tech uniforms'], ['deco', 'Decor'], ['hair', 'Hairstyles'], ['cyber', 'Cyborg'], ['pow', 'Power-ups']];
   function shopRows(cat) {
     const st = S.store;
     if (cat === 'walls') return SHOP_WALLS.map(w => ({ id: w[0], name: w[1], price: w[4], free: !w[4], on: st.walls === w[0], sw: [w[2], w[3]], note: '' }));
@@ -6173,24 +6272,31 @@ const World = (function () {
     if (cat === 'uni') return [{ id: '', name: 'Standard coats', price: 0, free: true, on: !st.uni, sw: ['#F4FAFA', '#27384F'], note: 'No bonus.' }].concat(SHOP_UNI.map(u => ({ id: u[0], name: u[1], price: u[6], on: st.uni === u[0], sw: [u[2], u[3]], note: buffText(u[5]) + '. ' + u[7] })));
     if (cat === 'deco') return SHOP_DECOR.map(d => ({ id: d[0], name: d[1], price: d[2], on: (st.deco || []).indexOf(d[0]) >= 0, emoji: d[4], note: d[3], toggle: true }));
     if (cat === 'hair') return SHOP_HAIR.map((h, i) => ({ id: h[0], name: h[1], price: h[3], on: S.me.hair === 7 + i, emoji: '💇', note: 'For your pharmacist.' }));
+    if (cat === 'pow') return Object.keys(PW).map(k => ({ id: k, name: PW[k].name, price: pwCost(k), emoji: PW[k].emoji, note: PW[k].note, stack: true, count: S.pw[k] || 0 }));
     return SHOP_CYBER.map(c => ({ id: c[1], name: c[2], price: c[4], on: ((S.cosmOn || {}).cyber) === c[1], emoji: c[3], note: 'For your pharmacist.' }));
   }
   function shopHTML() {
     const cash = S.cash, rows = shopRows(shopCat);
     const cats = SHOP_CATS.map(c => `<button type="button" class="chip" data-act="shopcat" data-v="${c[0]}" aria-pressed="${shopCat === c[0]}">${c[1]}</button>`).join('');
     const cards = rows.map(r => {
-      const own = r.free || shopOwn(r.id), sw = r.sw ? `<span class="spsw"><i style="background:${r.sw[0]}"></i><i style="background:${r.sw[1]}"></i></span>` : `<span class="spem" aria-hidden="true">${r.emoji || ''}</span>`;
+      const own = r.stack ? false : r.free || shopOwn(r.id), sw = r.sw ? `<span class="spsw"><i style="background:${r.sw[0]}"></i><i style="background:${r.sw[1]}"></i></span>` : `<span class="spem" aria-hidden="true">${r.emoji || ''}</span>`;
       let btn;
-      if (!own) btn = `<button type="button" class="btn go" data-act="shop-buy" data-k="${shopCat}" data-id="${r.id}"${cash < r.price ? ' disabled' : ''}>Buy ${money(r.price)}</button>`;
+      if (!own) btn = `<button type="button" class="btn go" data-act="shop-buy" data-k="${shopCat}" data-id="${r.id}"${cash < r.price || (r.stack && r.count >= PW_MAX) ? ' disabled' : ''}>${r.stack && r.count >= PW_MAX ? 'Full' : 'Buy ' + money(r.price)}</button>`;
       else if (r.toggle) btn = `<button type="button" class="btn" data-act="shop-use" data-k="${shopCat}" data-id="${r.id}" aria-pressed="${r.on}">${r.on ? 'Remove' : 'Place'}</button>`;
       else btn = r.on ? '<span class="spon">Equipped</span>' : `<button type="button" class="btn" data-act="shop-use" data-k="${shopCat}" data-id="${r.id}">Use</button>`;
-      return `<div class="spcard${r.on ? ' on' : ''}">${sw}<div class="sptx"><b>${esc(r.name)}</b>${r.note ? `<small>${esc(r.note)}</small>` : ''}</div>${btn}</div>`;
+      return `<div class="spcard${r.on ? ' on' : ''}">${sw}<div class="sptx"><b>${esc(r.name)}${r.stack ? ' <em class="pwn">x' + r.count + '</em>' : ''}</b>${r.note ? `<small>${esc(r.note)}</small>` : ''}</div>${btn}</div>`;
     }).join('');
     const bf = buffText(uniBuff()), hasT = S.up.tech >= 1;
     const note = shopCat === 'uni' ? `<p class="note">${hasT ? (bf ? 'Your techs are earning bonuses: ' + bf + '.' : 'Pick a uniform to give your techs a bonus.') : 'Hire a Pharmacy Technician first. Uniform bonuses work once you have at least one tech.'}</p>` : shopCat === 'cyber' || shopCat === 'hair' ? '<p class="note">Bought items show up in the Character tab, where you can mix and match.</p>' : '';
     return `<div class="spcash">Cash <b>${money(cash)}</b></div><div class="chips spcats" role="group" aria-label="Shop sections">${cats}</div>${note}<div class="spgrid">${cards}</div>`;
   }
   function shopBuy(kind, id) {
+    if (kind === 'pow') {
+      if (!PW[id]) return; const c = pwCost(id);
+      if ((S.pw[id] || 0) >= PW_MAX) { toast('You are holding the most ' + PW[id].name + ' you can carry.'); return; }
+      if (S.cash < c) { toast('Not enough cash for ' + PW[id].name + '.'); return; }
+      S.cash -= c; pwAdd(id, 1); SFX.play('unlock'); save(); renderStats(); toast('Bought ' + PW[id].name + '. You have ' + S.pw[id] + '.'); return;
+    }
     const rows = shopRows(kind), r = rows.find(x => x.id === id); if (!r || r.free || shopOwn(id)) return;
     if (S.cash < r.price) { toast('Not enough cash for ' + r.name + '.'); return; }
     S.cash -= r.price; S.store.own.push(id); SFX.play('unlock'); shopUse(kind, id, true); save(); renderStats(); toast('Bought ' + r.name + '.');
@@ -6232,7 +6338,7 @@ const World = (function () {
   const CAL_NAMES = ['Bronze', 'Silver', 'Gold', 'Platinum'], CAL_ICON = ['\uD83E\uDD49', '\uD83E\uDD48', '\uD83E\uDD47', '\uD83D\uDC8E'];
   const weekQs = (n) => TOPQ.filter(q => q.wk === n && !wkTypeOff(q));
   const weekProg = (n) => { const qs = weekQs(n); return { done: qs.filter(q => (S.mastery[q.k] || {}).box >= 2).length, total: qs.length }; };
-  const weeksOpen = () => WEEKS.filter(w => (w.from <= todayStr() || S.set.ahead) && weekQs(w.n).length);
+  const weeksOpen = () => WEEKS.filter(w => wk2Open(w) && weekQs(w.n).length);
   const weeksMastered = () => weeksOpen().filter(w => { const p = weekProg(w.n); return p.total > 0 && p.done >= p.total; }).length;
   /* floating unlock cards: a shining picture, then it travels to where it lives */
   const pend = { frames: new Set(), pets: new Set() };
@@ -6263,7 +6369,7 @@ const World = (function () {
   }
   /* an achievement pop-up for every weekly quiz (Top 300 and P3) the first time all of its questions are mastered */
   function checkWeekQuiz(silent) {
-    const isOpen = (w) => w.from <= todayStr() || (w.n > 100 ? S.set.ahead3 : S.set.ahead);
+    const isOpen = (w) => w.from <= todayStr() || (w.n > 100 ? p3On(w.n) : p2On(w.n));
     const mast = WEEKS.concat(P3WEEKS).filter(isOpen).filter(w => { const p = weekProg(w.n); return p.total > 0 && p.done >= p.total; });
     if (!S.awards.wkDone) { S.awards.wkDone = mast.map(w => w.n); save(); return; }
     const fresh = mast.filter(w => S.awards.wkDone.indexOf(w.n) < 0);
@@ -6422,10 +6528,10 @@ const World = (function () {
   /* restock draws from the weekly drug list: this week first, then earlier unlocked weeks */
   function shelfPairs() {
     const t = todayStr(), cw = curWeek(), seen = {};
-    const ok = DRUGS.filter(d => (d.w <= cw || (S.set.ahead && !S.set.wkOnly)) && WK[d.w] && (WK[d.w].from <= t || S.set.ahead) && brandPick(d) && brandPick(d).toLowerCase() !== d.g.toLowerCase() && d.g.length <= 26 && !/[;\/]/.test(d.g));
+    const ok = DRUGS.filter(d => WK[d.w] && p2On(d.w) && brandPick(d) && brandPick(d).toLowerCase() !== d.g.toLowerCase() && d.g.length <= 26 && !/[;\/]/.test(d.g));
     const uniq = (l) => l.filter(d => { const k = brandPick(d).toLowerCase(); if (seen[k]) return false; seen[k] = 1; return true; });
     const now = shuffle(ok.filter(d => d.w === cw)), old = shuffle(ok.filter(d => d.w !== cw));
-    const pick = uniq(S.set.wkOnly ? now : now.concat(old)).slice(0, 6);
+    const pick = uniq(now.concat(old)).slice(0, 6);
     if (pick.length < 6) return shuffle(BRANDS.slice()).slice(0, 6);
     return pick.map(d => [d.g, brandPick(d)]);
   }
@@ -6606,7 +6712,7 @@ const World = (function () {
     const q = refQ.trim().toLowerCase(), t = todayStr(), cw = curWeek();
     let h = '';
     WEEKS.forEach(w => {
-      const locked = w.from > t && !S.set.ahead;
+      const locked = !wk2Open(w);
       const list = DRUGS.filter(d => d.w === w.n && (!q || (d.g + ' ' + (d.b || '') + ' ' + (d.c || '')).toLowerCase().indexOf(q) >= 0));
       if (q && !list.length) return;
       if (locked) { if (!q) h += '<div class="rweek lockedw"><b>' + esc(w.t) + ' week ' + w.wk + ' · ' + esc(w.d) + '</b><small>Unlocks ' + esc(w.from) + '. Turn on Study ahead in settings to preview.</small></div>'; return; }
@@ -6716,7 +6822,7 @@ const World = (function () {
   function renderPanel() {
     const pn = $('#qpanel'); if (!pn) return;
     pn.classList.toggle('karen', !!(cur && cur.karen && !cur.done && view === 'q'));
-    const body = view === 'create' ? createHTML() : view === 'awards' ? awardsHTML() : view === 'phone' ? phoneHTML() : view === 'fp' || view === 'him' ? '' : view === 'shift' ? shiftHTML() : view === 'flash' ? fcHTML() : view === 'syn' ? synHTML() : view === 'ref' ? refHTML() : view === 'retire' ? retireHTML() : view === 'set' ? settingsHTML() : view === 'studies' ? studiesHTML() : (cur ? cardHTML() : '');
+    const body = view === 'create' ? createHTML() : view === 'awards' ? awardsHTML() : view === 'phone' ? phoneHTML() : view === 'fp' || view === 'him' ? '' : view === 'shift' ? shiftHTML() : view === 'daily' ? dailyHTML() : view === 'flash' ? fcHTML() : view === 'syn' ? synHTML() : view === 'ref' ? refHTML() : view === 'retire' ? retireHTML() : view === 'set' ? settingsHTML() : view === 'studies' ? studiesHTML() : (cur ? cardHTML() : '');
     $('#counter').innerHTML = qbar() + body;
     const nb = document.querySelector('.nbk');
     if (nb) {
@@ -6826,7 +6932,6 @@ const World = (function () {
       tech: '<circle cx="20" cy="14" r="5.5"/><path d="M9 29c1-6 5-9 11-9s10 3 11 9z"/>',
       train: '<path d="M20 9l14 7-14 7-14-7z"/><path d="M12 21v6c0 2 4 4 8 4s8-2 8-4v-6l-8 4z"/><rect x="32" y="17" width="2" height="9"/>',
       counsel: '<path d="M8 10h24a2 2 0 0 1 2 2v13a2 2 0 0 1-2 2H18l-7 5v-5H8a2 2 0 0 1-2-2V12a2 2 0 0 1 2-2z"/>',
-      library: '<rect x="8" y="9" width="7" height="22" rx="1.5"/><rect x="17" y="9" width="7" height="22" rx="1.5"/><path d="M26 11l6-1.5 4 20-6 1.5z"/>',
       robot: '<rect x="9" y="14" width="22" height="17" rx="4"/><rect x="19" y="7" width="2.5" height="7"/><circle cx="20" cy="6" r="2.5"/><circle cx="15" cy="22" r="2.6" style="fill:var(--amber)"/><circle cx="25" cy="22" r="2.6" style="fill:var(--amber)"/>'
     }[id];
     return `<svg viewBox="0 0 40 40" aria-hidden="true"><rect width="40" height="40" rx="12" style="fill:var(--teal-soft)"/><g style="fill:var(--teal-ink)">${g}</g></svg>`;
@@ -6876,7 +6981,6 @@ const World = (function () {
     const u = UPS.find(x => x.id === id), l = S.up[id], cost = u.cost(l);
     if (l >= u.max || S.cash < cost) return false;
     S.cash -= cost; S.up[id]++;
-    if (id === 'library') S.hintsLeft += 2;
     save(); renderStats(); renderStore(); renderUpgrades(); renderFranchise();
     if (view === 'q' && cur && !cur.empty) renderPanel();
     return true;
@@ -7069,9 +7173,9 @@ const World = (function () {
     if (S.streak < 5 || S.streak % 5) return '';
     const big = S.streak % 10 === 0, bonus = Math.max(15, Math.round(pay * (big ? 5 : 3)));
     S.cash += bonus; S.earned += bonus;
-    if (big) S.hintsLeft++;
+    if (big) pwAdd('hint', 1);
     SFX.play('streak');
-    return '<p class="gift streak"><b>' + S.streak + ' in a row!</b> Streak bonus ' + money(bonus) + (big ? ' plus 1 pharmacist hint' : '') + '.</p>';
+    return '<p class="gift streak"><b>' + S.streak + ' in a row!</b> Streak bonus ' + money(bonus) + (big ? ' plus 1 hint pill' : '') + '.</p>';
   }
 
   /* ---- "why not": explain the wrong answer that was picked ---- */
@@ -7142,6 +7246,132 @@ const World = (function () {
     shiftRes = null; view = 'q'; newCard();
   }
 
+  /* ---- daily goals: three goals a day, new ones at local midnight. Finishing all three keeps a day streak going. ---- */
+  const DG = {
+    right: { t: n => 'Answer ' + n + ' questions correctly', lo: 10, hi: 18, ic: '✅' },
+    streak: { t: n => 'Reach a streak of ' + n, lo: 4, hi: 8, ic: '🔥' },
+    fresh: { t: n => 'Meet ' + n + ' questions you have never seen', lo: 3, hi: 6, ic: '✨' },
+    week: { t: n => 'Get ' + n + ' weekly drug questions right', lo: 5, hi: 9, ic: '📅' },
+    hard: { t: n => 'Get ' + n + ' level 3 questions right', lo: 2, hi: 4, ic: '🧠' },
+    recall: { t: () => 'Help a Recall patient', lo: 1, hi: 1, ic: '↩️' },
+    regular: { t: () => 'Help one of your regulars', lo: 1, hi: 1, ic: '⭐' }
+  };
+  const dayStr = (off) => { const d = new Date(); d.setDate(d.getDate() + (off || 0)); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); };
+  function dailyRng(seedStr) { let h = 1779033703 ^ seedStr.length; for (let i = 0; i < seedStr.length; i++) { h = Math.imul(h ^ seedStr.charCodeAt(i), 3432918353); h = h << 13 | h >>> 19; } return () => { h = Math.imul(h ^ h >>> 16, 2246822507); h = Math.imul(h ^ h >>> 13, 3266489909); h ^= h >>> 16; return (h >>> 0) / 4294967296; }; }
+  function dailyState() {
+    const t = todayStr(), old = S.daily;
+    if (old && old.d === t) return old;
+    const R = dailyRng('rx' + t), ids = ['right', 'streak', 'fresh', 'week', 'hard'];
+    for (let i = ids.length - 1; i > 0; i--) { const j = Math.floor(R() * (i + 1)); [ids[i], ids[j]] = [ids[j], ids[i]]; }
+    const special = [];
+    if ((S.recall || []).length) special.push('recall');
+    if (Object.keys(S.reg || {}).length) special.push('regular');
+    const pickIds = (special.length ? [special[Math.floor(R() * special.length)]] : []).concat(ids).slice(0, 3);
+    S.daily = { d: t, g: pickIds.map(id => { const c = DG[id], need = c.lo + Math.floor(R() * (c.hi - c.lo + 1)); return { id: id, need: need, n: 0, done: false }; }), paid: false, streak: old ? old.streak || 0 : 0, last: old ? old.last || '' : '' };
+    save(); return S.daily;
+  }
+  const dayStreak = () => { const s = S.daily; if (!s || !s.last) return 0; return s.last === todayStr() || s.last === dayStr(-1) ? s.streak : 0; };
+  const dailyPay = () => Math.round(100 * franchiseMult() * (1 + Math.min(5, dayStreak()) * 0.1));
+  function dailyTick(ev) {
+    const st = dailyState(); let fresh = 0;
+    st.g.forEach(g => {
+      if (g.done) return;
+      if (g.id === 'right' && ev.ok) g.n++;
+      else if (g.id === 'streak' && ev.ok) g.n = Math.max(g.n, S.streak);
+      else if (g.id === 'fresh' && ev.unseen) g.n++;
+      else if (g.id === 'week' && ev.ok && isTop(ev.q)) g.n++;
+      else if (g.id === 'hard' && ev.ok && ev.q.d === 3) g.n++;
+      else if (g.id === 'recall' && ev.ok && ev.recall) g.n++;
+      else if (g.id === 'regular' && ev.ok && ev.regular) g.n++;
+      if (g.n >= g.need) { g.n = g.need; g.done = true; fresh++; const pay = dailyPay(); S.cash += pay; S.earned += pay; toast('Daily goal done: ' + DG[g.id].t(g.need) + '. +' + money(pay)); }
+    });
+    if (!st.paid && st.g.every(g => g.done)) {
+      st.paid = true;
+      st.streak = st.last === dayStr(-1) ? (st.streak || 0) + 1 : 1; st.last = todayStr();
+      const bonus = 2 * dailyPay(), kind = pick(['hint', 'second', 'binder']);
+      S.cash += bonus; S.earned += bonus; pwAdd(kind, 1);
+      showUnlock({ emoji: '🎯', title: 'Daily goals complete!', sub: money(bonus) + ' bonus and a free ' + PW[kind].name + '. Day streak: ' + st.streak + '.' });
+    }
+    if (fresh) { save(); renderStats(); }
+    dailyBadge();
+  }
+  function dailyBadge() { const b = $('#dailybadge'); if (!b) return; const st = dailyState(); b.textContent = st.g.filter(g => g.done).length + '/' + st.g.length; }
+  function dailyHTML() {
+    const st = dailyState(), ds = dayStreak(), pay = dailyPay(), done = st.g.filter(g => g.done).length;
+    const rows = st.g.map(g => { const c = DG[g.id], pct = Math.round(100 * g.n / g.need); return `<li class="${g.done ? 'done' : ''}"><span class="dgic" aria-hidden="true">${g.done ? '✔️' : c.ic}</span><div><b>${esc(c.t(g.need))}</b><div class="dgbar" role="progressbar" aria-valuemin="0" aria-valuemax="${g.need}" aria-valuenow="${g.n}"><i style="width:${pct}%"></i></div></div><small>${g.n}/${g.need}<br>${g.done ? 'paid' : '+' + money(pay)}</small></li>`; }).join('');
+    return `<div class="pane dailypane"><h3>Daily goals</h3><p class="sub">${done === st.g.length ? 'All done for today. New goals tomorrow.' : 'Three goals a day. New ones appear at midnight.'}</p>
+      <div class="dgstreak"><b>${ds}</b><span>day streak</span><small>${st.paid ? 'Today counted.' : ds ? 'Finish all three today to keep it.' : 'Finish all three to start a streak.'}</small></div>
+      <ol class="dglist">${rows}</ol>
+      <div class="grp"><b>Patients who come back</b><p class="note">${(S.recall || []).length ? 'Recall: ' + S.recall.length + ' patient' + (S.recall.length === 1 ? '' : 's') + ' will return with a question you missed.' : 'Recall: miss a question and that patient may come back a day later with it.'}</p><p class="note">${Object.keys(S.reg || {}).length ? 'Regulars (' + Object.keys(S.reg).length + '): ' + Object.values(S.reg).map(g => esc(g.name) + (g.visits ? ' x' + g.visits : '')).join(', ') + '.' : 'Regulars: master every question in a week to unlock one and add a jar to the mastery shelf.'}</p></div>
+      <p class="note">Each goal pays ${money(pay)}. Finishing all three pays ${money(2 * pay)} more and a free power-up. A longer day streak raises the payout (up to +50%).</p>
+      <div class="btnrow"><button type="button" class="btn go" data-act="back">Back to counter</button></div></div>`;
+  }
+
+  /* ---- recall patients and regulars ----
+     Recall: a patient whose question you missed comes back about a day later, looking the same, with that exact question.
+     Regular: mastering a week unlocks a regular who stops by with questions from that week. Both ignore your topic filters on purpose, and the card says so. */
+  const RC_DELAY = 864e5, RC_MAX = 10;
+  const RC_LINES = ['Hi again! I came in a while back and the answer did not stick. Can we go over it?', 'Remember me? I still have the same question from last time.', 'I am back. I wrote the question on my hand so I would not forget it.'];
+  const RG_LINES = ['Just my usual visit. Quick one for you:', 'You know me. Same pharmacy, same questions:', 'Hello again! I brought a question from our favorite topic:'];
+  const REG_NAMES = ['Mrs. Okafor', 'Big Mike', 'Dolores', 'Mr. Tran', 'Priya', 'Coach Hale', 'Ms. Dubois', 'Gus', 'Nadia', 'Pops Reyes', 'Lena', 'Rafi', 'Auntie Bea', 'Mr. Kowalski', 'Jun', 'Sister Agnes', 'Teddy', 'Ms. Ibarra', 'Walt', 'Zainab', 'Captain Lou', 'Mrs. Park', 'Dex', 'Granny Mae'];
+  let spOut = {}, forceSp = null;
+  const spReady = () => !focusOn() && !learning() && !labOn() && S.served - (S.lastSp || 0) >= 4;
+  function specialRoll() {
+    if (forceSp) return null;
+    if (!spReady()) return null;
+    const now = Date.now(), due = (S.recall || []).filter(r => r.due <= now && BYKEY[r.k] && !spOut['r' + r.k]);
+    if (due.length && Math.random() < 0.6) { const r = due[0]; spOut['r' + r.k] = 1; S.lastSp = S.served; return { kind: 'recall', k: r.k, seed: r.seed, body: r.body || 'normal' }; }
+    const regs = Object.keys(S.reg || {}).filter(n => !spOut['g' + n]);
+    if (regs.length && Math.random() < 0.16) { const g = S.reg[regs[Math.floor(Math.random() * regs.length)]]; spOut['g' + g.n] = 1; S.lastSp = S.served; return { kind: 'regular', n: g.n, seed: g.seed, body: g.body || 'normal' }; }
+    return null;
+  }
+  const regQ = (g) => { const qs = TOPQ.filter(q => q.wk === g.n && !wkTypeOff(q) && q.k !== lastKey); return qs.length ? qs[Math.floor(Math.random() * qs.length)] : null; };
+  /* resolve a roll to { kind, r|g, q }, or null when the card can't be used */
+  function spResolve(info, blocked) {
+    if (blocked) return null;
+    if (info.recall) { const r = (S.recall || []).find(x => x.k === info.recall); return r && BYKEY[r.k] ? { kind: 'recall', r: r, q: BYKEY[r.k] } : null; }
+    if (info.regular) { const g = (S.reg || {})[info.regular], q = g && regQ(g); return q ? { kind: 'regular', g: g, q: q } : null; }
+    return null;
+  }
+  function spApply(sp) {
+    if (sp.kind === 'recall') { cur.recall = sp.r; cur.name = sp.r.name || cur.name; cur.flavor = pick(RC_LINES); }
+    else { cur.regular = sp.g; cur.name = sp.g.name; cur.flavor = pick(RG_LINES); }
+  }
+  function recallAdd(q) {
+    if (!cur || cur.recall || cur.karen || cur.sweaty || cur.elder || cur.evt || cur.lab || cur.visit || q.gen || q.c === 'HIM') return;
+    S.recall = S.recall || [];
+    if (S.recall.some(r => r.k === q.k) || S.served < 12) return;
+    S.recall.push({ k: q.k, seed: cur.seed, body: cur.body || 'normal', name: cur.name, due: Date.now() + RC_DELAY * (1 + Math.random() * 0.5), tries: 0, at: Date.now() });
+    while (S.recall.length > RC_MAX) S.recall.shift();
+  }
+  function recallDone(ok) {
+    const r = cur.recall; if (!r) return;
+    const i = S.recall.indexOf(r);
+    if (ok) { if (i >= 0) S.recall.splice(i, 1); S.recallOK = (S.recallOK || 0) + 1; }
+    else { r.tries = (r.tries || 0) + 1; if (r.tries >= 2 && i >= 0) S.recall.splice(i, 1); else r.due = Date.now() + RC_DELAY; }
+  }
+  function regularDone(ok) { const g = cur.regular; if (!g) return; g.visits = (g.visits || 0) + 1; if (ok) g.ok = (g.ok || 0) + 1; }
+  const courseColor = (w) => w.n > 100 ? '#F2B01E' : w.t === 'PHAR 444' ? '#8E6BD8' : '#2FB5A5';
+  const masteryList = () => WEEKS.concat(P3WEEKS).filter(w => (S.reg || {})[w.n]).map(w => ({ n: w.n, c: courseColor(w) }));
+  function checkRegulars() {
+    S.reg = S.reg || {}; let fresh = 0;
+    WEEKS.concat(P3WEEKS).forEach(w => {
+      if (S.reg[w.n]) return;
+      const p = weekProg(w.n); if (!(p.total > 0 && p.done >= p.total)) return;
+      const body = w.n % 5 === 0 ? 'jacked' : w.n % 7 === 0 ? 'obese' : 'normal', name = REG_NAMES[(w.n * 7) % REG_NAMES.length];
+      S.reg[w.n] = { n: w.n, name: name, seed: 7000 + w.n * 137, body: body, visits: 0, ok: 0, at: Date.now() };
+      fresh++;
+      showUnlock({ emoji: '⭐', title: 'New regular: ' + name, sub: 'You mastered ' + w.d + ' · ' + w.topic + '. A jar joined the mastery shelf, and ' + name + ' will stop by with questions from that week.' });
+    });
+    if (fresh) { if (World.ok && World.setMastery) World.setMastery(masteryList()); save(); }
+  }
+  const dayWord = (t) => { const d = Math.max(0, Math.round((Date.now() - t) / 864e5)); return d <= 0 ? 'earlier today' : d === 1 ? 'yesterday' : d + ' days ago'; };
+  function spBanner() {
+    if (cur.recall) return `<div class="spbanner recall" role="note"><b>↩ RECALL PATIENT</b><span>You missed this ${esc(dayWord(cur.recall.at))}. It can be from any topic.</span></div>`;
+    if (cur.regular) { const g = cur.regular, w = g.n > 100 ? WK3[g.n] : WK[g.n]; return `<div class="spbanner regular" role="note"><b>★ REGULAR</b><span>${esc(g.name)} · from a week you mastered${w ? ': ' + esc(w.topic) : ''}. It may not match your topic filters.</span></div>`; }
+    return '';
+  }
+
   /* ---- flashcards: flip, rate yourself, earn medals and a goldfish ---- */
   const FC_CATS = [['fb', 'Brand & generic', '🏷️'], ['fc', 'Drug classes', '🧪'], ['fm', 'How drugs work', '⚙️'], ['fi', 'What they treat', '🎯'], ['fn', 'Counseling', '💬']];
   const FC_GOALS = [10, 30, 60], FC_NAME = {}; FC_CATS.forEach(c => { FC_NAME[c[0]] = c[1]; });
@@ -7163,7 +7393,7 @@ const World = (function () {
   }
   function fcPool(cat) {
     const t = todayStr(), deck = fcDeck();
-    const open = (c) => { const wk = WK[c.w]; return !wk || wk.from <= t || S.set.ahead; };
+    const open = (c) => { const wk = WK[c.w]; return !wk || wk2Open(wk); };
     let pool = deck.filter(c => (cat === 'all' || c.c === cat) && open(c));
     if (!pool.length) { const w0 = WEEKS.length ? WEEKS[0].n : 0; pool = deck.filter(c => (cat === 'all' || c.c === cat) && c.w === w0); }
     return pool;
@@ -7345,7 +7575,7 @@ const World = (function () {
   }
   function evAfter(ok) {
     if (cur.evt === 'driver') {
-      if (ok) { S.hintsLeft++; return '<p class="gift"><b>Delivery stored correctly.</b> Dale leaves you a free pharmacist hint.</p>'; }
+      if (ok) { pwAdd('hint', 1); return '<p class="gift"><b>Delivery stored correctly.</b> Dale leaves you a free hint pill.</p>'; }
       const loss = Math.min(S.cash, 40); S.cash -= loss; return '<p class="gift sad"><b>Spoiled stock.</b> ' + (loss ? 'You lose ' + money(loss) + ' of product. ' : '') + 'Check the label and the DEA schedule next time.</p>';
     }
     return '';
@@ -7518,7 +7748,7 @@ const World = (function () {
     const n = S.caps.length, bonus = 40 * n * Math.max(1, 1 + S.up.shelf * 0.25), c = CAPS[id];
     S.cash += bonus; S.earned += bonus;
     let sub = c.p + ' (+' + money(bonus) + ')';
-    if (n === CAPS.length) { S.hintsLeft = Math.min(hintCap() + 3, S.hintsLeft + 3); S.cash += 500; S.earned += 500; sub += ' All five found: +' + money(500) + ' and 3 hints!'; }
+    if (n === CAPS.length) { pwAdd('hint', 3); S.cash += 500; S.earned += 500; sub += ' All five found: +' + money(500) + ' and 3 hint pills!'; }
     save(); SFX.play('unlock');
     showUnlock({ emoji: capSvg(id, 54), title: 'Secret capsule ' + n + ' of ' + CAPS.length + ' (' + (src === 'plant' ? 'from the plant' : 'from the sky') + ')', sub });
     renderStats(); if (view === 'awards') renderPanel();
@@ -7641,7 +7871,7 @@ const World = (function () {
       if (res) {
         S.cosm = (S.cosm || []).concat([res[1]]); S.cosmOn = S.cosmOn || {}; S.cosmOn[res[0]] = res[1];
         msg = 'New ' + COSM_SLOT[res[0]].toLowerCase().replace(/s$/, '') + ': ' + res[2] + '! It is on your pharmacist now (change it any time in Character). ' + S.cosm.length + '/' + COSM.length + ' found.';
-        if (S.cosm.length === COSM.length) { S.cash += 1000; S.earned += 1000; S.hintsLeft = Math.min(hintCap() + 3, S.hintsLeft + 3); msg += ' Every cosmetic found: +' + money(1000) + ' and 3 hints!'; }
+        if (S.cosm.length === COSM.length) { S.cash += 1000; S.earned += 1000; pwAdd('hint', 3); msg += ' Every cosmetic found: +' + money(1000) + ' and 3 hint pills!'; }
       } else { const b = Math.round(250 * franchiseMult()); S.cash += b; S.earned += b; msg = 'You found every cosmetic already, so the capsule held ' + money(b) + ' instead.'; }
       save(); try { World.setPharmacist(meSpec()); } catch (e) { /* ignore */ }
       title.textContent = res ? 'Unlocked: ' + res[2] : 'Cash capsule'; nm.textContent = msg; done.disabled = false; done.focus(); SFX.play('streak'); renderStats();
@@ -7860,7 +8090,7 @@ const World = (function () {
       <div class="btnrow"><button type="button" class="btn go" data-act="back">Back to the pharmacy</button></div></div>`;
   }
 
-  const GAME_VERSION = 101;
+  const GAME_VERSION = 103;
   const b64u = (u8) => { let s = ''; for (let i = 0; i < u8.length; i += 0x8000) s += String.fromCharCode.apply(null, u8.subarray(i, i + 0x8000)); return btoa(s).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); };
   const unb64u = (t) => { const s = atob(t.replace(/-/g, '+').replace(/_/g, '/')), u = new Uint8Array(s.length); for (let i = 0; i < s.length; i++) u[i] = s.charCodeAt(i); return u; };
   const chk = (t) => { let h = 2166136261; for (let i = 0; i < t.length; i++) { h ^= t.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36); };
@@ -7926,6 +8156,7 @@ const World = (function () {
       case 'shopcat': shopCat = v; renderPanel(); return;
       case 'shop-buy': shopBuy(t.dataset.k, t.dataset.id); if (view === 'create') renderPanel(); return;
       case 'shop-use': shopUse(t.dataset.k, t.dataset.id); return;
+      case 'pwshop': cTab = 'shop'; shopCat = 'pow'; openView('create'); return;
       case 'me-done': readShop(); S.me.done = true; save(); syncBrand(); backToQ(); maybeTour(); return;
       case 'back': if (view === 'syn') synExit(); if (view === 'shift') return shiftNext(false); readDraft(); const wasC = view === 'create' && !S.me.done; if (view === 'create') readShop(); if (wasC) { S.me.done = true; save(); } backToQ(); if (wasC) maybeTour(); return;
       case 'phone': return openPhone();
@@ -7939,6 +8170,8 @@ const World = (function () {
       case 'sc-copy': case 'sc-load': return saveCodeAct(t, a);
       case 'dev-elder': { const ok = World.ok && World.devElder(); toast(ok ? 'An elder patient is next in line. Use "Test: skip to next patient".' : 'No patient could be swapped right now.'); return; }
       case 'dev-next': if (view === 'q') newCard(); return;
+      case 'dev-recall': { const q = BANK.find(x => !x.ms && x.k !== lastKey); if (!q) return; S.recall = S.recall || []; if (!S.recall.some(r => r.k === q.k)) S.recall.push({ k: q.k, seed: 4321, body: 'obese', name: 'Rosa', due: 0, tries: 0, at: Date.now() - 2 * 864e5 }); forceSp = { recall: q.k, seed: 4321, body: 'obese' }; if (view === 'q') newCard(); return; }
+      case 'dev-regular': { const w = WEEKS[0]; S.reg = S.reg || {}; if (!S.reg[w.n]) { S.reg[w.n] = { n: w.n, name: 'Big Mike', seed: 7000 + w.n * 137, body: 'jacked', visits: 0, ok: 0, at: Date.now() }; if (World.ok && World.setMastery) World.setMastery(masteryList()); } forceSp = { regular: w.n, seed: S.reg[w.n].seed, body: 'jacked' }; if (view === 'q') newCard(); return; }
       case 'dev-pill': { const ok = World.ok && World.devPill(); toast(ok ? 'A pill popped out. Tap it.' : 'Could not spawn one.'); return; }
       case 'dev-bottle': learnOff(); fp.cool = 0; return startBottles();
       case 'dev-shelve': learnOff(); return startShelve(false);
@@ -7984,9 +8217,10 @@ const World = (function () {
       case 'fp-leave': return fpLeave();
       case 'fp-tip': return;
       case 'shelve': return startShelve(false);
+      case 'daily': openView(view === 'daily' ? 'q' : 'daily'); if (view === 'q') { resumeTimers(); renderPanel(); } return;
       case 'ref': openView(view === 'ref' ? 'q' : 'ref'); if (view === 'q') { resumeTimers(); renderPanel(); } return;
       case 'retire-new': {
-        S.retired = (S.retired || 0) + 1; S.cash = 0; S.franchises = 0; S.rep = 50; S.streak = 0; S.hintsLeft = 0; S.sinceHint = 0; S.up = defaults().up;
+        S.retired = (S.retired || 0) + 1; S.cash = 0; S.franchises = 0; S.rep = 50; S.streak = 0; S.up = defaults().up;
         save(); renderAll(); view = 'q'; newCard(); toast('Career #' + (S.retired + 1) + ' begins. Income +50% per retirement.'); return;
       }
       case 'jim-go': endInterrupt(); renderPanel(); return;
@@ -7999,12 +8233,10 @@ const World = (function () {
       case 'focus': st.focus = !st.focus; applyFocus(); toast(st.focus ? 'Focus mode on. No timer, events or 3D world.' : 'Focus mode off. The pharmacy is back.'); break;
       case 'tab-set': flipTab = true; openView('set'); return;
       case 'tab-studies': flipTab = true; openView('studies'); return;
-      case 'wkonly': st.wkOnly = !st.wkOnly; break;
-      case 'wkonly3': { const c = curWeek3(); if (!c) { toast('No P3 week has started yet. Tap a week below to preview it.'); return; } if (p3OnlyNow()) { st.p3sel = st.p3prev && Object.keys(st.p3prev).length ? st.p3prev : p3OpenSel(); st.p3prev = null; } else { st.p3prev = p3Sel(); st.p3sel = {}; st.p3sel[c] = true; st.topics.TP3 = true; } st.wkOnly3 = false; break; }
-      case 'p3wk': { const o = p3Sel(); if (o[v]) delete o[v]; else { o[v] = true; st.topics.TP3 = true; } st.p3sel = o; st.wkOnly3 = false; break; }
-      case 'p3wk-all': { const o = {}; P3WEEKS.forEach(w => { o[w.n] = true; }); st.p3sel = o; st.wkOnly3 = false; st.topics.TP3 = true; break; }
-      case 'p3fold': st.p3fold = !st.p3fold; break;
-      case 'p3wk-none': st.p3sel = {}; st.wkOnly3 = false; break;
+      case 'wkpick': { const [k, x] = v.split(':'); const a = x === 'all' || x === 'none' || x === 'only' ? x : 'toggle'; if (wkPick(k, a === 'toggle' ? x : '', a) === false) return; break; }
+      case 'wkcourse': { const i = v.indexOf(':'); wkPick(v.slice(0, i), v.slice(i + 1), 'course'); break; }
+      case 'wkfold': st[v + 'fold'] = !st[v + 'fold']; break;
+      case 'wkup': st[v + 'up'] = !st[v + 'up']; break;
       case 'folder': st.folder = v === 'P1' || v === 'P3' ? v : 'P2'; break;
       case 'p3-only': CATS.forEach(c => st.topics[c[0]] = c[0] === 'TP3' || c[0] === 'T553'); break;
       case 'folder-only': {
@@ -8016,7 +8248,6 @@ const World = (function () {
         break;
       }
       case 'wktype': { st.wkTypes = st.wkTypes || {}; const on = WK_TYPES.filter(x => st.wkTypes[x[0]] !== false).length; if (st.wkTypes[v] !== false && on <= 1) { toast('Keep at least one kind of weekly question on.'); return; } st.wkTypes[v] = st.wkTypes[v] === false; break; }
-      case 'ahead': st.ahead = !st.ahead; break;
       case 'reset-set': S.set = defaults().set; break;
       case 'preview': readDraft(); $('#studyprev').innerHTML = previewHTML(parseStudy(draft.text, 'My notes')); return;
       case 'addstudy': return addStudy();
@@ -8045,11 +8276,13 @@ const World = (function () {
     if (t.classList.contains('opt')) return cur && cur.q && cur.q.ms ? msToggle(+t.dataset.i) : answer(+t.dataset.i);
     if (t.id === 'nextbtn') { if (cur && cur.insp && cur.insp.n < cur.insp.of) return inspContinue(); if (cur && cur.visit) return endVisit(); if (shiftDue()) return openShift(); return newCard(); }
     if (t.id === 'hintbtn') return useHint();
+    if (t.id === 'secbtn') return useSecond();
+    if (t.id === 'bindbtn') return useBinder();
     if (t.dataset.buy) { buyUp(t.dataset.buy); return; }
     if (t.id === 'frbtn') {
       if (S.cash < frCost()) return;
       if (armed !== 'fr') { armed = 'fr'; renderFranchise(); setTimeout(() => { if (armed === 'fr') { armed = null; renderFranchise(); } }, 4000); return; }
-      armed = null; S.cash = 0; S.franchises++; S.rep = 50; S.streak = 0; S.hintsLeft = 0; S.sinceHint = 0;
+      armed = null; S.cash = 0; S.franchises++; S.rep = 50; S.streak = 0;
       S.up = defaults().up; save(); renderAll(); newCard(); return;
     }
     if (t.id === 'resetbtn') {
@@ -8104,8 +8337,8 @@ const World = (function () {
   setInterval(() => { if (window.__rxLoading) return; try { localStorage.setItem(SAVE_KEY, JSON.stringify(S)); } catch (e) { /* ignore */ } }, 5000);
 
   { const sc = $('#savecard'); if (sc) sc.innerHTML = saveBoxHTML(); }
-  World.init({ host: $('#stage'), getS: () => S, tagInfo: tagInfo, onBuy: buyUp, onNotes: () => openView('studies'), notesInfo: customCount, karenRoll: karenRoll, sweatyRoll: sweatyRoll, elderRoll: elderRoll, eventRoll: eventRoll, onVisitor: visitClick, onVisitorArrive: visitArrive, capsuleOk: capsuleOk, onCapsule: onCapsule, onBrain: synEnter, onSynSite: onSynSite, onEvt: onEvt, pillOk: pillOk, onPill: onPill, onPhone: openPhone, onPolice: policeCome, himOk: himOk, onHimSpawn: onHimSpawn, onHimAngel: himAngelOk, onHimLand: himLand, onHimBless: onHimBless, onFp: fpClick, sign: () => shopName() + '|' + tierName() + ' #' + (S.franchises + 1) });
-  window.__rxDbg = () => ({ fp: fp, S: S, view: view, rush: rush, phoneR: phone.ringing, TOPQ: TOPQ, pool: poolQs, cur: cur, synQ: () => (typeof SYN !== 'undefined' ? SYN.q : null), synTap: id => onSynSite(id), offer: k => offerEvt(k, 'test'), onEvt: onEvt, holiday: () => holNow(), holN: () => holCount(), renderStats: renderStats, passive: passive, techRate: techRate, buyUp: buyUp, openVial: openVial, tabletTake: tabletTake, capsuleOpen: capsuleOpen, buffOn: buffOn, COSM: COSM });
+  World.init({ host: $('#stage'), getS: () => S, specialRoll: specialRoll, tagInfo: tagInfo, onBuy: buyUp, onNotes: () => openView('studies'), notesInfo: customCount, karenRoll: karenRoll, sweatyRoll: sweatyRoll, elderRoll: elderRoll, eventRoll: eventRoll, onVisitor: visitClick, onVisitorArrive: visitArrive, capsuleOk: capsuleOk, onCapsule: onCapsule, onBrain: synEnter, onSynSite: onSynSite, onEvt: onEvt, pillOk: pillOk, onPill: onPill, onPhone: openPhone, onPolice: policeCome, himOk: himOk, onHimSpawn: onHimSpawn, onHimAngel: himAngelOk, onHimLand: himLand, onHimBless: onHimBless, onFp: fpClick, sign: () => shopName() + '|' + tierName() + ' #' + (S.franchises + 1) });
+  window.__rxDbg = () => ({ nc: newCard, sp: specialRoll, fp: fp, S: S, view: view, rush: rush, phoneR: phone.ringing, TOPQ: TOPQ, pool: poolQs, cur: cur, synQ: () => (typeof SYN !== 'undefined' ? SYN.q : null), synTap: id => onSynSite(id), offer: k => offerEvt(k, 'test'), onEvt: onEvt, holiday: () => holNow(), holN: () => holCount(), renderStats: renderStats, passive: passive, techRate: techRate, buyUp: buyUp, openVial: openVial, tabletTake: tabletTake, capsuleOpen: capsuleOpen, buffOn: buffOn, COSM: COSM });
   if (!World.ok) $('#stage').classList.add('flat');
   else { document.body.classList.add('fx'); World.setPharmacist(meSpec()); World.setStore(S.store); World.setStaffLook(uniSpec()); World.setAwards(S.awards); World.setCalendar(Math.min(4, S.awards.calW || 0), false, S.awards.calW || 0); }
   applyFocus(); syncBrand(); sfxLabel();
@@ -8114,12 +8347,13 @@ const World = (function () {
     const menu = $('#menu'), close = menu && menu.querySelector('.menuclose');
     if (menu && close) {
       const hr = document.createElement('hr'); menu.insertBefore(hr, close);
-      [['dev-pill', 'Test: pop a pill'], ['dev-elder', 'Test: elder patient next'], ['dev-next', 'Test: skip to next patient'], ['dev-bottle', 'Test: bottle check'], ['dev-shelve', 'Test: restock'], ['dev-prior', 'Test: prior auth'], ['dev-rush', 'Test: rush hour'], ['dev-insp', 'Test: health inspector next'], ['dev-driver', 'Test: delivery next'], ['dev-sky', 'Test: sky capsule'], ['dev-him-walk', 'Test: Himothy walks in next'], ['dev-him-asc', 'Test: Himothy ascension'], ['dev-him-angel', 'Test: Himothy angel flyover'], ['dev-him-smash', 'Test: Himothy smash (skip click)'], ['dev-plant', 'Test: plant capsule'], ['dev-fast', 'Test: skip slow start']].forEach(b => {
+      [['dev-pill', 'Test: pop a pill'], ['dev-elder', 'Test: elder patient next'], ['dev-next', 'Test: skip to next patient'], ['dev-recall', 'Test: recall patient'], ['dev-regular', 'Test: regular patient'], ['dev-bottle', 'Test: bottle check'], ['dev-shelve', 'Test: restock'], ['dev-prior', 'Test: prior auth'], ['dev-rush', 'Test: rush hour'], ['dev-insp', 'Test: health inspector next'], ['dev-driver', 'Test: delivery next'], ['dev-sky', 'Test: sky capsule'], ['dev-him-walk', 'Test: Himothy walks in next'], ['dev-him-asc', 'Test: Himothy ascension'], ['dev-him-angel', 'Test: Himothy angel flyover'], ['dev-him-smash', 'Test: Himothy smash (skip click)'], ['dev-plant', 'Test: plant capsule'], ['dev-fast', 'Test: skip slow start']].forEach(b => {
         const el = document.createElement('button'); el.type = 'button'; el.dataset.act = b[0]; el.innerHTML = '<i aria-hidden="true">\u2699</i><span>' + b[1] + '</span>'; menu.insertBefore(el, close);
       });
     }
   }
-  checkAwards(true);
+  if (S.libRefund) { const r = S.libRefund; delete S.libRefund; toast('The Reference Library is retired. Refunded ' + money(r) + '. Hint pills and more power-ups are in the Shop.'); save(); }
+  checkAwards(true); dailyBadge(); if (World.ok && World.setMastery) World.setMastery(masteryList()); checkRegulars();
   if (blessOn()) blessStart(false);
   if (S.lab && World.ok && World.setLab) World.setLab(true);
   syncLab();
