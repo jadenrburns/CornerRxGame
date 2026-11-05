@@ -1,0 +1,20 @@
+const { chromium } = require('playwright'); const fs=require('fs');
+(async () => {
+  const b = await chromium.launch(); const errs=[];
+  const p = await b.newPage({ viewport:{width:1200,height:900} });
+  p.on('pageerror', e => errs.push(e.message));
+  await p.route('**/three.min.js', r => r.fulfill({ contentType:'application/javascript', body: fs.readFileSync('three-stub2.js','utf8') }));
+  await p.addInitScript(()=>{ localStorage.setItem('cornerRx.v1', JSON.stringify({me:{done:true,body:"normal",gender:"n",hair:0,hairColor:0,skin:1,scrub:0},served:8})); });
+  await p.clock.install();
+  await p.goto('file://'+process.cwd()+'/corner-rx.html'); await p.clock.runFor(500);
+  await p.evaluate(()=>{__rxDbg().fp.cool=Date.now()+1e10}); let q0=await p.evaluate(()=>World._dbg().queue.length);
+  await p.clock.runFor(60000);
+  console.log('queue len start',q0,'after 60s calm/rush',await p.evaluate(()=>World._dbg().queue.length));
+  console.log(JSON.stringify(await p.evaluate(()=>{const d=__rxDbg();return {rush:d.rush,view:d.view,fp:d.fp.on,ph:d.phoneR,now:Date.now()}})));const st=await p.evaluate(()=>({badge:document.querySelector('#rush3d').hidden}));
+  console.log('badge hidden before first rush (served>=5,next at 150s):',st.badge);
+  await p.clock.runFor(100000);
+  console.log('badge hidden at ~160s:',await p.evaluate(()=>document.querySelector('#rush3d').hidden), await p.evaluate(()=>document.querySelector('#rush3d').textContent));
+  await p.clock.runFor(50000);
+  console.log('badge hidden at ~210s:',await p.evaluate(()=>document.querySelector('#rush3d').hidden));
+  console.log(JSON.stringify(await p.evaluate(()=>{const d=__rxDbg();return {rush:d.rush,view:d.view,fp:d.fp.on,kind:d.fp.kind}})));console.log('ERR',errs); await b.close();
+})();

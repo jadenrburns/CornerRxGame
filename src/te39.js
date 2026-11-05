@@ -1,0 +1,13 @@
+const {chromium}=require('playwright');
+(async()=>{const b=await chromium.launch();const p=await b.newPage({viewport:{width:1000,height:900}});const errs=[];p.on('pageerror',e=>errs.push(e.message));
+await p.route('**/three.min.js',r=>r.fulfill({path:'three-stub2.js',contentType:'text/javascript'}));
+await p.addInitScript(()=>{if(!localStorage.getItem('cornerRx.v1'))localStorage.setItem('cornerRx.v1',JSON.stringify({me:{done:true,name:'T',look:{}},served:30,correct:25,tutDone:true,playSec:999,set:{ahead:true,ahead3:true}}))});
+await p.goto('file://'+process.cwd()+'/corner-rx.html');await p.waitForTimeout(900);
+await p.evaluate(()=>document.querySelectorAll('.tour').forEach(e=>e.remove()));
+console.log('wkDone start',await p.evaluate(()=>JSON.stringify(window.__rxDbg().S.awards.wkDone)));
+await p.evaluate(()=>{const d=window.__rxDbg();d.TOPQ.filter(q=>q.wk===1||q.wk===101).forEach(q=>{d.S.mastery[q.k]={box:2,seen:3,ok:3}})});
+await p.evaluate(()=>{const i=window.__rxDbg().cur.opts.findIndex(o=>o.ok);document.querySelector('.opt[data-i="'+i+'"]').click()});await p.waitForTimeout(900);
+console.log('popups',await p.evaluate(()=>[...document.querySelectorAll('.unlock')].map(e=>e.innerText.replace(/\n/g,' | '))));
+await p.waitForTimeout(8500);await p.evaluate(()=>{const nb=document.querySelector('#nextbtn');nb&&nb.click()});await p.waitForTimeout(500);
+console.log('popups later',await p.evaluate(()=>[...document.querySelectorAll('.unlock')].map(e=>e.innerText.replace(/\n/g,' | '))),await p.evaluate(()=>JSON.stringify(window.__rxDbg().S.awards.wkDone)));
+console.log('errs',errs);await b.close()})();

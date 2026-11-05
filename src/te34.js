@@ -1,0 +1,14 @@
+const {chromium}=require('playwright');
+(async()=>{const b=await chromium.launch();const p=await b.newPage({viewport:{width:760,height:1000}});
+const errs=[];p.on('pageerror',e=>errs.push(e.message));
+await p.route('**/three.min.js',r=>r.fulfill({path:'three-stub2.js',contentType:'text/javascript'}));
+await p.addInitScript(()=>{if(!localStorage.getItem('cornerRx.v1'))localStorage.setItem('cornerRx.v1',JSON.stringify({me:{done:true,body:'normal',gender:'n',hair:0,hairColor:0,skin:1,scrub:0},served:30,correct:25,tutDone:true,playSec:999}))});
+await p.goto('file://'+process.cwd()+'/corner-rx.html');await p.waitForTimeout(1000);
+const r=await p.evaluate(()=>{const d=window.__rxDbg();const S=d.S;
+ Object.keys(S.set.topics).forEach(k=>S.set.topics[k]=false);S.set.topics.TP3=true;
+ const all=d.pool();const a={n:all.length,weeks:[...new Set(all.map(q=>q.wk))].sort()};
+ S.set.wkOnly3=true;const w=d.pool();a.only={n:w.length,weeks:[...new Set(w.map(q=>q.wk))]};
+ S.set.wkOnly3=false;S.set.ahead3=true;a.ahead=[...new Set(d.pool().map(q=>q.wk))].length;
+ S.set.ahead3=false;S.set.topics.TP3=false;S.set.topics.TOP=true;a.p2=[...new Set(d.pool().map(q=>q.c))];
+ return a});
+console.log(JSON.stringify(r));console.log('errs',errs);await b.close()})();
