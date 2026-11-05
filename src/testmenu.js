@@ -1,0 +1,25 @@
+const { chromium } = require('playwright'); const fs=require('fs');
+(async () => {
+  const b = await chromium.launch(); const errs=[];
+  const ctx = await b.newContext({ viewport:{width:390,height:844}, hasTouch:true, isMobile:true, deviceScaleFactor:2 });
+  const p = await ctx.newPage(); p.on('pageerror', e => errs.push(e.message));
+  await p.route('**/three.min.js', r => r.fulfill({ contentType:'application/javascript', body: fs.readFileSync('three-stub2.js','utf8') }));
+  await p.addInitScript(()=>{ localStorage.setItem('cornerRx.v1', JSON.stringify({me:{done:true,body:"normal",gender:"n",hair:0,hairColor:0,skin:1,scrub:0},served:2,cash:500})); });
+  await p.goto('file://'+process.cwd()+'/corner-rx.html'); await p.waitForTimeout(600);
+  console.log('qbar in panel:', await p.$$eval('#counter .qbar',e=>e.length), 'tags visible:', await p.$$eval('.tag3d',e=>e.filter(x=>getComputedStyle(x).display!=='none').length));
+  const c=async s=>p.$eval(s,e=>e.click());
+  await c('.drawerbtn'); await p.waitForTimeout(300); await p.screenshot({path:'fx_menu.png'});
+  await c('[data-act="sheet-ups"]'); await p.waitForTimeout(450);
+  console.log('ups sheet: title',await p.textContent('#sheettitle'),'drawer',await p.evaluate(()=>document.body.classList.contains('drawer')),'menu',await p.evaluate(()=>document.body.classList.contains('menuopen')),'ups vis',await p.$eval('#ups',e=>e.offsetParent!==null),'store vis',await p.$eval('#store',e=>e.offsetParent!==null));
+  await p.screenshot({path:'fx_ups.png'});
+  await c('.drawerhead [data-act="drawer-close"]'); await c('.drawerbtn'); await c('[data-act="sheet-prog"]'); await p.waitForTimeout(450);
+  console.log('prog sheet: ups vis',await p.$eval('#ups',e=>e.offsetParent!==null),'store vis',await p.$eval('#store',e=>e.offsetParent!==null),'mastery',await p.$eval('#mastery',e=>e.offsetParent!==null));
+  await c('.awbtn'); await p.waitForTimeout(200); console.log('after awards btn: view',await p.evaluate(()=>__rxDbg().view),'drawer',await p.evaluate(()=>document.body.classList.contains('drawer')));
+  await p.screenshot({path:'fx_awards.png'});
+  await c('#counter [data-act="back"]'); await c('.drawerbtn'); await c('#menu [data-act="studies"]'); await p.waitForTimeout(500);
+  console.log('studies view',await p.evaluate(()=>__rxDbg().view),'menu closed',!(await p.evaluate(()=>document.body.classList.contains('menuopen'))));
+  await c('.nbclose'); await p.waitForTimeout(500); await c('.drawerbtn'); await c('#menu [data-act="settings"]'); await p.waitForTimeout(300);
+  console.log('settings view',await p.evaluate(()=>__rxDbg().view)); await c('#counter [data-act="back"]'); await p.waitForTimeout(100);
+  await c('.drawerbtn'); await c('#menu [data-act="shelve"]'); await p.waitForTimeout(800); console.log('restock fp:',await p.evaluate(()=>__rxDbg().fp.on));
+  console.log('ERR',errs); await b.close();
+})();

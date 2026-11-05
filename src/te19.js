@@ -1,0 +1,15 @@
+const { chromium } = require('playwright'); const fs=require('fs');
+(async()=>{const b=await chromium.launch();const ctx=await b.newContext({viewport:{width:1000,height:700}});const p=await ctx.newPage();const errs=[];p.on('pageerror',e=>errs.push(e.message));
+await p.route('**/three.min.js',r=>r.fulfill({contentType:'application/javascript',body:fs.readFileSync('three-stub2.js','utf8')}));
+await p.addInitScript(()=>{if(!localStorage.getItem('cornerRx.v1'))localStorage.setItem('cornerRx.v1',JSON.stringify({me:{done:true,body:"normal",gender:"n",hair:0,hairColor:0,skin:1,scrub:0},served:30,correct:130,tutDone:true,playSec:999}))});
+await p.goto('file://'+process.cwd()+'/corner-rx.html?dev=1');await p.waitForTimeout(900);
+console.log('menu items',await p.$$eval('#menu button span',e=>e.map(x=>x.textContent).join(' | ')));
+await p.evaluate(()=>document.querySelector('#menu [data-act=create]').click());await p.waitForTimeout(300);
+console.log('view',await p.evaluate(()=>__rxDbg().view),'acc chips',await p.$$eval('[data-act=acc-tog]',e=>e.length),'locked',await p.$$eval('.chip[disabled]',e=>e.length));
+await p.evaluate(()=>{const i=document.querySelector('#shopname');i.value='Test Rx';document.querySelector('[data-act=acc-tog]').click()});
+console.log('accOff',await p.evaluate(()=>JSON.stringify(__rxDbg().S.accOff)),'acc',await p.evaluate(()=>__rxDbg().S.acc));
+await p.evaluate(()=>document.querySelector('[data-act=me-done]').click());await p.waitForTimeout(300);
+console.log('shop',await p.evaluate(()=>__rxDbg().S.shop),'brand',await p.$eval('.brand h1',e=>e.textContent),'view',await p.evaluate(()=>__rxDbg().view));
+await p.evaluate(()=>document.querySelector('[data-act=settings]').click());await p.waitForTimeout(300);
+console.log('settings title',await p.$eval('.nbtitle',e=>e.textContent),'has name field',!!(await p.$('#shopname2')),'tabs',await p.$$eval('.hubtabs button',e=>e.map(x=>x.textContent).join('|')));
+console.log('errs',errs);await b.close()})();

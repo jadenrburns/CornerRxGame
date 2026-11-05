@@ -1,0 +1,11 @@
+const { chromium } = require('playwright'); const fs=require('fs');
+(async()=>{const b=await chromium.launch();const ctx=await b.newContext({viewport:{width:1000,height:700}});const p=await ctx.newPage();const errs=[];p.on('pageerror',e=>errs.push(e.message));
+await p.route('**/three.min.js',r=>r.fulfill({contentType:'application/javascript',body:fs.readFileSync('three-stub2.js','utf8')}));
+await p.addInitScript(()=>{if(!localStorage.getItem('cornerRx.v1'))localStorage.setItem('cornerRx.v1',JSON.stringify({me:{done:true,body:"normal",gender:"n",hair:0,hairColor:0,skin:1,scrub:0},served:30,correct:12,tutDone:true,playSec:999,up:{shelf:0,tech:3,counsel:0,library:0,robot:0}}))});
+await p.goto('file://'+process.cwd()+'/corner-rx.html?dev=1');await p.waitForTimeout(800);
+const vis=()=>p.evaluate(()=>{const d=World._dbg();return {staffN:d.staff.length,vis:d.staff[0]&&d.staff[0].g.parent.visible,fpT:d.fpT,fpK:d.fpK,lab:World.labOn(),pos:d.staff.map(s=>[+s.g.position.x.toFixed(1),+s.g.position.z.toFixed(1)]).join(' ')}});
+console.log('start',await vis());
+await p.evaluate(()=>document.querySelector('[data-act=lab]').click());await p.waitForTimeout(800);console.log('lab',await vis());
+await p.evaluate(()=>document.querySelector('[data-act=lab]').click());await p.waitForTimeout(800);console.log('back',await vis());
+await p.waitForTimeout(3000);console.log('back+3s',await vis());
+console.log('errs',errs);await b.close()})();

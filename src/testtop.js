@@ -1,0 +1,21 @@
+const { chromium } = require('playwright'); const fs=require('fs');
+(async () => {
+  const b = await chromium.launch(); const errs=[];
+  const p = await b.newPage({ viewport:{width:1200,height:900} });
+  p.on('pageerror', e => errs.push(e.message));
+  await p.route('**/three.min.js', r => r.fulfill({ contentType:'application/javascript', body: fs.readFileSync('three-stub2.js','utf8') }));
+  await p.addInitScript(()=>{ localStorage.setItem('cornerRx.v1', JSON.stringify({me:{done:true,body:"normal",gender:"n",hair:0,hairColor:0,skin:1,scrub:0},served:2})); });
+  await p.goto('file://'+process.cwd()+'/corner-rx.html');
+  await p.waitForTimeout(400);
+  console.log('dbg keys', Object.keys(await p.evaluate(()=>window.__rxDbg())));
+  await p.$eval('[data-act="ref"]',e=>e.click()); await p.waitForTimeout(150);
+  console.log('weeks', await p.$$eval('.rweek',e=>e.length), 'locked', await p.$$eval('.lockedw',e=>e.length), 'open drugs', await p.$$eval('.rdrug',e=>e.length));
+  await p.fill('#refq','amox'); await p.waitForTimeout(100);
+  console.log('search', await p.$$eval('.rdrug',e=>e.length));
+  await p.$eval('[data-act="back"]',e=>e.click());
+  await p.$eval('[data-act="settings"]',e=>e.click()); await p.waitForTimeout(100);
+  console.log((await p.textContent('.note')).slice(0,200));
+  console.log('chips', await p.$$eval('[data-act="wkonly"],[data-act="ahead"],[data-topic="TOP"]',e=>e.length));
+  await p.$eval('[data-act="ahead"]',e=>e.click());
+  console.log('ERR',errs); await b.close();
+})();

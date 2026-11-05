@@ -1,0 +1,10 @@
+const { chromium } = require('playwright'); const fs=require('fs');
+(async()=>{const b=await chromium.launch();const ctx=await b.newContext({viewport:{width:390,height:844}});const p=await ctx.newPage();
+await p.route('**/three.min.js',r=>r.fulfill({contentType:'application/javascript',body:fs.readFileSync('three-stub2.js','utf8')}));
+await p.addInitScript(()=>{localStorage.setItem('cornerRx.v1',JSON.stringify({me:{done:true,body:"normal",gender:"n",hair:0,hairColor:0,skin:1,scrub:0},served:30,correct:25,tutDone:true,playSec:999,streak:12,best:12}))});
+await p.goto('file://'+process.cwd()+'/corner-rx.html?dev=1');await p.waitForTimeout(900);
+console.log(await p.$$eval('.stat',e=>e.map(x=>x.className)));
+const r=await p.$eval('.stat.fire',e=>{const c=getComputedStyle(e,'::before');return [c.animationName,c.inset,getComputedStyle(e).getPropertyValue('--fw')]});console.log(r);
+const m=await p.evaluate(()=>[document.querySelector('.drawerbtn').getBoundingClientRect().right,document.querySelector('.top').scrollWidth,innerWidth]);console.log(m);
+await p.screenshot({path:'/tmp/claude-0/-home-claude/1f69ded7-e892-5fa4-8b3b-b61751a72bc0/scratchpad/top.png',clip:{x:0,y:0,width:390,height:90}});
+await b.close()})();
