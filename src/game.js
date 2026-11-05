@@ -356,8 +356,7 @@
   const todayStr = () => { const d = new Date(); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); };
   function eligible(q) {
     const st = S.set;
-    if (q.c === 'TP3') { if (!p3On(q.wk)) return false; } else if (q.from && q.from > todayStr() && !(isTop(q) && wkAhead(q))) return false;
-    if (q.c !== 'TP3' && isTop(q) && st.wkOnly && q.wk !== wkNow(q)) return false;
+    if (q.c === 'TP3') { if (!p3On(q.wk)) return false; } else if (q.c === 'TOP') { if (!p2On(q.wk)) return false; } else if (q.from && q.from > todayStr()) return false;
     if (isTop(q) && wkTypeOff(q)) return false;
     if (!st.topics[q.c] || st.diffs.indexOf(q.d) < 0) return false;
     if (st.mode === 'missed') return S.missed.indexOf(q.k) >= 0;
@@ -373,11 +372,50 @@
   }
   const WK_TYPES = [['bg', 'Brand / generic'], ['ind', 'Indications'], ['moa', 'Mechanism'], ['cn', 'Counseling (select all)'], ['class', 'Drug class']];
   /* P3 week picker: S.set.p3sel = { weekNumber: true } once the player has chosen. Before that, the old rules apply (open weeks, Study ahead, This week only, p3off). */
-  const p3On = (n) => { const st = S.set; if (st.p3sel) return !!st.p3sel[n]; if (st.wkOnly3) return n === curWeek3(); const w = WK3[n]; return !!w && (w.from <= todayStr() || !!st.ahead3) && !(st.p3off && st.p3off[n]); };
-  const p3Off = (n) => !p3On(n);
-  const p3Sel = () => { const o = {}; P3WEEKS.forEach(w => { if (p3On(w.n)) o[w.n] = true; }); return o; };
-  const p3OpenSel = () => { const o = {}, t = todayStr(); P3WEEKS.forEach(w => { if (w.from <= t) o[w.n] = true; }); return o; };
-  const p3OnlyNow = () => { const c = curWeek3(), k = Object.keys(p3Sel()); return !!c && k.length === 1 && +k[0] === c; };
+  /* Week pickers for the weekly drug lists. k is 'p2' (WEEKS) or 'p3' (P3WEEKS). Selection is saved in S.set[k + 'sel'] = { weekNumber: true } once the player has chosen.
+     Before that, the old rules apply (started weeks, Study ahead, This week only, p3off) so older saves behave the same. */
+  const WKCFG = {
+    p2: { L: WEEKS, M: WK, cur: curWeek, only: 'wkOnly', ahead: 'ahead', topic: 'TOP' },
+    p3: { L: P3WEEKS, M: WK3, cur: curWeek3, only: 'wkOnly3', ahead: 'ahead3', topic: 'TP3' }
+  };
+  const wkOn = (k, n) => { const st = S.set, c = WKCFG[k], sel = st[k + 'sel']; if (sel) return !!sel[n]; if (st[c.only]) return n === c.cur(); const w = c.M[n]; return !!w && (w.from <= todayStr() || !!st[c.ahead]) && !(st[k + 'off'] && st[k + 'off'][n]); };
+  const wkSel = (k) => { const o = {}; WKCFG[k].L.forEach(w => { if (wkOn(k, w.n)) o[w.n] = true; }); return o; };
+  const wkOpenSel = (k) => { const o = {}, t = todayStr(); WKCFG[k].L.forEach(w => { if (w.from <= t) o[w.n] = true; }); return o; };
+  const wkOnlyNow = (k) => { const c = WKCFG[k].cur(), ks = Object.keys(wkSel(k)); return !!c && ks.length === 1 && +ks[0] === c; };
+  const p3On = (n) => wkOn('p3', n), p2On = (n) => wkOn('p2', n);
+  /* a week counts as unlocked once it has started or the player picked it */
+  const wk2Open = (w) => w.from <= todayStr() || p2On(w.n);
+  function wkPick(k, v, a) {
+    const st = S.set, c = WKCFG[k];
+    if (a === 'toggle') { const o = wkSel(k); if (o[v]) delete o[v]; else { o[v] = true; st.topics[c.topic] = true; } st[k + 'sel'] = o; }
+    else if (a === 'all') { const o = {}; c.L.forEach(w => { o[w.n] = true; }); st[k + 'sel'] = o; st.topics[c.topic] = true; }
+    else if (a === 'none') st[k + 'sel'] = {};
+    else if (a === 'only') {
+      const cw = c.cur(); if (!cw) { toast('No week has started yet. Tap a week below to preview it.'); return false; }
+      if (wkOnlyNow(k)) { st[k + 'sel'] = st[k + 'prev'] && Object.keys(st[k + 'prev']).length ? st[k + 'prev'] : wkOpenSel(k); st[k + 'prev'] = null; }
+      else { st[k + 'prev'] = wkSel(k); st[k + 'sel'] = {}; st[k + 'sel'][cw] = true; st.topics[c.topic] = true; }
+    } else if (a === 'course') { const o = wkSel(k), on = v.split('|')[1] === '1'; c.L.forEach(w => { if (w.t === v.split('|')[0]) { if (on) o[w.n] = true; else delete o[w.n]; } }); st[k + 'sel'] = o; if (on) st.topics[c.topic] = true; }
+    st[c.only] = false; return true;
+  }
+  function wkSchedHTML(k, title) {
+    const st = S.set, c = WKCFG[k], t = todayStr(), cw = c.cur(), n = c.L.filter(w => wkOn(k, w.n)).length;
+    const row = (w) => { const on = wkOn(k, w.n), started = w.from <= t, cnt = k === 'p3' ? w.ids.length : DRUGS.filter(d => d.w === w.n).length, lab = (w.t ? 'Wk ' + w.wk + ' · ' : '') + w.d;
+      return `<li class="${w.n === cw ? 'now' : started || on ? '' : 'lock'}${on ? '' : ' off'}"><button type="button" data-act="wkpick" data-v="${k}:${w.n}" aria-pressed="${on}" aria-label="${esc(lab)} ${esc(w.topic)}: ${on ? 'on' : 'off'}"><i class="p3box">${on ? '✓' : ''}</i><b>${esc(lab)}</b><span>${esc(w.topic)}</span><small>${on ? cnt + ' drugs' + (w.n === cw ? ' · this week' : started ? '' : ' · upcoming') : 'off'}</small></button></li>`; };
+    const started = c.L.filter(w => w.from <= t), up = c.L.filter(w => w.from > t), foldUp = up.length > 3 && !st[k + 'up'];
+    const shown = (w) => w.from <= t || !foldUp || wkOn(k, w.n);
+    let body = '';
+    const courses = [];
+    c.L.forEach(w => { if (w.t && courses.indexOf(w.t) < 0) courses.push(w.t); });
+    if (courses.length) courses.forEach(cr => {
+      const ws = c.L.filter(w => w.t === cr), vis = ws.filter(shown); if (!vis.length) return;
+      const allOn = ws.every(w => wkOn(k, w.n));
+      body += `<div class="crshd"><b>${esc(cr)}</b><span><button type="button" class="link" data-act="wkcourse" data-v="${k}:${esc(cr)}|1">All</button> &middot; <button type="button" class="link" data-act="wkcourse" data-v="${k}:${esc(cr)}|0">None</button></span></div><ol class="p3sched">${vis.map(row).join('')}</ol>`;
+    });
+    else body = `<ol class="p3sched">${c.L.filter(shown).map(row).join('')}</ol>`;
+    const hidden = c.L.filter(w => !shown(w)).length;
+    const more = up.length > 3 ? `<button type="button" class="link upmore" data-act="wkup" data-v="${k}">${st[k + 'up'] ? 'Hide' : 'Show'} upcoming weeks${hidden ? ' (' + hidden + ' more)' : ''}</button>` : '';
+    return `<div class="grp"><div class="grphd"><button type="button" class="fold" data-act="wkfold" data-v="${k}" aria-expanded="${!st[k + 'fold']}"><i>${st[k + 'fold'] ? '▸' : '▾'}</i> ${title}</button><span class="grpr"><button type="button" class="chip sm" data-act="wkpick" data-v="${k}:only" aria-pressed="${wkOnlyNow(k)}">This week only</button><button type="button" class="link" data-act="wkpick" data-v="${k}:all">All</button> &middot; <button type="button" class="link" data-act="wkpick" data-v="${k}:none">None</button></span></div>${st[k + 'fold'] ? `<p class="note">${n} of ${c.L.length} weeks on. Tap ${title} to show the schedule.</p>` : body + more + `<p class="note">${k === 'p3' ? weekNote3() : weekNote()}</p>`}<div class="chips" aria-label="Weekly question types">${WK_TYPES.map(x => `<button type="button" class="chip" data-act="wktype" data-v="${x[0]}" aria-pressed="${!(st.wkTypes && st.wkTypes[x[0]] === false)}">${x[1]}</button>`).join('')}</div></div>`;
+  }
   const wkTypeOff = (q) => !!(S.set.wkTypes && S.set.wkTypes[q.wt] === false);
   const focusOn = () => !!S.set.focus;
   const labOn = () => !!S.lab;
@@ -743,13 +781,11 @@
       <div class="grp"><b>Difficulty</b><div class="chips">${diffs}</div></div>
       <div class="grp"><b>Mode</b><div class="chips">${modes}</div><p class="note">${MODES.find(m => m[0] === st.mode)[2]}</p></div>
       <div class="grp"><b>Compounding pharmacy</b><div class="chips"><button type="button" class="chip" data-act="labk" data-v="comp" aria-pressed="${(S.labK || {}).comp !== false}">Compounding math</button><button type="button" class="chip" data-act="labk" data-v="pk" aria-pressed="${(S.labK || {}).pk !== false}">Kinetics</button></div><p class="note">Used when you tap Switch to compounding in the menu. Level chips above apply there too. ${S.labN ? 'Solved at the bench: ' + S.labOK + ' of ' + S.labN + '.' : ''}</p></div>
-      <div class="grp"><b>Weekly drugs</b><div class="chips"><button type="button" class="chip" data-act="wkonly" aria-pressed="${!!st.wkOnly}">This week only</button><button type="button" class="chip" data-act="ahead" aria-pressed="${!!st.ahead}">Study ahead</button></div><div class="chips" aria-label="Weekly question types">${WK_TYPES.map(x => `<button type="button" class="chip" data-act="wktype" data-v="${x[0]}" aria-pressed="${!(st.wkTypes && st.wkTypes[x[0]] === false)}">${x[1]}</button>`).join('')}</div><p class="note">${weekNote()} Use the question-type buttons to pick which kinds of weekly questions you get.</p></div>
+      ${wkSchedHTML('p2', 'Weekly drugs')}
       <div class="grp"><b>Speed bonus</b><div class="chips"><button type="button" class="chip" data-act="timer" aria-pressed="${st.timer}">Timer bonus ${st.timer ? 'on' : 'off'}</button></div><p class="note">Turn it off to study without time pressure. Karen still has a limit.</p></div>
       `;
-    const w3 = curWeek3();
-    const sched = P3WEEKS.map(w => { const open = w.from <= todayStr(), off = p3Off(w.n), cnt = TOPQ.filter(q => q.wk === w.n && !wkTypeOff(q)).length; return `<li class="${w.n === w3 ? 'now' : open || !off ? '' : 'lock'}${off ? ' off' : ''}"><button type="button" data-act="p3wk" data-v="${w.n}" aria-pressed="${!off}" aria-label="${esc(w.d)} ${esc(w.topic)}: ${off ? 'off' : 'on'}"><i class="p3box">${off ? '' : '\u2713'}</i><b>${esc(w.d)}</b><span>${esc(w.topic)}</span><small>${off ? 'off' : w.ids.length + ' drugs' + (w.n === w3 ? ' \u00B7 this week' : open ? '' : ' \u00B7 upcoming')}</small></button></li>`; }).join('');
     const p3 = `${fsw('P3')}<h3>P3 weekly drugs</h3><p class="sub">Drug list sheets by system, one set per week. Changes apply to the next patient.</p>
-      <div class="grp"><div class="grphd"><button type="button" class="fold" data-act="p3fold" aria-expanded="${!st.p3fold}"><i>${st.p3fold ? '\u25B8' : '\u25BE'}</i> Top 300</button><span class="grpr"><button type="button" class="chip sm" data-act="wkonly3" aria-pressed="${p3OnlyNow()}">This week only</button><button type="button" class="link" data-act="p3wk-all">All</button> &middot; <button type="button" class="link" data-act="p3wk-none">None</button></span></div>${st.p3fold ? `<p class="note">${P3WEEKS.filter(w => p3On(w.n)).length} of ${P3WEEKS.length} weeks on. Tap Top 300 to show the schedule.</p>` : `<ol class="p3sched">${sched}</ol><p class="note">${weekNote3()}</p>`}<div class="chips" aria-label="Weekly question types">${WK_TYPES.map(x => `<button type="button" class="chip" data-act="wktype" data-v="${x[0]}" aria-pressed="${!(st.wkTypes && st.wkTypes[x[0]] === false)}">${x[1]}</button>`).join('')}</div></div>
+      ${wkSchedHTML('p3', 'Top 300')}
       <div class="grp"><b>Relevant otherwise</b><div class="chips">${CATS.filter(c => c[0] === 'T553').map(chipOf).join('')}</div><p class="note">Therapeutics III (PHAR 553) syllabus topics: asthma, COPD, renal, diabetes, gout, migraine, RA and SLE, thyroid, liver, hepatitis, blood pressure, lipids, pain, nutrition, fluids and electrolytes.</p></div>
       <div class="grp"><b>Focus</b><div class="chips"><button type="button" class="chip" data-act="topics-all">Turn every topic back on</button></div><p class="note">Use the switch at the top of this folder to ask only P3 topics.</p></div>`;
     const p1 = `${fsw('P1')}<h3>P1 folder</h3><p class="sub">Nothing is filed here yet.</p><div class="grp"><b>Empty folder</b><p class="note">P1 drug lists and exam questions will go in this folder. Your current question settings live in the P2 folder.</p></div>`;
@@ -919,7 +955,7 @@
   const CAL_NAMES = ['Bronze', 'Silver', 'Gold', 'Platinum'], CAL_ICON = ['\uD83E\uDD49', '\uD83E\uDD48', '\uD83E\uDD47', '\uD83D\uDC8E'];
   const weekQs = (n) => TOPQ.filter(q => q.wk === n && !wkTypeOff(q));
   const weekProg = (n) => { const qs = weekQs(n); return { done: qs.filter(q => (S.mastery[q.k] || {}).box >= 2).length, total: qs.length }; };
-  const weeksOpen = () => WEEKS.filter(w => (w.from <= todayStr() || S.set.ahead) && weekQs(w.n).length);
+  const weeksOpen = () => WEEKS.filter(w => wk2Open(w) && weekQs(w.n).length);
   const weeksMastered = () => weeksOpen().filter(w => { const p = weekProg(w.n); return p.total > 0 && p.done >= p.total; }).length;
   /* floating unlock cards: a shining picture, then it travels to where it lives */
   const pend = { frames: new Set(), pets: new Set() };
@@ -950,7 +986,7 @@
   }
   /* an achievement pop-up for every weekly quiz (Top 300 and P3) the first time all of its questions are mastered */
   function checkWeekQuiz(silent) {
-    const isOpen = (w) => w.from <= todayStr() || (w.n > 100 ? S.set.ahead3 : S.set.ahead);
+    const isOpen = (w) => w.from <= todayStr() || (w.n > 100 ? p3On(w.n) : p2On(w.n));
     const mast = WEEKS.concat(P3WEEKS).filter(isOpen).filter(w => { const p = weekProg(w.n); return p.total > 0 && p.done >= p.total; });
     if (!S.awards.wkDone) { S.awards.wkDone = mast.map(w => w.n); save(); return; }
     const fresh = mast.filter(w => S.awards.wkDone.indexOf(w.n) < 0);
@@ -1109,10 +1145,10 @@
   /* restock draws from the weekly drug list: this week first, then earlier unlocked weeks */
   function shelfPairs() {
     const t = todayStr(), cw = curWeek(), seen = {};
-    const ok = DRUGS.filter(d => (d.w <= cw || (S.set.ahead && !S.set.wkOnly)) && WK[d.w] && (WK[d.w].from <= t || S.set.ahead) && brandPick(d) && brandPick(d).toLowerCase() !== d.g.toLowerCase() && d.g.length <= 26 && !/[;\/]/.test(d.g));
+    const ok = DRUGS.filter(d => WK[d.w] && p2On(d.w) && brandPick(d) && brandPick(d).toLowerCase() !== d.g.toLowerCase() && d.g.length <= 26 && !/[;\/]/.test(d.g));
     const uniq = (l) => l.filter(d => { const k = brandPick(d).toLowerCase(); if (seen[k]) return false; seen[k] = 1; return true; });
     const now = shuffle(ok.filter(d => d.w === cw)), old = shuffle(ok.filter(d => d.w !== cw));
-    const pick = uniq(S.set.wkOnly ? now : now.concat(old)).slice(0, 6);
+    const pick = uniq(now.concat(old)).slice(0, 6);
     if (pick.length < 6) return shuffle(BRANDS.slice()).slice(0, 6);
     return pick.map(d => [d.g, brandPick(d)]);
   }
@@ -1293,7 +1329,7 @@
     const q = refQ.trim().toLowerCase(), t = todayStr(), cw = curWeek();
     let h = '';
     WEEKS.forEach(w => {
-      const locked = w.from > t && !S.set.ahead;
+      const locked = !wk2Open(w);
       const list = DRUGS.filter(d => d.w === w.n && (!q || (d.g + ' ' + (d.b || '') + ' ' + (d.c || '')).toLowerCase().indexOf(q) >= 0));
       if (q && !list.length) return;
       if (locked) { if (!q) h += '<div class="rweek lockedw"><b>' + esc(w.t) + ' week ' + w.wk + ' · ' + esc(w.d) + '</b><small>Unlocks ' + esc(w.from) + '. Turn on Study ahead in settings to preview.</small></div>'; return; }
@@ -1633,7 +1669,7 @@
   function maybeTour() { if (S.me.done && !S.tutDone && !tourEl) showTour(); }
   /* ---- save code: the whole save as one long code, to move progress between devices or keep a backup ---- */
 /*@EXT@*/
-  const GAME_VERSION = 101;
+  const GAME_VERSION = 102;
   const b64u = (u8) => { let s = ''; for (let i = 0; i < u8.length; i += 0x8000) s += String.fromCharCode.apply(null, u8.subarray(i, i + 0x8000)); return btoa(s).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); };
   const unb64u = (t) => { const s = atob(t.replace(/-/g, '+').replace(/_/g, '/')), u = new Uint8Array(s.length); for (let i = 0; i < s.length; i++) u[i] = s.charCodeAt(i); return u; };
   const chk = (t) => { let h = 2166136261; for (let i = 0; i < t.length; i++) { h ^= t.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36); };
@@ -1772,12 +1808,10 @@
       case 'focus': st.focus = !st.focus; applyFocus(); toast(st.focus ? 'Focus mode on. No timer, events or 3D world.' : 'Focus mode off. The pharmacy is back.'); break;
       case 'tab-set': flipTab = true; openView('set'); return;
       case 'tab-studies': flipTab = true; openView('studies'); return;
-      case 'wkonly': st.wkOnly = !st.wkOnly; break;
-      case 'wkonly3': { const c = curWeek3(); if (!c) { toast('No P3 week has started yet. Tap a week below to preview it.'); return; } if (p3OnlyNow()) { st.p3sel = st.p3prev && Object.keys(st.p3prev).length ? st.p3prev : p3OpenSel(); st.p3prev = null; } else { st.p3prev = p3Sel(); st.p3sel = {}; st.p3sel[c] = true; st.topics.TP3 = true; } st.wkOnly3 = false; break; }
-      case 'p3wk': { const o = p3Sel(); if (o[v]) delete o[v]; else { o[v] = true; st.topics.TP3 = true; } st.p3sel = o; st.wkOnly3 = false; break; }
-      case 'p3wk-all': { const o = {}; P3WEEKS.forEach(w => { o[w.n] = true; }); st.p3sel = o; st.wkOnly3 = false; st.topics.TP3 = true; break; }
-      case 'p3fold': st.p3fold = !st.p3fold; break;
-      case 'p3wk-none': st.p3sel = {}; st.wkOnly3 = false; break;
+      case 'wkpick': { const [k, x] = v.split(':'); const a = x === 'all' || x === 'none' || x === 'only' ? x : 'toggle'; if (wkPick(k, a === 'toggle' ? x : '', a) === false) return; break; }
+      case 'wkcourse': { const i = v.indexOf(':'); wkPick(v.slice(0, i), v.slice(i + 1), 'course'); break; }
+      case 'wkfold': st[v + 'fold'] = !st[v + 'fold']; break;
+      case 'wkup': st[v + 'up'] = !st[v + 'up']; break;
       case 'folder': st.folder = v === 'P1' || v === 'P3' ? v : 'P2'; break;
       case 'p3-only': CATS.forEach(c => st.topics[c[0]] = c[0] === 'TP3' || c[0] === 'T553'); break;
       case 'folder-only': {
@@ -1789,7 +1823,6 @@
         break;
       }
       case 'wktype': { st.wkTypes = st.wkTypes || {}; const on = WK_TYPES.filter(x => st.wkTypes[x[0]] !== false).length; if (st.wkTypes[v] !== false && on <= 1) { toast('Keep at least one kind of weekly question on.'); return; } st.wkTypes[v] = st.wkTypes[v] === false; break; }
-      case 'ahead': st.ahead = !st.ahead; break;
       case 'reset-set': S.set = defaults().set; break;
       case 'preview': readDraft(); $('#studyprev').innerHTML = previewHTML(parseStudy(draft.text, 'My notes')); return;
       case 'addstudy': return addStudy();

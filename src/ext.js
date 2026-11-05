@@ -216,7 +216,7 @@
   }
   function fcPool(cat) {
     const t = todayStr(), deck = fcDeck();
-    const open = (c) => { const wk = WK[c.w]; return !wk || wk.from <= t || S.set.ahead; };
+    const open = (c) => { const wk = WK[c.w]; return !wk || wk2Open(wk); };
     let pool = deck.filter(c => (cat === 'all' || c.c === cat) && open(c));
     if (!pool.length) { const w0 = WEEKS.length ? WEEKS[0].n : 0; pool = deck.filter(c => (cat === 'all' || c.c === cat) && c.w === w0); }
     return pool;

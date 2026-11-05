@@ -884,7 +884,7 @@ body.syn .synwrap { display: block; }
 .p3sched li small { color: var(--muted); white-space: nowrap; line-height: 1.2; }
 .p3sched li span { line-height: 1.25; }
 .p3sched li { padding: 0; display: block; }
-.p3sched li button { all: unset; box-sizing: border-box; display: grid; grid-template-columns: 20px 52px minmax(0, 1fr) auto; gap: 6px; align-items: center; width: 100%; padding: 6px 10px; cursor: pointer; }
+.p3sched li button { all: unset; box-sizing: border-box; display: grid; grid-template-columns: 20px minmax(52px, max-content) minmax(0, 1fr) auto; gap: 6px; align-items: center; width: 100%; padding: 6px 10px; cursor: pointer; }
 .p3sched li button:focus-visible { outline: 2px solid var(--teal); outline-offset: 2px; border-radius: 10px; }
 .p3box { width: 18px; height: 18px; border: 2px solid var(--line); border-radius: 5px; display: grid; place-items: center; font: 800 12px/1 var(--f-mono); font-style: normal; color: #fff; background: var(--teal); }
 .p3sched li.off .p3box { background: #fff; }
@@ -1052,3 +1052,6 @@ body.trip .stats .stat { animation: tripbob 1.4s ease-in-out infinite; }
 .fold { all: unset; cursor: pointer; font: 800 15px/1.2 inherit; display: inline-flex; align-items: center; gap: 6px; }
 .fold i { font-style: normal; width: 14px; }
 .fold:focus-visible { outline: 2px solid var(--teal); outline-offset: 2px; border-radius: 6px; }
+.crshd > span { margin-left: auto; }
+.crshd { display: flex; align-items: center; justify-content: space-between; margin: 10px 0 4px; font: 800 11px/1 var(--f-mono); letter-spacing: .06em; color: var(--muted); }
+.upmore { display: block; margin: 8px 0 0; }
