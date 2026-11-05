@@ -1698,6 +1698,7 @@ const World = (function () {
     for (let i = fpXs.length - 1; i >= 0; i--) { const x = fpXs[i]; x.t += 0.016; if (x.t > 1.4 || !fpT) { x.el.remove(); fpXs.splice(i, 1); } else place(x.el, x.c.x, x.c.y, x.c.z); }
     CLICK.forEach(id => place(tags[id], BASE[id][0], TAGY[id], BASE[id][2]));
     if (cur) { place(bubEl, cur.g.position.x, 3.0 + Math.abs(Math.sin(time * 3)) * 0.1, cur.g.position.z); }
+    if (bubEl) bubEl.style.visibility = (himH || himAsc) ? 'hidden' : '';
   }
 
   function applyTheme() {

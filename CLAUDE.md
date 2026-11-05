@@ -25,5 +25,5 @@ Node + Playwright, run from `src/`: `node te38.js` etc. They load `corner-rx.htm
 ## Conventions
 - Wrong answers must not be arguably correct (for example an indication shared with the right drug). Keep the correct answer from being the longest option every time.
 - Questions use plain language; no em dashes.
-- 3D has not been verified visually from the build environment; check changes by playing with `?dev=1`.
+- 3D can be checked visually in the build environment: the user attaches `three.min.js` (r128, from cdnjs), then run `THREE_JS=/path/three.min.js SHOT_DIR=/some/dir node shot3d.js <dir-arg> dev-him-asc 12 900` from `src/` (args: ignored, dev button id, frame count, ms between frames; the first arg is only the scratchpad fallback path). It uses headless Chromium with SwiftShader. The sandbox cannot download three.js itself. Still confirm by playing with `?dev=1`.
 - Saves live in the browser (`localStorage`); keep save-format changes backward compatible.
