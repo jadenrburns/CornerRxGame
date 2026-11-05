@@ -19,6 +19,7 @@ else{
  await p.click('.p3sched li button[data-v="111"]');console.log('future only',await wks());
  await p.click('[data-act="p3wk-all"]');console.log('all',await wks());
  console.log('removed buttons',await p.$$eval('[data-act="ahead3"]',e=>e.length),await p.$$eval('.fb-P3 .chip[data-act="topic"]',e=>e.length));
+ await p.click('[data-act="p3fold"]');console.log('folded rows',await p.$$eval('.p3sched li',e=>e.length),(await p.innerText('.grp:has(.grphd) .note')).slice(0,40));await p.click('[data-act="p3fold"]');console.log('unfolded rows',await p.$$eval('.p3sched li',e=>e.length));
  console.log('aria',await p.evaluate(()=>document.querySelector('.p3sched li button').getAttribute('aria-pressed')));
  console.log('overflow',await p.evaluate(()=>document.documentElement.scrollWidth>innerWidth));
  await p.evaluate(()=>{document.querySelectorAll('.unlock,.unlockov').forEach(e=>e.remove());const e=document.querySelector('.grphd');e.scrollIntoView({block:'center'})});await p.waitForTimeout(300);await p.screenshot({path:process.env.SHOT||'/tmp/p3.png'});

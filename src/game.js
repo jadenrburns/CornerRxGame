@@ -749,7 +749,7 @@
     const w3 = curWeek3();
     const sched = P3WEEKS.map(w => { const open = w.from <= todayStr(), off = p3Off(w.n), cnt = TOPQ.filter(q => q.wk === w.n && !wkTypeOff(q)).length; return `<li class="${w.n === w3 ? 'now' : open || !off ? '' : 'lock'}${off ? ' off' : ''}"><button type="button" data-act="p3wk" data-v="${w.n}" aria-pressed="${!off}" aria-label="${esc(w.d)} ${esc(w.topic)}: ${off ? 'off' : 'on'}"><i class="p3box">${off ? '' : '\u2713'}</i><b>${esc(w.d)}</b><span>${esc(w.topic)}</span><small>${off ? 'off' : w.ids.length + ' drugs' + (w.n === w3 ? ' \u00B7 this week' : open ? '' : ' \u00B7 upcoming')}</small></button></li>`; }).join('');
     const p3 = `${fsw('P3')}<h3>P3 weekly drugs</h3><p class="sub">Drug list sheets by system, one set per week. Changes apply to the next patient.</p>
-      <div class="grp"><div class="grphd"><b>Top 300</b><span class="grpr"><button type="button" class="chip sm" data-act="wkonly3" aria-pressed="${p3OnlyNow()}">This week only</button><button type="button" class="link" data-act="p3wk-all">All</button> &middot; <button type="button" class="link" data-act="p3wk-none">None</button></span></div><ol class="p3sched">${sched}</ol><p class="note">${weekNote3()}</p><div class="chips" aria-label="Weekly question types">${WK_TYPES.map(x => `<button type="button" class="chip" data-act="wktype" data-v="${x[0]}" aria-pressed="${!(st.wkTypes && st.wkTypes[x[0]] === false)}">${x[1]}</button>`).join('')}</div></div>
+      <div class="grp"><div class="grphd"><button type="button" class="fold" data-act="p3fold" aria-expanded="${!st.p3fold}"><i>${st.p3fold ? '\u25B8' : '\u25BE'}</i> Top 300</button><span class="grpr"><button type="button" class="chip sm" data-act="wkonly3" aria-pressed="${p3OnlyNow()}">This week only</button><button type="button" class="link" data-act="p3wk-all">All</button> &middot; <button type="button" class="link" data-act="p3wk-none">None</button></span></div>${st.p3fold ? `<p class="note">${P3WEEKS.filter(w => p3On(w.n)).length} of ${P3WEEKS.length} weeks on. Tap Top 300 to show the schedule.</p>` : `<ol class="p3sched">${sched}</ol><p class="note">${weekNote3()}</p>`}<div class="chips" aria-label="Weekly question types">${WK_TYPES.map(x => `<button type="button" class="chip" data-act="wktype" data-v="${x[0]}" aria-pressed="${!(st.wkTypes && st.wkTypes[x[0]] === false)}">${x[1]}</button>`).join('')}</div></div>
       <div class="grp"><b>Relevant otherwise</b><div class="chips">${CATS.filter(c => c[0] === 'T553').map(chipOf).join('')}</div><p class="note">Therapeutics III (PHAR 553) syllabus topics: asthma, COPD, renal, diabetes, gout, migraine, RA and SLE, thyroid, liver, hepatitis, blood pressure, lipids, pain, nutrition, fluids and electrolytes.</p></div>
       <div class="grp"><b>Focus</b><div class="chips"><button type="button" class="chip" data-act="topics-all">Turn every topic back on</button></div><p class="note">Use the switch at the top of this folder to ask only P3 topics.</p></div>`;
     const p1 = `${fsw('P1')}<h3>P1 folder</h3><p class="sub">Nothing is filed here yet.</p><div class="grp"><b>Empty folder</b><p class="note">P1 drug lists and exam questions will go in this folder. Your current question settings live in the P2 folder.</p></div>`;
@@ -1633,7 +1633,7 @@
   function maybeTour() { if (S.me.done && !S.tutDone && !tourEl) showTour(); }
   /* ---- save code: the whole save as one long code, to move progress between devices or keep a backup ---- */
 /*@EXT@*/
-  const GAME_VERSION = 100;
+  const GAME_VERSION = 101;
   const b64u = (u8) => { let s = ''; for (let i = 0; i < u8.length; i += 0x8000) s += String.fromCharCode.apply(null, u8.subarray(i, i + 0x8000)); return btoa(s).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); };
   const unb64u = (t) => { const s = atob(t.replace(/-/g, '+').replace(/_/g, '/')), u = new Uint8Array(s.length); for (let i = 0; i < s.length; i++) u[i] = s.charCodeAt(i); return u; };
   const chk = (t) => { let h = 2166136261; for (let i = 0; i < t.length; i++) { h ^= t.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36); };
@@ -1776,6 +1776,7 @@
       case 'wkonly3': { const c = curWeek3(); if (!c) { toast('No P3 week has started yet. Tap a week below to preview it.'); return; } if (p3OnlyNow()) { st.p3sel = st.p3prev && Object.keys(st.p3prev).length ? st.p3prev : p3OpenSel(); st.p3prev = null; } else { st.p3prev = p3Sel(); st.p3sel = {}; st.p3sel[c] = true; st.topics.TP3 = true; } st.wkOnly3 = false; break; }
       case 'p3wk': { const o = p3Sel(); if (o[v]) delete o[v]; else { o[v] = true; st.topics.TP3 = true; } st.p3sel = o; st.wkOnly3 = false; break; }
       case 'p3wk-all': { const o = {}; P3WEEKS.forEach(w => { o[w.n] = true; }); st.p3sel = o; st.wkOnly3 = false; st.topics.TP3 = true; break; }
+      case 'p3fold': st.p3fold = !st.p3fold; break;
       case 'p3wk-none': st.p3sel = {}; st.wkOnly3 = false; break;
       case 'folder': st.folder = v === 'P1' || v === 'P3' ? v : 'P2'; break;
       case 'p3-only': CATS.forEach(c => st.topics[c[0]] = c[0] === 'TP3' || c[0] === 'T553'); break;
