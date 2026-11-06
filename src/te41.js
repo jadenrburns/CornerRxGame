@@ -1,0 +1,24 @@
+const {chromium}=require('playwright');
+(async()=>{const b=await chromium.launch();const p=await b.newPage({viewport:{width:1000,height:900}});const errs=[];p.on('pageerror',e=>errs.push(e.message));
+await p.route('**/three.min.js',r=>r.fulfill({path:'three-stub2.js',contentType:'text/javascript'}));
+await p.addInitScript(()=>{if(!localStorage.getItem('cornerRx.v1'))localStorage.setItem('cornerRx.v1',JSON.stringify({cash:3000,me:{done:true,name:'T',look:{}},served:30,correct:25,tutDone:true,playSec:999,set:{ahead:true,ahead3:true},up:{shelf:0,tech:2,train:0,counsel:0,library:0,robot:0}}))});
+await p.goto('file://'+process.cwd()+'/corner-rx.html');await p.waitForTimeout(900);
+await p.evaluate(()=>document.querySelectorAll('.tour').forEach(e=>e.remove()));
+const click=sel=>p.evaluate(s=>{const e=document.querySelector(s);if(e&&!e.disabled)e.click();return !!e&&!e.disabled},sel);
+const D=()=>p.evaluate(()=>{const d=window.__rxDbg();return {store:d.S.store,cash:d.S.cash,rate:d.techRate(),hair:d.S.me.hair,cyber:(d.S.cosmOn||{}).cyber}});
+const base=await D();console.log('base rate',base.rate.toFixed(4));
+await click('[data-act="create"]');await click('[data-act="ctab"][data-v="shop"]');
+await click('[data-act="shopcat"][data-v="uni"]');const rich=await click('[data-act="shop-buy"][data-id="u6"]');console.log('unaffordable u6 buyable?',rich,'(expect false)');
+let d=await D();console.log('u6 owned?',d.store.own.includes('u6'),'cash',d.cash);
+await click('[data-act="shop-buy"][data-id="u2"]');d=await D();console.log('u2 bought',d.store.own.includes('u2'),'uni',d.store.uni,'rate x',(d.rate/base.rate).toFixed(3),'(expect 1.08)','cash',d.cash);
+await click('[data-act="shop-use"][data-id=""]');d=await D();console.log('standard coats rate x',(d.rate/base.rate).toFixed(3),'(expect 1)');
+await click('[data-act="shopcat"][data-v="walls"]');await click('[data-act="shop-buy"][data-id="w1"]');d=await D();console.log('wall',d.store.walls,'own',d.store.own.includes('w1'));
+await click('[data-act="shopcat"][data-v="deco"]');await click('[data-act="shop-buy"][data-id="rug"]');d=await D();console.log('deco',d.store.deco);
+await click('[data-act="shop-use"][data-id="rug"]');d=await D();console.log('deco after remove',d.store.deco);
+await click('[data-act="shopcat"][data-v="hair"]');await click('[data-act="shop-buy"][data-id="hmo"]');d=await D();console.log('hair idx',d.hair,'(expect 7)');
+await click('[data-act="shopcat"][data-v="cyber"]');await click('[data-act="shop-buy"][data-id="cyeye"]');d=await D();console.log('cyber',d.cyber);
+await click('[data-act="ctab"][data-v="me"]');
+console.log('hair row has mohawk',await p.evaluate(()=>document.body.innerText.includes('Mohawk')),'cyborg row',await p.evaluate(()=>document.body.innerText.toLowerCase().includes('cyborg parts')));
+// save round trip
+await p.evaluate(()=>{const d=window.__rxDbg();JSON.parse(JSON.stringify(d.S.store))});
+console.log('errs',errs);await b.close()})();

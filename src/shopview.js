@@ -1,0 +1,17 @@
+const {chromium}=require('playwright');const S=process.argv[2];const tag=process.argv[3]||'v';
+const store={own:['w3','f1','u2','rug','bell','cactus','lava','fish','cooler','neon','vend','hmo','cykit'],walls:'w3',floor:'f1',uni:'u2',deco:['rug','bell','cactus','lava','fish','cooler','neon','vend']};
+(async()=>{const b=await chromium.launch({args:['--use-angle=swiftshader','--use-gl=angle','--enable-unsafe-swiftshader','--ignore-gpu-blocklist']});
+const p=await b.newPage({viewport:{width:1100,height:800}});const errs=[];p.on('pageerror',e=>errs.push(e.message));
+await p.route('**/three.min.js',r=>r.fulfill({path:S+'/real/three.min.js',contentType:'text/javascript'}));
+await p.addInitScript(st=>{if(!localStorage.getItem('cornerRx.v1'))localStorage.setItem('cornerRx.v1',JSON.stringify({cash:100,me:{done:true,name:'T',look:{},hair:7,body:'normal',gender:'n',hairColor:1,skin:1,scrub:0,shirt:0,shoes:3},cosmOn:{cyber:'cykit'},store:st,served:30,correct:25,tutDone:true,playSec:999,set:{ahead:true,ahead3:true},up:{shelf:0,tech:3,train:0,counsel:0,library:0,robot:0}}))},store);
+await p.goto('file://'+process.cwd()+'/corner-rx.html');await p.waitForTimeout(3500);
+await p.evaluate(()=>{document.querySelectorAll('.tour,.unlock').forEach(e=>e.remove());const q=document.querySelector('#qpanel');if(q)q.style.display='none'});
+const shot=async n=>{await p.waitForTimeout(900);await p.screenshot({path:S+'/shots/'+tag+'_'+n+'.png'})};
+await shot('0');
+const drag=async(dx,dy)=>{await p.mouse.move(500,450);await p.mouse.down();await p.mouse.move(500+dx,450+dy,{steps:6});await p.mouse.up()};
+const zoom=async d=>{await p.mouse.move(500,400);await p.mouse.wheel(0,d)};
+await zoom(-600);await shot('1');
+await drag(-150,0);await shot('2');
+await drag(-150,0);await shot('3');
+await drag(-300,0);await shot('4');
+console.log('errs',errs);await b.close()})();

@@ -122,9 +122,9 @@
     if (S.streak < 5 || S.streak % 5) return '';
     const big = S.streak % 10 === 0, bonus = Math.max(15, Math.round(pay * (big ? 5 : 3)));
     S.cash += bonus; S.earned += bonus;
-    if (big) S.hintsLeft++;
+    if (big) pwAdd('hint', 1);
     SFX.play('streak');
-    return '<p class="gift streak"><b>' + S.streak + ' in a row!</b> Streak bonus ' + money(bonus) + (big ? ' plus 1 pharmacist hint' : '') + '.</p>';
+    return '<p class="gift streak"><b>' + S.streak + ' in a row!</b> Streak bonus ' + money(bonus) + (big ? ' plus 1 hint pill' : '') + '.</p>';
   }
 
   /* ---- "why not": explain the wrong answer that was picked ---- */
@@ -195,6 +195,132 @@
     shiftRes = null; view = 'q'; newCard();
   }
 
+  /* ---- daily goals: three goals a day, new ones at local midnight. Finishing all three keeps a day streak going. ---- */
+  const DG = {
+    right: { t: n => 'Answer ' + n + ' questions correctly', lo: 10, hi: 18, ic: '✅' },
+    streak: { t: n => 'Reach a streak of ' + n, lo: 4, hi: 8, ic: '🔥' },
+    fresh: { t: n => 'Meet ' + n + ' questions you have never seen', lo: 3, hi: 6, ic: '✨' },
+    week: { t: n => 'Get ' + n + ' weekly drug questions right', lo: 5, hi: 9, ic: '📅' },
+    hard: { t: n => 'Get ' + n + ' level 3 questions right', lo: 2, hi: 4, ic: '🧠' },
+    recall: { t: () => 'Help a Recall patient', lo: 1, hi: 1, ic: '↩️' },
+    regular: { t: () => 'Help one of your regulars', lo: 1, hi: 1, ic: '⭐' }
+  };
+  const dayStr = (off) => { const d = new Date(); d.setDate(d.getDate() + (off || 0)); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); };
+  function dailyRng(seedStr) { let h = 1779033703 ^ seedStr.length; for (let i = 0; i < seedStr.length; i++) { h = Math.imul(h ^ seedStr.charCodeAt(i), 3432918353); h = h << 13 | h >>> 19; } return () => { h = Math.imul(h ^ h >>> 16, 2246822507); h = Math.imul(h ^ h >>> 13, 3266489909); h ^= h >>> 16; return (h >>> 0) / 4294967296; }; }
+  function dailyState() {
+    const t = todayStr(), old = S.daily;
+    if (old && old.d === t) return old;
+    const R = dailyRng('rx' + t), ids = ['right', 'streak', 'fresh', 'week', 'hard'];
+    for (let i = ids.length - 1; i > 0; i--) { const j = Math.floor(R() * (i + 1)); [ids[i], ids[j]] = [ids[j], ids[i]]; }
+    const special = [];
+    if ((S.recall || []).length) special.push('recall');
+    if (Object.keys(S.reg || {}).length) special.push('regular');
+    const pickIds = (special.length ? [special[Math.floor(R() * special.length)]] : []).concat(ids).slice(0, 3);
+    S.daily = { d: t, g: pickIds.map(id => { const c = DG[id], need = c.lo + Math.floor(R() * (c.hi - c.lo + 1)); return { id: id, need: need, n: 0, done: false }; }), paid: false, streak: old ? old.streak || 0 : 0, last: old ? old.last || '' : '' };
+    save(); return S.daily;
+  }
+  const dayStreak = () => { const s = S.daily; if (!s || !s.last) return 0; return s.last === todayStr() || s.last === dayStr(-1) ? s.streak : 0; };
+  const dailyPay = () => Math.round(100 * franchiseMult() * (1 + Math.min(5, dayStreak()) * 0.1));
+  function dailyTick(ev) {
+    const st = dailyState(); let fresh = 0;
+    st.g.forEach(g => {
+      if (g.done) return;
+      if (g.id === 'right' && ev.ok) g.n++;
+      else if (g.id === 'streak' && ev.ok) g.n = Math.max(g.n, S.streak);
+      else if (g.id === 'fresh' && ev.unseen) g.n++;
+      else if (g.id === 'week' && ev.ok && isTop(ev.q)) g.n++;
+      else if (g.id === 'hard' && ev.ok && ev.q.d === 3) g.n++;
+      else if (g.id === 'recall' && ev.ok && ev.recall) g.n++;
+      else if (g.id === 'regular' && ev.ok && ev.regular) g.n++;
+      if (g.n >= g.need) { g.n = g.need; g.done = true; fresh++; const pay = dailyPay(); S.cash += pay; S.earned += pay; toast('Daily goal done: ' + DG[g.id].t(g.need) + '. +' + money(pay)); }
+    });
+    if (!st.paid && st.g.every(g => g.done)) {
+      st.paid = true;
+      st.streak = st.last === dayStr(-1) ? (st.streak || 0) + 1 : 1; st.last = todayStr();
+      const bonus = 2 * dailyPay(), kind = pick(['hint', 'second', 'binder']);
+      S.cash += bonus; S.earned += bonus; pwAdd(kind, 1);
+      showUnlock({ emoji: '🎯', title: 'Daily goals complete!', sub: money(bonus) + ' bonus and a free ' + PW[kind].name + '. Day streak: ' + st.streak + '.' });
+    }
+    if (fresh) { save(); renderStats(); }
+    dailyBadge();
+  }
+  function dailyBadge() { const b = $('#dailybadge'); if (!b) return; const st = dailyState(); b.textContent = st.g.filter(g => g.done).length + '/' + st.g.length; }
+  function dailyHTML() {
+    const st = dailyState(), ds = dayStreak(), pay = dailyPay(), done = st.g.filter(g => g.done).length;
+    const rows = st.g.map(g => { const c = DG[g.id], pct = Math.round(100 * g.n / g.need); return `<li class="${g.done ? 'done' : ''}"><span class="dgic" aria-hidden="true">${g.done ? '✔️' : c.ic}</span><div><b>${esc(c.t(g.need))}</b><div class="dgbar" role="progressbar" aria-valuemin="0" aria-valuemax="${g.need}" aria-valuenow="${g.n}"><i style="width:${pct}%"></i></div></div><small>${g.n}/${g.need}<br>${g.done ? 'paid' : '+' + money(pay)}</small></li>`; }).join('');
+    return `<div class="pane dailypane"><h3>Daily goals</h3><p class="sub">${done === st.g.length ? 'All done for today. New goals tomorrow.' : 'Three goals a day. New ones appear at midnight.'}</p>
+      <div class="dgstreak"><b>${ds}</b><span>day streak</span><small>${st.paid ? 'Today counted.' : ds ? 'Finish all three today to keep it.' : 'Finish all three to start a streak.'}</small></div>
+      <ol class="dglist">${rows}</ol>
+      <div class="grp"><b>Patients who come back</b><p class="note">${(S.recall || []).length ? 'Recall: ' + S.recall.length + ' patient' + (S.recall.length === 1 ? '' : 's') + ' will return with a question you missed.' : 'Recall: miss a question and that patient may come back a day later with it.'}</p><p class="note">${Object.keys(S.reg || {}).length ? 'Regulars (' + Object.keys(S.reg).length + '): ' + Object.values(S.reg).map(g => esc(g.name) + (g.visits ? ' x' + g.visits : '')).join(', ') + '.' : 'Regulars: master every question in a week to unlock one and add a jar to the mastery shelf.'}</p></div>
+      <p class="note">Each goal pays ${money(pay)}. Finishing all three pays ${money(2 * pay)} more and a free power-up. A longer day streak raises the payout (up to +50%).</p>
+      <div class="btnrow"><button type="button" class="btn go" data-act="back">Back to counter</button></div></div>`;
+  }
+
+  /* ---- recall patients and regulars ----
+     Recall: a patient whose question you missed comes back about a day later, looking the same, with that exact question.
+     Regular: mastering a week unlocks a regular who stops by with questions from that week. Both ignore your topic filters on purpose, and the card says so. */
+  const RC_DELAY = 864e5, RC_MAX = 10;
+  const RC_LINES = ['Hi again! I came in a while back and the answer did not stick. Can we go over it?', 'Remember me? I still have the same question from last time.', 'I am back. I wrote the question on my hand so I would not forget it.'];
+  const RG_LINES = ['Just my usual visit. Quick one for you:', 'You know me. Same pharmacy, same questions:', 'Hello again! I brought a question from our favorite topic:'];
+  const REG_NAMES = ['Mrs. Okafor', 'Big Mike', 'Dolores', 'Mr. Tran', 'Priya', 'Coach Hale', 'Ms. Dubois', 'Gus', 'Nadia', 'Pops Reyes', 'Lena', 'Rafi', 'Auntie Bea', 'Mr. Kowalski', 'Jun', 'Sister Agnes', 'Teddy', 'Ms. Ibarra', 'Walt', 'Zainab', 'Captain Lou', 'Mrs. Park', 'Dex', 'Granny Mae'];
+  let spOut = {}, forceSp = null;
+  const spReady = () => !focusOn() && !learning() && !labOn() && S.served - (S.lastSp || 0) >= 4;
+  function specialRoll() {
+    if (forceSp) return null;
+    if (!spReady()) return null;
+    const now = Date.now(), due = (S.recall || []).filter(r => r.due <= now && BYKEY[r.k] && !spOut['r' + r.k]);
+    if (due.length && Math.random() < 0.6) { const r = due[0]; spOut['r' + r.k] = 1; S.lastSp = S.served; return { kind: 'recall', k: r.k, seed: r.seed, body: r.body || 'normal' }; }
+    const regs = Object.keys(S.reg || {}).filter(n => !spOut['g' + n]);
+    if (regs.length && Math.random() < 0.16) { const g = S.reg[regs[Math.floor(Math.random() * regs.length)]]; spOut['g' + g.n] = 1; S.lastSp = S.served; return { kind: 'regular', n: g.n, seed: g.seed, body: g.body || 'normal' }; }
+    return null;
+  }
+  const regQ = (g) => { const qs = TOPQ.filter(q => q.wk === g.n && !wkTypeOff(q) && q.k !== lastKey); return qs.length ? qs[Math.floor(Math.random() * qs.length)] : null; };
+  /* resolve a roll to { kind, r|g, q }, or null when the card can't be used */
+  function spResolve(info, blocked) {
+    if (blocked) return null;
+    if (info.recall) { const r = (S.recall || []).find(x => x.k === info.recall); return r && BYKEY[r.k] ? { kind: 'recall', r: r, q: BYKEY[r.k] } : null; }
+    if (info.regular) { const g = (S.reg || {})[info.regular], q = g && regQ(g); return q ? { kind: 'regular', g: g, q: q } : null; }
+    return null;
+  }
+  function spApply(sp) {
+    if (sp.kind === 'recall') { cur.recall = sp.r; cur.name = sp.r.name || cur.name; cur.flavor = pick(RC_LINES); }
+    else { cur.regular = sp.g; cur.name = sp.g.name; cur.flavor = pick(RG_LINES); }
+  }
+  function recallAdd(q) {
+    if (!cur || cur.recall || cur.karen || cur.sweaty || cur.elder || cur.evt || cur.lab || cur.visit || q.gen || q.c === 'HIM') return;
+    S.recall = S.recall || [];
+    if (S.recall.some(r => r.k === q.k) || S.served < 12) return;
+    S.recall.push({ k: q.k, seed: cur.seed, body: cur.body || 'normal', name: cur.name, due: Date.now() + RC_DELAY * (1 + Math.random() * 0.5), tries: 0, at: Date.now() });
+    while (S.recall.length > RC_MAX) S.recall.shift();
+  }
+  function recallDone(ok) {
+    const r = cur.recall; if (!r) return;
+    const i = S.recall.indexOf(r);
+    if (ok) { if (i >= 0) S.recall.splice(i, 1); S.recallOK = (S.recallOK || 0) + 1; }
+    else { r.tries = (r.tries || 0) + 1; if (r.tries >= 2 && i >= 0) S.recall.splice(i, 1); else r.due = Date.now() + RC_DELAY; }
+  }
+  function regularDone(ok) { const g = cur.regular; if (!g) return; g.visits = (g.visits || 0) + 1; if (ok) g.ok = (g.ok || 0) + 1; }
+  const courseColor = (w) => w.n > 100 ? '#F2B01E' : w.t === 'PHAR 444' ? '#8E6BD8' : '#2FB5A5';
+  const masteryList = () => WEEKS.concat(P3WEEKS).filter(w => (S.reg || {})[w.n]).map(w => ({ n: w.n, c: courseColor(w) }));
+  function checkRegulars() {
+    S.reg = S.reg || {}; let fresh = 0;
+    WEEKS.concat(P3WEEKS).forEach(w => {
+      if (S.reg[w.n]) return;
+      const p = weekProg(w.n); if (!(p.total > 0 && p.done >= p.total)) return;
+      const body = w.n % 5 === 0 ? 'jacked' : w.n % 7 === 0 ? 'obese' : 'normal', name = REG_NAMES[(w.n * 7) % REG_NAMES.length];
+      S.reg[w.n] = { n: w.n, name: name, seed: 7000 + w.n * 137, body: body, visits: 0, ok: 0, at: Date.now() };
+      fresh++;
+      showUnlock({ emoji: '⭐', title: 'New regular: ' + name, sub: 'You mastered ' + w.d + ' · ' + w.topic + '. A jar joined the mastery shelf, and ' + name + ' will stop by with questions from that week.' });
+    });
+    if (fresh) { if (World.ok && World.setMastery) World.setMastery(masteryList()); save(); }
+  }
+  const dayWord = (t) => { const d = Math.max(0, Math.round((Date.now() - t) / 864e5)); return d <= 0 ? 'earlier today' : d === 1 ? 'yesterday' : d + ' days ago'; };
+  function spBanner() {
+    if (cur.recall) return `<div class="spbanner recall" role="note"><b>↩ RECALL PATIENT</b><span>You missed this ${esc(dayWord(cur.recall.at))}. It can be from any topic.</span></div>`;
+    if (cur.regular) { const g = cur.regular, w = g.n > 100 ? WK3[g.n] : WK[g.n]; return `<div class="spbanner regular" role="note"><b>★ REGULAR</b><span>${esc(g.name)} · from a week you mastered${w ? ': ' + esc(w.topic) : ''}. It may not match your topic filters.</span></div>`; }
+    return '';
+  }
+
   /* ---- flashcards: flip, rate yourself, earn medals and a goldfish ---- */
   const FC_CATS = [['fb', 'Brand & generic', '🏷️'], ['fc', 'Drug classes', '🧪'], ['fm', 'How drugs work', '⚙️'], ['fi', 'What they treat', '🎯'], ['fn', 'Counseling', '💬']];
   const FC_GOALS = [10, 30, 60], FC_NAME = {}; FC_CATS.forEach(c => { FC_NAME[c[0]] = c[1]; });
@@ -216,7 +342,7 @@
   }
   function fcPool(cat) {
     const t = todayStr(), deck = fcDeck();
-    const open = (c) => { const wk = WK[c.w]; return !wk || wk.from <= t || S.set.ahead; };
+    const open = (c) => { const wk = WK[c.w]; return !wk || wk2Open(wk); };
     let pool = deck.filter(c => (cat === 'all' || c.c === cat) && open(c));
     if (!pool.length) { const w0 = WEEKS.length ? WEEKS[0].n : 0; pool = deck.filter(c => (cat === 'all' || c.c === cat) && c.w === w0); }
     return pool;
@@ -398,7 +524,7 @@
   }
   function evAfter(ok) {
     if (cur.evt === 'driver') {
-      if (ok) { S.hintsLeft++; return '<p class="gift"><b>Delivery stored correctly.</b> Dale leaves you a free pharmacist hint.</p>'; }
+      if (ok) { pwAdd('hint', 1); return '<p class="gift"><b>Delivery stored correctly.</b> Dale leaves you a free hint pill.</p>'; }
       const loss = Math.min(S.cash, 40); S.cash -= loss; return '<p class="gift sad"><b>Spoiled stock.</b> ' + (loss ? 'You lose ' + money(loss) + ' of product. ' : '') + 'Check the label and the DEA schedule next time.</p>';
     }
     return '';
@@ -571,7 +697,7 @@
     const n = S.caps.length, bonus = 40 * n * Math.max(1, 1 + S.up.shelf * 0.25), c = CAPS[id];
     S.cash += bonus; S.earned += bonus;
     let sub = c.p + ' (+' + money(bonus) + ')';
-    if (n === CAPS.length) { S.hintsLeft = Math.min(hintCap() + 3, S.hintsLeft + 3); S.cash += 500; S.earned += 500; sub += ' All five found: +' + money(500) + ' and 3 hints!'; }
+    if (n === CAPS.length) { pwAdd('hint', 3); S.cash += 500; S.earned += 500; sub += ' All five found: +' + money(500) + ' and 3 hint pills!'; }
     save(); SFX.play('unlock');
     showUnlock({ emoji: capSvg(id, 54), title: 'Secret capsule ' + n + ' of ' + CAPS.length + ' (' + (src === 'plant' ? 'from the plant' : 'from the sky') + ')', sub });
     renderStats(); if (view === 'awards') renderPanel();
@@ -584,9 +710,10 @@
   ];
   const COSM_SLOT = { face: 'Facial hair', eyes: 'Glasses', hat: 'Hats', extra: 'Extras' };
   const STD_EYES = [['eyes', 'round', 'Round glasses'], ['eyes', 'square', 'Square glasses']];
-  const cosmById = id => COSM.find(c => c[1] === id) || STD_EYES.find(c => c[1] === id);
-  const cosmHave = id => (S.cosm || []).indexOf(id) >= 0 || STD_EYES.some(c => c[1] === id);
-  function cosmSpec() { const on = S.cosmOn || {}, o = { face: '', eyes: '', hat: '', extra: '' }; Object.keys(on).forEach(k => { const id = on[k], c = id && cosmHave(id) ? cosmById(id) : null; if (c) o[c[0]] = id; }); return o; }
+  const SHOP_COS = SHOP_CYBER.map(c => [c[0], c[1], c[2], c[3]]);
+  const cosmById = id => COSM.find(c => c[1] === id) || STD_EYES.find(c => c[1] === id) || SHOP_COS.find(c => c[1] === id);
+  const cosmHave = id => (S.cosm || []).indexOf(id) >= 0 || STD_EYES.some(c => c[1] === id) || ((S.store || {}).own || []).indexOf(id) >= 0;
+  function cosmSpec() { const on = S.cosmOn || {}, o = { face: '', eyes: '', hat: '', extra: '', cyber: '' }; Object.keys(on).forEach(k => { const id = on[k], c = id && cosmHave(id) ? cosmById(id) : null; if (c) o[c[0]] = id; }); return o; }
   const PNAME = { '#F4F4F0': 'white', '#F2A516': 'orange', '#E04F3A': 'red', '#4C7BD9': 'blue', '#2FAE66': 'green', '#F29BC1': 'pink', '#8A63C9': 'purple', '#7FD6E8': 'sky blue', '#F6E27A': 'yellow' };
   const PSHAPE = { disc: 'round tablet', oval: 'oval tablet', caplet: 'caplet tablet', sq: 'square tablet', two: 'two-tone capsule', band: 'banded capsule', gel: 'softgel capsule' };
   function pillName(p) { const c = PNAME[p.c] || 'colorful'; return (p.k === 'c' && p.s !== 'gel' && p.c2 && p.c2 !== p.c ? c + ' and ' + (PNAME[p.c2] || 'white') + ' ' : c + ' ') + (PSHAPE[p.s] || (p.k === 't' ? 'tablet' : 'capsule')); }
@@ -616,7 +743,7 @@
   /* tablet buff */
   const BUFF_MS = 90000; let buffUntil = 0, buffSlips = 0, buffTimer = null, buffEl = null;
   const buffOn = () => Date.now() < buffUntil;
-  const buffPay = () => (buffOn() ? 2 : 1) * blessMult();
+  const buffPay = () => (buffOn() ? 2 : 1) * blessMult() * (1 + (uniBuff().pay || 0));
   function buffKeep() { if (buffOn() && buffSlips > 0) { buffSlips--; return true; } return false; }
   function buffTick() {
     const left = buffUntil - Date.now();
@@ -693,7 +820,7 @@
       if (res) {
         S.cosm = (S.cosm || []).concat([res[1]]); S.cosmOn = S.cosmOn || {}; S.cosmOn[res[0]] = res[1];
         msg = 'New ' + COSM_SLOT[res[0]].toLowerCase().replace(/s$/, '') + ': ' + res[2] + '! It is on your pharmacist now (change it any time in Character). ' + S.cosm.length + '/' + COSM.length + ' found.';
-        if (S.cosm.length === COSM.length) { S.cash += 1000; S.earned += 1000; S.hintsLeft = Math.min(hintCap() + 3, S.hintsLeft + 3); msg += ' Every cosmetic found: +' + money(1000) + ' and 3 hints!'; }
+        if (S.cosm.length === COSM.length) { S.cash += 1000; S.earned += 1000; pwAdd('hint', 3); msg += ' Every cosmetic found: +' + money(1000) + ' and 3 hint pills!'; }
       } else { const b = Math.round(250 * franchiseMult()); S.cash += b; S.earned += b; msg = 'You found every cosmetic already, so the capsule held ' + money(b) + ' instead.'; }
       save(); try { World.setPharmacist(meSpec()); } catch (e) { /* ignore */ }
       title.textContent = res ? 'Unlocked: ' + res[2] : 'Cash capsule'; nm.textContent = msg; done.disabled = false; done.focus(); SFX.play('streak'); renderStats();

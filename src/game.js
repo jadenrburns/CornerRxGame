@@ -39,7 +39,6 @@
     { id: 'tech', short: 'Techs', name: 'Pharmacy Technician', max: 20, cost: l => Math.round(80 * Math.pow(1.6, l)), desc: l => `Techs earn tips on their own, about ${money(techRate())}/s each right now. Hired: ${l}.` },
     { id: 'train', short: 'Training', name: 'Tech Training', max: 10, cost: l => Math.round(150 * Math.pow(1.7, l)), desc: l => `Technicians earn +40% per level. Techs now also gain from Stocked Shelves. Now +${l * 40}%. Needs hired techs.` },
     { id: 'counsel', short: 'Counseling', name: 'Counseling Room', max: 10, cost: l => Math.round(120 * Math.pow(1.8, l)), desc: l => `Streak bonus (+5% per answer) caps at ${5 + 3 * l} in a row. ${Math.min(60, l * 10)}% chance to talk Karen down.` },
-    { id: 'library', short: 'Library', name: 'Reference Library', max: 5, cost: l => Math.round(150 * Math.pow(1.9, l)), desc: l => `Ask the pharmacist to remove two wrong answers. Holds ${2 * l} hints.` },
     { id: 'robot', short: 'Robot', name: 'Dispensing Robot', max: 5, cost: l => Math.round(300 * Math.pow(2, l)), desc: l => `${l * 6}% chance that a correct fill pays double.` }
   ];
   const ICON_GEAR = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1L7 17M17 7l2.1-2.1"/></svg>';
@@ -53,11 +52,11 @@
   function defaults() {
     const topics = {}; CATS.forEach(c => topics[c[0]] = true);
     return { cash: 0, earned: 0, rep: 50, streak: 0, best: 0, correct: 0, wrong: 0, served: 0, franchises: 0,
-      hintsLeft: 0, sinceHint: 0, calcOK: 0, mastery: {}, missed: [], karenCd: 0, karenWin: 0, karenLoss: 0, sweatyCd: 0, jimWin: 0, jimLoss: 0, phoneOK: 0, phoneBad: 0, phoneMiss: 0, lastShelve: 0, retired: 0, shelveOK: 0, shelveBad: 0, priorN: 0, decks: [],
+      pw: { hint: 0, second: 0, binder: 0 }, daily: null, recall: [], reg: {}, calcOK: 0, mastery: {}, missed: [], karenCd: 0, karenWin: 0, karenLoss: 0, sweatyCd: 0, jimWin: 0, jimLoss: 0, phoneOK: 0, phoneBad: 0, phoneMiss: 0, lastShelve: 0, retired: 0, shelveOK: 0, shelveBad: 0, priorN: 0, decks: [],
       me: { done: false, body: 'normal', gender: 'n', hair: 0, hairColor: 0, skin: 1, scrub: 0, shirt: 0, shoes: 3 }, awards: { frames: [], pets: [] },
       set: { topics: topics, diffs: [1, 2, 3], mode: 'mixed', timer: true, focus: false },
-      vial: [], cosm: [], cosmOn: {}, pillN: 0,
-      up: { shelf: 0, tech: 0, train: 0, counsel: 0, library: 0, robot: 0 } };
+      vial: [], cosm: [], cosmOn: {}, pillN: 0, store: { own: [], walls: 'w0', floor: 'f0', uni: '', deco: [] },
+      up: { shelf: 0, tech: 0, train: 0, counsel: 0, robot: 0 } };
   }
   let S = load();
   if (S.playSec === undefined) S.playSec = S.served > 0 ? 300 : 0; // people who already play skip the slow start
@@ -70,6 +69,11 @@
         const o = JSON.parse(raw); Object.assign(f, o);
         f.up = Object.assign(defaults().up, o.up || {});
         f.me = Object.assign(defaults().me, o.me || {});
+        f.pw = Object.assign({ hint: 0, second: 0, binder: 0 }, o.pw || {});
+        if (!o.pw && o.hintsLeft) f.pw.hint = Math.min(9, o.hintsLeft);
+        if (f.up.library) { let r = 0; for (let l = 0; l < f.up.library; l++) r += Math.round(150 * Math.pow(1.9, l)); f.cash = (f.cash || 0) + r; f.libRefund = (f.libRefund || 0) + r; }
+        delete f.up.library; delete f.hintsLeft; delete f.sinceHint;
+        f.store = Object.assign(defaults().store, o.store || {}); f.store.own = (f.store.own || []).slice(); f.store.deco = (f.store.deco || []).slice();
         f.awards = { frames: ((o.awards || {}).frames || []).slice(), pets: ((o.awards || {}).pets || []).slice(), calW: (o.awards || {}).calW || 0, wkDone: (o.awards || {}).wkDone ? o.awards.wkDone.slice() : null };
         const d = defaults().set, os = o.set || {};
         f.set = Object.assign(d, os); f.set.topics = Object.assign(defaults().set.topics, os.topics || {});
@@ -305,9 +309,20 @@
     return '$' + (n / 1e15).toFixed(2) + 'Qa';
   }
   const franchiseMult = () => 1 + 0.25 * S.franchises + 0.5 * (S.retired || 0);
-  const techRate = () => 0.4 * (0.5 + S.rep / 100) * franchiseMult() * (1 + 0.25 * S.up.shelf) * (1 + 0.4 * S.up.train);
+  const shopOwn = id => !!id && ((S.store || {}).own || []).indexOf(id) >= 0;
+  const uniOf = () => SHOP_UNI.find(u => u[0] === (S.store || {}).uni);
+  const uniBuff = () => { const u = uniOf(); return u && S.up.tech >= 1 ? u[5] : {}; };
+  const techRate = () => 0.4 * (0.5 + S.rep / 100) * franchiseMult() * (1 + 0.25 * S.up.shelf) * (1 + 0.4 * S.up.train) * (1 + (uniBuff().tech || 0));
   const passive = () => S.up.tech * techRate();
-  const hintCap = () => 2 * S.up.library;
+  /* power-ups: consumables bought in the Shop (Power-ups). Counts live in S.pw. */
+  const PW_MAX = 9;
+  const PW = {
+    hint: { name: 'Hint pill', emoji: '💊', base: 60, note: 'Removes two wrong answers on one question. Pays half.' },
+    second: { name: 'Second chance', emoji: '🔁', base: 120, note: 'Arm it on a question. If your first pick is wrong, you get one more try. No streak or reputation loss, pays half, and it still counts as a miss for mastery.' },
+    binder: { name: 'Reference binder', emoji: '📘', base: 90, note: 'Shows where this question comes from (week, topic and study source). Pays 15% less.' }
+  };
+  const pwCost = (k) => Math.round(PW[k].base * franchiseMult());
+  const pwAdd = (k, n) => { S.pw[k] = Math.min(PW_MAX, (S.pw[k] || 0) + n); };
   const upTotal = () => Object.keys(S.up).reduce((a, k) => a + S.up[k], 0);
   const customCount = () => S.decks.reduce((a, d) => a + d.items.length, 0);
   const shopName = () => (S.shop && S.shop.trim()) || 'Corner Rx';
@@ -352,8 +367,7 @@
   const todayStr = () => { const d = new Date(); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); };
   function eligible(q) {
     const st = S.set;
-    if (q.from && q.from > todayStr() && !(isTop(q) && wkAhead(q))) return false;
-    if (isTop(q) && (q.c === 'TP3' ? st.wkOnly3 : st.wkOnly) && q.wk !== wkNow(q)) return false;
+    if (q.c === 'TP3') { if (!p3On(q.wk)) return false; } else if (q.c === 'TOP') { if (!p2On(q.wk)) return false; } else if (q.from && q.from > todayStr()) return false;
     if (isTop(q) && wkTypeOff(q)) return false;
     if (!st.topics[q.c] || st.diffs.indexOf(q.d) < 0) return false;
     if (st.mode === 'missed') return S.missed.indexOf(q.k) >= 0;
@@ -368,6 +382,51 @@
     return arr;
   }
   const WK_TYPES = [['bg', 'Brand / generic'], ['ind', 'Indications'], ['moa', 'Mechanism'], ['cn', 'Counseling (select all)'], ['class', 'Drug class']];
+  /* P3 week picker: S.set.p3sel = { weekNumber: true } once the player has chosen. Before that, the old rules apply (open weeks, Study ahead, This week only, p3off). */
+  /* Week pickers for the weekly drug lists. k is 'p2' (WEEKS) or 'p3' (P3WEEKS). Selection is saved in S.set[k + 'sel'] = { weekNumber: true } once the player has chosen.
+     Before that, the old rules apply (started weeks, Study ahead, This week only, p3off) so older saves behave the same. */
+  const WKCFG = {
+    p2: { L: WEEKS, M: WK, cur: curWeek, only: 'wkOnly', ahead: 'ahead', topic: 'TOP' },
+    p3: { L: P3WEEKS, M: WK3, cur: curWeek3, only: 'wkOnly3', ahead: 'ahead3', topic: 'TP3' }
+  };
+  const wkOn = (k, n) => { const st = S.set, c = WKCFG[k], sel = st[k + 'sel']; if (sel) return !!sel[n]; if (st[c.only]) return n === c.cur(); const w = c.M[n]; return !!w && (w.from <= todayStr() || !!st[c.ahead]) && !(st[k + 'off'] && st[k + 'off'][n]); };
+  const wkSel = (k) => { const o = {}; WKCFG[k].L.forEach(w => { if (wkOn(k, w.n)) o[w.n] = true; }); return o; };
+  const wkOpenSel = (k) => { const o = {}, t = todayStr(); WKCFG[k].L.forEach(w => { if (w.from <= t) o[w.n] = true; }); return o; };
+  const wkOnlyNow = (k) => { const c = WKCFG[k].cur(), ks = Object.keys(wkSel(k)); return !!c && ks.length === 1 && +ks[0] === c; };
+  const p3On = (n) => wkOn('p3', n), p2On = (n) => wkOn('p2', n);
+  /* a week counts as unlocked once it has started or the player picked it */
+  const wk2Open = (w) => w.from <= todayStr() || p2On(w.n);
+  function wkPick(k, v, a) {
+    const st = S.set, c = WKCFG[k];
+    if (a === 'toggle') { const o = wkSel(k); if (o[v]) delete o[v]; else { o[v] = true; st.topics[c.topic] = true; } st[k + 'sel'] = o; }
+    else if (a === 'all') { const o = {}; c.L.forEach(w => { o[w.n] = true; }); st[k + 'sel'] = o; st.topics[c.topic] = true; }
+    else if (a === 'none') st[k + 'sel'] = {};
+    else if (a === 'only') {
+      const cw = c.cur(); if (!cw) { toast('No week has started yet. Tap a week below to preview it.'); return false; }
+      if (wkOnlyNow(k)) { st[k + 'sel'] = st[k + 'prev'] && Object.keys(st[k + 'prev']).length ? st[k + 'prev'] : wkOpenSel(k); st[k + 'prev'] = null; }
+      else { st[k + 'prev'] = wkSel(k); st[k + 'sel'] = {}; st[k + 'sel'][cw] = true; st.topics[c.topic] = true; }
+    } else if (a === 'course') { const o = wkSel(k), on = v.split('|')[1] === '1'; c.L.forEach(w => { if (w.t === v.split('|')[0]) { if (on) o[w.n] = true; else delete o[w.n]; } }); st[k + 'sel'] = o; if (on) st.topics[c.topic] = true; }
+    st[c.only] = false; return true;
+  }
+  function wkSchedHTML(k, title) {
+    const st = S.set, c = WKCFG[k], t = todayStr(), cw = c.cur(), n = c.L.filter(w => wkOn(k, w.n)).length;
+    const row = (w) => { const on = wkOn(k, w.n), started = w.from <= t, cnt = k === 'p3' ? w.ids.length : DRUGS.filter(d => d.w === w.n).length, lab = (w.t ? 'Wk ' + w.wk + ' · ' : '') + w.d;
+      return `<li class="${w.n === cw ? 'now' : started || on ? '' : 'lock'}${on ? '' : ' off'}"><button type="button" data-act="wkpick" data-v="${k}:${w.n}" aria-pressed="${on}" aria-label="${esc(lab)} ${esc(w.topic)}: ${on ? 'on' : 'off'}"><i class="p3box">${on ? '✓' : ''}</i><b>${esc(lab)}</b><span>${esc(w.topic)}</span><small>${on ? cnt + ' drugs' + (w.n === cw ? ' · this week' : started ? '' : ' · upcoming') : 'off'}</small></button></li>`; };
+    const started = c.L.filter(w => w.from <= t), up = c.L.filter(w => w.from > t), foldUp = up.length > 3 && !st[k + 'up'];
+    const shown = (w) => w.from <= t || !foldUp || wkOn(k, w.n);
+    let body = '';
+    const courses = [];
+    c.L.forEach(w => { if (w.t && courses.indexOf(w.t) < 0) courses.push(w.t); });
+    if (courses.length) courses.forEach(cr => {
+      const ws = c.L.filter(w => w.t === cr), vis = ws.filter(shown); if (!vis.length) return;
+      const allOn = ws.every(w => wkOn(k, w.n));
+      body += `<div class="crshd"><b>${esc(cr)}</b><span><button type="button" class="link" data-act="wkcourse" data-v="${k}:${esc(cr)}|1">All</button> &middot; <button type="button" class="link" data-act="wkcourse" data-v="${k}:${esc(cr)}|0">None</button></span></div><ol class="p3sched">${vis.map(row).join('')}</ol>`;
+    });
+    else body = `<ol class="p3sched">${c.L.filter(shown).map(row).join('')}</ol>`;
+    const hidden = c.L.filter(w => !shown(w)).length;
+    const more = up.length > 3 ? `<button type="button" class="link upmore" data-act="wkup" data-v="${k}">${st[k + 'up'] ? 'Hide' : 'Show'} upcoming weeks${hidden ? ' (' + hidden + ' more)' : ''}</button>` : '';
+    return `<div class="grp"><div class="grphd"><button type="button" class="fold" data-act="wkfold" data-v="${k}" aria-expanded="${!st[k + 'fold']}"><i>${st[k + 'fold'] ? '▸' : '▾'}</i> ${title}</button><span class="grpr"><button type="button" class="chip sm" data-act="wkpick" data-v="${k}:only" aria-pressed="${wkOnlyNow(k)}">This week only</button><button type="button" class="link" data-act="wkpick" data-v="${k}:all">All</button> &middot; <button type="button" class="link" data-act="wkpick" data-v="${k}:none">None</button></span></div>${st[k + 'fold'] ? `<p class="note">${n} of ${c.L.length} weeks on. Tap ${title} to show the schedule.</p>` : body + more + `<p class="note">${k === 'p3' ? weekNote3() : weekNote()}</p>`}<div class="chips" aria-label="Weekly question types">${WK_TYPES.map(x => `<button type="button" class="chip" data-act="wktype" data-v="${x[0]}" aria-pressed="${!(st.wkTypes && st.wkTypes[x[0]] === false)}">${x[1]}</button>`).join('')}</div></div>`;
+  }
   const wkTypeOff = (q) => !!(S.set.wkTypes && S.set.wkTypes[q.wt] === false);
   const focusOn = () => !!S.set.focus;
   const labOn = () => !!S.lab;
@@ -435,7 +494,6 @@
     const open = UPS.filter(u => S.up[u.id] < u.max);
     if (!open.length) { const bonus = Math.round(120 * franchiseMult()); S.cash += bonus; S.earned += bonus; return '<p class="gift"><b>' + esc(cur.name) + ' is delighted.</b> Everything is already maxed, so she tips ' + money(bonus) + '.</p>'; }
     const u = pick(open); S.up[u.id]++;
-    if (u.id === 'library') S.hintsLeft += 2;
     save(); renderStats(); renderStore(); renderUpgrades(); renderFranchise();
     return '<p class="gift"><b>' + esc(cur.name) + ' tells all her friends about you.</b> Free upgrade: ' + esc(u.name || u.short) + ' is now level ' + S.up[u.id] + '.</p>';
   }
@@ -465,15 +523,19 @@
       if (phone.pending && !focusOn()) { phone.pending = false; info.karen = true; info.caller = true; }
       if (!info.karen) info.sweaty = sweatyRoll();
     }
-    if (!World.ok && !info.karen && !info.sweaty) info.elder = elderRoll();
+    if (forceSp) { info.recall = forceSp.recall || null; info.regular = forceSp.regular || null; if (forceSp.seed) info.seed = forceSp.seed; info.body = forceSp.body || info.body; forceSp = null; }
+    if (!World.ok && !info.karen && !info.sweaty && !info.recall && !info.regular && !info.evt) { const x = specialRoll(); if (x) { info.seed = x.seed; info.body = x.body; if (x.kind === 'recall') info.recall = x.k; else info.regular = x.n; } }
+    if (!World.ok && !info.karen && !info.sweaty && !info.recall && !info.regular) info.elder = elderRoll();
     if (!info.karen && !info.sweaty && !info.elder && !info.evt && (forceEvt || !World.ok)) info.evt = eventRoll();
-    const calm = focusOn(), karen = !!info.karen && !calm, sweaty = !!info.sweaty && !karen && !calm, elder = !!info.elder && !karen && !sweaty && !calm, evt = !karen && !sweaty && !elder && !calm && info.evt ? info.evt : null, q = evt ? evQuestion(evt) : (forceHim && !karen && !sweaty && !elder && !calm && himPick()) || chooseQ(karen);
+    const calm = focusOn(), karen = !!info.karen && !calm, sweaty = !!info.sweaty && !karen && !calm, elder = !!info.elder && !karen && !sweaty && !calm, evt = !karen && !sweaty && !elder && !calm && info.evt ? info.evt : null, sp = (!karen && !sweaty && !elder && !evt && !calm) ? spResolve(info, false) : null, q = evt ? evQuestion(evt) : (sp && sp.q) || (forceHim && !karen && !sweaty && !elder && !calm && himPick()) || chooseQ(karen);
     view = 'q';
     const himDev = forceHim; forceHim = false;
     if (!q) { cur = { empty: true, seed: info.seed, karen: false }; renderPanel(); return; }
     const himWalk = q.c === 'HIM' && !evt && !karen && !sweaty && !elder && !calm && World.ok && !!World.himArrive && (!S.himDone || himDev);
     const opts = q.ms ? shuffle(q.as.map(t => ({ t, ok: true })).concat(q.w.map(t => ({ t, ok: false })))) : shuffle([q.a, ...q.w].map((t, i) => ({ t, ok: i === 0 })));
-    cur = { q, sel: {}, wasMissed: S.missed.indexOf(q.k) >= 0, opts, t0: Date.now(), done: false, hint: false, karen, sweaty, elder, elderStage: elder ? 0 : 2, ask: pick(ELDER_ASK), caller: !!info.caller && !calm, name: karen ? 'Karen' : sweaty ? 'Jittery Jim' : elder ? pick(info.seed % 2 === 0 ? ELDER_F : ELDER_M) : evt && EV_NAME[evt] ? pick(EV_NAME[evt]) : pick(NAMES), flavor: info.caller ? pick(CALLER_LINES) : evt ? pick(EV_FLAVOR[evt]) : karen ? pick(KAREN_LINES) : sweaty ? pick(JIM_LINES) : pick(FLAVOR[q.c] || FLAVOR.MY), seed: info.seed, num: S.served + 1, picked: -1, ok: false, resHTML: '', interrupt: null, evt: evt, insp: evt === 'inspector' ? { n: 1, of: 3, ok: 0, used: [q.k] } : null, review: reviewDue(S.mastery[q.k]) };
+    cur = { q, sel: {}, wasMissed: S.missed.indexOf(q.k) >= 0, opts, t0: Date.now(), done: false, hint: false, karen, sweaty, elder, elderStage: elder ? 0 : 2, ask: pick(ELDER_ASK), caller: !!info.caller && !calm, name: karen ? 'Karen' : sweaty ? 'Jittery Jim' : elder ? pick(info.seed % 2 === 0 ? ELDER_F : ELDER_M) : evt && EV_NAME[evt] ? pick(EV_NAME[evt]) : pick(NAMES), flavor: info.caller ? pick(CALLER_LINES) : evt ? pick(EV_FLAVOR[evt]) : karen ? pick(KAREN_LINES) : sweaty ? pick(JIM_LINES) : pick(FLAVOR[q.c] || FLAVOR.MY), seed: info.seed, num: S.served + 1, picked: -1, ok: false, resHTML: '', interrupt: null, evt: evt, insp: evt === 'inspector' ? { n: 1, of: 3, ok: 0, used: [q.k] } : null, review: reviewDue(S.mastery[q.k]), body: info.body || 'normal' };
+    if (info.recall) delete spOut['r' + info.recall]; if (info.regular) delete spOut['g' + info.regular];
+    if (sp) spApply(sp);
     if (q.c === 'HIM') { cur.name = 'Himothy'; if (himWalk) World.himArrive(); }
     if (evt === 'inspector') SFX.play('siren'); else if (evt === 'driver') SFX.play('thud'); else if (S.served > 0) SFX.play('bell');
     if (sweatyOwed && calm) sweatyOwed = false;
@@ -489,7 +551,6 @@
     let r = Math.random() * owned.reduce((a, u) => a + S.up[u.id], 0), u = owned[0];
     for (const x of owned) { r -= S.up[x.id]; if (r <= 0) { u = x; break; } }
     const from = S.up[u.id]; S.up[u.id]--;
-    if (u.id === 'library') S.hintsLeft = Math.min(S.hintsLeft, hintCap());
     World.karenLoss(u.id);
     return { lost: u, from, to: from - 1 };
   }
@@ -506,8 +567,14 @@
     } else if (idx >= 0 && (!o || o.gone || isBlocked(idx))) return;
     else if (q.ms && idx >= 0) return;
     endInterrupt();
+    if (cur.secArmed && !cur.secUsed && idx >= 0 && S.pw.second > 0 && !(msOk !== null ? msOk : o.ok)) {
+      cur.secUsed = true; cur.secArmed = false; S.pw.second--;
+      if (q.ms) cur.sel = {}; else o.gone = true;
+      SFX.play('bad'); toast('Second chance used. Try again.'); save(); renderPanel(); return;
+    }
     const ok = msOk !== null ? msOk : idx >= 0 && o.ok, elapsed = (Date.now() - cur.t0) / 1000, karen = cur.karen, sweaty = cur.sweaty;
     cur.done = true; cur.picked = idx; cur.ok = ok; S.served++;
+    const unseen = !q.gen && !(S.mastery[q.k] && S.mastery[q.k].seen);
     let pay = 0; const chips = []; let head = '', extra = '';
     if (ok) {
       S.streak++; S.best = Math.max(S.best, S.streak); S.correct++; holCorrect();
@@ -516,7 +583,7 @@
       const speed = timerOn() ? 1 + 0.5 * Math.max(0, 1 - elapsed / 20) : 1;
       const bz = buffOn() ? 3 : 1, streakN = Math.min(S.streak * bz, (5 + 3 * S.up.counsel) * bz), streak = 1 + 0.05 * streakN;
       const lucky = Math.random() < 0.06 * S.up.robot, fr = franchiseMult();
-      pay = Math.max(1, Math.round(base * shelf * speed * streak * fr * buffPay() * (lucky ? 2 : 1) * (cur.hint ? 0.5 : 1) * (karen ? 2 : 1) * (sweaty ? 1.5 : 1) * (rush.on ? 1.5 : 1) * (cur.lab ? 1.5 : 1)));
+      pay = Math.max(1, Math.round(base * shelf * speed * streak * fr * buffPay() * (lucky ? 2 : 1) * (cur.hint ? 0.5 : 1) * (cur.secUsed ? 0.5 : 1) * (cur.binder ? 0.85 : 1) * (cur.recall ? 1.5 : 1) * (cur.regular ? 1.25 : 1) * (karen ? 2 : 1) * (sweaty ? 1.5 : 1) * (rush.on ? 1.5 : 1) * (cur.lab ? 1.5 : 1)));
       chips.push(`<span class="big">+${money(pay)}</span>`, `<span>base $${base.toFixed(0)}</span>`);
       if (blessOn()) chips.push('<span>Himothy\u2019s blessing x' + BLESS_MULT.toFixed(2) + '</span>');
       if (S.up.shelf) chips.push(`<span>shelves x${shelf.toFixed(2)}</span>`);
@@ -526,12 +593,14 @@
       if (rush.on) chips.push('<span>rush hour x1.50</span>');
       if (cur.lab) chips.push('<span>compounding bench x1.50</span>');
       if (lucky) chips.push('<span>robot: double fill</span>');
-      if (cur.hint) chips.push('<span>hint used x0.5</span>');
+      if (cur.hint) chips.push('<span>hint pill x0.5</span>');
+      if (cur.secUsed) chips.push('<span>second chance x0.5</span>');
+      if (cur.binder) chips.push('<span>binder x0.85</span>');
+      if (cur.recall) chips.push('<span>recall bonus x1.50</span>');
+      if (cur.regular) chips.push('<span>regular x1.25</span>');
       if (karen) chips.push('<span>Karen calmed x2</span>');
       if (sweaty) chips.push('<span>Jim relieved x1.5</span>');
       S.cash += pay; S.earned += pay; S.rep = Math.min(100, S.rep + (karen ? 5 : sweaty ? 3 : 2));
-      S.sinceHint++;
-      if (S.sinceHint >= 5 && S.hintsLeft < hintCap()) { S.hintsLeft++; S.sinceHint = 0; }
       if (q.gen) S.calcOK++;
       if (cur.lab) { S.labOK = (S.labOK || 0) + 1; }
       if (karen) S.karenWin++;
@@ -557,23 +626,27 @@
     if (cur.elder) extra += ok ? elderGift() : '<p class="gift sad">She pats your hand anyway and shuffles off. No upgrade this time.</p>';
     if (!q.gen) {
       const m = S.mastery[q.k] || { box: 0, seen: 0, ok: 0 };
+      const mok = ok && !cur.secUsed;
       const wasDue = reviewDue(m);
       m.seen++;
       const wasNew = m.seen === 1;
-      if (ok) { m.ok++; m.lapse = 0; m.box = Math.min(3, m.box + (wasNew ? 2 : 1)); } else slip(m);
-      if (ok) { if (wasDue) { m.iv = Math.min(IV.length - 1, (m.iv || 0) + 1); chips.push('<span>memory check passed, next in ' + IV[m.iv] + ' d</span>'); } if (!m.t || wasDue || m.box < 2) { m.t = Date.now(); if (m.iv === undefined) m.iv = 0; } } else { m.iv = 0; m.t = Date.now(); }
+      if (mok) { m.ok++; m.lapse = 0; m.box = Math.min(3, m.box + (wasNew ? 2 : 1)); } else slip(m);
+      if (mok) { if (wasDue) { m.iv = Math.min(IV.length - 1, (m.iv || 0) + 1); chips.push('<span>memory check passed, next in ' + IV[m.iv] + ' d</span>'); } if (!m.t || wasDue || m.box < 2) { m.t = Date.now(); if (m.iv === undefined) m.iv = 0; } } else { m.iv = 0; m.t = Date.now(); }
       if (S.set.mode === 'mixed') {
         const ri = retry.findIndex(r => r.k === q.k); if (ri >= 0) retry.splice(ri, 1);
-        if (!ok) retry.push({ k: q.k, due: S.served + 3 });
+        if (!mok) retry.push({ k: q.k, due: S.served + 3 });
         else if (m.box === 1) retry.push({ k: q.k, due: S.served + 6 });
       }
       S.mastery[q.k] = m;
-      if (ok && q.c === 'HIM' && !S.himDone && himAllMastered()) himPending = true;
+      if (mok && q.c === 'HIM' && !S.himDone && himAllMastered()) himPending = true;
       const i = S.missed.indexOf(q.k);
-      if (!ok && i < 0) S.missed.push(q.k);
-      if (ok && m.box >= 2 && i >= 0) S.missed.splice(i, 1);
+      if (!mok && i < 0) S.missed.push(q.k);
+      if (mok && m.box >= 2 && i >= 0) S.missed.splice(i, 1);
       lastKey = q.k;
     } else lastKey = null;
+    if (!ok || cur.secUsed) recallAdd(q);
+    recallDone(ok && !cur.secUsed); regularDone(ok && !cur.secUsed); checkRegulars();
+    dailyTick({ ok: ok && !cur.secUsed, q: q, unseen: unseen, recall: !!cur.recall, regular: !!cur.regular });
     shiftNote(q, ok, pay, ok || idx < 0 ? '' : q.ms ? cur.opts.filter((x, i) => cur.sel[i]).map(x => x.t).join(' · ') : o.t);
     save();
     checkAwards();
@@ -621,10 +694,27 @@
     return '<p><b>Correct choices:</b> ' + esc(cur.opts.filter(x => x.ok).map(x => x.t).join(' \u00B7 ')) + '</p>' + (wrong.length ? '<p class="whynot"><b>Not true for ' + esc(cur.q.rows ? cur.q.rows[0][1].split(' (')[0] : 'this drug') + ':</b> ' + esc(wrong.join(' \u00B7 ')) + '</p>' : '') + (missed.length ? '<p class="whynot"><b>You missed:</b> ' + esc(missed.join(' \u00B7 ')) + '</p>' : '');
   }
   function useHint() {
-    if (!cur || cur.empty || cur.done || cur.hint || S.hintsLeft < 1) return;
-    cur.hint = true; S.hintsLeft--;
-    const wr = cur.opts.filter(o => !o.ok); shuffle(wr).slice(0, cur.q.ms ? Math.min(2, wr.length - 1) : 2).forEach(o => { o.gone = true; delete cur.sel[cur.opts.indexOf(o)]; });
+    if (!cur || cur.empty || cur.done || cur.hint || S.pw.hint < 1) return;
+    cur.hint = true; S.pw.hint--;
+    const wr = cur.opts.filter(o => !o.ok && !o.gone); shuffle(wr).slice(0, cur.q.ms ? Math.min(2, wr.length - 1) : Math.min(2, wr.length)).forEach(o => { o.gone = true; delete cur.sel[cur.opts.indexOf(o)]; });
     save(); renderPanel();
+  }
+  function useSecond() {
+    if (!cur || cur.empty || cur.done || cur.secUsed || (!cur.secArmed && S.pw.second < 1)) return;
+    cur.secArmed = !cur.secArmed; renderPanel();
+  }
+  function useBinder() {
+    if (!cur || cur.empty || cur.done || cur.binder || S.pw.binder < 1) return;
+    cur.binder = true; S.pw.binder--; save(); renderPanel();
+  }
+  /* where a question comes from, for the reference binder */
+  function binderNote(q) {
+    const cat = (CATS.find(c => c[0] === q.c) || [0, q.c || 'Question'])[1], parts = [cat];
+    const w = q.wk ? (q.c === 'TP3' ? WK3[q.wk] : WK[q.wk]) : null;
+    if (w) parts.push((w.t ? w.t + ' wk ' + w.wk + ' \u00B7 ' : '') + w.d + ' \u00B7 ' + w.topic);
+    else if (q.t) parts.push(q.t);
+    if (q.gen) return 'Calculation: set up the units first, then solve.';
+    return esc(parts.join(' \u00B7 ')) + (q.s ? '<br><b>Study source:</b> ' + esc(q.s) : '<br><small>No slide reference saved for this question yet.</small>');
   }
 
   /* ---- panel rendering ---- */
@@ -668,7 +758,8 @@
     }).join('');
     const label = cur.lab ? (cur.lab === 'pk' ? 'KINETICS CONSULT \u00B7 show your work' : 'COMPOUNDING ORDER \u00B7 show your work') : cur.elder ? cur.name.toUpperCase() + ' \u00B7 free upgrade if right' : cur.evt ? (cur.evt === 'inspector' ? 'HEALTH INSPECTOR \u00B7 question ' + cur.insp.n + ' of ' + cur.insp.of + ' \u00B7 need 2' : EV_LABEL[cur.evt]) : cur.caller ? 'KAREN · "I tried to call"' : cur.karen ? 'KAREN · wants the manager' : cur.sweaty ? 'JITTERY JIM · sweating buckets' : CATNAME[q.c] + (q.t ? ' · ' + q.t : '');
     const isK = cur.karen || cur.caller, showTimer = !isK && timerOn();
-    return `<article class="rx ${cur.lab ? 'labq' : ''} ${cur.karen ? 'karen' : cur.sweaty ? 'sweaty' : ''} ${cur.evt ? 'evt evt-' + cur.evt : ''}">
+    return `<article class="rx ${cur.lab ? 'labq' : ''} ${cur.karen ? 'karen' : cur.sweaty ? 'sweaty' : ''} ${cur.recall ? 'recall' : cur.regular ? 'regular' : ''} ${cur.evt ? 'evt evt-' + cur.evt : ''}">
+      ${spBanner()}
       <div class="rx-head"><span class="rx-sym" aria-hidden="true">&#8478;</span>
         <div class="rx-meta"><b>${esc(label)}</b><span>Rx #${pad} &middot; ${esc(cur.name)}</span></div>
         ${cur.wasMissed ? `<span class="missedtag" title="You missed this question before">Missed before</span>` : cur.review ? `<span class="missedtag rv" title="You mastered this a while ago. A quick memory check.">Memory check</span>` : ''}
@@ -678,7 +769,11 @@
       <div class="rx-body">
         <div class="patient">${avatar(cur.seed, cur.done ? (cur.ok ? 'ok' : 'bad') : 'idle', cur.karen, cur.sweaty, cur.elder, cur.name === 'Himothy')}<div class="bubble"><em>${esc(cur.flavor)}</em><p>${esc(q.q)}</p></div></div>
         <div class="opts" role="group" aria-label="Answer choices">${opts}${jimHTML()}</div>${q.ms && !cur.done ? `<div class="msbar"><span>Select all that apply (${Object.keys(cur.sel).length} picked)</span><button type="button" class="btn go" id="msgo" ${Object.keys(cur.sel).length ? '' : 'disabled'}>Submit answer</button></div>` : ''}${labToolsHTML()}
-        <div class="tools"><button type="button" class="btn" id="hintbtn" ${S.hintsLeft < 1 || cur.hint || cur.done ? 'disabled' : ''}>Ask the pharmacist (${S.hintsLeft})</button>
+        ${cur.binder ? `<div class="binderbox" role="note"><b>\uD83D\uDCD8 Reference binder</b><span>${binderNote(q)}</span></div>` : ''}
+        <div class="tools pwtools"><button type="button" class="btn" id="hintbtn" ${S.pw.hint < 1 || cur.hint || cur.done ? 'disabled' : ''}>\uD83D\uDC8A Hint pill (${S.pw.hint})</button>
+          <button type="button" class="btn" id="secbtn" aria-pressed="${!!cur.secArmed}" ${(S.pw.second < 1 && !cur.secArmed) || cur.secUsed || cur.done ? 'disabled' : ''}>\uD83D\uDD01 Second chance (${S.pw.second})${cur.secArmed ? ' ready' : ''}</button>
+          <button type="button" class="btn" id="bindbtn" ${S.pw.binder < 1 || cur.binder || cur.done ? 'disabled' : ''}>\uD83D\uDCD8 Binder (${S.pw.binder})</button>
+          ${S.pw.hint + S.pw.second + S.pw.binder < 1 && !cur.done ? '<button type="button" class="mini" data-act="pwshop">Get power-ups</button>' : ''}
           <span class="keyhint">${isK ? 'Karen leaves in ' + KAREN_SEC + ' s. A wrong answer costs an upgrade.' : cur.lab ? 'Lab bench: no timer. Pays x1.5.' : timerOn() ? 'Speed bonus fades over 20 s' : focusOn() ? 'Focus mode: no timer' : 'Timer bonus is off'}</span></div>
       </div>${cur.resHTML || ''}</article>`;
   }
@@ -711,8 +806,8 @@
   }
   function weekNote3() {
     const n = curWeek3(), w = WK3[n];
-    if (!w) { const f = P3WEEKS[0]; return 'P3 weekly drugs start on ' + esc(f.from) + ' (' + esc(f.topic) + '). Turn on Study ahead to preview them now.'; }
-    return 'Now: ' + esc(w.d) + ' \u00B7 ' + esc(w.topic) + '. Earlier weeks stay in the mix; this week is asked most. Study ahead also unlocks future weeks.';
+    if (!w) { const f = P3WEEKS[0]; return 'P3 weekly drugs start on ' + esc(f.from) + ' (' + esc(f.topic) + '). Tap a week to preview it now.'; }
+    return 'Now: ' + esc(w.d) + ' \u00B7 ' + esc(w.topic) + '. Tap a week to add or remove it, including upcoming weeks.';
   }
   function settingsHTML() {
     const st = S.set, mc = missedByCat(), ms = masteryByCat();
@@ -733,15 +828,12 @@
       <div class="grp"><b>Difficulty</b><div class="chips">${diffs}</div></div>
       <div class="grp"><b>Mode</b><div class="chips">${modes}</div><p class="note">${MODES.find(m => m[0] === st.mode)[2]}</p></div>
       <div class="grp"><b>Compounding pharmacy</b><div class="chips"><button type="button" class="chip" data-act="labk" data-v="comp" aria-pressed="${(S.labK || {}).comp !== false}">Compounding math</button><button type="button" class="chip" data-act="labk" data-v="pk" aria-pressed="${(S.labK || {}).pk !== false}">Kinetics</button></div><p class="note">Used when you tap Switch to compounding in the menu. Level chips above apply there too. ${S.labN ? 'Solved at the bench: ' + S.labOK + ' of ' + S.labN + '.' : ''}</p></div>
-      <div class="grp"><b>Weekly drugs</b><div class="chips"><button type="button" class="chip" data-act="wkonly" aria-pressed="${!!st.wkOnly}">This week only</button><button type="button" class="chip" data-act="ahead" aria-pressed="${!!st.ahead}">Study ahead</button></div><div class="chips" aria-label="Weekly question types">${WK_TYPES.map(x => `<button type="button" class="chip" data-act="wktype" data-v="${x[0]}" aria-pressed="${!(st.wkTypes && st.wkTypes[x[0]] === false)}">${x[1]}</button>`).join('')}</div><p class="note">${weekNote()} Use the question-type buttons to pick which kinds of weekly questions you get.</p></div>
+      ${wkSchedHTML('p2', 'Weekly drugs')}
       <div class="grp"><b>Speed bonus</b><div class="chips"><button type="button" class="chip" data-act="timer" aria-pressed="${st.timer}">Timer bonus ${st.timer ? 'on' : 'off'}</button></div><p class="note">Turn it off to study without time pressure. Karen still has a limit.</p></div>
       `;
-    const w3 = curWeek3();
-    const sched = P3WEEKS.map(w => { const open = w.from <= todayStr() || st.ahead3, cnt = TOPQ.filter(q => q.wk === w.n && !wkTypeOff(q)).length; return `<li class="${w.n === w3 ? 'now' : open ? '' : 'lock'}"><b>${esc(w.d)}</b><span>${esc(w.topic)}</span><small>${w.ids.length} drugs${w.n === w3 ? ' \u00B7 this week' : open ? '' : ' \u00B7 locked'}</small></li>`; }).join('');
     const p3 = `${fsw('P3')}<h3>P3 weekly drugs</h3><p class="sub">Drug list sheets by system, one set per week. Changes apply to the next patient.</p>
-      <div class="grp"><b>Top 300</b><div class="chips">${CATS.filter(c => c[0] === 'TP3').map(chipOf).join('')}</div><div class="chips"><button type="button" class="chip" data-act="wkonly3" aria-pressed="${!!st.wkOnly3}">This week only</button><button type="button" class="chip" data-act="ahead3" aria-pressed="${!!st.ahead3}">Study ahead</button></div><div class="chips" aria-label="Weekly question types">${WK_TYPES.map(x => `<button type="button" class="chip" data-act="wktype" data-v="${x[0]}" aria-pressed="${!(st.wkTypes && st.wkTypes[x[0]] === false)}">${x[1]}</button>`).join('')}</div><p class="note">${weekNote3()}</p></div>
+      ${wkSchedHTML('p3', 'Top 300')}
       <div class="grp"><b>Relevant otherwise</b><div class="chips">${CATS.filter(c => c[0] === 'T553').map(chipOf).join('')}</div><p class="note">Therapeutics III (PHAR 553) syllabus topics: asthma, COPD, renal, diabetes, gout, migraine, RA and SLE, thyroid, liver, hepatitis, blood pressure, lipids, pain, nutrition, fluids and electrolytes.</p></div>
-      <div class="grp"><b>P3 schedule</b><ol class="p3sched">${sched}</ol></div>
       <div class="grp"><b>Focus</b><div class="chips"><button type="button" class="chip" data-act="topics-all">Turn every topic back on</button></div><p class="note">Use the switch at the top of this folder to ask only P3 topics.</p></div>`;
     const p1 = `${fsw('P1')}<h3>P1 folder</h3><p class="sub">Nothing is filed here yet.</p><div class="grp"><b>Empty folder</b><p class="note">P1 drug lists and exam questions will go in this folder. Your current question settings live in the P2 folder.</p></div>`;
     return `<div class="pane nbk ${nbClosing ? 'closing' : ''}"><div class="nbcover"><span class="nbtitle">Topics</span></div><div class="nbsheet">${hubTabs('set')}${cabinetHTML(fold)}<div class="fbody fb-${fold}" role="tabpanel" aria-label="${fold} folder">${fold === 'P1' ? p1 : fold === 'P3' ? p3 : p2}</div>
@@ -782,7 +874,7 @@
   const ME_SHOES = [['#27384F', 'Navy shoes'], ['#F4F4F0', 'White sneakers'], ['#E04F3A', 'Red sneakers'], ['#2B2B33', 'Black shoes'], ['#F2C94C', 'Gold shoes'], ['#3FD07F', 'Green sneakers'], ['#8A63C9', 'Purple sneakers']];
   const ME_BODIES = [['slim', 'Slim'], ['normal', 'Average'], ['jacked', 'Jacked'], ['obese', 'Round']];
   const ME_GENDERS = [['f', 'Woman'], ['m', 'Man'], ['n', 'Nonbinary']];
-  const ME_HAIRS = ['Short', 'Bob', 'Long', 'Bun', 'Curly', 'Spiky', 'Bald'];
+  const ME_HAIRS = ['Short', 'Bob', 'Long', 'Bun', 'Curly', 'Spiky', 'Bald'].concat(SHOP_HAIR.map(h => h[1]));
   function meSpec() { const m = S.me; return { body: m.body, gender: m.gender, hair: m.hair, skin: ME_SKIN[m.skin], hairCol: ME_HAIR[m.hairColor], scrub: ME_SCRUB[m.scrub], shirtCol: (ME_SHIRT[m.shirt | 0] || ME_SHIRT[0])[0], shoes: (ME_SHOES[m.shoes === undefined ? 3 : m.shoes] || ME_SHOES[3])[0], acc: S.acc || 0, accOn: accOnList(), cosm: cosmSpec() }; }
   function accOnList() { const off = S.accOff || [], out = []; for (let k = 1; k <= (S.acc || 0); k++) if (off.indexOf(k) < 0) out.push(k); return out; }
   function meSVG() {
@@ -796,7 +888,12 @@
       `<path d="M37 58c0-20 10-30 23-30s23 10 23 30c-4-9-12-13-23-13s-19 4-23 13z" fill="${hair}"/><circle cx="60" cy="24" r="9" fill="${hair}"/>`,
       `<g fill="${hair}"><circle cx="42" cy="42" r="12"/><circle cx="56" cy="32" r="13"/><circle cx="72" cy="33" r="13"/><circle cx="82" cy="46" r="11"/><circle cx="38" cy="54" r="9"/><circle cx="84" cy="58" r="8"/></g>`,
       `<path d="M37 56c0-16 9-24 23-24s23 8 23 24c-4-8-12-11-23-11s-19 3-23 11z" fill="${hair}"/><path d="M42 36l-3-14 11 9zM56 32l0-16 8 14zM72 33l6-14 3 15z" fill="${hair}"/>`,
-      ''
+      '',
+      `<path d="M55 20h10v26H55z" fill="${hair}"/><path d="M52 30h16v14H52z" fill="${hair}"/>`,
+      `<circle cx="60" cy="40" r="30" fill="${hair}"/>`,
+      `<path d="M37 58c0-20 10-30 23-30s23 10 23 30c-4-9-12-13-23-13s-19 4-23 13z" fill="${hair}"/><path d="M62 46l14 30-8 4z" fill="${hair}"/>`,
+      `<path d="M36 58c0-20 10-32 24-32s24 12 24 32c-4-9-12-14-24-14s-20 5-24 14z" fill="${hair}"/><path d="M42 30c8-12 28-12 38 0l-6 4c-8-6-18-6-26 0z" fill="${hair}"/>`,
+      `<path d="M37 58c0-20 10-30 23-30s23 10 23 30c-4-9-12-13-23-13s-19 4-23 13z" fill="${hair}"/><circle cx="40" cy="34" r="9" fill="${hair}"/><circle cx="80" cy="34" r="9" fill="${hair}"/>`
     ];
     const f = m.gender === 'f';
     const face = `<circle cx="60" cy="62" r="22" fill="${skin}"/>${hs[m.hair] || ''}<circle cx="51" cy="62" r="2.4" fill="#2b1b12"/><circle cx="69" cy="62" r="2.4" fill="#2b1b12"/>${f ? '<path d="M46 57l5-2M74 57l-5-2" stroke="#2b1b12" stroke-width="1.6" stroke-linecap="round"/><path d="M54 73q6 4 12 0" stroke="#D9677A" stroke-width="3" fill="none" stroke-linecap="round"/>' : '<path d="M54 72q6 4 12 0" stroke="#3a1f12" stroke-width="2.2" fill="none" stroke-linecap="round"/>'}`;
@@ -809,12 +906,12 @@
   /* ---- character screen: one slider row per part, top to bottom ---- */
   function crows() {
     const m = S.me, on = cosmSpec(), N = (arr) => arr.map((x, i) => ({ v: i, n: x[1] || x, c: x[0] && x[0][0] === '#' ? x[0] : '' }));
-    const cos = (slot, std) => [{ v: '', n: 'None' }].concat((std || []).map(c => ({ v: c[1], n: c[2] })), COSM.filter(c => c[0] === slot && cosmHave(c[1])).map(c => ({ v: c[1], n: c[2] })));
+    const cos = (slot, std) => [{ v: '', n: 'None' }].concat((std || []).map(c => ({ v: c[1], n: c[2] })), COSM.concat(SHOP_COS).filter(c => c[0] === slot && cosmHave(c[1])).map(c => ({ v: c[1], n: c[2] })));
     return [
       { k: 'gender', t: 'Gender', cur: m.gender, o: ME_GENDERS.map(x => ({ v: x[0], n: x[1] })) },
       { k: 'body', t: 'Body type', cur: m.body, o: ME_BODIES.map(x => ({ v: x[0], n: x[1] })) },
       { k: 'skin', t: 'Skin tone', cur: m.skin, o: ME_SKIN.map((c, i) => ({ v: i, n: ME_SKIN_N[i], c })) },
-      { k: 'hair', t: 'Hair style', cur: m.hair, o: ME_HAIRS.map((n, i) => ({ v: i, n })) },
+      { k: 'hair', t: 'Hair style', cur: m.hair, o: ME_HAIRS.map((n, i) => ({ v: i, n })).filter(x => x.v < 7 || shopOwn(SHOP_HAIR[x.v - 7][0])) },
       { k: 'hairColor', t: 'Hair color', cur: m.hairColor, o: ME_HAIR.map((c, i) => ({ v: i, n: ME_HAIR_N[i], c })) },
       { k: 'face', t: 'Facial hair', cur: on.face, o: cos('face') },
       { k: 'eyes', t: 'Glasses', cur: on.eyes, o: cos('eyes', STD_EYES) },
@@ -823,21 +920,73 @@
       { k: 'scrub', t: 'Pants', cur: m.scrub, o: ME_SCRUB.map((c, i) => ({ v: i, n: ME_SCRUB_N[i] + ' pants', c })) },
       { k: 'shoes', t: 'Shoes', cur: m.shoes === undefined ? 3 : m.shoes, o: ME_SHOES.map((x, i) => ({ v: i, n: x[1], c: x[0] })) },
       { k: 'extra', t: 'Extras', cur: on.extra, o: cos('extra') }
-    ];
+    ].concat(SHOP_CYBER.some(c => shopOwn(c[1])) ? [{ k: 'cyber', t: 'Cyborg parts', cur: on.cyber, o: cos('cyber') }] : []);
   }
   function crowHTML(r) {
     const n = r.o.length, i = Math.max(0, r.o.findIndex(x => x.v === r.cur)), c = r.o[i], dis = n < 2 ? ' disabled' : '';
     return `<div class="crow" data-k="${r.k}"><span class="clab">${r.t}</span><div class="cslide"><button type="button" class="carr" data-act="cyc" data-k="${r.k}" data-d="-1" aria-label="Previous ${r.t.toLowerCase()}"${dis}>&#8249;</button><div class="cval" role="status" aria-live="polite">${c.c ? `<i class="csw" style="background:${c.c}"></i>` : ''}<span>${esc(c.n)}</span><small>${i + 1} of ${n}</small></div><button type="button" class="carr" data-act="cyc" data-k="${r.k}" data-d="1" aria-label="Next ${r.t.toLowerCase()}"${dis}>&#8250;</button></div></div>`;
   }
   function setCrow(k, v) {
-    if (['face', 'eyes', 'hat', 'extra'].indexOf(k) >= 0) { S.cosmOn = S.cosmOn || {}; const keep = {}; Object.keys(S.cosmOn).forEach(s => { const c = S.cosmOn[s] && cosmById(S.cosmOn[s]); if (c && c[0] !== k) keep[c[0]] = S.cosmOn[s]; }); S.cosmOn = keep; if (v) S.cosmOn[k] = v; }
+    if (['face', 'eyes', 'hat', 'extra', 'cyber'].indexOf(k) >= 0) { S.cosmOn = S.cosmOn || {}; const keep = {}; Object.keys(S.cosmOn).forEach(s => { const c = S.cosmOn[s] && cosmById(S.cosmOn[s]); if (c && c[0] !== k) keep[c[0]] = S.cosmOn[s]; }); S.cosmOn = keep; if (v) S.cosmOn[k] = v; }
     else S.me[k] = (typeof v === 'number') ? v : v;
   }
+  /* ---- shop (a tab on the Character screen) ---- */
+  let cTab = 'me', shopCat = 'walls';
+  const buffText = b => [b.tech ? '+' + Math.round(b.tech * 100) + '% tech tips' : '', b.pay ? '+' + Math.round(b.pay * 100) + '% pay' : ''].filter(Boolean).join(', ');
+  function uniSpec() { const u = uniOf(); return u ? { shirt: u[2], scrub: u[3], cosm: { hat: u[4] || '', eyes: u[0] === 'u5' ? 'goggles' : '' } } : null; }
+  function applyShop() { if (!World.ok) return; World.setStore(S.store); World.setStaffLook(uniSpec()); World.setPharmacist(meSpec()); }
+  const SHOP_CATS = [['walls', 'Wall paint'], ['floors', 'Floors'], ['uni', 'Tech uniforms'], ['deco', 'Decor'], ['hair', 'Hairstyles'], ['cyber', 'Cyborg'], ['pow', 'Power-ups']];
+  function shopRows(cat) {
+    const st = S.store;
+    if (cat === 'walls') return SHOP_WALLS.map(w => ({ id: w[0], name: w[1], price: w[4], free: !w[4], on: st.walls === w[0], sw: [w[2], w[3]], note: '' }));
+    if (cat === 'floors') return SHOP_FLOORS.map(f => ({ id: f[0], name: f[1], price: f[4], free: !f[4], on: st.floor === f[0], sw: [f[2], f[3]], note: '' }));
+    if (cat === 'uni') return [{ id: '', name: 'Standard coats', price: 0, free: true, on: !st.uni, sw: ['#F4FAFA', '#27384F'], note: 'No bonus.' }].concat(SHOP_UNI.map(u => ({ id: u[0], name: u[1], price: u[6], on: st.uni === u[0], sw: [u[2], u[3]], note: buffText(u[5]) + '. ' + u[7] })));
+    if (cat === 'deco') return SHOP_DECOR.map(d => ({ id: d[0], name: d[1], price: d[2], on: (st.deco || []).indexOf(d[0]) >= 0, emoji: d[4], note: d[3], toggle: true }));
+    if (cat === 'hair') return SHOP_HAIR.map((h, i) => ({ id: h[0], name: h[1], price: h[3], on: S.me.hair === 7 + i, emoji: '💇', note: 'For your pharmacist.' }));
+    if (cat === 'pow') return Object.keys(PW).map(k => ({ id: k, name: PW[k].name, price: pwCost(k), emoji: PW[k].emoji, note: PW[k].note, stack: true, count: S.pw[k] || 0 }));
+    return SHOP_CYBER.map(c => ({ id: c[1], name: c[2], price: c[4], on: ((S.cosmOn || {}).cyber) === c[1], emoji: c[3], note: 'For your pharmacist.' }));
+  }
+  function shopHTML() {
+    const cash = S.cash, rows = shopRows(shopCat);
+    const cats = SHOP_CATS.map(c => `<button type="button" class="chip" data-act="shopcat" data-v="${c[0]}" aria-pressed="${shopCat === c[0]}">${c[1]}</button>`).join('');
+    const cards = rows.map(r => {
+      const own = r.stack ? false : r.free || shopOwn(r.id), sw = r.sw ? `<span class="spsw"><i style="background:${r.sw[0]}"></i><i style="background:${r.sw[1]}"></i></span>` : `<span class="spem" aria-hidden="true">${r.emoji || ''}</span>`;
+      let btn;
+      if (!own) btn = `<button type="button" class="btn go" data-act="shop-buy" data-k="${shopCat}" data-id="${r.id}"${cash < r.price || (r.stack && r.count >= PW_MAX) ? ' disabled' : ''}>${r.stack && r.count >= PW_MAX ? 'Full' : 'Buy ' + money(r.price)}</button>`;
+      else if (r.toggle) btn = `<button type="button" class="btn" data-act="shop-use" data-k="${shopCat}" data-id="${r.id}" aria-pressed="${r.on}">${r.on ? 'Remove' : 'Place'}</button>`;
+      else btn = r.on ? '<span class="spon">Equipped</span>' : `<button type="button" class="btn" data-act="shop-use" data-k="${shopCat}" data-id="${r.id}">Use</button>`;
+      return `<div class="spcard${r.on ? ' on' : ''}">${sw}<div class="sptx"><b>${esc(r.name)}${r.stack ? ' <em class="pwn">x' + r.count + '</em>' : ''}</b>${r.note ? `<small>${esc(r.note)}</small>` : ''}</div>${btn}</div>`;
+    }).join('');
+    const bf = buffText(uniBuff()), hasT = S.up.tech >= 1;
+    const note = shopCat === 'uni' ? `<p class="note">${hasT ? (bf ? 'Your techs are earning bonuses: ' + bf + '.' : 'Pick a uniform to give your techs a bonus.') : 'Hire a Pharmacy Technician first. Uniform bonuses work once you have at least one tech.'}</p>` : shopCat === 'cyber' || shopCat === 'hair' ? '<p class="note">Bought items show up in the Character tab, where you can mix and match.</p>' : '';
+    return `<div class="spcash">Cash <b>${money(cash)}</b></div><div class="chips spcats" role="group" aria-label="Shop sections">${cats}</div>${note}<div class="spgrid">${cards}</div>`;
+  }
+  function shopBuy(kind, id) {
+    if (kind === 'pow') {
+      if (!PW[id]) return; const c = pwCost(id);
+      if ((S.pw[id] || 0) >= PW_MAX) { toast('You are holding the most ' + PW[id].name + ' you can carry.'); return; }
+      if (S.cash < c) { toast('Not enough cash for ' + PW[id].name + '.'); return; }
+      S.cash -= c; pwAdd(id, 1); SFX.play('unlock'); save(); renderStats(); toast('Bought ' + PW[id].name + '. You have ' + S.pw[id] + '.'); return;
+    }
+    const rows = shopRows(kind), r = rows.find(x => x.id === id); if (!r || r.free || shopOwn(id)) return;
+    if (S.cash < r.price) { toast('Not enough cash for ' + r.name + '.'); return; }
+    S.cash -= r.price; S.store.own.push(id); SFX.play('unlock'); shopUse(kind, id, true); save(); renderStats(); toast('Bought ' + r.name + '.');
+  }
+  function shopUse(kind, id, quiet) {
+    const st = S.store;
+    if (kind === 'walls') st.walls = id; else if (kind === 'floors') st.floor = id; else if (kind === 'uni') st.uni = id;
+    else if (kind === 'deco') { const i = st.deco.indexOf(id); if (i >= 0 && !quiet) st.deco.splice(i, 1); else if (i < 0) st.deco.push(id); }
+    else if (kind === 'hair') { const i = SHOP_HAIR.findIndex(h => h[0] === id); if (i >= 0) S.me.hair = 7 + i; }
+    else if (kind === 'cyber') { S.cosmOn = S.cosmOn || {}; S.cosmOn.cyber = id; }
+    save(); applyShop(); if (view === 'create') renderPanel();
+  }
   function createHTML() {
+    const tabs = S.me.done ? `<div class="chips ctabs" role="tablist" aria-label="Character screen"><button type="button" class="chip" role="tab" data-act="ctab" data-v="me" aria-pressed="${cTab === 'me'}">Character</button><button type="button" class="chip" role="tab" data-act="ctab" data-v="shop" aria-pressed="${cTab === 'shop'}">Shop</button></div>` : '';
+    if (S.me.done && cTab === 'shop') return `<div class="pane cpane"><h3>Pharmacy shop</h3>${tabs}${shopCat === 'hair' || shopCat === 'cyber' ? '<div class="mepv sticky">' + mePreview() + '</div>' : ''}${shopHTML()}<div class="btnrow"><button type="button" class="btn go" data-act="me-done">Done</button></div></div>`;
     const m = S.me, rows = crows().map(crowHTML).join('');
     const gear = (S.acc || 0) < 1 ? '' : `<div class="grp"><b>Rank gear</b><div class="chips">${ACCS.map((a, i) => { const k = i + 1, un = k <= (S.acc || 0), onN = un && (S.accOff || []).indexOf(k) < 0; return un ? `<button type="button" class="chip" data-act="acc-tog" data-v="${k}" aria-pressed="${onN}">${a[1]} ${a[0]}</button>` : ''; }).join('')}</div></div>`;
     const found = (S.cosm || []).length;
-    return `<div class="pane cpane"><h3>Your character</h3>
+    return `<div class="pane cpane"><h3>Your character</h3>${tabs}
       <div class="mepv sticky">${mePreview()}</div>
       <div class="grp"><b>Name your pharmacy</b><input id="shopname" class="field" type="text" maxlength="24" autocomplete="off" placeholder="Corner Rx" value="${esc(S.shop || '')}" aria-label="Pharmacy name"><p class="note">It goes on the sign above your shelves.</p></div>
       <p class="note">Use the arrows on each row to flip through your options, top to bottom. ${found ? found + '/' + COSM.length + ' cosmetics found.' : 'Open capsules from the lost pills vial (top bar) to unlock facial hair, hats, glasses and more.'}</p>
@@ -860,7 +1009,7 @@
   const CAL_NAMES = ['Bronze', 'Silver', 'Gold', 'Platinum'], CAL_ICON = ['\uD83E\uDD49', '\uD83E\uDD48', '\uD83E\uDD47', '\uD83D\uDC8E'];
   const weekQs = (n) => TOPQ.filter(q => q.wk === n && !wkTypeOff(q));
   const weekProg = (n) => { const qs = weekQs(n); return { done: qs.filter(q => (S.mastery[q.k] || {}).box >= 2).length, total: qs.length }; };
-  const weeksOpen = () => WEEKS.filter(w => (w.from <= todayStr() || S.set.ahead) && weekQs(w.n).length);
+  const weeksOpen = () => WEEKS.filter(w => wk2Open(w) && weekQs(w.n).length);
   const weeksMastered = () => weeksOpen().filter(w => { const p = weekProg(w.n); return p.total > 0 && p.done >= p.total; }).length;
   /* floating unlock cards: a shining picture, then it travels to where it lives */
   const pend = { frames: new Set(), pets: new Set() };
@@ -891,7 +1040,7 @@
   }
   /* an achievement pop-up for every weekly quiz (Top 300 and P3) the first time all of its questions are mastered */
   function checkWeekQuiz(silent) {
-    const isOpen = (w) => w.from <= todayStr() || (w.n > 100 ? S.set.ahead3 : S.set.ahead);
+    const isOpen = (w) => w.from <= todayStr() || (w.n > 100 ? p3On(w.n) : p2On(w.n));
     const mast = WEEKS.concat(P3WEEKS).filter(isOpen).filter(w => { const p = weekProg(w.n); return p.total > 0 && p.done >= p.total; });
     if (!S.awards.wkDone) { S.awards.wkDone = mast.map(w => w.n); save(); return; }
     const fresh = mast.filter(w => S.awards.wkDone.indexOf(w.n) < 0);
@@ -1050,10 +1199,10 @@
   /* restock draws from the weekly drug list: this week first, then earlier unlocked weeks */
   function shelfPairs() {
     const t = todayStr(), cw = curWeek(), seen = {};
-    const ok = DRUGS.filter(d => (d.w <= cw || (S.set.ahead && !S.set.wkOnly)) && WK[d.w] && (WK[d.w].from <= t || S.set.ahead) && brandPick(d) && brandPick(d).toLowerCase() !== d.g.toLowerCase() && d.g.length <= 26 && !/[;\/]/.test(d.g));
+    const ok = DRUGS.filter(d => WK[d.w] && p2On(d.w) && brandPick(d) && brandPick(d).toLowerCase() !== d.g.toLowerCase() && d.g.length <= 26 && !/[;\/]/.test(d.g));
     const uniq = (l) => l.filter(d => { const k = brandPick(d).toLowerCase(); if (seen[k]) return false; seen[k] = 1; return true; });
     const now = shuffle(ok.filter(d => d.w === cw)), old = shuffle(ok.filter(d => d.w !== cw));
-    const pick = uniq(S.set.wkOnly ? now : now.concat(old)).slice(0, 6);
+    const pick = uniq(now.concat(old)).slice(0, 6);
     if (pick.length < 6) return shuffle(BRANDS.slice()).slice(0, 6);
     return pick.map(d => [d.g, brandPick(d)]);
   }
@@ -1234,7 +1383,7 @@
     const q = refQ.trim().toLowerCase(), t = todayStr(), cw = curWeek();
     let h = '';
     WEEKS.forEach(w => {
-      const locked = w.from > t && !S.set.ahead;
+      const locked = !wk2Open(w);
       const list = DRUGS.filter(d => d.w === w.n && (!q || (d.g + ' ' + (d.b || '') + ' ' + (d.c || '')).toLowerCase().indexOf(q) >= 0));
       if (q && !list.length) return;
       if (locked) { if (!q) h += '<div class="rweek lockedw"><b>' + esc(w.t) + ' week ' + w.wk + ' · ' + esc(w.d) + '</b><small>Unlocks ' + esc(w.from) + '. Turn on Study ahead in settings to preview.</small></div>'; return; }
@@ -1344,7 +1493,7 @@
   function renderPanel() {
     const pn = $('#qpanel'); if (!pn) return;
     pn.classList.toggle('karen', !!(cur && cur.karen && !cur.done && view === 'q'));
-    const body = view === 'create' ? createHTML() : view === 'awards' ? awardsHTML() : view === 'phone' ? phoneHTML() : view === 'fp' || view === 'him' ? '' : view === 'shift' ? shiftHTML() : view === 'flash' ? fcHTML() : view === 'syn' ? synHTML() : view === 'ref' ? refHTML() : view === 'retire' ? retireHTML() : view === 'set' ? settingsHTML() : view === 'studies' ? studiesHTML() : (cur ? cardHTML() : '');
+    const body = view === 'create' ? createHTML() : view === 'awards' ? awardsHTML() : view === 'phone' ? phoneHTML() : view === 'fp' || view === 'him' ? '' : view === 'shift' ? shiftHTML() : view === 'daily' ? dailyHTML() : view === 'flash' ? fcHTML() : view === 'syn' ? synHTML() : view === 'ref' ? refHTML() : view === 'retire' ? retireHTML() : view === 'set' ? settingsHTML() : view === 'studies' ? studiesHTML() : (cur ? cardHTML() : '');
     $('#counter').innerHTML = qbar() + body;
     const nb = document.querySelector('.nbk');
     if (nb) {
@@ -1454,7 +1603,6 @@
       tech: '<circle cx="20" cy="14" r="5.5"/><path d="M9 29c1-6 5-9 11-9s10 3 11 9z"/>',
       train: '<path d="M20 9l14 7-14 7-14-7z"/><path d="M12 21v6c0 2 4 4 8 4s8-2 8-4v-6l-8 4z"/><rect x="32" y="17" width="2" height="9"/>',
       counsel: '<path d="M8 10h24a2 2 0 0 1 2 2v13a2 2 0 0 1-2 2H18l-7 5v-5H8a2 2 0 0 1-2-2V12a2 2 0 0 1 2-2z"/>',
-      library: '<rect x="8" y="9" width="7" height="22" rx="1.5"/><rect x="17" y="9" width="7" height="22" rx="1.5"/><path d="M26 11l6-1.5 4 20-6 1.5z"/>',
       robot: '<rect x="9" y="14" width="22" height="17" rx="4"/><rect x="19" y="7" width="2.5" height="7"/><circle cx="20" cy="6" r="2.5"/><circle cx="15" cy="22" r="2.6" style="fill:var(--amber)"/><circle cx="25" cy="22" r="2.6" style="fill:var(--amber)"/>'
     }[id];
     return `<svg viewBox="0 0 40 40" aria-hidden="true"><rect width="40" height="40" rx="12" style="fill:var(--teal-soft)"/><g style="fill:var(--teal-ink)">${g}</g></svg>`;
@@ -1504,7 +1652,6 @@
     const u = UPS.find(x => x.id === id), l = S.up[id], cost = u.cost(l);
     if (l >= u.max || S.cash < cost) return false;
     S.cash -= cost; S.up[id]++;
-    if (id === 'library') S.hintsLeft += 2;
     save(); renderStats(); renderStore(); renderUpgrades(); renderFranchise();
     if (view === 'q' && cur && !cur.empty) renderPanel();
     return true;
@@ -1574,7 +1721,7 @@
   function maybeTour() { if (S.me.done && !S.tutDone && !tourEl) showTour(); }
   /* ---- save code: the whole save as one long code, to move progress between devices or keep a backup ---- */
 /*@EXT@*/
-  const GAME_VERSION = 97;
+  const GAME_VERSION = 103;
   const b64u = (u8) => { let s = ''; for (let i = 0; i < u8.length; i += 0x8000) s += String.fromCharCode.apply(null, u8.subarray(i, i + 0x8000)); return btoa(s).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); };
   const unb64u = (t) => { const s = atob(t.replace(/-/g, '+').replace(/_/g, '/')), u = new Uint8Array(s.length); for (let i = 0; i < s.length; i++) u[i] = s.charCodeAt(i); return u; };
   const chk = (t) => { let h = 2166136261; for (let i = 0; i < t.length; i++) { h ^= t.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36); };
@@ -1636,6 +1783,11 @@
       case 'create': openView(view === 'create' ? 'q' : 'create'); if (view === 'q') { resumeTimers(); renderPanel(); } return;
       case 'awards': openView(view === 'awards' ? 'q' : 'awards'); if (view === 'q') { resumeTimers(); renderPanel(); } return;
       case 'me': { readShop(); const k = t.dataset.k, v = t.dataset.v; S.me[k] = (k === 'hair' || k === 'hairColor' || k === 'skin' || k === 'scrub') ? +v : v; save(); World.setPharmacist(meSpec()); renderPanel(); return; }
+      case 'ctab': readShop(); cTab = v === 'shop' ? 'shop' : 'me'; renderPanel(); return;
+      case 'shopcat': shopCat = v; renderPanel(); return;
+      case 'shop-buy': shopBuy(t.dataset.k, t.dataset.id); if (view === 'create') renderPanel(); return;
+      case 'shop-use': shopUse(t.dataset.k, t.dataset.id); return;
+      case 'pwshop': cTab = 'shop'; shopCat = 'pow'; openView('create'); return;
       case 'me-done': readShop(); S.me.done = true; save(); syncBrand(); backToQ(); maybeTour(); return;
       case 'back': if (view === 'syn') synExit(); if (view === 'shift') return shiftNext(false); readDraft(); const wasC = view === 'create' && !S.me.done; if (view === 'create') readShop(); if (wasC) { S.me.done = true; save(); } backToQ(); if (wasC) maybeTour(); return;
       case 'phone': return openPhone();
@@ -1649,6 +1801,8 @@
       case 'sc-copy': case 'sc-load': return saveCodeAct(t, a);
       case 'dev-elder': { const ok = World.ok && World.devElder(); toast(ok ? 'An elder patient is next in line. Use "Test: skip to next patient".' : 'No patient could be swapped right now.'); return; }
       case 'dev-next': if (view === 'q') newCard(); return;
+      case 'dev-recall': { const q = BANK.find(x => !x.ms && x.k !== lastKey); if (!q) return; S.recall = S.recall || []; if (!S.recall.some(r => r.k === q.k)) S.recall.push({ k: q.k, seed: 4321, body: 'obese', name: 'Rosa', due: 0, tries: 0, at: Date.now() - 2 * 864e5 }); forceSp = { recall: q.k, seed: 4321, body: 'obese' }; if (view === 'q') newCard(); return; }
+      case 'dev-regular': { const w = WEEKS[0]; S.reg = S.reg || {}; if (!S.reg[w.n]) { S.reg[w.n] = { n: w.n, name: 'Big Mike', seed: 7000 + w.n * 137, body: 'jacked', visits: 0, ok: 0, at: Date.now() }; if (World.ok && World.setMastery) World.setMastery(masteryList()); } forceSp = { regular: w.n, seed: S.reg[w.n].seed, body: 'jacked' }; if (view === 'q') newCard(); return; }
       case 'dev-pill': { const ok = World.ok && World.devPill(); toast(ok ? 'A pill popped out. Tap it.' : 'Could not spawn one.'); return; }
       case 'dev-bottle': learnOff(); fp.cool = 0; return startBottles();
       case 'dev-shelve': learnOff(); return startShelve(false);
@@ -1694,9 +1848,10 @@
       case 'fp-leave': return fpLeave();
       case 'fp-tip': return;
       case 'shelve': return startShelve(false);
+      case 'daily': openView(view === 'daily' ? 'q' : 'daily'); if (view === 'q') { resumeTimers(); renderPanel(); } return;
       case 'ref': openView(view === 'ref' ? 'q' : 'ref'); if (view === 'q') { resumeTimers(); renderPanel(); } return;
       case 'retire-new': {
-        S.retired = (S.retired || 0) + 1; S.cash = 0; S.franchises = 0; S.rep = 50; S.streak = 0; S.hintsLeft = 0; S.sinceHint = 0; S.up = defaults().up;
+        S.retired = (S.retired || 0) + 1; S.cash = 0; S.franchises = 0; S.rep = 50; S.streak = 0; S.up = defaults().up;
         save(); renderAll(); view = 'q'; newCard(); toast('Career #' + (S.retired + 1) + ' begins. Income +50% per retirement.'); return;
       }
       case 'jim-go': endInterrupt(); renderPanel(); return;
@@ -1709,9 +1864,10 @@
       case 'focus': st.focus = !st.focus; applyFocus(); toast(st.focus ? 'Focus mode on. No timer, events or 3D world.' : 'Focus mode off. The pharmacy is back.'); break;
       case 'tab-set': flipTab = true; openView('set'); return;
       case 'tab-studies': flipTab = true; openView('studies'); return;
-      case 'wkonly': st.wkOnly = !st.wkOnly; break;
-      case 'wkonly3': st.wkOnly3 = !st.wkOnly3; break;
-      case 'ahead3': st.ahead3 = !st.ahead3; break;
+      case 'wkpick': { const [k, x] = v.split(':'); const a = x === 'all' || x === 'none' || x === 'only' ? x : 'toggle'; if (wkPick(k, a === 'toggle' ? x : '', a) === false) return; break; }
+      case 'wkcourse': { const i = v.indexOf(':'); wkPick(v.slice(0, i), v.slice(i + 1), 'course'); break; }
+      case 'wkfold': st[v + 'fold'] = !st[v + 'fold']; break;
+      case 'wkup': st[v + 'up'] = !st[v + 'up']; break;
       case 'folder': st.folder = v === 'P1' || v === 'P3' ? v : 'P2'; break;
       case 'p3-only': CATS.forEach(c => st.topics[c[0]] = c[0] === 'TP3' || c[0] === 'T553'); break;
       case 'folder-only': {
@@ -1723,7 +1879,6 @@
         break;
       }
       case 'wktype': { st.wkTypes = st.wkTypes || {}; const on = WK_TYPES.filter(x => st.wkTypes[x[0]] !== false).length; if (st.wkTypes[v] !== false && on <= 1) { toast('Keep at least one kind of weekly question on.'); return; } st.wkTypes[v] = st.wkTypes[v] === false; break; }
-      case 'ahead': st.ahead = !st.ahead; break;
       case 'reset-set': S.set = defaults().set; break;
       case 'preview': readDraft(); $('#studyprev').innerHTML = previewHTML(parseStudy(draft.text, 'My notes')); return;
       case 'addstudy': return addStudy();
@@ -1752,11 +1907,13 @@
     if (t.classList.contains('opt')) return cur && cur.q && cur.q.ms ? msToggle(+t.dataset.i) : answer(+t.dataset.i);
     if (t.id === 'nextbtn') { if (cur && cur.insp && cur.insp.n < cur.insp.of) return inspContinue(); if (cur && cur.visit) return endVisit(); if (shiftDue()) return openShift(); return newCard(); }
     if (t.id === 'hintbtn') return useHint();
+    if (t.id === 'secbtn') return useSecond();
+    if (t.id === 'bindbtn') return useBinder();
     if (t.dataset.buy) { buyUp(t.dataset.buy); return; }
     if (t.id === 'frbtn') {
       if (S.cash < frCost()) return;
       if (armed !== 'fr') { armed = 'fr'; renderFranchise(); setTimeout(() => { if (armed === 'fr') { armed = null; renderFranchise(); } }, 4000); return; }
-      armed = null; S.cash = 0; S.franchises++; S.rep = 50; S.streak = 0; S.hintsLeft = 0; S.sinceHint = 0;
+      armed = null; S.cash = 0; S.franchises++; S.rep = 50; S.streak = 0;
       S.up = defaults().up; save(); renderAll(); newCard(); return;
     }
     if (t.id === 'resetbtn') {
@@ -1811,22 +1968,23 @@
   setInterval(() => { if (window.__rxLoading) return; try { localStorage.setItem(SAVE_KEY, JSON.stringify(S)); } catch (e) { /* ignore */ } }, 5000);
 
   { const sc = $('#savecard'); if (sc) sc.innerHTML = saveBoxHTML(); }
-  World.init({ host: $('#stage'), getS: () => S, tagInfo: tagInfo, onBuy: buyUp, onNotes: () => openView('studies'), notesInfo: customCount, karenRoll: karenRoll, sweatyRoll: sweatyRoll, elderRoll: elderRoll, eventRoll: eventRoll, onVisitor: visitClick, onVisitorArrive: visitArrive, capsuleOk: capsuleOk, onCapsule: onCapsule, onBrain: synEnter, onSynSite: onSynSite, onEvt: onEvt, pillOk: pillOk, onPill: onPill, onPhone: openPhone, onPolice: policeCome, himOk: himOk, onHimSpawn: onHimSpawn, onHimAngel: himAngelOk, onHimLand: himLand, onHimBless: onHimBless, onFp: fpClick, sign: () => shopName() + '|' + tierName() + ' #' + (S.franchises + 1) });
-  window.__rxDbg = () => ({ fp: fp, S: S, view: view, rush: rush, phoneR: phone.ringing, TOPQ: TOPQ, pool: poolQs, cur: cur, synQ: () => (typeof SYN !== 'undefined' ? SYN.q : null), synTap: id => onSynSite(id), offer: k => offerEvt(k, 'test'), onEvt: onEvt, holiday: () => holNow(), holN: () => holCount(), renderStats: renderStats, passive: passive, techRate: techRate, buyUp: buyUp, openVial: openVial, tabletTake: tabletTake, capsuleOpen: capsuleOpen, buffOn: buffOn, COSM: COSM });
+  World.init({ host: $('#stage'), getS: () => S, specialRoll: specialRoll, tagInfo: tagInfo, onBuy: buyUp, onNotes: () => openView('studies'), notesInfo: customCount, karenRoll: karenRoll, sweatyRoll: sweatyRoll, elderRoll: elderRoll, eventRoll: eventRoll, onVisitor: visitClick, onVisitorArrive: visitArrive, capsuleOk: capsuleOk, onCapsule: onCapsule, onBrain: synEnter, onSynSite: onSynSite, onEvt: onEvt, pillOk: pillOk, onPill: onPill, onPhone: openPhone, onPolice: policeCome, himOk: himOk, onHimSpawn: onHimSpawn, onHimAngel: himAngelOk, onHimLand: himLand, onHimBless: onHimBless, onFp: fpClick, sign: () => shopName() + '|' + tierName() + ' #' + (S.franchises + 1) });
+  window.__rxDbg = () => ({ nc: newCard, sp: specialRoll, fp: fp, S: S, view: view, rush: rush, phoneR: phone.ringing, TOPQ: TOPQ, pool: poolQs, cur: cur, synQ: () => (typeof SYN !== 'undefined' ? SYN.q : null), synTap: id => onSynSite(id), offer: k => offerEvt(k, 'test'), onEvt: onEvt, holiday: () => holNow(), holN: () => holCount(), renderStats: renderStats, passive: passive, techRate: techRate, buyUp: buyUp, openVial: openVial, tabletTake: tabletTake, capsuleOpen: capsuleOpen, buffOn: buffOn, COSM: COSM });
   if (!World.ok) $('#stage').classList.add('flat');
-  else { document.body.classList.add('fx'); World.setPharmacist(meSpec()); World.setAwards(S.awards); World.setCalendar(Math.min(4, S.awards.calW || 0), false, S.awards.calW || 0); }
+  else { document.body.classList.add('fx'); World.setPharmacist(meSpec()); World.setStore(S.store); World.setStaffLook(uniSpec()); World.setAwards(S.awards); World.setCalendar(Math.min(4, S.awards.calW || 0), false, S.awards.calW || 0); }
   applyFocus(); syncBrand(); sfxLabel();
   /* test tools: open the game with ?dev=1 on the end of the link to get extra menu buttons for trying events quickly */
   if (/[?&]dev=1/.test(location.search)) {
     const menu = $('#menu'), close = menu && menu.querySelector('.menuclose');
     if (menu && close) {
       const hr = document.createElement('hr'); menu.insertBefore(hr, close);
-      [['dev-pill', 'Test: pop a pill'], ['dev-elder', 'Test: elder patient next'], ['dev-next', 'Test: skip to next patient'], ['dev-bottle', 'Test: bottle check'], ['dev-shelve', 'Test: restock'], ['dev-prior', 'Test: prior auth'], ['dev-rush', 'Test: rush hour'], ['dev-insp', 'Test: health inspector next'], ['dev-driver', 'Test: delivery next'], ['dev-sky', 'Test: sky capsule'], ['dev-him-walk', 'Test: Himothy walks in next'], ['dev-him-asc', 'Test: Himothy ascension'], ['dev-him-angel', 'Test: Himothy angel flyover'], ['dev-him-smash', 'Test: Himothy smash (skip click)'], ['dev-plant', 'Test: plant capsule'], ['dev-fast', 'Test: skip slow start']].forEach(b => {
+      [['dev-pill', 'Test: pop a pill'], ['dev-elder', 'Test: elder patient next'], ['dev-next', 'Test: skip to next patient'], ['dev-recall', 'Test: recall patient'], ['dev-regular', 'Test: regular patient'], ['dev-bottle', 'Test: bottle check'], ['dev-shelve', 'Test: restock'], ['dev-prior', 'Test: prior auth'], ['dev-rush', 'Test: rush hour'], ['dev-insp', 'Test: health inspector next'], ['dev-driver', 'Test: delivery next'], ['dev-sky', 'Test: sky capsule'], ['dev-him-walk', 'Test: Himothy walks in next'], ['dev-him-asc', 'Test: Himothy ascension'], ['dev-him-angel', 'Test: Himothy angel flyover'], ['dev-him-smash', 'Test: Himothy smash (skip click)'], ['dev-plant', 'Test: plant capsule'], ['dev-fast', 'Test: skip slow start']].forEach(b => {
         const el = document.createElement('button'); el.type = 'button'; el.dataset.act = b[0]; el.innerHTML = '<i aria-hidden="true">\u2699</i><span>' + b[1] + '</span>'; menu.insertBefore(el, close);
       });
     }
   }
-  checkAwards(true);
+  if (S.libRefund) { const r = S.libRefund; delete S.libRefund; toast('The Reference Library is retired. Refunded ' + money(r) + '. Hint pills and more power-ups are in the Shop.'); save(); }
+  checkAwards(true); dailyBadge(); if (World.ok && World.setMastery) World.setMastery(masteryList()); checkRegulars();
   if (blessOn()) blessStart(false);
   if (S.lab && World.ok && World.setLab) World.setLab(true);
   syncLab();
