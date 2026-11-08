@@ -2,7 +2,7 @@ const {chromium}=require('playwright');
 (async()=>{const b=await chromium.launch();const p=await b.newPage({viewport:{width:1000,height:900}});const errs=[];p.on('pageerror',e=>errs.push(e.message));
 await p.route('**/three.min.js',r=>r.fulfill({path:'three-stub2.js',contentType:'text/javascript'}));
 await p.addInitScript(()=>{if(!localStorage.getItem('cornerRx.v1'))localStorage.setItem('cornerRx.v1',JSON.stringify({me:{done:true,name:'T',look:{}},served:30,correct:25,tutDone:true,playSec:999,cash:100,hintsLeft:3,up:{shelf:1,library:2}}))});
-await p.goto('file://'+process.cwd()+'/corner-rx.html');await p.waitForTimeout(900);
+await p.goto('file://'+process.cwd()+'/corner-rx.html?noconf=1');await p.waitForTimeout(900);
 await p.evaluate(()=>document.querySelectorAll('.tour').forEach(e=>e.remove()));
 const D=()=>p.evaluate(()=>{const d=window.__rxDbg();return {cash:d.S.cash,pw:d.S.pw,up:d.S.up,hl:d.S.hintsLeft}});
 console.log('migrated',JSON.stringify(await D()));

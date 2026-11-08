@@ -2,7 +2,7 @@ const {chromium}=require('playwright');
 (async()=>{const b=await chromium.launch();const p=await b.newPage({viewport:{width:900,height:900}});const errs=[];p.on('pageerror',e=>errs.push(e.message));
 await p.route('**/three.min.js',r=>r.fulfill({path:'three-stub2.js',contentType:'text/javascript'}));
 await p.addInitScript(()=>{localStorage.setItem('cornerRx.v1',JSON.stringify({me:{done:true,name:'T',look:{}},served:30,correct:25,tutDone:true,playSec:999}))});
-await p.goto('file://'+process.cwd()+'/corner-rx.html');await p.waitForTimeout(800);
+await p.goto('file://'+process.cwd()+'/corner-rx.html?noconf=1');await p.waitForTimeout(800);
 await p.evaluate(()=>document.querySelectorAll('.tour').forEach(e=>e.remove()));
 await p.evaluate(()=>{const t=[...document.querySelectorAll('[data-act]')].find(e=>/settings|topics/i.test(e.dataset.act+e.textContent)&&e.dataset.act!=='topic');t&&t.click()});await p.waitForTimeout(300);
 const st=async()=>p.evaluate(()=>({sw:[...document.querySelectorAll('.swt')].map(e=>e.getAttribute('aria-checked')),chips:[...document.querySelectorAll('.chip.tp')].map(e=>e.getAttribute('aria-pressed')).join('')}));

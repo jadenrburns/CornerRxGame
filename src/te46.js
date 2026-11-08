@@ -2,7 +2,7 @@ const {chromium}=require('playwright');
 (async()=>{const b=await chromium.launch();const p=await b.newPage({viewport:{width:420,height:900}});const errs=[];p.on('pageerror',e=>errs.push(e.message));
 await p.route('**/three.min.js',r=>r.fulfill({path:'three-stub2.js',contentType:'text/javascript'}));
 await p.addInitScript(()=>{if(!localStorage.getItem('cornerRx.v1'))localStorage.setItem('cornerRx.v1',JSON.stringify({me:{done:true,name:'T',look:{}},served:40,correct:25,tutDone:true,playSec:999,set:{mode:'even'}}))});
-await p.goto('file://'+process.cwd()+'/corner-rx.html');await p.waitForTimeout(900);
+await p.goto('file://'+process.cwd()+'/corner-rx.html?noconf=1');await p.waitForTimeout(900);
 await p.evaluate(()=>document.querySelectorAll('.tour').forEach(e=>e.remove()));
 const step=async(right)=>p.evaluate((right)=>{const d=window.__rxDbg();const c=d.cur;if(!c||!c.q){const n=document.querySelector('#nextbtn');n&&n.click();return 'x'}if(c.elder&&c.elderStage<2){const e=document.querySelector('[data-elder]');e&&!e.disabled&&e.click();return 'e'}if(c.done){const n=document.querySelector('#nextbtn');n&&n.click();return 'n'}if(c.q.ms){c.opts.forEach((o,i)=>{if(right===o.ok)c.sel[i]=true});const m=document.querySelector('#msgo');if(m){m.disabled=false;m.click()}return 'm'}const i=c.opts.findIndex(o=>right?o.ok:!o.ok&&!o.gone);const bt=document.querySelector('.opt[data-i="'+i+'"]');bt&&bt.click();return 'a'},right);
 // 1. miss a plain question

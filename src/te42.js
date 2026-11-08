@@ -2,7 +2,7 @@ const {chromium}=require('playwright');
 (async()=>{const b=await chromium.launch();const p=await b.newPage({viewport:{width:420,height:900}});const errs=[];p.on('pageerror',e=>errs.push(e.message));
 await p.route('**/three.min.js',r=>r.fulfill({path:'three-stub2.js',contentType:'text/javascript'}));
 await p.addInitScript(()=>{if(!localStorage.getItem('cornerRx.v1'))localStorage.setItem('cornerRx.v1',JSON.stringify({me:{done:true,name:'T',look:{}},served:30,correct:25,tutDone:true,playSec:999,set:{folder:'P3'}}))});
-await p.goto('file://'+process.cwd()+'/corner-rx.html');await p.waitForTimeout(900);
+await p.goto('file://'+process.cwd()+'/corner-rx.html?noconf=1');await p.waitForTimeout(900);
 await p.evaluate(()=>document.querySelectorAll('.tour').forEach(e=>e.remove()));
 const wks=()=>p.evaluate(()=>{const d=window.__rxDbg();const s=new Set();d.pool().filter(q=>q.c==='TP3').forEach(q=>s.add(q.wk));return [...s].sort((a,b)=>a-b).join(',')});
 console.log('all weeks',await wks());
