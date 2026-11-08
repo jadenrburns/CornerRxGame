@@ -29,10 +29,11 @@
   const NAMES = ['Marcus', 'Priya', 'Mrs. Alvarez', 'Devon', 'Mei', 'Mr. Okafor', 'Sofia', 'Grandpa Joe', 'Hannah', 'Luis', 'Dr. Patel', 'Aisha', 'Tom', 'Nadia', 'Ben', 'Ms. Lindqvist'];
   const RANKS = [[0, 'Pharmacy Intern'], [20, 'Pharmacy Technician'], [60, 'Staff Pharmacist'], [130, 'Clinical Pharmacist'], [250, 'Residency Preceptor'], [450, 'Chief of Pharmacy'], [700, 'Director of Pharmacy'], [1000, 'Pharmacy Legend']];
   const MODES = [
-    ['mixed', 'Smart mix', 'Built for faster mastery: new and missed questions come up most, a miss returns within 3 cards, a first-try hit counts double, and mastered ones fade out.'],
-    ['missed', 'Review misses', 'Only questions on your Review Shelf.'],
-    ['new', 'New only', 'Only questions you have never answered.'],
-    ['even', 'Even shuffle', 'Every question has the same chance.']
+    ['mixed', 'Smart mix', 'Recommended. After each answer you rate how sure you were, and the game schedules reviews with the SM-2 spaced repetition method. New and missed questions come up most, a miss returns within 3 cards, questions you were certain about but missed return first, and mastered ones fade out.'],
+    ['review', 'Individual review', 'Your daily review. Only questions whose review date has arrived, from every topic you have studied, with the same confidence rating. Skip it on days you are focusing on something else and it just waits.'],
+    ['missed', 'Review misses', 'Only questions on your Review Shelf. No confidence rating or review scheduling.'],
+    ['new', 'New only', 'Only questions you have never answered. No confidence rating or review scheduling.'],
+    ['even', 'Linear', 'Plain practice. Every question has the same chance, with no confidence rating and no review scheduling. Pick this if you want simple drilling.']
   ];
   const UPS = [
     { id: 'shelf', short: 'Shelves', name: 'Stocked Shelves', max: 20, cost: l => Math.round(40 * Math.pow(1.55, l)), desc: l => `Each sale pays +25% more. Now +${l * 25}%.` },
@@ -368,6 +369,7 @@
   const todayStr = () => { const d = new Date(); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); };
   function eligible(q) {
     const st = S.set;
+    if (st.mode === 'review') return !(q.from && q.from > todayStr()) && srDue(S.mastery[q.k]);
     if (q.c === 'TP3') { if (!p3On(q.wk)) return false; } else if (q.c === 'TOP') { if (!p2On(q.wk)) return false; } else if (q.from && q.from > todayStr()) return false;
     if (isTop(q) && wkTypeOff(q)) return false;
     if (!st.topics[q.c] || st.diffs.indexOf(q.d) < 0) return false;
@@ -433,7 +435,7 @@
   const labOn = () => !!S.lab;
   const LEARN_SEC = 300, learning = () => (S.playSec || 0) < LEARN_SEC; // the first five minutes: slower line, no surprise events
   const timerOn = () => S.set.timer && !S.set.focus && !labOn();
-  const calcOn = () => S.set.topics.CALC && S.set.mode !== 'missed';
+  const calcOn = () => S.set.topics.CALC && S.set.mode !== 'missed' && S.set.mode !== 'review';
   const retry = [];
   function chooseQ(karen) {
     let qs = poolQs();
@@ -446,7 +448,7 @@
     }
     const items = qs.map(q => {
       let w = 1;
-      if (S.set.mode === 'mixed') { const m = S.mastery[q.k], box = m ? m.box : -1; w = box < 0 ? 4 : [10, 5, 0.8, 0.15][box]; if (m && reviewDue(m)) w = Math.max(w, 4 + Math.min(6, Math.floor((Date.now() - (m.due || m.t || 0)) / 864e5))); if (m && m.cw) w *= 1.6; }
+      if (S.set.mode === 'mixed') { const m = S.mastery[q.k], box = m ? m.box : -1; w = box < 0 ? 4 : [10, 5, 0.8, 0.15][box]; if (m && m.cw) w *= 1.6; }
       if (isTop(q)) w *= q.wk === wkNow(q) ? 3 : q.from > todayStr() ? 1.5 : 0.7;
       return [q, w];
     });
@@ -555,7 +557,7 @@
     World.karenLoss(u.id);
     return { lost: u, from, to: from - 1 };
   }
-  const confNeeded = () => S.set.conf !== false && cur && cur.q && !cur.q.gen && !cur.karen && !cur.sweaty && !cur.elder && !cur.lab && !cur.caller && !cur.evt && !cur.visit;
+  const confNeeded = () => S.set.conf !== false && srOn() && cur && cur.q && !cur.q.gen && !cur.karen && !cur.sweaty && !cur.elder && !cur.lab && !cur.caller && !cur.evt && !cur.visit;
   function answer(idx, conf) {
     if (!cur || cur.empty || cur.done || view !== 'q') return;
     if (cur.elder && cur.elderStage < 2) { if (idx >= 0 && idx < 2 && cur.elderStage === 0) elderPick(); return; }
@@ -641,11 +643,11 @@
       let inc = wasNew ? 2 : 1;
       if (cf === 'guess') { m.gr = (m.gr || 0) + 1; if (m.gr >= 2) m.gr = 0; else inc = wasNew ? 1 : 0; } else m.gr = 0;
       if (mok) { m.ok++; m.lapse = 0; m.box = Math.min(3, m.box + inc); } else slip(m);
-      srUpdate(m, mok, cf);
+      if (srOn()) srUpdate(m, mok, cf);
       if (mok && wasDue) chips.push('<span>memory check passed</span>');
-      if (mok && m.box >= 2) chips.push('<span>next review in ' + fmtDays(m.d) + '</span>');
-      if (cf === 'certain' && !mok) chips.push('<span>you were certain, so this returns first</span>');
-      else if (cf === 'guess' && mok) chips.push('<span>lucky guess? it will be back soon</span>');
+      if (mok && m.box >= 2 && srOn()) chips.push('<span>next review in ' + fmtDays(m.d) + '</span>');
+      if (srOn() && cf === 'certain' && !mok) chips.push('<span>you were certain, so this returns first</span>');
+      else if (srOn() && cf === 'guess' && mok) chips.push('<span>lucky guess? it will be back soon</span>');
       if (S.set.mode === 'mixed') {
         const ri = retry.findIndex(r => r.k === q.k); if (ri >= 0) retry.splice(ri, 1);
         if (!mok) retry.push({ k: q.k, due: S.served + 3 });
@@ -757,6 +759,7 @@
     return `<div class="jim" style="grid-row:${j.a + 1} / span 2" role="alert">${avatar(7771, 'idle', false, true)}<div><p>${esc(j.line)}</p><div class="jbar"><i id="jimbar"></i></div></div><button type="button" class="mini" id="jimgo" data-act="jim-go" hidden>Not yet, Jim</button></div>`;
   }
   function cardHTML() {
+    if (cur.empty && S.set.mode === 'review') { const nx = nextDueText(); return `<div class="empty-q"><h3>Nothing due for review</h3><p>${nx ? 'Your next review is due in ' + nx + '.' : 'Answer questions in Smart mix and they will start coming back here on a schedule.'}</p><div class="btnrow"><button class="btn go" type="button" data-act="mode-go" data-v="mixed">Back to Smart mix</button><button class="btn" type="button" data-act="settings">Open settings</button></div></div>`; }
     if (cur.empty) return `<div class="empty-q"><h3>No questions match your settings</h3><p>Loosen the topics, level or mode, or add your own studies.</p><div class="btnrow"><button class="btn go" type="button" data-act="settings">Open settings</button><button class="btn" type="button" data-act="studies">Add my studies</button></div></div>`;
     if (cur.elder && cur.elderStage < 2) return elderHTML();
     const q = cur.q, pad = String(cur.num).padStart(5, '0'), keys = ['1', '2', '3', '4', '5', '6'];
@@ -835,7 +838,7 @@
     const tox = CATS.filter(c => c[0] === 'PT3' || c[0] === 'PT3G' || c[0] === 'PT4').map(chipOf).join('');
     const thx = CATS.filter(c => c[0] === 'TH3').map(chipOf).join('');
     const diffs = [[1, 'Level 1 easy'], [2, 'Level 2 medium'], [3, 'Level 3 hard']].map(d => `<button type="button" class="chip" data-act="diff" data-v="${d[0]}" aria-pressed="${st.diffs.indexOf(d[0]) >= 0}">${d[1]}</button>`).join('');
-    const modes = MODES.map(m => `<button type="button" class="chip" data-act="mode" data-v="${m[0]}" aria-pressed="${st.mode === m[0]}">${m[1]}</button>`).join('');
+    const modes = MODES.map(m => `<button type="button" class="chip" data-act="mode" data-v="${m[0]}" aria-pressed="${st.mode === m[0]}">${m[1]}${m[0] === 'review' && dueCount() ? ' (' + dueCount() + ' due)' : ''}</button>`).join('');
     const n = poolQs().length;
     const fold = st.folder === 'P1' || st.folder === 'P3' ? st.folder : 'P2';
     const inFold = (f, c) => f === 'P3' ? (c[0] === 'TP3' || c[0] === 'T553') : f === 'P2' ? !(c[0] === 'TP3' || c[0] === 'T553') : false;
@@ -848,7 +851,7 @@
       <div class="grp"><b>Mode</b><div class="chips">${modes}</div><p class="note">${MODES.find(m => m[0] === st.mode)[2]}</p></div>
       <div class="grp"><b>Compounding pharmacy</b><div class="chips"><button type="button" class="chip" data-act="labk" data-v="comp" aria-pressed="${(S.labK || {}).comp !== false}">Compounding math</button><button type="button" class="chip" data-act="labk" data-v="pk" aria-pressed="${(S.labK || {}).pk !== false}">Kinetics</button></div><p class="note">Used when you tap Switch to compounding in the menu. Level chips above apply there too. ${S.labN ? 'Solved at the bench: ' + S.labOK + ' of ' + S.labN + '.' : ''}</p></div>
       ${wkSchedHTML('p2', 'Weekly drugs')}
-      <div class="grp"><b>Confidence ratings</b><div class="chips"><button type="button" class="chip" data-act="conf" aria-pressed="${st.conf !== false}">Ask how sure I am ${st.conf !== false ? 'on' : 'off'}</button></div><p class="note">After you pick an answer, rate Guess, Pretty sure or Certain before the result shows. Spaced review (SM-2) uses it: certain and right pushes a question far out, a guess comes back soon, certain but wrong returns first.</p></div>
+      <div class="grp"><b>Confidence ratings</b><div class="chips"><button type="button" class="chip" data-act="conf" aria-pressed="${st.conf !== false}">Ask how sure I am ${st.conf !== false ? 'on' : 'off'}</button></div><p class="note">After you pick an answer, rate Guess, Pretty sure or Certain before the result shows. Works in Smart mix and Individual review only. Spaced review (SM-2) uses it: certain and right pushes a question far out, a guess comes back soon, certain but wrong returns first.</p></div>
       <div class="grp"><b>Speed bonus</b><div class="chips"><button type="button" class="chip" data-act="timer" aria-pressed="${st.timer}">Timer bonus ${st.timer ? 'on' : 'off'}</button></div><p class="note">Turn it off to study without time pressure. Karen still has a limit.</p></div>
       `;
     const p3 = `${fsw('P3')}<h3>P3 weekly drugs</h3><p class="sub">Drug list sheets by system, one set per week. Changes apply to the next patient.</p>
@@ -1168,7 +1171,7 @@
     if (!q || !q.k) return;
     const m = srSeed(S.mastery[q.k] || { box: 0, seen: 0, ok: 0 });
     m.seen++; if (ok) { m.ok++; m.lapse = 0; m.box = Math.min(3, m.box + 1); } else slip(m);
-    srUpdate(m, ok, undefined);
+    if (srOn()) srUpdate(m, ok, undefined);
     S.mastery[q.k] = m;
     const mi = S.missed.indexOf(q.k);
     if (!ok && mi < 0) S.missed.push(q.k);
@@ -1480,7 +1483,7 @@
     }
     const m = srSeed(S.mastery[q.k] || { box: 0, seen: 0, ok: 0 });
     m.seen++; if (ok) { m.ok++; m.lapse = 0; m.box = Math.min(3, m.box + 1); } else slip(m);
-    srUpdate(m, ok, undefined);
+    if (srOn()) srUpdate(m, ok, undefined);
     S.mastery[q.k] = m;
     const mi = S.missed.indexOf(q.k);
     if (!ok && mi < 0) S.missed.push(q.k);
@@ -1646,7 +1649,7 @@
   }
   function masteryRow(label, n, total) { return `<div class="mrow"><b>${esc(label)}</b><span>${n}/${total}</span><div class="bar"><i style="width:${total ? n / total * 100 : 0}%"></i></div></div>`; }
   function renderMastery() {
-    let h = '<h2>Mastery by topic <small>2 right in a row = mastered</small></h2>' + calibNote() + (dueCount() ? '<p class="note">' + dueCount() + ' mastered question' + (dueCount() === 1 ? ' is' : 's are') + ' ready for a memory check. They return in your mix on their own.</p>' : '');
+    let h = '<h2>Mastery by topic <small>2 right in a row = mastered</small></h2>' + calibNote() + (dueCount() ? '<p class="note"><b>' + dueCount() + ' question' + (dueCount() === 1 ? ' is' : 's are') + ' due for review.</b> Pick Individual review in Settings whenever you want to run through them. They wait if you are busy with something else.</p>' : '');
     CATS.forEach(c => {
       if (c[0] === 'MY') return;
       if (c[0] === 'CALC') { h += `<div class="mrow"><b>${c[1]}</b><span>${S.calcOK} solved</span><div class="bar"><i style="width:${Math.min(100, S.calcOK / 20 * 100)}%"></i></div></div>`; return; }
@@ -1743,7 +1746,7 @@
   function maybeTour() { if (S.me.done && !S.tutDone && !tourEl) showTour(); }
   /* ---- save code: the whole save as one long code, to move progress between devices or keep a backup ---- */
 /*@EXT@*/
-  const GAME_VERSION = 107;
+  const GAME_VERSION = 108;
   const b64u = (u8) => { let s = ''; for (let i = 0; i < u8.length; i += 0x8000) s += String.fromCharCode.apply(null, u8.subarray(i, i + 0x8000)); return btoa(s).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); };
   const unb64u = (t) => { const s = atob(t.replace(/-/g, '+').replace(/_/g, '/')), u = new Uint8Array(s.length); for (let i = 0; i < s.length; i++) u[i] = s.charCodeAt(i); return u; };
   const chk = (t) => { let h = 2166136261; for (let i = 0; i < t.length; i++) { h ^= t.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36); };
@@ -1882,6 +1885,7 @@
       case 'topics-none': CATS.forEach(c => st.topics[c[0]] = false); break;
       case 'diff': { const i = st.diffs.indexOf(+v); if (i >= 0) { if (st.diffs.length > 1) st.diffs.splice(i, 1); } else st.diffs.push(+v); break; }
       case 'mode': st.mode = v; break;
+      case 'mode-go': st.mode = v; save(); newCard(); return;
       case 'timer': st.timer = !st.timer; break;
       case 'conf': st.conf = st.conf === false; if (cur) cur.pend = undefined; break;
       case 'focus': st.focus = !st.focus; applyFocus(); toast(st.focus ? 'Focus mode on. No timer, events or 3D world.' : 'Focus mode off. The pharmacy is back.'); break;

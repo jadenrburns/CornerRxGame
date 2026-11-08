@@ -176,7 +176,11 @@
     let cw = 0; for (const k in S.mastery) if (BYKEY[k] && S.mastery[k].cw) cw++;
     return '<p class="note"><b>Your confidence check:</b> right when you said Certain: ' + pc('certain') + ' &middot; Pretty sure: ' + pc('sure') + ' &middot; Guess: ' + pc('guess') + '.' + (cw ? ' ' + cw + ' question' + (cw === 1 ? '' : 's') + ' you were certain about but missed. Those return first.' : '') + '</p>';
   }
-  function dueCount() { let n = 0; for (const k in S.mastery) if (BYKEY[k] && reviewDue(S.mastery[k])) n++; return n; }
+  // due for the daily review: SM-2 date has arrived (older saves: the old memory-check ladder)
+  function srDue(m) { return !!(m && m.seen > 0 && (m.due !== undefined ? m.due <= Date.now() : reviewDue(m))); }
+  function dueCount() { let n = 0; for (const k in S.mastery) if (BYKEY[k] && srDue(S.mastery[k])) n++; return n; }
+  function nextDueText() { let t = 0; for (const k in S.mastery) { const m = S.mastery[k]; if (BYKEY[k] && m && m.due > Date.now() && (!t || m.due < t)) t = m.due; } return t ? fmtDays((t - Date.now()) / 864e5) : ''; }
+  const srOn = () => S.set.mode === 'mixed' || S.set.mode === 'review';
 
   /* ---- shifts: every 10 patients you get a report with what you missed ---- */
   const SHIFT_LEN = 10;
