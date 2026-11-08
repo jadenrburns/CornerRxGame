@@ -159,6 +159,8 @@
   function srSeed(m) { if (m.n === undefined && m.seen > 0) { m.n = m.box >= 2 ? 2 : m.box >= 1 ? 1 : 0; m.d = m.n === 2 ? 6 : m.n === 1 ? 1 : 0; } return m; } // older saves: start SM-2 from the existing box
   function srUpdate(m, ok, conf) {
     const q = srGrade(ok, conf);
+    const early = q >= 3 && m.n > 0 && m.due > Date.now(); // an extra right answer before the review date is practice, not a longer interval
+    if (early) { if (conf) { const c = S.cf = S.cf || {}; const o = c[conf] = c[conf] || { n: 0, ok: 0 }; o.n++; o.ok++; } m.cw = 0; return; }
     if (m.n === undefined) { m.n = 0; m.d = 0; }
     if (!m.ef) m.ef = 2.5;
     if (q >= 3) { m.n++; m.d = m.n === 1 ? 1 : m.n === 2 ? 6 : Math.round((m.d || 6) * m.ef); } else { m.n = 0; m.d = 1; }

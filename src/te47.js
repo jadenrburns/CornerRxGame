@@ -5,7 +5,7 @@ await p.addInitScript(()=>{if(!localStorage.getItem('cornerRx.v1'))localStorage.
 await p.goto('file://'+process.cwd()+'/corner-rx.html');await p.waitForTimeout(900);
 await p.evaluate(()=>document.querySelectorAll('.tour').forEach(e=>e.remove()));
 // SM-2 math
-console.log('sm2',JSON.stringify(await p.evaluate(()=>{const d=window.__rxDbg();const m={box:0,seen:0,ok:0},o=[];const s=(ok,c)=>{d.sr(m,ok,c);o.push([m.n,m.d,m.ef])};s(true,'certain');s(true,'certain');s(true,'certain');s(false,'certain');s(true,'guess');return o})));
+console.log('sm2',JSON.stringify(await p.evaluate(()=>{const d=window.__rxDbg();const m={box:0,seen:0,ok:0},o=[];const s=(ok,c)=>{m.due=0;d.sr(m,ok,c);o.push([m.n,m.d,m.ef])};s(true,'certain');s(true,'certain');s(true,'certain');s(false,'certain');s(true,'guess');return o})));
 // get a single-answer question card
 async function card(){for(let i=0;i<30;i++){const r=await p.evaluate(()=>{const d=window.__rxDbg();if(d.cur&&d.cur.q&&!d.cur.done&&!d.cur.q.ms&&!d.cur.q.gen&&!d.cur.karen&&!d.cur.sweaty&&!d.cur.elder&&!d.cur.evt&&!d.cur.caller&&!d.cur.visit&&!d.cur.lab)return 1;const n=document.querySelector('#nextbtn');if(n)n.click();else d.nc();return 0});if(r)return true;await p.waitForTimeout(80)}return false}
 console.log('got card',await card());
