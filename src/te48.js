@@ -8,11 +8,11 @@ const single=`(d)=>d.cur&&d.cur.q&&!d.cur.done&&!d.cur.q.ms&&!d.cur.q.gen&&!d.cu
 async function card(){for(let i=0;i<40;i++){const r=await p.evaluate(`(()=>{const d=window.__rxDbg();if((${single})(d))return 1;const n=document.querySelector('#nextbtn');if(n)n.click();else d.nc();return 0})()`);if(r)return true;await p.waitForTimeout(60)}return false}
 const modes=await p.evaluate(()=>{document.body.insertAdjacentHTML('beforeend','<button id="ts" data-act="settings"></button>');document.getElementById('ts').click();return [...document.querySelectorAll('[data-act="mode"]')].map(x=>x.innerText)});
 console.log('modes',modes);await p.evaluate(()=>window.__rxDbg().nc());
-// Linear: no prompt
-await p.evaluate(()=>{window.__rxDbg().S.set.mode='even'});console.log('card',await card());
+// Review misses / New only: no prompt
+await p.evaluate(()=>{window.__rxDbg().S.set.mode='new'});console.log('card',await card());
 const ri=await p.evaluate(()=>window.__rxDbg().cur.opts.findIndex(o=>o.ok));
 await p.click('.opt[data-i="'+ri+'"]');await p.waitForTimeout(200);
-console.log('linear: done',await p.evaluate(()=>window.__rxDbg().cur.done),'confbar',await p.$$eval('.confbar',e=>e.length),'sm2 fields',await p.evaluate(()=>{const d=window.__rxDbg();const m=d.S.mastery[d.cur.q.k];return m.due===undefined&&m.n===undefined}));
+console.log('new-only: done',await p.evaluate(()=>window.__rxDbg().cur.done),'confbar',await p.$$eval('.confbar',e=>e.length),'sm2 fields',await p.evaluate(()=>{const d=window.__rxDbg();const m=d.S.mastery[d.cur.q.k];return m.due===undefined&&m.n===undefined}));
 // Smart mix: prompt + sm2
 await p.evaluate(()=>{window.__rxDbg().S.set.mode='mixed'});console.log('card',await card());
 await p.click('.opt[data-i="0"]');await p.waitForTimeout(150);
