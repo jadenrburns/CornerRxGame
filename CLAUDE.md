@@ -37,3 +37,8 @@ Node + Playwright, run from `src/`: `node te38.js` etc. They load `corner-rx.htm
 - Questions use plain language; no em dashes.
 - 3D can be checked visually in the build environment: the user attaches `three.min.js` (r128, from cdnjs), then run `THREE_JS=/path/three.min.js SHOT_DIR=/some/dir node shot3d.js <dir-arg> dev-him-asc 12 900` from `src/` (args: ignored, dev button id, frame count, ms between frames; the first arg is only the scratchpad fallback path). It uses headless Chromium with SwiftShader. The sandbox cannot download three.js itself. Still confirm by playing with `?dev=1`.
 - Saves live in the browser (`localStorage`); keep save-format changes backward compatible.
+
+## Confidence and SM-2 review
+- After picking an answer the card shows "How sure are you?" (Guess / Pretty sure / Certain, keys 1 to 3) before the result. `answer(idx, conf)` in `game.js` gates on `confNeeded()` (skipped for generated calc, Karen, Jim, elder, lab, callers, events, visitors, and when `S.set.conf === false`). `cur.pend` holds the pending pick; `confBar()` draws the buttons.
+- `ext.js` has the SM-2 code: `srGrade` (grade 0 to 5 from correctness and confidence), `srUpdate` (fields on `S.mastery[k]`: `n` reps, `d` interval days, `ef` ease, `due` timestamp, `cw` certain-but-wrong flag, `gr` consecutive guess-rights), `srSeed` (starts older saves from their box), `reviewDue` (uses `due`, falls back to the old `iv`/`t` ladder), `calibNote` (accuracy by confidence, `S.cf`). The old Leitner `box` still drives mastery (>= 2); a guess-right does not raise it unless it happens twice in a row.
+- `chooseQ` smart mix boosts due reviews and `cw` questions. Test: `te47`. Other tests load `corner-rx.html?noconf=1` to skip the prompt.

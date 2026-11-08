@@ -54,11 +54,12 @@
     return { cash: 0, earned: 0, rep: 50, streak: 0, best: 0, correct: 0, wrong: 0, served: 0, franchises: 0,
       pw: { hint: 0, second: 0, binder: 0 }, daily: null, recall: [], reg: {}, calcOK: 0, mastery: {}, missed: [], karenCd: 0, karenWin: 0, karenLoss: 0, sweatyCd: 0, jimWin: 0, jimLoss: 0, phoneOK: 0, phoneBad: 0, phoneMiss: 0, lastShelve: 0, retired: 0, shelveOK: 0, shelveBad: 0, priorN: 0, decks: [],
       me: { done: false, body: 'normal', gender: 'n', hair: 0, hairColor: 0, skin: 1, scrub: 0, shirt: 0, shoes: 3 }, awards: { frames: [], pets: [] },
-      set: { topics: topics, diffs: [1, 2, 3], mode: 'mixed', timer: true, focus: false },
+      set: { topics: topics, diffs: [1, 2, 3], mode: 'mixed', timer: true, focus: false, conf: true },
       vial: [], cosm: [], cosmOn: {}, pillN: 0, store: { own: [], walls: 'w0', floor: 'f0', uni: '', deco: [] },
       up: { shelf: 0, tech: 0, train: 0, counsel: 0, robot: 0 } };
   }
   let S = load();
+  if (/[?&]noconf=1/.test(location.search)) S.set.conf = false; // tests: skip the confidence prompt
   if (S.playSec === undefined) S.playSec = S.served > 0 ? 300 : 0; // people who already play skip the slow start
   if (S.tutDone === undefined && S.served > 0) S.tutDone = true;
   function load() {
@@ -445,7 +446,7 @@
     }
     const items = qs.map(q => {
       let w = 1;
-      if (S.set.mode === 'mixed') { const m = S.mastery[q.k], box = m ? m.box : -1; w = box < 0 ? 4 : [10, 5, 0.8, 0.15][box]; }
+      if (S.set.mode === 'mixed') { const m = S.mastery[q.k], box = m ? m.box : -1; w = box < 0 ? 4 : [10, 5, 0.8, 0.15][box]; if (m && reviewDue(m)) w = Math.max(w, 4 + Math.min(6, Math.floor((Date.now() - (m.due || m.t || 0)) / 864e5))); if (m && m.cw) w *= 1.6; }
       if (isTop(q)) w *= q.wk === wkNow(q) ? 3 : q.from > todayStr() ? 1.5 : 0.7;
       return [q, w];
     });
@@ -554,10 +555,16 @@
     World.karenLoss(u.id);
     return { lost: u, from, to: from - 1 };
   }
-  function answer(idx) {
+  const confNeeded = () => S.set.conf !== false && cur && cur.q && !cur.q.gen && !cur.karen && !cur.sweaty && !cur.elder && !cur.lab && !cur.caller && !cur.evt && !cur.visit;
+  function answer(idx, conf) {
     if (!cur || cur.empty || cur.done || view !== 'q') return;
     if (cur.elder && cur.elderStage < 2) { if (idx >= 0 && idx < 2 && cur.elderStage === 0) elderPick(); return; }
     const q = cur.q; let o = cur.opts[idx], msOk = null;
+    if (conf === undefined && confNeeded()) {
+      const okPick = idx === -2 ? Object.keys(cur.sel).length > 0 : !!(o && !o.gone && !isBlocked(idx));
+      if (okPick) { cur.pend = idx; cur.tPick = cur.tPick || Date.now(); renderPanel(); const f = document.querySelector('.confbtn[data-conf="sure"]'); if (f) f.focus({ preventScroll: true }); }
+      return;
+    }
     if (q.ms && idx === -2) {
       const chosen = cur.opts.map((x, i) => i).filter(i => cur.sel[i]);
       if (!chosen.length) return;
@@ -568,11 +575,11 @@
     else if (q.ms && idx >= 0) return;
     endInterrupt();
     if (cur.secArmed && !cur.secUsed && idx >= 0 && S.pw.second > 0 && !(msOk !== null ? msOk : o.ok)) {
-      cur.secUsed = true; cur.secArmed = false; S.pw.second--;
+      cur.secUsed = true; cur.secArmed = false; cur.pend = undefined; cur.tPick = 0; S.pw.second--;
       if (q.ms) cur.sel = {}; else o.gone = true;
       SFX.play('bad'); toast('Second chance used. Try again.'); save(); renderPanel(); return;
     }
-    const ok = msOk !== null ? msOk : idx >= 0 && o.ok, elapsed = (Date.now() - cur.t0) / 1000, karen = cur.karen, sweaty = cur.sweaty;
+    const ok = msOk !== null ? msOk : idx >= 0 && o.ok, elapsed = ((cur.tPick || Date.now()) - cur.t0) / 1000, karen = cur.karen, sweaty = cur.sweaty;
     cur.done = true; cur.picked = idx; cur.ok = ok; S.served++;
     const unseen = !q.gen && !(S.mastery[q.k] && S.mastery[q.k].seen);
     let pay = 0; const chips = []; let head = '', extra = '';
@@ -625,13 +632,20 @@
     if (cur.evt) { if (cur.insp) { cur.insp.ok += ok ? 1 : 0; if (cur.insp.n >= cur.insp.of) extra += inspVerdict(); } else extra += evAfter(ok); }
     if (cur.elder) extra += ok ? elderGift() : '<p class="gift sad">She pats your hand anyway and shuffles off. No upgrade this time.</p>';
     if (!q.gen) {
-      const m = S.mastery[q.k] || { box: 0, seen: 0, ok: 0 };
+      const m = srSeed(S.mastery[q.k] || { box: 0, seen: 0, ok: 0 });
       const mok = ok && !cur.secUsed;
       const wasDue = reviewDue(m);
       m.seen++;
       const wasNew = m.seen === 1;
-      if (mok) { m.ok++; m.lapse = 0; m.box = Math.min(3, m.box + (wasNew ? 2 : 1)); } else slip(m);
-      if (mok) { if (wasDue) { m.iv = Math.min(IV.length - 1, (m.iv || 0) + 1); chips.push('<span>memory check passed, next in ' + IV[m.iv] + ' d</span>'); } if (!m.t || wasDue || m.box < 2) { m.t = Date.now(); if (m.iv === undefined) m.iv = 0; } } else { m.iv = 0; m.t = Date.now(); }
+      const cf = cur.secUsed ? 'sure' : conf;
+      let inc = wasNew ? 2 : 1;
+      if (cf === 'guess') { m.gr = (m.gr || 0) + 1; if (m.gr >= 2) m.gr = 0; else inc = wasNew ? 1 : 0; } else m.gr = 0;
+      if (mok) { m.ok++; m.lapse = 0; m.box = Math.min(3, m.box + inc); } else slip(m);
+      srUpdate(m, mok, cf);
+      if (mok && wasDue) chips.push('<span>memory check passed</span>');
+      if (mok && m.box >= 2) chips.push('<span>next review in ' + fmtDays(m.d) + '</span>');
+      if (cf === 'certain' && !mok) chips.push('<span>you were certain, so this returns first</span>');
+      else if (cf === 'guess' && mok) chips.push('<span>lucky guess? it will be back soon</span>');
       if (S.set.mode === 'mixed') {
         const ri = retry.findIndex(r => r.k === q.k); if (ri >= 0) retry.splice(ri, 1);
         if (!mok) retry.push({ k: q.k, due: S.served + 3 });
@@ -687,6 +701,7 @@
     if (!cur || cur.empty || cur.done || view !== 'q' || !cur.q.ms) return;
     const o = cur.opts[i]; if (!o || o.gone || isBlocked(i)) return;
     if (cur.sel[i]) delete cur.sel[i]; else cur.sel[i] = true;
+    cur.pend = undefined;
     renderPanel(); const b = document.querySelector('.opt[data-i="' + i + '"]'); if (b) b.focus({ preventScroll: true });
   }
   function msMiss() {
@@ -753,7 +768,7 @@
         if (cur.done) { if (o.ok && on) c = 'ok'; else if (o.ok) c = 'ok miss'; else if (on) c = 'bad'; } else if (on) c = 'sel';
         return `<button type="button" class="opt ms ${c}" style="grid-row:${i + 1};grid-column:1" data-i="${i}" aria-pressed="${on}" ${o.gone || cur.done || isBlocked(i) ? 'disabled' : ''}><kbd>${on ? (cur.done && !o.ok ? '\u2715' : '\u2713') : keys[i]}</kbd><span>${esc(o.t)}${cur.done && o.ok && !on ? ' <em class="mtag">missed</em>' : ''}</span></button>`;
       }
-      if (cur.done) { if (o.ok) c = 'ok'; else if (i === cur.picked) c = 'bad'; }
+      if (cur.done) { if (o.ok) c = 'ok'; else if (i === cur.picked) c = 'bad'; } else if (cur.pend === i) c = 'sel';
       return `<button type="button" class="opt ${c}" style="grid-row:${i + 1};grid-column:1" data-i="${i}" ${o.gone || cur.done || isBlocked(i) ? 'disabled' : ''}><kbd>${keys[i]}</kbd><span>${esc(o.t)}</span></button>`;
     }).join('');
     const label = cur.lab ? (cur.lab === 'pk' ? 'KINETICS CONSULT \u00B7 show your work' : 'COMPOUNDING ORDER \u00B7 show your work') : cur.elder ? cur.name.toUpperCase() + ' \u00B7 free upgrade if right' : cur.evt ? (cur.evt === 'inspector' ? 'HEALTH INSPECTOR \u00B7 question ' + cur.insp.n + ' of ' + cur.insp.of + ' \u00B7 need 2' : EV_LABEL[cur.evt]) : cur.caller ? 'KAREN · "I tried to call"' : cur.karen ? 'KAREN · wants the manager' : cur.sweaty ? 'JITTERY JIM · sweating buckets' : CATNAME[q.c] + (q.t ? ' · ' + q.t : '');
@@ -768,7 +783,8 @@
       ${isK ? `<div class="ktimer" role="timer" aria-label="Time before Karen leaves"><div class="timer"><i id="timerbar"></i></div><b id="tcount">${KAREN_SEC}</b><small>sec</small></div>` : ''}
       <div class="rx-body">
         <div class="patient">${avatar(cur.seed, cur.done ? (cur.ok ? 'ok' : 'bad') : 'idle', cur.karen, cur.sweaty, cur.elder, cur.name === 'Himothy')}<div class="bubble"><em>${esc(cur.flavor)}</em><p>${esc(q.q)}</p></div></div>
-        <div class="opts" role="group" aria-label="Answer choices">${opts}${jimHTML()}</div>${q.ms && !cur.done ? `<div class="msbar"><span>Select all that apply (${Object.keys(cur.sel).length} picked)</span><button type="button" class="btn go" id="msgo" ${Object.keys(cur.sel).length ? '' : 'disabled'}>Submit answer</button></div>` : ''}${labToolsHTML()}
+        <div class="opts" role="group" aria-label="Answer choices">${opts}${jimHTML()}</div>${q.ms && !cur.done && cur.pend === undefined ? `<div class="msbar"><span>Select all that apply (${Object.keys(cur.sel).length} picked)</span><button type="button" class="btn go" id="msgo" ${Object.keys(cur.sel).length ? '' : 'disabled'}>Submit answer</button></div>` : ''}${labToolsHTML()}
+        ${cur.pend !== undefined && !cur.done ? confBar() : ''}
         ${cur.binder ? `<div class="binderbox" role="note"><b>\uD83D\uDCD8 Reference binder</b><span>${binderNote(q)}</span></div>` : ''}
         <div class="tools pwtools"><button type="button" class="btn" id="hintbtn" ${S.pw.hint < 1 || cur.hint || cur.done ? 'disabled' : ''}>\uD83D\uDC8A Hint pill (${S.pw.hint})</button>
           <button type="button" class="btn" id="secbtn" aria-pressed="${!!cur.secArmed}" ${(S.pw.second < 1 && !cur.secArmed) || cur.secUsed || cur.done ? 'disabled' : ''}>\uD83D\uDD01 Second chance (${S.pw.second})${cur.secArmed ? ' ready' : ''}</button>
@@ -776,6 +792,9 @@
           ${S.pw.hint + S.pw.second + S.pw.binder < 1 && !cur.done ? '<button type="button" class="mini" data-act="pwshop">Get power-ups</button>' : ''}
           <span class="keyhint">${isK ? 'Karen leaves in ' + KAREN_SEC + ' s. A wrong answer costs an upgrade.' : cur.lab ? 'Lab bench: no timer. Pays x1.5.' : timerOn() ? 'Speed bonus fades over 20 s' : focusOn() ? 'Focus mode: no timer' : 'Timer bonus is off'}</span></div>
       </div>${cur.resHTML || ''}</article>`;
+  }
+  function confBar() {
+    return '<div class="confbar" role="group" aria-label="How sure are you?"><b>How sure are you?</b><div class="confbtns"><button type="button" class="btn confbtn" data-conf="guess"><kbd>1</kbd> Guess</button><button type="button" class="btn confbtn" data-conf="sure"><kbd>2</kbd> Pretty sure</button><button type="button" class="btn confbtn" data-conf="certain"><kbd>3</kbd> Certain</button></div><small>Pick your answer first, then rate it. The result shows after.</small></div>';
   }
   function explHTML(q) {
     if (!q.rows) return '<p class="why"><b>' + (q.lab ? 'Worked solution:' : 'Why:') + '</b> ' + esc(q.e) + '</p>' + (q.s ? '<p class="srcline"><b>Study source:</b> ' + esc(q.s) + '</p>' : '');
@@ -829,6 +848,7 @@
       <div class="grp"><b>Mode</b><div class="chips">${modes}</div><p class="note">${MODES.find(m => m[0] === st.mode)[2]}</p></div>
       <div class="grp"><b>Compounding pharmacy</b><div class="chips"><button type="button" class="chip" data-act="labk" data-v="comp" aria-pressed="${(S.labK || {}).comp !== false}">Compounding math</button><button type="button" class="chip" data-act="labk" data-v="pk" aria-pressed="${(S.labK || {}).pk !== false}">Kinetics</button></div><p class="note">Used when you tap Switch to compounding in the menu. Level chips above apply there too. ${S.labN ? 'Solved at the bench: ' + S.labOK + ' of ' + S.labN + '.' : ''}</p></div>
       ${wkSchedHTML('p2', 'Weekly drugs')}
+      <div class="grp"><b>Confidence ratings</b><div class="chips"><button type="button" class="chip" data-act="conf" aria-pressed="${st.conf !== false}">Ask how sure I am ${st.conf !== false ? 'on' : 'off'}</button></div><p class="note">After you pick an answer, rate Guess, Pretty sure or Certain before the result shows. Spaced review (SM-2) uses it: certain and right pushes a question far out, a guess comes back soon, certain but wrong returns first.</p></div>
       <div class="grp"><b>Speed bonus</b><div class="chips"><button type="button" class="chip" data-act="timer" aria-pressed="${st.timer}">Timer bonus ${st.timer ? 'on' : 'off'}</button></div><p class="note">Turn it off to study without time pressure. Karen still has a limit.</p></div>
       `;
     const p3 = `${fsw('P3')}<h3>P3 weekly drugs</h3><p class="sub">Drug list sheets by system, one set per week. Changes apply to the next patient.</p>
@@ -1146,8 +1166,9 @@
   function slip(m) { if (m.box >= 2 && !m.lapse) m.lapse = 1; else { m.box = 0; m.lapse = 0; } }
   function recordMastery(q, ok) {
     if (!q || !q.k) return;
-    const m = S.mastery[q.k] || { box: 0, seen: 0, ok: 0 };
+    const m = srSeed(S.mastery[q.k] || { box: 0, seen: 0, ok: 0 });
     m.seen++; if (ok) { m.ok++; m.lapse = 0; m.box = Math.min(3, m.box + 1); } else slip(m);
+    srUpdate(m, ok, undefined);
     S.mastery[q.k] = m;
     const mi = S.missed.indexOf(q.k);
     if (!ok && mi < 0) S.missed.push(q.k);
@@ -1457,8 +1478,9 @@
       chips.push('<span>reputation -5</span>', '<span>queued for review</span>');
       head = 'Not quite. The caller sounds unsure and hangs up.';
     }
-    const m = S.mastery[q.k] || { box: 0, seen: 0, ok: 0 };
+    const m = srSeed(S.mastery[q.k] || { box: 0, seen: 0, ok: 0 });
     m.seen++; if (ok) { m.ok++; m.lapse = 0; m.box = Math.min(3, m.box + 1); } else slip(m);
+    srUpdate(m, ok, undefined);
     S.mastery[q.k] = m;
     const mi = S.missed.indexOf(q.k);
     if (!ok && mi < 0) S.missed.push(q.k);
@@ -1624,7 +1646,7 @@
   }
   function masteryRow(label, n, total) { return `<div class="mrow"><b>${esc(label)}</b><span>${n}/${total}</span><div class="bar"><i style="width:${total ? n / total * 100 : 0}%"></i></div></div>`; }
   function renderMastery() {
-    let h = '<h2>Mastery by topic <small>2 right in a row = mastered</small></h2>' + (dueCount() ? '<p class="note">' + dueCount() + ' mastered question' + (dueCount() === 1 ? ' is' : 's are') + ' ready for a memory check. They return in your mix on their own.</p>' : '');
+    let h = '<h2>Mastery by topic <small>2 right in a row = mastered</small></h2>' + calibNote() + (dueCount() ? '<p class="note">' + dueCount() + ' mastered question' + (dueCount() === 1 ? ' is' : 's are') + ' ready for a memory check. They return in your mix on their own.</p>' : '');
     CATS.forEach(c => {
       if (c[0] === 'MY') return;
       if (c[0] === 'CALC') { h += `<div class="mrow"><b>${c[1]}</b><span>${S.calcOK} solved</span><div class="bar"><i style="width:${Math.min(100, S.calcOK / 20 * 100)}%"></i></div></div>`; return; }
@@ -1721,7 +1743,7 @@
   function maybeTour() { if (S.me.done && !S.tutDone && !tourEl) showTour(); }
   /* ---- save code: the whole save as one long code, to move progress between devices or keep a backup ---- */
 /*@EXT@*/
-  const GAME_VERSION = 105;
+  const GAME_VERSION = 107;
   const b64u = (u8) => { let s = ''; for (let i = 0; i < u8.length; i += 0x8000) s += String.fromCharCode.apply(null, u8.subarray(i, i + 0x8000)); return btoa(s).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); };
   const unb64u = (t) => { const s = atob(t.replace(/-/g, '+').replace(/_/g, '/')), u = new Uint8Array(s.length); for (let i = 0; i < s.length; i++) u[i] = s.charCodeAt(i); return u; };
   const chk = (t) => { let h = 2166136261; for (let i = 0; i < t.length; i++) { h ^= t.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36); };
@@ -1861,6 +1883,7 @@
       case 'diff': { const i = st.diffs.indexOf(+v); if (i >= 0) { if (st.diffs.length > 1) st.diffs.splice(i, 1); } else st.diffs.push(+v); break; }
       case 'mode': st.mode = v; break;
       case 'timer': st.timer = !st.timer; break;
+      case 'conf': st.conf = st.conf === false; if (cur) cur.pend = undefined; break;
       case 'focus': st.focus = !st.focus; applyFocus(); toast(st.focus ? 'Focus mode on. No timer, events or 3D world.' : 'Focus mode off. The pharmacy is back.'); break;
       case 'tab-set': flipTab = true; openView('set'); return;
       case 'tab-studies': flipTab = true; openView('studies'); return;
@@ -1903,6 +1926,7 @@
     if (t.dataset.panext) return paNext();
     if (t.id === 'retirebtn') { if (S.cash >= RETIRE_AT) openView('retire'); return; }
     if (t.id === 'hangbtn') return hangUp();
+    if (t.dataset.conf) { if (cur && cur.pend !== undefined && !cur.done) answer(cur.pend, t.dataset.conf); return; }
     if (t.id === 'msgo') return answer(-2);
     if (t.classList.contains('opt')) return cur && cur.q && cur.q.ms ? msToggle(+t.dataset.i) : answer(+t.dataset.i);
     if (t.id === 'nextbtn') { if (cur && cur.insp && cur.insp.n < cur.insp.of) return inspContinue(); if (cur && cur.visit) return endVisit(); if (shiftDue()) return openShift(); return newCard(); }
@@ -1935,7 +1959,9 @@
       else if (e.key === 'Enter' && phone.call && phone.call.done && !e.target.closest('button')) hangUp();
       return;
     }
+    if (view === 'q' && !cur.done && !cur.empty && cur.q && cur.q.ms && cur.pend !== undefined && ['1', '2', '3'].indexOf(e.key) >= 0) { answer(-2, ['guess', 'sure', 'certain'][+e.key - 1]); return; }
     if (view === 'q' && !cur.done && !cur.empty && cur.q && cur.q.ms) { if (['1', '2', '3', '4', '5', '6'].indexOf(e.key) >= 0) msToggle(+e.key - 1); else if (e.key === 'Enter' && Object.keys(cur.sel).length) { e.preventDefault(); answer(-2); } return; }
+    if (view === 'q' && cur.pend !== undefined && !cur.done && !cur.empty && ['1', '2', '3'].indexOf(e.key) >= 0) { answer(cur.pend, ['guess', 'sure', 'certain'][+e.key - 1]); return; }
     if (['1', '2', '3', '4'].indexOf(e.key) >= 0) { if (view === 'q' && !cur.done && !cur.empty) answer(+e.key - 1); }
     else if (e.key === 'Enter' && view === 'q' && cur.done && !e.target.closest('button')) newCard();
   });
@@ -1969,7 +1995,7 @@
 
   { const sc = $('#savecard'); if (sc) sc.innerHTML = saveBoxHTML(); }
   World.init({ host: $('#stage'), getS: () => S, specialRoll: specialRoll, tagInfo: tagInfo, onBuy: buyUp, onNotes: () => openView('studies'), notesInfo: customCount, karenRoll: karenRoll, sweatyRoll: sweatyRoll, elderRoll: elderRoll, eventRoll: eventRoll, onVisitor: visitClick, onVisitorArrive: visitArrive, capsuleOk: capsuleOk, onCapsule: onCapsule, onBrain: synEnter, onSynSite: onSynSite, onEvt: onEvt, pillOk: pillOk, onPill: onPill, onPhone: openPhone, onPolice: policeCome, himOk: himOk, onHimSpawn: onHimSpawn, onHimAngel: himAngelOk, onHimLand: himLand, onHimBless: onHimBless, onFp: fpClick, sign: () => shopName() + '|' + tierName() + ' #' + (S.franchises + 1) });
-  window.__rxDbg = () => ({ nc: newCard, sp: specialRoll, fp: fp, S: S, view: view, rush: rush, phoneR: phone.ringing, TOPQ: TOPQ, pool: poolQs, cur: cur, synQ: () => (typeof SYN !== 'undefined' ? SYN.q : null), synTap: id => onSynSite(id), offer: k => offerEvt(k, 'test'), onEvt: onEvt, holiday: () => holNow(), holN: () => holCount(), renderStats: renderStats, passive: passive, techRate: techRate, buyUp: buyUp, openVial: openVial, tabletTake: tabletTake, capsuleOpen: capsuleOpen, buffOn: buffOn, COSM: COSM });
+  window.__rxDbg = () => ({ sr: srUpdate, nc: newCard, sp: specialRoll, fp: fp, S: S, view: view, rush: rush, phoneR: phone.ringing, TOPQ: TOPQ, pool: poolQs, cur: cur, synQ: () => (typeof SYN !== 'undefined' ? SYN.q : null), synTap: id => onSynSite(id), offer: k => offerEvt(k, 'test'), onEvt: onEvt, holiday: () => holNow(), holN: () => holCount(), renderStats: renderStats, passive: passive, techRate: techRate, buyUp: buyUp, openVial: openVial, tabletTake: tabletTake, capsuleOpen: capsuleOpen, buffOn: buffOn, COSM: COSM });
   if (!World.ok) $('#stage').classList.add('flat');
   else { document.body.classList.add('fx'); World.setPharmacist(meSpec()); World.setStore(S.store); World.setStaffLook(uniSpec()); World.setAwards(S.awards); World.setCalendar(Math.min(4, S.awards.calW || 0), false, S.awards.calW || 0); }
   applyFocus(); syncBrand(); sfxLabel();
