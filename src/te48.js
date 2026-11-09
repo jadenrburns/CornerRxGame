@@ -19,6 +19,11 @@ await p.click('.opt[data-i="0"]');await p.waitForTimeout(150);
 console.log('smart: confbar',await p.$$eval('.confbar',e=>e.length),'done',await p.evaluate(()=>window.__rxDbg().cur.done));
 await p.click('.confbtn[data-conf="sure"]');await p.waitForTimeout(200);
 console.log('smart: sm2 set',await p.evaluate(()=>{const d=window.__rxDbg();const m=d.S.mastery[d.cur.q.k];return m.due>0&&m.n!==undefined}));
+// same-day repeat skips the prompt
+await p.evaluate(()=>{window.__rxDbg().S.set.mode='mixed'});console.log('card',await card());
+const kk=await p.evaluate(()=>{const d=window.__rxDbg();const k=d.cur.q.k;const m=d.S.mastery[k]||(d.S.mastery[k]={box:0,seen:1,ok:0});m.lt=Date.now();return k});
+await p.click('.opt[data-i="0"]');await p.waitForTimeout(200);
+console.log('same-day repeat: done at once',await p.evaluate(()=>window.__rxDbg().cur.done),'confbar',await p.$$eval('.confbar',e=>e.length));
 // Review: nothing due -> empty message
 await p.evaluate(()=>{const d=window.__rxDbg();for(const k in d.S.mastery){d.S.mastery[k].due=Date.now()+5*864e5}d.S.set.mode='review';d.nc()});await p.waitForTimeout(150);
 console.log('review none:',await p.$eval('.empty-q',e=>e.innerText.replace(/\n/g,' | ')));

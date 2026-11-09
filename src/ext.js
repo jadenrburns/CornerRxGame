@@ -158,6 +158,7 @@
   function srGrade(ok, conf) { return ok ? (conf === 'guess' ? 3 : conf === 'certain' ? 5 : 4) : (conf === 'certain' ? 0 : conf === 'guess' ? 2 : 1); }
   function srSeed(m) { if (m.n === undefined && m.seen > 0) { m.n = m.box >= 2 ? 2 : m.box >= 1 ? 1 : 0; m.d = m.n === 2 ? 6 : m.n === 1 ? 1 : 0; } return m; } // older saves: start SM-2 from the existing box
   function srUpdate(m, ok, conf) {
+    m.lt = Date.now();
     const q = srGrade(ok, conf);
     const early = q >= 3 && m.n > 0 && m.due > Date.now(); // an extra right answer before the review date is practice, not a longer interval
     if (early) { if (conf) { const c = S.cf = S.cf || {}; const o = c[conf] = c[conf] || { n: 0, ok: 0 }; o.n++; o.ok++; } m.cw = 0; return; }
@@ -182,6 +183,7 @@
   function srDue(m) { return !!(m && m.seen > 0 && (m.due !== undefined ? m.due <= Date.now() : reviewDue(m))); }
   function dueCount() { let n = 0; for (const k in S.mastery) if (BYKEY[k] && srDue(S.mastery[k])) n++; return n; }
   function nextDueText() { let t = 0; for (const k in S.mastery) { const m = S.mastery[k]; if (BYKEY[k] && m && m.due > Date.now() && (!t || m.due < t)) t = m.due; } return t ? fmtDays((t - Date.now()) / 864e5) : ''; }
+  const askedToday = (k) => { const m = S.mastery[k]; return !!(m && m.lt && new Date(m.lt).toDateString() === new Date().toDateString()); }; // repeats on the same day skip the confidence prompt
   const srOn = () => S.set.mode === 'mixed' || S.set.mode === 'review';
 
   /* ---- shifts: every 10 patients you get a report with what you missed ---- */

@@ -557,7 +557,7 @@
     World.karenLoss(u.id);
     return { lost: u, from, to: from - 1 };
   }
-  const confNeeded = () => S.set.conf !== false && srOn() && cur && cur.q && !cur.q.gen && !cur.karen && !cur.sweaty && !cur.elder && !cur.lab && !cur.caller && !cur.evt && !cur.visit;
+  const confNeeded = () => S.set.conf !== false && srOn() && cur && cur.q && !askedToday(cur.q.k) && cur && cur.q && !cur.q.gen && !cur.karen && !cur.sweaty && !cur.elder && !cur.lab && !cur.caller && !cur.evt && !cur.visit;
   function answer(idx, conf) {
     if (!cur || cur.empty || cur.done || view !== 'q') return;
     if (cur.elder && cur.elderStage < 2) { if (idx >= 0 && idx < 2 && cur.elderStage === 0) elderPick(); return; }
@@ -1746,7 +1746,7 @@
   function maybeTour() { if (S.me.done && !S.tutDone && !tourEl) showTour(); }
   /* ---- save code: the whole save as one long code, to move progress between devices or keep a backup ---- */
 /*@EXT@*/
-  const GAME_VERSION = 110;
+  const GAME_VERSION = 111;
   const b64u = (u8) => { let s = ''; for (let i = 0; i < u8.length; i += 0x8000) s += String.fromCharCode.apply(null, u8.subarray(i, i + 0x8000)); return btoa(s).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); };
   const unb64u = (t) => { const s = atob(t.replace(/-/g, '+').replace(/_/g, '/')), u = new Uint8Array(s.length); for (let i = 0; i < s.length; i++) u[i] = s.charCodeAt(i); return u; };
   const chk = (t) => { let h = 2166136261; for (let i = 0; i < t.length; i++) { h ^= t.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36); };
