@@ -1037,6 +1037,21 @@ body.trip .stats .stat { animation: tripbob 1.4s ease-in-out infinite; }
 .confbtn { flex: 1 1 110px; font-weight: 700; }
 .confbtn kbd { opacity: .6; margin-right: 6px; }
 .deckrow a.mini { text-decoration: none; color: inherit; display: inline-block; }
+.drawbox { display: grid; gap: 8px; margin-top: 8px; }
+.cycsvg { width: 100%; max-width: 520px; height: auto; touch-action: none; cursor: crosshair; display: block; margin: 0 auto; user-select: none; -webkit-user-select: none; }
+.cybox { fill: var(--surface); stroke: var(--line); stroke-width: 1.5; }
+.cyb { fill: none; stroke: var(--line); stroke-width: 1; }
+.cyl { stroke: var(--muted); stroke-width: 1; }
+.cy14 { stroke: var(--muted); stroke-width: 1; stroke-dasharray: 3 3; }
+.cyt { font: 600 9px var(--f-mono); fill: var(--muted); }
+.cyt.cys { font-size: 8.5px; font-weight: 500; }
+.cyu { fill: none; stroke: var(--ink); stroke-width: 2.6; stroke-linecap: round; stroke-linejoin: round; }
+.cyu.good { stroke: #2f8f55; opacity: .85; } .cyu.bad { stroke: #b0443a; opacity: .85; }
+.cytrue { fill: none; stroke-width: 2.6; stroke-linecap: round; }
+.drawnote { margin: 0; font-size: 13px; color: var(--muted); text-align: center; }
+.drawkey { margin: 0; font-size: 12px; color: var(--muted); text-align: center; }
+.drawkey i { display: inline-block; width: 18px; height: 0; border-top: 3px solid var(--ink); vertical-align: middle; margin: 0 4px 0 8px; }
+.drawkey i.k2 { border-top-color: var(--c, #1d7a93); }
 </style>
 
 <div class="shell">
@@ -1655,8 +1670,90 @@ P4("Psychosis and mania",2,"What is the boxed warning for all antipsychotics in 
 P4("Psychosis and mania",2,"Which symptom group of schizophrenia is the least responsive to antipsychotic drugs?","Negative symptoms such as apathy and social withdrawal",["Hallucinations","Delusions","Agitation"],"Antipsychotics treat positive symptoms (hallucinations, delusions) mainly through D2 blockade. Negative symptoms remain hard to treat with any drug.");
 P4("Psychosis and mania",2,"Which antipsychotic combines with fluoxetine as an approved option for bipolar depression and treatment-resistant depression?","Olanzapine",["Haloperidol","Ziprasidone","Risperidone"],"The olanzapine-fluoxetine combination (Symbyax) is approved for both. Weight gain and metabolic monitoring remain essential.");
 P4("Psychosis and mania",3,"Which antipsychotic is chiefly associated with QT prolongation, and should be avoided with other QT-prolonging drugs?","Ziprasidone",["Aripiprazole","Lurasidone","Paliperidone"],"Ziprasidone should be taken with a meal of at least 500 calories. Haloperidol (especially IV) and citalopram are other QT concerns.");
-/* Therapeutics Exam 3: diarrhea, constipation, IBS, IBD, peptic ulcer disease and hemorrhoids (from the lecture slides and class questions) */
-const T = (t, d, q, a, w, e, s) => Q("TH3", d, q, a, w, e, t, s);
+/* ---------------- Menstrual cycle graph: draw-the-hormone question ----------------
+   Curves are traced from the instructor's idealized 28-day schematic (pituitary panel: FSH dashed, LH solid;
+   ovary panel: progesterone dashed, estradiol solid). Values are 0..1 within each panel; shape matters, not scale. */
+const CYC = {
+  FSH: { name: 'FSH', panel: 'pit', dash: true, col: '#7a5fb0', peak: 3, pts: [[1, .40], [3, .485], [5, .44], [7, .36], [9, .30], [11, .26], [12.5, .28], [13.3, .35], [14, .456], [14.7, .40], [15.5, .32], [17, .26], [19, .20], [23, .167], [25, .19], [27, .30], [28, .36]] },
+  LH: { name: 'LH', panel: 'pit', dash: false, col: '#1f2547', peak: 14, pts: [[1, .186], [6, .186], [9, .19], [11, .20], [12, .26], [13, .50], [13.6, .80], [14, .926], [14.5, .80], [15, .50], [15.6, .28], [16.5, .20], [19, .185], [28, .185]] },
+  E2: { name: 'Estradiol', panel: 'ov', dash: false, col: '#1d7a93', peak: 12.2, pts: [[1, .152], [4.5, .176], [7, .25], [9, .42], [10.5, .59], [11.3, .68], [12.2, .88], [13, .72], [14, .49], [15, .42], [16, .41], [18, .47], [21, .63], [23, .52], [26, .27], [28, .15]] },
+  P4: { name: 'Progesterone', panel: 'ov', dash: true, col: '#c0561b', peak: 21, pts: [[1, .09], [12, .09], [14, .137], [15.5, .27], [17, .52], [18.5, .76], [20, .88], [21, .92], [22.5, .87], [24, .72], [25.5, .42], [26.5, .27], [28, .10]] }
+};
+const CYC_PANEL = { pit: 'Pituitary hormone (arbitrary units)', ov: 'Ovarian hormone (arbitrary units)' };
+
+/* monotone cubic (Fritsch-Carlson) interpolation through the control points */
+function cycVal(h, day) {
+  const P = CYC[h].pts, n = P.length;
+  if (day <= P[0][0]) return P[0][1]; if (day >= P[n - 1][0]) return P[n - 1][1];
+  const d = [], m = [];
+  for (let i = 0; i < n - 1; i++) d.push((P[i + 1][1] - P[i][1]) / (P[i + 1][0] - P[i][0]));
+  m[0] = d[0]; m[n - 1] = d[n - 2];
+  for (let i = 1; i < n - 1; i++) m[i] = d[i - 1] * d[i] <= 0 ? 0 : (d[i - 1] + d[i]) / 2;
+  for (let i = 0; i < n - 1; i++) {
+    if (d[i] === 0) { m[i] = 0; m[i + 1] = 0; continue; }
+    const a = m[i] / d[i], b = m[i + 1] / d[i], s = a * a + b * b;
+    if (s > 9) { const t = 3 / Math.sqrt(s); m[i] = t * a * d[i]; m[i + 1] = t * b * d[i]; }
+  }
+  let k = 0; while (k < n - 2 && day > P[k + 1][0]) k++;
+  const h0 = P[k + 1][0] - P[k][0], t = (day - P[k][0]) / h0, t2 = t * t, t3 = t2 * t;
+  return (2 * t3 - 3 * t2 + 1) * P[k][1] + (t3 - 2 * t2 + t) * h0 * m[k] + (-2 * t3 + 3 * t2) * P[k + 1][1] + (t3 - t2) * h0 * m[k + 1];
+}
+
+/* pts: [[day 1..28, value 0..1], ...] in the order drawn. Returns { ok, reason, r, mae, peak } */
+function cycScore(h, pts) {
+  const out = { ok: false, reason: '', r: 0, mae: 1, peak: 0 };
+  if (!pts || pts.length < 8) { out.reason = 'Draw a line across the graph first.'; return out; }
+  const xs = pts.map(p => p[0]), lo = Math.min.apply(null, xs), hi = Math.max.apply(null, xs);
+  if (lo > 4.5 || hi < 24.5) { out.reason = 'Draw the line all the way across, from day 1 to day 28.'; return out; }
+  const days = []; for (let d = 1; d <= 28; d += 0.5) days.push(d);
+  const raw = days.map(d => { let s = 0, c = 0; pts.forEach(p => { if (Math.abs(p[0] - d) <= 0.6) { s += p[1]; c++; } }); return c ? s / c : null; });
+  // fill gaps by linear interpolation between the nearest drawn neighbours
+  const u = raw.slice();
+  for (let i = 0; i < u.length; i++) {
+    if (u[i] !== null) continue;
+    let a = i - 1; while (a >= 0 && u[a] === null) a--;
+    let b = i + 1; while (b < u.length && raw[b] === null) b++;
+    if (a < 0) u[i] = raw[b]; else if (b >= u.length) u[i] = u[a]; else u[i] = u[a] + (raw[b] - u[a]) * (i - a) / (b - a);
+  }
+  const t = days.map(d => cycVal(h, d));
+  const norm = (arr) => { const mn = Math.min.apply(null, arr), mx = Math.max.apply(null, arr); return mx - mn < 1e-6 ? null : arr.map(v => (v - mn) / (mx - mn)); };
+  const sm = (a) => a.map((v, i) => { let s = 0, c = 0; for (let j = Math.max(0, i - 2); j <= Math.min(a.length - 1, i + 2); j++) { s += a[j]; c++; } return s / c; });
+  const un = norm(sm(u)), tn = norm(sm(t));
+  if (!un) { out.reason = 'A flat line does not show the pattern. Show how the hormone rises and falls.'; return out; }
+  const n = days.length; let mu = 0, mt = 0; for (let i = 0; i < n; i++) { mu += un[i]; mt += tn[i]; } mu /= n; mt /= n;
+  let sxy = 0, sxx = 0, syy = 0, ae = 0; for (let i = 0; i < n; i++) { sxy += (un[i] - mu) * (tn[i] - mt); sxx += (un[i] - mu) ** 2; syy += (tn[i] - mt) ** 2; ae += Math.abs(un[i] - tn[i]); }
+  out.r = sxy / Math.sqrt(sxx * syy); out.mae = ae / n;
+  let pi = 0; for (let i = 1; i < n; i++) if (un[i] > un[pi]) pi = i; out.peak = days[pi];
+  const peakOK = h === 'FSH' ? true : Math.abs(out.peak - CYC[h].peak) <= 2.5;
+  out.ok = out.r >= 0.72 && out.mae <= 0.2 && peakOK;
+  if (!out.ok) out.reason = !peakOK ? 'The peak is in the wrong place. Your highest point was near day ' + Math.round(out.peak) + '.' : 'The shape is off. Check when the hormone rises and falls.';
+  else out.reason = 'Your line follows the real pattern.';
+  return out;
+}
+
+/* SVG: viewBox 360 x 222. Plot x 34..350 = day 1..28, y 12..170 = value 1..0 */
+const CYC_X0 = 34, CYC_X1 = 350, CYC_Y0 = 12, CYC_Y1 = 170;
+const cycX = d => CYC_X0 + (d - 1) / 27 * (CYC_X1 - CYC_X0);
+const cycY = v => CYC_Y1 - v * (CYC_Y1 - CYC_Y0);
+function cycPath(h) { let s = ''; for (let d = 1; d <= 28.001; d += 0.25) s += (s ? 'L' : 'M') + cycX(d).toFixed(1) + ' ' + cycY(cycVal(h, d)).toFixed(1); return s; }
+function cycSVG(h, userPts, reveal, ok) {
+  const c = CYC[h];
+  const ticks = [1, 7, 14, 21, 28].map(d => `<text x="${cycX(d).toFixed(1)}" y="216" text-anchor="middle" class="cyt">${d === 1 ? 'Day 1' : d}</text><line x1="${cycX(d).toFixed(1)}" y1="${CYC_Y1}" x2="${cycX(d).toFixed(1)}" y2="${CYC_Y1 + 4}" class="cyl"/>`).join('');
+  const bands = [[1, 5.5, 'Menses'], [5.5, 13.5, 'Follicular'], [14.5, 28, 'Luteal']].map(b => `<rect x="${cycX(b[0]).toFixed(1)}" y="178" width="${(cycX(b[1]) - cycX(b[0])).toFixed(1)}" height="22" class="cyb"/><text x="${((cycX(b[0]) + cycX(b[1])) / 2).toFixed(1)}" y="193" text-anchor="middle" class="cyt cys">${b[2]}</text>`).join('');
+  const user = userPts && userPts.length ? `<polyline id="cycuser" class="cyu${reveal ? (ok ? ' good' : ' bad') : ''}" points="${userPts.map(p => cycX(p[0]).toFixed(1) + ',' + cycY(p[1]).toFixed(1)).join(' ')}"/>` : '<polyline id="cycuser" class="cyu" points=""/>';
+  const truth = reveal ? `<path d="${cycPath(h)}" class="cytrue" stroke="${c.col}"${c.dash ? ' stroke-dasharray="7 5"' : ''}/>` : '';
+  return `<svg id="cycsvg" class="cycsvg" viewBox="0 0 360 222" role="img" aria-label="Blank cycle graph, day 1 to day 28. Draw the line for ${c.name}.">
+    <rect x="${CYC_X0}" y="${CYC_Y0}" width="${CYC_X1 - CYC_X0}" height="${CYC_Y1 - CYC_Y0}" rx="6" class="cybox"/>
+    <text x="${CYC_X0 + 6}" y="${CYC_Y0 + 12}" class="cyt cys">${CYC_PANEL[c.panel]}</text>
+    <text x="10" y="${(CYC_Y0 + CYC_Y1) / 2}" class="cyt cys" transform="rotate(-90 10 ${(CYC_Y0 + CYC_Y1) / 2})" text-anchor="middle">level</text>
+    <line x1="${cycX(14).toFixed(1)}" y1="${CYC_Y0}" x2="${cycX(14).toFixed(1)}" y2="200" class="cy14"/>
+    ${bands}${ticks}${truth}${user}</svg>`;
+}
+
+if (typeof module !== 'undefined') module.exports = { CYC, cycVal, cycScore };
+/* Therapeutics Exam 3: IBS, constipation, diarrhea, IBD, peptic ulcer disease, hemorrhoids and GI tests (from the lecture slides and class questions) */
+/* Three categories: TH3F = IBS, constipation and diarrhea; TH3C = contraceptives (th3c.js); TH3 = everything else */
+const T = (t, d, q, a, w, e, s) => Q(/^(Diarrhea|Constipation|IBS|Opioid-induced)/.test(t) ? "TH3F" : "TH3", d, q, a, w, e, t, s);
 
 /* ---------- Diarrhea ---------- */
 T("Diarrhea",2,"A 26-year-old has had six loose stools and cramping for 18 hours, with no fever or blood. Yesterday they ate at a street fair. Ibuprofen and cannabis use were occasional. What is the most likely cause?","A food- or waterborne organism picked up at the street fair",["Early type 2 diabetes","HIV infection","An ibuprofen and cannabis interaction"],"Sudden onset, no red flags and a recent food exposure point to infectious acute diarrhea. Family history of diabetes does not explain it.");
@@ -1888,6 +1985,194 @@ T("Hemorrhoids: counseling",1,"How should a patient lie to insert a suppository?
 T("Hemorrhoids: counseling",2,"How many times per day can most hemorrhoid products be used?","Up to 6 times, or 4 times for vasoconstrictors and hydrocortisone",["Once a day","Up to 10 times","Only at bedtime"],"Improvement should occur in a few days. Refer if there is no improvement in 7 days.",HRL+", slide 26");
 T("Hemorrhoids: counseling",2,"Which product claim is supported for combination hemorrhoid products?","They are reasonable to try for several symptoms but are no more effective than single agents",["They work twice as fast","They are safer than single agents","They can replace diet changes"],"Choose by location, patient factors and what form the patient will use.",HRL+", slide 25");
 T("Hemorrhoids: complementary",3,"What is the evidence for diosmin plus hesperidin in hemorrhoids?","It reduced itching, bleeding and leakage but did not decrease pain",["It reduced pain best","It heals grade 4 hemorrhoids","It is Rx only"],"The usual course is 2 weeks at 1200/300 mg BID. Most studies were manufacturer funded.",HRL+", slide 24");
+/* Therapeutics Exam 3: contraceptives (PHAR 451 Contraception Days 1 to 3 and the menstrual cycle warm-up worksheet) */
+const CT = (t, d, q, a, w, e, s) => Q("TH3C", d, q, a, w, e, t, s);
+const CTD1 = "Contraception Day 1 lecture", CTD2 = "Contraception Day 2 lecture", CTD3 = "Contraception Day 3 lecture", CTW = "Menstrual cycle warm-up worksheet";
+/* draw-the-line questions: the card shows a blank cycle graph (cycle.js) and the player draws the hormone */
+const CTDRAW = (h, d, q, a, w, e, s) => { CT("Cycle: draw the hormone", d, q, a, w, e, s); BANK[BANK.length - 1].draw = h; };
+
+/* ---------- Cycle physiology ---------- */
+CTDRAW("LH", 2, "Draw the line for LH across the 28-day cycle. Press and drag from day 1 to day 28.", "LH: low baseline with one sharp spike at day 14", ["LH: slow rise to a broad peak at day 21", "LH: high in days 1 to 5 and falling all cycle", "LH: steady high level through the whole cycle"], "LH stays low, then surges just before day 14. The surge triggers ovulation and then LH falls back to baseline.", CTW + ", Part 1 graph; " + CTD1 + ", slide 3");
+CTDRAW("FSH", 3, "Draw the line for FSH across the 28-day cycle. Press and drag from day 1 to day 28.", "FSH: higher early in the cycle, a small bump at day 14, then low in the luteal phase", ["FSH: one sharp spike at day 14 and flat elsewhere", "FSH: rises steadily to a peak at day 21", "FSH: flat at the same level all cycle"], "FSH is highest early to recruit follicles, falls as estradiol and inhibin rise, has a small bump with the LH surge, then stays low in the luteal phase and rises again near the end.", CTW + ", Part 1 graph; " + CTD1 + ", slide 3");
+CTDRAW("E2", 3, "Draw the line for estradiol across the 28-day cycle. Press and drag from day 1 to day 28.", "Estradiol: peaks around day 12, dips near day 14, then a smaller second hump in the luteal phase", ["Estradiol: flat until day 14, then one big peak at day 21", "Estradiol: sharp spike at day 14 only", "Estradiol: high on day 1 and falling steadily"], "Growing follicles make rising estradiol that peaks just before ovulation. It dips, then the corpus luteum makes a smaller second rise before everything falls near day 28.", CTW + ", Part 1 graph; " + CTD1 + ", slide 17");
+CTDRAW("P4", 3, "Draw the line for progesterone across the 28-day cycle. Press and drag from day 1 to day 28.", "Progesterone: near zero until ovulation, peaks around day 21, then falls by day 28", ["Progesterone: peaks at day 12 and is low in the luteal phase", "Progesterone: sharp spike at day 14 only", "Progesterone: high early and falling all cycle"], "Progesterone is low before ovulation. After ovulation the corpus luteum makes it, it peaks mid-luteal, and the fall near day 28 triggers menses.", CTW + ", Part 1 graph; " + CTD1 + ", slide 17");
+CT("Cycle: physiology", 1, "In the follicular phase, what do rising estradiol and inhibin do to FSH secretion?", "Decrease it", ["Increase it", "Have no effect on it", "Trigger an FSH surge"], "Estradiol and inhibin are negative feedback on FSH, so FSH falls as the follicle matures.", CTW + ", Part 2, question 1");
+CT("Cycle: physiology", 1, "Which hormone surge directly triggers ovulation?", "LH", ["FSH", "Progesterone", "hCG"], "The LH surge around day 14 triggers release of the egg.", CTW + ", Part 2, question 2");
+CT("Cycle: physiology", 1, "Which hormone makes cervical mucus thick and scant, so it acts as a barrier to sperm?", "Progesterone", ["Estradiol", "FSH", "LH"], "Progesterone thickens mucus. This is also why progestin-only methods work, in part.", CTW + ", Part 2, question 3");
+CT("Cycle: physiology", 1, "In a cycle without pregnancy, what triggers menses?", "Falling progesterone", ["Rising LH", "Rising estradiol", "Rising hCG"], "The corpus luteum fades, progesterone falls, and the lining sheds.", CTW + ", Part 2, question 4");
+CT("Cycle: physiology", 2, "Which best describes the fertile window?", "The 6 days ending on ovulation day", ["The 6 days starting on ovulation day", "Days 1 to 6 of the cycle", "The 6 days before menses"], "Sperm can survive for days, so intercourse in the days before ovulation can cause pregnancy.", CTW + ", Part 2, question 5");
+CT("Cycle: physiology", 1, "Which pituitary hormone mainly drives follicle growth early in the cycle?", "FSH", ["LH", "Progesterone", "Inhibin"], "FSH recruits and grows follicles. The ovarian hormones are estradiol and progesterone.", CTD1 + ", slides 3, 17, 18");
+CT("Cycle: physiology", 2, "Which hormone, made mainly by the corpus luteum, peaks in the luteal phase?", "Progesterone", ["FSH", "LH", "hCG"], "After ovulation the empty follicle becomes the corpus luteum, which makes progesterone (and some estradiol).", CTW + ", Part 1 graph");
+
+/* ---------- Overview of methods ---------- */
+CT("Methods: overview", 1, "About what proportion of US pregnancies were unintended in 2019?", "42%", ["25%", "33%", "56%"], "About 60% of people with an unintended pregnancy reported not using any contraception.", CTD1 + ", slides 4, 5");
+CT("Methods: overview", 1, "Which method is a LARC?", "Etonogestrel implant", ["Vaginal ring", "Depo-Provera injection", "Contraceptive patch"], "LARCs are the IUDs (copper or levonorgestrel) and the implant.", CTD1 + ", slide 10");
+CT("Methods: overview", 1, "Which of these is a nonhormonal method?", "Copper IUD", ["Mirena", "Nexplanon", "Depo-Provera"], "Nonhormonal methods are fertility awareness, barrier methods and the copper IUD.", CTD1 + ", slide 10");
+CT("Methods: overview", 1, "Which of these is a combined hormonal contraceptive (CHC)?", "Intravaginal ring", ["Nexplanon implant", "Depo-Provera injection", "Mirena IUD"], "CHCs are the combined pill, patch and ring. The implant, injection, IUD and mini pill are progestin only.", CTD1 + ", slide 10");
+CT("Methods: overview", 2, "Which method has the lowest typical-use pregnancy rate in the first year?", "Implant (0.1%)", ["Injectable (4%)", "Combined pill (7%)", "Male condom (13%)"], "Typical-use rates are under 1% for the implant, IUDs and sterilization, about 4 to 7% for the injection, pill, patch and ring, and 13% or more for condoms and other barriers.", CTD1 + ", slide 9");
+CT("Methods: overview", 2, "About what percent of women become pregnant in the first year of typical use of the combined pill, patch or ring?", "7%", ["0.3%", "13%", "21%"], "Perfect use is 0.3%. The gap is mostly missed doses and late changes.", CTD1 + ", slide 9");
+CT("Methods: overview", 1, "What is the typical-use first-year pregnancy rate with no method at all?", "85%", ["42%", "56%", "25%"], "This is the baseline all methods are compared against.", CTD1 + ", slide 9");
+CT("Methods: overview", 2, "Which is a disadvantage of fertility awareness-based methods?", "Relatively high pregnancy rates and no STI protection", ["Requires a prescription and fitting", "Causes irregular bleeding in most users", "Raises the risk of blood clots"], "They avoid intercourse around the fertile days, which is hard to time perfectly.", CTD1 + ", slide 12");
+CT("Methods: barrier", 2, "How long must the Today sponge stay in place after intercourse?", "At least 6 hours (up to 24 hours total)", ["30 minutes", "2 hours", "48 hours"], "The sponge contains nonoxynol-9 and can be inserted up to 6 hours before intercourse.", CTD1 + ", slide 15");
+CT("Methods: barrier", 2, "Which barrier method must be fitted and needs a prescription?", "Diaphragm", ["Today sponge", "Spermicidal foam", "Internal (female) condom"], "The diaphragm is a dome-shaped cap that covers the cervix and can be used with spermicide.", CTD1 + ", slide 15");
+CT("Methods: barrier", 2, "Which spermicide product is prescription only?", "Phexxi", ["Today sponge", "Nonoxynol-9 foam", "Male condom"], "Most spermicides are OTC. Phexxi is the Rx vaginal option.", CTD1 + ", slide 15");
+
+/* ---------- Mechanism of action ---------- */
+CT("Mechanism of action", 2, "In a combined hormonal contraceptive, which hormone's secretion does the estrogen mainly suppress, limiting follicle selection?", "FSH", ["Progesterone", "hCG", "Prolactin"], "Estrogen suppresses FSH (partly, depending on dose). The progestin blocks the LH surge.", CTD1 + ", slide 18");
+CT("Mechanism of action", 2, "Which event do progestins block to prevent ovulation?", "The LH surge", ["FSH release early in the cycle", "Implantation only", "Sperm production"], "Progestins block the LH surge, so ovulation does not happen. They also thicken cervical mucus.", CTD1 + ", slide 18");
+CT("Mechanism of action", 2, "Which effect do all progestin methods share?", "Thickened cervical mucus that blocks sperm", ["Copper release", "A larger LH surge", "A thicker uterine lining"], "Progestins also thin the endometrium and slow tubal motility.", CTD1 + ", slide 18");
+CT("Mechanism of action", 2, "How does the copper IUD mainly prevent pregnancy?", "It impairs sperm motility and viability and causes local inflammation", ["It blocks the LH surge", "It thickens mucus with a progestin", "It suppresses FSH"], "The copper IUD is hormone free, so it does not suppress ovulation.", CTD1 + ", slides 18, 32");
+CT("Mechanism of action", 2, "In combined contraceptives, which hormone stabilizes the endometrium to give better cycle control?", "Estrogen", ["Progestin", "Androgen", "FSH"], "Progestin thins the lining. Estrogen stabilizes it, which helps reduce breakthrough bleeding.", CTD1 + ", slide 18");
+CT("Mechanism of action", 3, "How does an LNG IUD act?", "Mostly local effects in the uterus, with little systemic hormone", ["Mostly systemic effects, like a pill", "By releasing copper ions", "By blocking only the LH surge"], "It thins the endometrium, thickens mucus and slows tubal motility. It is not a systemic method like the ring.", CTD1 + ", slides 20, 32, 35");
+
+/* ---------- Estrogens and progestins ---------- */
+CT("Hormones: estrogens", 1, "Which estrogen is the most common in hormonal contraceptives?", "Ethinyl estradiol", ["Estetrol", "Mestranol", "Estradiol valerate"], "EE is the most common. Its ethinyl group blocks breakdown, which adds stability.", CTD1 + ", slide 19");
+CT("Hormones: estrogens", 2, "Which estrogen is a prodrug that is converted to ethinyl estradiol?", "Mestranol", ["Estetrol", "Estradiol valerate", "Estradiol cypionate"], "Mestranol is metabolized to EE.", CTD1 + ", slide 19");
+CT("Hormones: estrogens", 2, "Which estrogen is the native fetal estrogen used in Nextstellis?", "Estetrol", ["Mestranol", "Estradiol valerate", "Ethinyl estradiol"], "Estetrol has a half-life of about 27 hours.", CTD1 + ", slides 15, 19");
+CT("Hormones: estrogens", 3, "How is estetrol mainly cleared?", "Glucuronidation (UGT2B7), not CYP3A4", ["CYP3A4 oxidation", "CYP2C19", "Unchanged in the urine"], "Ethinyl estradiol has extensive first-pass metabolism by CYP3A4 and conjugation, with oral bioavailability of about 43%.", CTD1 + ", slide 19");
+CT("Hormones: estrogens", 3, "Why could estrogen doses in combined pills be lowered over time?", "Newer progestins suppress ovulation better, so less EE is needed", ["EE became more potent", "Estrogen is no longer needed for cycle control", "Progestins stopped being absorbed"], "Progestins with more antigonadotrophic activity allow effective ovulation suppression at lower EE doses.", CTD1 + ", slide 19");
+CT("Hormones: estrogens", 2, "Which estrogen has the more favorable aquatic ecotoxicity profile?", "Estetrol", ["Ethinyl estradiol", "Estradiol", "Mestranol"], "Estetrol is plant-derived, less is excreted in urine, and it breaks down faster.", CTD1 + ", slide 20");
+CT("Hormones: estrogens", 2, "Which brand combines estradiol valerate with dienogest in four phases?", "Natazia", ["Kariva", "Yaz", "Nextstellis"], "Natazia is the quadriphasic product.", CTD2 + ", slide 16");
+CT("Hormones: progestins", 2, "Which progestin has the highest androgenic activity?", "Levonorgestrel", ["Norgestimate", "Drospirenone", "Dienogest"], "Levonorgestrel is rated four plus for androgenic activity. Drospirenone and dienogest have none.", CTD1 + ", slide 22");
+CT("Hormones: progestins", 2, "Which progestin has anti-androgen and anti-mineralocorticoid activity?", "Drospirenone", ["Levonorgestrel", "Norethindrone", "Desogestrel"], "That is why drospirenone can help acne and hirsutism and has a mild diuretic effect.", CTD1 + ", slides 22, 23");
+CT("Hormones: progestins", 2, "Levonorgestrel and norgestrel belong to which progestin generation?", "Second", ["First", "Third", "Fourth"], "First generation is the norethindrones. Third is norgestimate and desogestrel.", CTD1 + ", slide 21");
+CT("Hormones: progestins", 2, "Norgestimate and desogestrel belong to which progestin generation?", "Third", ["First", "Second", "Fourth"], "Norethindrone is first generation. Levonorgestrel is second.", CTD1 + ", slide 21");
+CT("Hormones: progestins", 3, "A patient takes a drospirenone pill and starts an ACE inhibitor. What should be monitored?", "Potassium", ["Calcium", "Sodium only", "Magnesium"], "Drospirenone 3 to 4 mg has an anti-mineralocorticoid effect similar to spironolactone 25 mg. The risk rises with ACE inhibitors, ARBs, potassium-sparing diuretics and strong CYP3A4 inhibitors.", CTD1 + ", slide 23");
+
+/* ---------- LARCs ---------- */
+CT("LARC: IUDs", 2, "Which two LNG IUDs contain 52 mg of levonorgestrel?", "Mirena and Liletta", ["Kyleena and Skyla", "Mirena and Kyleena", "Liletta and Skyla"], "Both are approved for 8 years. Kyleena has 19.5 mg (5 years) and Skyla has 13.5 mg (3 years).", CTD1 + ", slide 27");
+CT("LARC: IUDs", 2, "Which LNG IUD has the lowest dose and the shortest approved duration?", "Skyla (13.5 mg, 3 years)", ["Kyleena (19.5 mg, 5 years)", "Mirena (52 mg, 8 years)", "Liletta (52 mg, 8 years)"], "Higher hormone content means longer duration and a greater chance of amenorrhea.", CTD1 + ", slides 27, 33, 35");
+CT("LARC: IUDs", 2, "A patient wants the LNG IUD most likely to cause amenorrhea. Which fits best?", "Mirena", ["Skyla", "Kyleena", "Paragard"], "Amenorrhea at 5 years is about 40% with Mirena and Liletta, 23% with Kyleena and 12% with Skyla at 3 years. Paragard is copper.", CTD1 + ", slides 33, 35");
+CT("LARC: IUDs", 2, "Which IUD may suit a patient with a smaller uterus or who has not given birth?", "Kyleena", ["Mirena", "Liletta", "Paragard"], "Kyleena has a smaller size.", CTD1 + ", slide 27");
+CT("LARC: IUDs", 2, "How long is Paragard FDA approved for?", "10 years", ["3 years", "5 years", "8 years"], "Data support use for up to 12 years. Miudella, a newer copper IUD, was approved for 3 years.", CTD1 + ", slides 27, 28");
+CT("LARC: IUDs", 2, "Which method is best for a patient who needs highly effective contraception that is hormone free, such as after breast cancer?", "Copper IUD", ["LNG IUD", "Nexplanon implant", "Depo-Provera"], "Current breast cancer is MEC 4 for all hormonal methods but MEC 1 for the copper IUD.", CTD1 + ", slide 27; " + CTD2 + ", slide 31");
+CT("LARC: IUDs", 2, "Which IUD should usually be avoided in a patient with heavy periods and dysmenorrhea?", "Copper IUD", ["LNG IUD", "Skyla", "Kyleena"], "The copper IUD can increase bleeding and cramping. LNG IUDs usually decrease bleeding and pain.", CTD1 + ", slide 27; " + CTD3 + ", slide 6");
+CT("LARC: IUDs", 2, "A 34-year-old has heavy periods and iron-deficiency anemia and wants pregnancy prevention without a daily pill. Which is best?", "LNG IUD (Mirena)", ["Copper IUD (Paragard)", "Norethindrone mini pill", "Today sponge"], "LNG IUDs significantly decrease menstrual bleeding. The copper IUD can increase it, and a pill is daily.", CTD1 + ", slide 27; " + CTD2 + ", slide 27");
+CT("LARC: IUDs", 3, "What is the usual time of IUD expulsion?", "The first 3 months after insertion", ["After about 5 years", "Only during menses after year 2", "Immediately at insertion only"], "Expulsion is uncommon, under 5%. A new IUD can be placed.", CTD1 + ", slide 34");
+CT("LARC: IUDs", 3, "When is PID risk increased with an IUD?", "In the first 20 days after insertion", ["Throughout the whole time it is in place", "Only after year 5", "Only with LNG IUDs"], "Over the long term the risk is comparable to people without an IUD.", CTD1 + ", slide 34");
+CT("LARC: IUDs", 2, "If a pregnancy occurs with an IUD in place, what is more likely compared with other pregnancies?", "It is more commonly ectopic", ["It is always ectopic", "It is never ectopic", "It is always twins"], "The absolute risk of ectopic pregnancy is not higher than in non-users, but when pregnancy occurs 15 to 50% are ectopic.", CTD1 + ", slide 34");
+CT("LARC: IUDs", 2, "Which drug can reduce IUD insertion pain?", "Lidocaine (paracervical block or topical)", ["Misoprostol", "Ulipristal", "Metformin"], "Misoprostol is not recommended routinely (CDC SPR 2024).", CTD1 + ", slide 35");
+CT("LARC: implant", 1, "What does the Nexplanon implant contain?", "Etonogestrel", ["Levonorgestrel", "Medroxyprogesterone", "Norethindrone"], "It is a subdermal rod placed in the upper arm. FDA-approved duration is up to 5 years (January 2026).", CTD1 + ", slides 27, 29");
+CT("LARC: implant", 2, "What is the most common adverse effect of the implant?", "Irregular bleeding", ["Ectopic pregnancy", "Nausea and vomiting", "Hyperkalemia"], "More than 20% become amenorrheic with continued use, but many have prolonged bleeding or spotting.", CTD1 + ", slide 29");
+CT("LARC: implant", 3, "What is new for Nexplanon in 2026?", "A REMS: only certified prescribers and pharmacies can obtain it", ["It became OTC", "Its approval was shortened to 1 year", "It was restricted to BMI under 25"], "Inserters complete training, and pharmacies may supply it only to certified providers.", CTD1 + ", slides 28, 29");
+CT("LARC: implant", 3, "A patient with a Nexplanon implant reports chest pain, shortness of breath and coughing up blood. What is the response?", "Emergency evaluation for possible pulmonary migration", ["Reassure her", "Schedule a routine visit next month", "Start a stimulant laxative"], "Pulmonary vascular migration is rare but serious.", CTD1 + ", slide 30");
+CT("LARC: implant", 3, "A patient cannot feel her implant. What should be done?", "Prompt clinical evaluation and localization; do not attempt blind removal", ["Wait to see if it returns", "Remove it at home", "Assume she is protected"], "The patient also needs interim contraceptive advice if insertion is uncertain.", CTD1 + ", slide 30");
+CT("LARC: implant", 3, "Which drugs can reduce the efficacy of the implant?", "CYP3A4 inducers", ["Broad-spectrum antibiotics", "Antacids", "Acetaminophen"], "Evaluate case by case. The package insert and CDC guidance differ.", CTD1 + ", slide 29");
+
+/* ---------- Injectable, pills, ring, patch ---------- */
+CT("Injectable: DMPA", 1, "How often is Depo-Provera given?", "Every 12 weeks", ["Every 4 weeks", "Every 6 months", "Once a year"], "It is given by deep IM injection or SQ. There is some flexibility, up to 14 weeks.", CTD2 + ", slide 5");
+CT("Injectable: DMPA", 2, "Which hormonal method's efficacy is not reduced by higher BMI?", "DMPA injection", ["Combined patch", "Drospirenone and estetrol pill", "Plan B (levonorgestrel) emergency contraception"], "The patch may be less effective at 90 kg or more, and Nextstellis may be less effective at BMI 30 or more.", CTD2 + ", slides 5, 15, 22");
+CT("Injectable: DMPA", 2, "DMPA should be avoided in which patient?", "One taking long-term corticosteroids", ["One with migraine", "One using lamotrigine", "One who is breastfeeding"], "DMPA causes short-term bone loss. Avoid it with long-term corticosteroids or a history of high-risk fracture.", CTD2 + ", slide 6");
+CT("Injectable: DMPA", 2, "Which is a common effect of DMPA after 12 months of use?", "More than half report amenorrhea", ["Heavier bleeding", "Improved bone density", "A rapid return to fertility"], "Irregular bleeding is common in the first year. About 38% gain more than 10 lb over 24 months.", CTD2 + ", slide 6");
+CT("Injectable: DMPA", 2, "Which method has the slowest return to fertility?", "DMPA", ["LNG IUD", "Implant", "Progestin-only pill"], "DMPA can delay fertility up to 12 months. LNG IUD, implant and POP return to fertility within one cycle.", CTD2 + ", slides 27, 35");
+CT("Injectable: DMPA", 3, "What label update was added to Depo-Provera in December 2025?", "A meningioma warning", ["A stroke boxed warning", "A kidney injury warning", "A new weekly dose"], "Meningioma has been reported after repeated, mostly long-term use. Absolute risk is low.", CTD2 + ", slide 6");
+CT("Progestin-only pills", 1, "Which progestin-only pill is sold OTC?", "Opill (norgestrel 0.075 mg)", ["Slynd (drospirenone)", "Camila (norethindrone)", "Plan B"], "Opill was approved for OTC use in July 2023 with no age limit.", CTD2 + ", slides 7, 8");
+CT("Progestin-only pills", 2, "A patient wants to buy Opill. Which patient should NOT use it?", "One who has had breast cancer", ["One who is breastfeeding", "One who takes ibuprofen", "One who is 17 years old"], "Opill is also not for patients who are pregnant, already using another hormonal method, or who need emergency contraception.", CTD2 + ", slide 9");
+CT("Progestin-only pills", 2, "A patient takes Opill more than 3 hours late. What should she do?", "Take it as soon as possible, then use backup for 48 hours", ["Skip it and double the next dose", "Nothing, no backup is needed", "Stop the pack and start a new one in a week"], "Norethindrone and norgestrel have short half-lives, so timing matters.", CTD2 + ", slide 9");
+CT("Progestin-only pills", 2, "Opill may interact with which emergency contraceptive?", "Ulipristal (ella)", ["Levonorgestrel (Plan B)", "Copper IUD", "Condoms"], "Opill is not a morning-after pill.", CTD2 + ", slide 9");
+CT("Progestin-only pills", 2, "Which POP contains drospirenone and may require monitoring for hyperkalemia?", "Slynd", ["Opill", "Camila", "Errin"], "Drospirenone has anti-androgenic benefits and is more forgiving of late doses than the other POPs.", CTD2 + ", slide 7");
+CT("Progestin-only pills", 2, "Progestin-only pills are a good choice for which patient?", "One who cannot take estrogen", ["One who cannot take a daily pill at the same time", "One who wants the most forgiving daily schedule", "One who wants a predictable, regular bleeding pattern"], "POPs avoid estrogen. Avoid them if she cannot take one at the same time every day.", CTD2 + ", slides 7, 27");
+CT("Combined pills", 2, "What is a good place to start for a new combined pill user with no compelling indication?", "A monophasic pill with a moderate dose of EE", ["A triphasic pill", "A quadriphasic pill", "A very high dose EE pill"], "Multiphasic pills are not the best place to start.", CTD2 + ", slides 13, 16");
+CT("Combined pills", 2, "A patient wants to skip placebo weeks and use a pill continuously. Which type should she use?", "A monophasic combined pill", ["A biphasic pill", "A triphasic pill", "A progestin-only pill"], "Avoid multiphasic pills for continuous use.", CTD2 + ", slide 17");
+CT("Combined pills", 2, "What is a downside of extended or continuous cycle regimens?", "More spotting in the first 3 to 6 months", ["Less effective ovulation suppression", "A higher failure rate", "Heavier withdrawal bleeds"], "Benefits include fewer periods and help with menstrual issues.", CTD2 + ", slide 17");
+CT("Combined pills", 3, "Why can extended or continuous cycles help?", "They avoid the hormone-free interval, keeping FSH and LH suppressed", ["They raise FSH to improve cycle control", "They remove the need for estrogen", "They lower LH only"], "They avoid the estrogen cliff and cut headaches, pelvic pain and breast tenderness.", CTD2 + ", slide 18");
+CT("Combined pills", 2, "Which pill contains estetrol with drospirenone?", "Nextstellis", ["Yaz", "Natazia", "Seasonique"], "It has 24 active days. The label says it may be less effective at BMI 30 or more.", CTD2 + ", slides 14, 15");
+CT("Combined pills", 2, "Which pill is an 84-active-tablet extended-cycle product?", "Seasonique", ["Yaz", "Loestrin 24 Fe", "Nextstellis"], "Seasonique has 84 tablets of EE 0.03 mg with levonorgestrel 0.15 mg, plus 7 low-dose EE tablets.", CTD2 + ", slide 18");
+CT("Combined pills", 2, "Which of these is quadriphasic?", "Natazia", ["Kariva", "Estrostep", "Yaz"], "Kariva is biphasic and Estrostep is triphasic.", CTD2 + ", slide 16");
+CT("Ring and patch", 1, "What hormones are in NuvaRing?", "Ethinyl estradiol and etonogestrel", ["Estetrol and drospirenone", "Levonorgestrel only", "Ethinyl estradiol and norelgestromin"], "The ring is in for 21 days and out for 7, or replaced every 28 days for continuous use.", CTD2 + ", slide 19");
+CT("Ring and patch", 2, "How long can one Annovera ring be used?", "Up to 1 year (13 cycles)", ["21 days", "3 months", "5 years"], "It is reusable and contains EE with segesterone. It should not be used for continuous regimens.", CTD2 + ", slides 17, 19");
+CT("Ring and patch", 2, "What is the most common reason people stop using the ring?", "Foreign body sensation or other device-related issues", ["Weight gain", "Loss of bone density", "Hyperkalemia"], "Most patients and partners do not report discomfort during intercourse.", CTD2 + ", slide 21");
+CT("Ring and patch", 2, "How is the contraceptive patch used?", "Change weekly for 3 weeks, then a patch-free week", ["Change daily", "Wear continuously for a month", "Change every 3 days"], "For continuous use, replace every 7 days without a break.", CTD2 + ", slides 17, 22");
+CT("Ring and patch", 2, "A patient with a BMI of 36 asks about the patch. What is the best answer?", "Avoid it: the Xulane label contraindicates BMI of 30 or more", ["Use it with a higher dose", "It is MEC 1", "Use it only in the luteal phase"], "The patch may also be less effective at 90 kg or more. An IUD, implant or DMPA fits better.", CTD2 + ", slide 22; " + CTD3 + ", slide 3");
+CT("Ring and patch", 3, "How does EE exposure from the patch compare with a 35 mcg EE pill?", "About 60% higher (AUC)", ["About 60% lower", "The same", "Twice as high in Cmax"], "Nausea, breast tenderness and application-site reactions may be more common.", CTD2 + ", slide 22");
+CT("Ring and patch", 2, "How does a vaginal ring differ from an LNG IUD in hormone exposure?", "The ring is absorbed into the bloodstream; the IUD acts mostly locally", ["The ring acts mostly locally", "Both act only locally", "Neither is absorbed"], "The ring gives systemic effects, which is why estrogen-related restrictions apply.", CTD2 + ", slide 20");
+
+/* ---------- Choosing a method, MEC, interactions ---------- */
+CT("Choosing a method", 2, "Which is the best choice for someone who cannot take a pill every day?", "An IUD, implant, DMPA, weekly patch or monthly ring", ["A progestin-only pill", "A daily combined pill with an alarm only", "Fertility awareness methods"], "Avoid the POP if she cannot take it at the same time every day.", CTD2 + ", slide 27");
+CT("Choosing a method", 2, "A 43-year-old forgets her combined pill once or twice a month and wants no more children. What fits best?", "A long-acting method such as an IUD or implant", ["Switch to a progestin-only pill", "Take the pill with her morning coffee only", "Fertility awareness"], "If daily dosing is hard, choose a method that does not depend on daily dosing.", CTD2 + ", slides 27, 47");
+CT("Choosing a method", 2, "How soon does fertility usually return after an LNG IUD, implant or POP?", "Within one cycle", ["About 2 months", "6 to 12 months", "More than a year"], "Combined pills take about 2 months, and DMPA can take up to 12 months.", CTD2 + ", slide 27");
+CT("Choosing a method", 2, "Choice matters. In the study discussed, what happened to continuation when people got their method of choice?", "Far fewer stopped within 12 months", ["No difference", "More stopped within 12 months", "Only IUD users stayed"], "Only 8.9% of those who got their method of choice stopped within 12 months, compared with 72.2% of those who did not.", CTD2 + ", slide 26");
+CT("USMEC", 1, "What does U.S. MEC category 4 mean?", "The method poses an unacceptable health risk; do not use it", ["Advantages generally outweigh risks", "No restriction", "Use only if no other method is acceptable"], "Category 3 means risks usually outweigh advantages. Category 1 is no restriction and 2 means advantages outweigh risks.", CTD2 + ", slide 28");
+CT("USMEC", 2, "What does U.S. MEC category 3 mean?", "Risks usually outweigh advantages; avoid unless no other method is appropriate", ["No restriction", "Advantages generally outweigh the risks", "Unacceptable health risk"], "Category 4 is an unacceptable risk.", CTD2 + ", slide 28");
+CT("USMEC", 2, "Which condition is MEC 4 for combined hormonal contraceptives?", "Migraine with aura at any age", ["Adequately controlled hypertension", "BMI of 30", "Smoking at age 36 under 15 cigarettes a day"], "Controlled hypertension and smoking at 35 or older under 15 a day are MEC 3. Obesity is MEC 2.", CTD2 + ", slides 31, 33");
+CT("USMEC", 3, "What is the MEC category for CHCs in a woman 35 or older who smokes 15 or more cigarettes a day?", "4", ["1", "2", "3"], "With fewer than 15 a day it is category 3.", CTD2 + ", slide 31");
+CT("USMEC", 2, "Why does estrogen make some conditions restrictions for CHCs?", "It increases liver production of clotting factors VII, X and fibrinogen", ["It lowers blood pressure", "It blocks sodium channels", "It raises SHBG only"], "CHCs can also raise blood pressure by 6 to 8 mm Hg.", CTD2 + ", slide 31");
+CT("USMEC", 2, "Current breast cancer is MEC 4 for which methods?", "All hormonal methods, but the copper IUD is MEC 1", ["Only estrogen-containing methods", "Only the implant", "All methods including the copper IUD"], "That is why the copper IUD is the hormone-free option.", CTD2 + ", slide 31");
+CT("Postpartum", 2, "What is the CHC MEC category in the first 21 days postpartum?", "4, whether or not breastfeeding", ["2", "3 only if breastfeeding", "1"], "Clot risk is highest right after delivery, and estrogen adds to it.", CTD2 + ", slide 32");
+CT("Postpartum", 2, "Which methods are MEC 1 or 2 at any time postpartum?", "Implant, DMPA and progestin-only pills", ["Combined pills", "The patch", "The ring"], "IUDs are MEC 2 until 4 weeks, then MEC 1 (4 with postpartum sepsis).", CTD2 + ", slide 32");
+CT("Postpartum", 2, "A 30-year-old has just delivered, plans to breastfeed and wants contraception at discharge. Which should be avoided?", "A combined hormonal contraceptive", ["An implant", "DMPA", "A progestin-only pill"], "Progestin-only methods are MEC 1 or 2 postpartum.", CTD3 + ", slide 3; " + CTD2 + ", slide 32");
+CT("Postpartum", 3, "A healthy 31-year-old is 5 weeks postpartum, not breastfeeding, with no other VTE risks. What is the CHC MEC category?", "2", ["1", "3", "4"], "It is 3 with other VTE risk factors and 1 after 42 days.", CTD2 + ", slides 32, 47");
+CT("Drug interactions", 2, "Which antibiotic class has strong evidence of reducing hormonal contraceptive efficacy?", "Rifamycins (rifampin, rifabutin)", ["Penicillins", "Macrolides", "Tetracyclines"], "Other antibiotics have no strong evidence of a decrease. MEC rates rifampin and rifabutin as category 3 for CHCs and POPs.", CTD3 + ", slide 4");
+CT("Drug interactions", 2, "Which anticonvulsant has its levels lowered by combined hormonal contraceptives?", "Lamotrigine", ["Carbamazepine", "Phenytoin", "Topiramate"], "CHCs lower lamotrigine by about 50%, risking breakthrough seizures. Avoid CHC with lamotrigine (MEC 3).", CTD3 + ", slide 4");
+CT("Drug interactions", 2, "Which anticonvulsants lower hormonal contraceptive levels and raise the risk of pregnancy?", "Carbamazepine, oxcarbazepine, phenytoin, phenobarbital and topiramate", ["Lamotrigine and valproate", "Levetiracetam and gabapentin only", "Valproate and lamotrigine only"], "Lamotrigine and valproate are the ones whose levels are lowered by the contraceptive instead.", CTD3 + ", slide 4");
+CT("Drug interactions", 3, "A woman taking topiramate for seizures wants contraception. Which is preferred?", "DMPA or an IUD", ["Combined pill", "Progestin-only pill", "Vaginal ring"], "With CYP3A4 inducers prefer DMPA or an IUD. The implant is acceptable, and CHC and POP should be avoided.", CTD2 + ", slide 27; " + CTD3 + ", slide 47");
+CT("Drug interactions", 3, "A woman on a combined pill will take rifampin for 4 months. What is the best plan?", "Switch to DMPA or an IUD", ["Continue the pill and add vitamin C", "Take two pills a day", "Stop all contraception during treatment"], "Rifampin is a CYP3A4 inducer and is MEC 3 for CHCs and POPs.", CTD3 + ", slides 4, 47");
+CT("Drug interactions", 3, "A woman with epilepsy takes lamotrigine and wants a combined pill. What should the pharmacist say?", "Avoid CHCs; levels of lamotrigine fall about 50%", ["A CHC is fine with no changes", "Lamotrigine raises CHC levels", "Only a progestin-only pill is unsafe"], "CHC is MEC 3 with lamotrigine.", CTD3 + ", slides 4, 47");
+CT("Drug interactions", 2, "Which adverse effects can oral estrogen and progestins have on lipids?", "Oral estrogen may raise triglycerides; progestins may raise LDL", ["Estrogen raises LDL; progestins raise HDL", "Both lower triglycerides", "Neither affects lipids"], "More androgenic progestins are more likely to raise LDL.", CTD2 + ", slide 27");
+
+/* ---------- Starting a method ---------- */
+CT("Starting a method", 2, "If a combined hormonal contraceptive is started within the first 5 days of menstrual bleeding, is backup needed?", "No additional protection is needed", ["Backup for 7 days", "Backup for 14 days", "Backup for 28 days"], "If started more than 5 days after bleeding began, use abstinence or barrier methods for 7 days.", CTD2 + ", slide 43; " + CTD3 + ", slide 18");
+CT("Starting a method", 2, "What is a Quick Start?", "Start active tablets any day, with backup for 7 days", ["Start only on the first day of the period", "Start on the first Sunday after menses", "Start only after a negative pregnancy test and a month of condoms"], "Quick start is the easiest option and improves adherence.", CTD2 + ", slide 45");
+CT("Starting a method", 2, "Which is true about a Sunday start?", "Start active tablets the first Sunday after menses begin and use backup for 7 days", ["It needs no backup", "It must start on Monday", "It cannot be used with pills"], "A first-day start may not need backup, though 7 days is the conservative advice.", CTD2 + ", slide 45");
+CT("Starting a method", 3, "Which patient can the pharmacist be reasonably certain is not pregnant (no signs of pregnancy)?", "One who is 5 days after the start of normal menses", ["One who had unprotected sex 3 days ago on cycle day 20", "One who is 8 weeks postpartum, not breastfeeding, and has had unprotected sex", "One who reports a missed period"], "Other criteria include no intercourse since the last normal menses, correct use of a reliable method, within 7 days of an abortion, within 4 weeks postpartum, or fully breastfeeding and amenorrheic under 6 months.", CTD2 + ", slide 42");
+CT("Starting a method", 2, "What should be collected before starting a hormonal method?", "Blood pressure, medical history and a pregnancy assessment", ["Only a cholesterol level", "Only a weight", "A bone density scan"], "Also ask about prior contraception, lifestyle and preferences, then assess contraindications.", CTD2 + ", slides 40, 41");
+CT("Starting a method", 2, "In Montana, which can a pharmacist NOT prescribe under 37-7-106 MCA?", "Controlled substances or abortion-inducing drugs", ["A drug needing no new diagnosis", "A drug for a minor self-limiting condition", "A drug for an emergency"], "Pharmacists may prescribe within a documented patient-prescriber relationship and only what they are competent to prescribe.", CTD2 + ", slide 46");
+CT("Starting a method", 2, "After prescribing contraception in Montana, what must the pharmacist do?", "Ask for the PCP and notify them soon after prescribing", ["Get the PCP's written approval first", "Nothing, notification is optional", "Refer instead of prescribing"], "The steps are assess, plan follow-up, notify, and document (ARM 24.174.505).", CTD2 + ", slide 46");
+CT("Adherence", 2, "About what proportion of unintended pregnancies are due to improper use of contraceptives?", "About 40%", ["About 5%", "About 15%", "About 85%"], "Use reminders and give clear missed-dose directions.", CTD3 + ", slide 22");
+CT("Adherence", 3, "A one-year supply of oral contraceptives compared with a 30 or 90 day supply leads to what?", "About 30% lower unintended pregnancy rates", ["No change", "More missed doses", "A higher cost per cycle and worse adherence"], "About a third of users missed doses because they could not get their next supply.", CTD3 + ", slide 22");
+CT("Adherence", 2, "What should every contraceptive user keep on hand?", "A backup method and emergency contraception", ["A second prescription pack only", "A pregnancy test only", "A copper IUD"], "Also tell them what to do for missed doses.", CTD3 + ", slide 22");
+CT("Adherence", 2, "Which questions matter when a patient misses doses?", "What product, how many doses, and when in the cycle", ["Their favorite brand", "Only the patient's age", "Only whether she has had a baby"], "Check the package insert for product-specific advice. Vomiting or diarrhea can also reduce efficacy.", CTD3 + ", slide 23");
+
+/* ---------- Adverse effects ---------- */
+CT("Managing side effects", 2, "What do most people who stop a combined pill report as the reason?", "Side effects (59 to 81%)", ["Cost", "Pregnancy", "Pharmacist advice"], "Setting expectations helps tell expected, self-limiting effects from serious ones.", CTD3 + ", slide 24");
+CT("Managing side effects", 2, "When is breakthrough bleeding expected with a combined pill?", "In the first 1 to 2 months, usually settling within 3 months", ["After 2 years", "Only with the patch", "Never"], "Up to a third of women stop because of it.", CTD3 + ", slide 24");
+CT("Managing side effects", 2, "A patient has nausea with her pill. What is a first step?", "Take it at bedtime or with food", ["Double the dose", "Stop all contraception", "Take it on an empty stomach in the morning"], "Nausea is usually due to estrogen. If it persists, consider switching.", CTD3 + ", slide 24");
+CT("Managing side effects", 2, "A patient gets headaches in the placebo week. What might help?", "A lower EE dose or an extended or continuous cycle", ["A higher EE dose", "Stopping the progestin", "A longer placebo week"], "Headaches are thought to be due to the drop in estrogen during the placebo week.", CTD3 + ", slide 24");
+CT("Managing side effects", 3, "A patient has breakthrough bleeding on days 1 to 14 of her cycle. Which is most likely too little?", "Estrogen", ["Progestin", "Androgen", "Cortisol"], "Early and mid-cycle breakthrough bleeding points to too little estrogen. Late-cycle (days 15 to 28) points to too little progestin.", CTD3 + ", slide 30");
+CT("Managing side effects", 3, "A patient has breakthrough bleeding on days 15 to 28. Which is most likely too little?", "Progestin", ["Estrogen", "Androgen", "Prolactin"], "Days 1 to 14 point to too little estrogen.", CTD3 + ", slide 30");
+CT("Managing side effects", 3, "Which set of effects suggests too much androgenic activity?", "Acne, hirsutism and hair loss", ["Melasma and breast tenderness", "Yeast infections and low sex drive", "Nausea and bloating"], "Androgen excess can also cause weight gain, higher LDL and lower HDL. Switch to a less androgenic progestin.", CTD3 + ", slide 30");
+CT("Managing side effects", 3, "Melasma, nausea and breast tenderness suggest too much of which hormone?", "Estrogen", ["Androgen", "Progestin", "FSH"], "Too much progestin causes fatigue, mood changes, increased appetite and yeast infections.", CTD3 + ", slide 30");
+CT("Managing side effects", 3, "A 21-year-old on Aviane has acne, dark facial hair and early-cycle breakthrough bleeding. What does this suggest?", "An androgenic progestin and too little estrogen", ["Too much estrogen", "Too much progestin only", "A normal response that needs no change"], "Aviane is EE 20 mcg with levonorgestrel. Consider a less androgenic progestin such as desogestrel, norgestimate or drospirenone.", CTD3 + ", slides 30, 33; " + CTD2 + ", slide 14");
+CT("Serious adverse effects", 2, "Chest pain, shortness of breath and coughing up blood in a pill user suggest what?", "Pulmonary embolism", ["Gallbladder disease", "Stroke", "Migraine"], "Severe leg pain, swelling and warmth suggest a VTE.", CTD3 + ", slide 26");
+CT("Serious adverse effects", 2, "Numbness, slurred speech and weakness in a pill user suggest what?", "Stroke", ["Pulmonary embolism", "Pancreatitis", "Gallstones"], "Blurred or double vision or loss of vision can also signal stroke or a retinal clot.", CTD3 + ", slide 26");
+CT("Serious adverse effects", 2, "Abdominal pain, jaundice and itching in a pill user suggest what?", "Gallbladder or liver problems, pancreatitis or abdominal thrombosis", ["Pulmonary embolism", "Stroke", "Tension headache"], "Any of these need urgent evaluation.", CTD3 + ", slide 26");
+CT("Serious adverse effects", 2, "Is the risk of blood clots higher with pregnancy or with the pill?", "Pregnancy", ["The pill", "They are equal", "Neither increases clot risk"], "The risk of clots with the pill is real but lower than in pregnancy. Avoid in age over 35 smoking 15 or more a day.", CTD3 + ", slide 29");
+CT("Serious adverse effects", 3, "Which statement about breast cancer risk with hormonal contraception is right?", "The absolute risk is very small and is outweighed by benefits for most", ["The risk is large for all users", "There is no risk at all", "Risk depends only on weight"], "Age, family history and duration of use influence it.", CTD3 + ", slide 29");
+
+/* ---------- Non-contraceptive benefits and PMOS ---------- */
+CT("Non-contraceptive benefits", 2, "Which is a non-contraceptive benefit of hormonal contraception?", "Less dysmenorrhea (pain reduced in 70 to 80% of users)", ["Protection from STIs", "A cure for infertility", "Lower blood pressure"], "Hormonal methods can also help heavy bleeding, PMS and PMDD, endometriosis, acne and PMOS.", CTD3 + ", slide 6; " + CTD2 + ", slide 36");
+CT("PMOS", 2, "PCOS has been renamed in 2026 to what?", "Polyendocrine metabolic ovarian syndrome (PMOS)", ["Primary menstrual ovarian syndrome", "Pituitary metabolic ovarian syndrome", "Polycystic metabolic ovulation syndrome"], "The ovarian cysts are arrested small follicles. The core problem is endocrine and metabolic.", CTD3 + ", slide 7");
+CT("PMOS", 3, "In PMOS, what happens to GnRH pulses and gonadotropins?", "GnRH pulses speed up and LH rises relative to FSH", ["GnRH pulses slow and FSH rises", "LH and FSH both fall", "FSH surges at mid-cycle"], "Without ovulation there is no progesterone brake on GnRH.", CTD3 + ", slide 7");
+CT("PMOS", 3, "Why does insulin resistance raise free testosterone in PMOS?", "Hyperinsulinemia lowers liver SHBG", ["Insulin blocks the androgen receptor", "Insulin lowers LH", "Insulin increases SHBG"], "Insulin also acts as a co-gonadotropin on theca cells.", CTD3 + ", slide 7");
+CT("PMOS", 2, "What is first-line for both menstrual abnormalities and hirsutism in PMOS?", "A combined oral contraceptive", ["Metformin alone", "Letrozole", "Spironolactone alone"], "Use the lowest effective EE dose (20 to 30 mcg, not more than 35 mcg).", CTD3 + ", slides 8, 9");
+CT("PMOS", 3, "Which progestins are low androgen or anti-androgen choices for PMOS?", "Desogestrel and norgestimate (low androgen); drospirenone and dienogest (anti-androgen)", ["Levonorgestrel and norgestrel", "Norethindrone and ethynodiol diacetate", "Medroxyprogesterone only"], "These are the better fit for hirsutism and acne.", CTD3 + ", slide 9");
+CT("PMOS", 3, "Which PMOS add-on is used if hirsutism persists after at least 6 months of a COC?", "Spironolactone", ["Letrozole", "Metformin", "Clomiphene"], "It blocks androgen receptors and 5-alpha reductase, and needs effective contraception because of risk to a male fetus.", CTD3 + ", slide 8");
+CT("PMOS", 3, "Which drug is first-line for ovulation induction in PMOS?", "Letrozole", ["Spironolactone", "Metformin", "Ethinyl estradiol"], "Letrozole blocks aromatase, so estrogen falls and FSH rises. Its half-life is about 2 days, compared with 5 to 7 days for clomiphene.", CTD3 + ", slide 8");
+CT("PMOS", 3, "How does metformin help in PMOS?", "It lowers insulin, which lowers insulin-driven ovarian androgen", ["It blocks the androgen receptor", "It blocks aromatase", "It is the best choice for hirsutism"], "It helps cycles and metabolic risk at BMI 25 or more, but not hirsutism.", CTD3 + ", slide 8");
+CT("PMOS", 3, "Cyclic progestin for at least 12 days every 3 months mainly protects against what?", "Endometrial hyperplasia from unopposed estrogen", ["Hirsutism", "Insulin resistance", "Infertility"], "A LNG IUD is another option when estrogen is not appropriate.", CTD3 + ", slide 8");
+CT("Special populations", 3, "Which statement about testosterone therapy and pregnancy is correct?", "Pregnancy is still possible, and effective contraception matters because testosterone is teratogenic", ["Testosterone makes pregnancy impossible", "Testosterone is a contraceptive", "Contraception is never needed"], "Many pregnancies in trans men and nonbinary people on testosterone were unplanned. Copper IUD, LNG IUD, DMPA or other progestin-only options are good choices.", CTD3 + ", slide 10");
+
+/* ---------- Emergency contraception ---------- */
+CT("Emergency contraception", 1, "How should levonorgestrel emergency contraception (Plan B) be taken?", "1.5 mg once, as soon as possible", ["3 mg twice", "30 mg once", "Only after 72 hours"], "Take it as soon as possible. The CDC says within 5 days, but pregnancy rates rise on days 4 to 5.", CTD3 + ", slide 35");
+CT("Emergency contraception", 2, "What is the mechanism of levonorgestrel EC?", "It delays or inhibits ovulation if taken before the LH surge", ["It ends an existing pregnancy", "It blocks implantation only", "It kills sperm"], "It is safe and not an abortion pill. Taking it after the LH surge is less likely to work.", CTD3 + ", slides 34, 35");
+CT("Emergency contraception", 2, "What is the mechanism of ulipristal (ella)?", "A selective progesterone receptor modulator that delays ovulation, even after the LH surge starts", ["A progestin that works only before the LH surge", "An estrogen", "A copper ion"], "Ulipristal is taken within 120 hours.", CTD3 + ", slide 36");
+CT("Emergency contraception", 2, "Which EC pill is prescription only?", "Ulipristal (ella)", ["Levonorgestrel 1.5 mg", "Both are Rx only", "Neither is available in the US"], "Levonorgestrel is OTC with no age limit or ID needed.", CTD3 + ", slides 35, 36");
+CT("Emergency contraception", 2, "Within how long should ulipristal be taken?", "120 hours", ["24 hours", "72 hours only", "7 days"], "Take it as soon as possible for best efficacy.", CTD3 + ", slide 36");
+CT("Emergency contraception", 2, "Which is the most effective emergency contraceptive method?", "Copper IUD (about 0.1% pregnancy rate)", ["Levonorgestrel 1.5 mg", "Ulipristal 30 mg", "The Yuzpe method"], "The copper IUD is placed within 5 days. Weight does not affect it and there are no drug interactions.", CTD3 + ", slides 39, 42");
+CT("Emergency contraception", 2, "Which IUD other than the copper IUD can be used for EC (off label)?", "LNG 52 mg IUD (Mirena or Liletta)", ["Kyleena", "Skyla", "Nexplanon"], "It was noninferior in a trial. There are no data for lower-dose LNG IUDs.", CTD3 + ", slide 40");
+CT("Emergency contraception", 3, "How does BMI affect levonorgestrel EC?", "It may be less effective at BMI over 25, and doubling the dose does not help", ["BMI has no effect", "It works better with higher BMI", "Doubling the dose fixes it"], "BMI 25 to 29.9 has about 2 times the pregnancy risk, and BMI over 30 about 4.4 times.", CTD3 + ", slide 38");
+CT("Emergency contraception", 3, "How does ulipristal's efficacy change with BMI?", "Reduced with BMI over 30, with no difference at 25 to 29.9", ["Reduced at any BMI over 20", "It is better at higher BMI", "It is unaffected at any BMI"], "BMI over 30 has about 2.6 times the pregnancy risk compared with BMI under 25.", CTD3 + ", slide 38");
+CT("Emergency contraception", 3, "A patient with a BMI of 32 wants EC. What is the best ranking?", "Copper or LNG IUD first, then ulipristal over levonorgestrel; never withhold oral EC", ["Levonorgestrel 1.5 mg, then ulipristal", "Refuse EC because of her weight", "Double-dose levonorgestrel is best"], "ACOG says people with higher weight should not be denied oral EC.", CTD3 + ", slide 38");
+CT("Emergency contraception", 2, "A patient had unprotected sex 4 days ago. Which EC option is better than levonorgestrel?", "Ulipristal", ["Yuzpe method", "Another dose of levonorgestrel", "Waiting for a pregnancy test"], "Ulipristal is more effective than levonorgestrel between 72 and 120 hours after unprotected sex.", CTD3 + ", slide 42");
+CT("Emergency contraception", 2, "When can a regular hormonal method be started after levonorgestrel EC?", "Right away, with backup for 7 days", ["After 5 days", "Only after the next period", "Never"], "After ulipristal wait at least 5 days, then use backup for 7 days.", CTD3 + ", slides 35, 43");
+CT("Emergency contraception", 3, "When can a regular hormonal method be started after ulipristal?", "No sooner than 5 days later, with backup for 7 days", ["Right away", "Within 24 hours", "After 6 weeks"], "Ulipristal and hormonal contraception may interfere, so the start is delayed. Nonhormonal methods can start immediately.", CTD3 + ", slide 36");
+CT("Emergency contraception", 2, "What should the patient do if she vomits within 3 hours of an EC pill?", "Take another dose", ["Do nothing", "Wait a week", "Switch to a condom"], "CDC SPR 2024 uses 3 hours for repeat dosing.", CTD3 + ", slides 35, 36");
+CT("Emergency contraception", 2, "When should a pregnancy test be advised after EC?", "If there is no withdrawal bleed within 3 weeks", ["Within 1 day", "After 6 months", "Never"], "Also keep one dose of EC on hand and discuss STI risk.", CTD3 + ", slide 43");
+CT("Emergency contraception", 2, "Which is a common misconception about emergency contraception?", "That it is an abortion pill", ["That it can work for up to 5 days", "That it does not protect against STIs", "That OTC levonorgestrel needs no prescription"], "EC is safe and effective, and it is NOT equivalent to abortion. No age or ID is needed for OTC levonorgestrel.", CTD3 + ", slide 34");
+CT("Emergency contraception", 2, "Which EC method is not recommended?", "Yuzpe method (high-dose combined pills)", ["Copper IUD", "Ulipristal", "Levonorgestrel"], "It has low efficacy and a high rate of adverse effects.", CTD3 + ", slide 42");
+CT("Emergency contraception", 3, "Which drugs may lower ulipristal absorption?", "Acid-suppressing drugs", ["Antihistamines", "Statins", "Calcium channel blockers"], "CYP3A4 inducers also lower EC efficacy.", CTD3 + ", slide 42");
+CT("Emergency contraception", 2, "What are the typical adverse effects of levonorgestrel and ulipristal EC?", "Headache, nausea and dysmenorrhea", ["Hyperkalemia and edema", "Blood clots", "Jaundice"], "They are similar for the two pills.", CTD3 + ", slides 35, 36");
+CT("Emergency contraception", 2, "What is a first step for a patient who asks for EC after a condom broke 2 days ago?", "Assess timing and weight, offer options, and use nonjudgmental language", ["Ask for her ID and age", "Tell her to wait until her next period", "Refuse because of embarrassment"], "Options include levonorgestrel, ulipristal or an IUD within 5 days, and she should leave with a plan for ongoing contraception.", CTD3 + ", slides 33, 44");
 /* P3 · Therapeutics III (PHAR 553 Fall 2026): disease-state questions by syllabus topic */
 const T5 = (t, d, q, a, w, e) => Q("T553", d, q, a, w, e, t);
 
@@ -5449,7 +5734,7 @@ const World = (function () {
   const CATS = [
     ['BG', 'Brand / Generic'], ['CL', 'Drug classes'], ['MOA', 'Mechanisms'], ['AE', 'Adverse effects'],
     ['DDI', 'Interactions'], ['CN', 'Counseling'], ['AD', 'Antidotes'], ['SIG', 'Sig & law'],
-    ['TOP', 'Weekly drugs'], ['TP3', 'Weekly drugs \u00B7 P3'], ['CALC', 'Calculations'], ['PT3', 'PharmTox \u00B7 Exam 3 questions'], ['PT3G', 'PharmTox \u00B7 Exam 3 drug practice'], ['PT4', 'PharmTox \u00B7 Exam 4 drug practice'], ['TH3', 'Therapeutics \u00B7 Exam 3'], ['T553', 'Therapeutics III \u00B7 Syllabus topics'], ['HIM', 'Himothy \u00B7 Heart failure'], ['MY', 'My studies']
+    ['TOP', 'Weekly drugs'], ['TP3', 'Weekly drugs \u00B7 P3'], ['CALC', 'Calculations'], ['PT3', 'PharmTox \u00B7 Exam 3 questions'], ['PT3G', 'PharmTox \u00B7 Exam 3 drug practice'], ['PT4', 'PharmTox \u00B7 Exam 4 drug practice'], ['TH3', 'Therapeutics \u00B7 Exam 3'], ['TH3F', 'Therapeutics \u00B7 IBS, constipation, diarrhea'], ['TH3C', 'Therapeutics \u00B7 Contraceptives'], ['T553', 'Therapeutics III \u00B7 Syllabus topics'], ['HIM', 'Himothy \u00B7 Heart failure'], ['MY', 'My studies']
   ];
   const CATNAME = {}; CATS.forEach(c => CATNAME[c[0]] = c[1]);
   const FLAVOR = {
@@ -5466,6 +5751,9 @@ const World = (function () {
     TP3: ['P3 drug list: this one is on the sheet.', 'Quiz week! Do you know this one?', 'Straight off the Top 300 sheet.'],
     T553: ['My doctor changed my plan, can you explain?', 'Quick therapy question before I go.', 'Is this the right treatment for me?'],
     HIM: ['*high knees* Quick heart failure question!', 'Is my ejection fraction a problem?', 'Which pills do I take for my heart?'],
+    TH3C: ['I have a question about birth control.', 'My doctor mentioned contraception, can you explain?', 'Quick question about my pill.'],
+    TH3F: ['My stomach has been off for days.', 'Is this bowel problem normal?', 'Which one should I take for my gut?'],
+    TH3: ['Quick gut and stomach question.', 'My doctor mentioned this, can you explain?', 'Is this the right treatment for me?'],
     MY: ['A question from your own notes.', 'Straight from your study sheet.', 'This one is on your exam list.']
   };
   const KAREN_LINES = ['I WANT TO SPEAK TO YOUR MANAGER!', 'This is UNACCEPTABLE. Answer me right now!', 'I have been coming here for twenty years!', 'Do you even know what you are doing?!'];
@@ -5521,6 +5809,7 @@ const World = (function () {
         f.awards = { frames: ((o.awards || {}).frames || []).slice(), pets: ((o.awards || {}).pets || []).slice(), calW: (o.awards || {}).calW || 0, wkDone: (o.awards || {}).wkDone ? o.awards.wkDone.slice() : null };
         const d = defaults().set, os = o.set || {};
         f.set = Object.assign(d, os); f.set.topics = Object.assign(defaults().set.topics, os.topics || {});
+        if (os.topics && os.topics.TH3 === false) { if (os.topics.TH3F === undefined) f.set.topics.TH3F = false; if (os.topics.TH3C === undefined) f.set.topics.TH3C = false; }
         if (!Array.isArray(f.set.diffs) || !f.set.diffs.length) f.set.diffs = [1, 2, 3];
         if (!MODES.some(m => m[0] === f.set.mode)) f.set.mode = 'mixed'; // Even shuffle / Linear was removed
         if (!Array.isArray(f.decks)) f.decks = [];
@@ -5978,7 +6267,7 @@ const World = (function () {
     const himDev = forceHim; forceHim = false;
     if (!q) { cur = { empty: true, seed: info.seed, karen: false }; renderPanel(); return; }
     const himWalk = q.c === 'HIM' && !evt && !karen && !sweaty && !elder && !calm && World.ok && !!World.himArrive && (!S.himDone || himDev);
-    const opts = q.ms ? shuffle(q.as.map(t => ({ t, ok: true })).concat(q.w.map(t => ({ t, ok: false })))) : shuffle([q.a, ...q.w].map((t, i) => ({ t, ok: i === 0 })));
+    const opts = q.draw ? [{ t: q.a, ok: true }, { t: 'Your line did not match the real curve closely enough', ok: false }] : q.ms ? shuffle(q.as.map(t => ({ t, ok: true })).concat(q.w.map(t => ({ t, ok: false })))) : shuffle([q.a, ...q.w].map((t, i) => ({ t, ok: i === 0 })));
     cur = { q, sel: {}, wasMissed: S.missed.indexOf(q.k) >= 0, opts, t0: Date.now(), done: false, hint: false, karen, sweaty, elder, elderStage: elder ? 0 : 2, ask: pick(ELDER_ASK), caller: !!info.caller && !calm, name: karen ? 'Karen' : sweaty ? 'Jittery Jim' : elder ? pick(info.seed % 2 === 0 ? ELDER_F : ELDER_M) : evt && EV_NAME[evt] ? pick(EV_NAME[evt]) : pick(NAMES), flavor: info.caller ? pick(CALLER_LINES) : evt ? pick(EV_FLAVOR[evt]) : karen ? pick(KAREN_LINES) : sweaty ? pick(JIM_LINES) : pick(FLAVOR[q.c] || FLAVOR.MY), seed: info.seed, num: S.served + 1, picked: -1, ok: false, resHTML: '', interrupt: null, evt: evt, insp: evt === 'inspector' ? { n: 1, of: 3, ok: 0, used: [q.k] } : null, review: reviewDue(S.mastery[q.k]), body: info.body || 'normal' };
     if (info.recall) delete spOut['r' + info.recall]; if (info.regular) delete spOut['g' + info.regular];
     if (sp) spApply(sp);
@@ -6000,7 +6289,7 @@ const World = (function () {
     World.karenLoss(u.id);
     return { lost: u, from, to: from - 1 };
   }
-  const confNeeded = () => S.set.conf !== false && srOn() && cur && cur.q && !askedToday(cur.q.k) && cur && cur.q && !cur.q.gen && !cur.karen && !cur.sweaty && !cur.elder && !cur.lab && !cur.caller && !cur.evt && !cur.visit;
+  const confNeeded = () => S.set.conf !== false && srOn() && cur && cur.q && !askedToday(cur.q.k) && cur && cur.q && !cur.q.gen && !cur.q.draw && !cur.karen && !cur.sweaty && !cur.elder && !cur.lab && !cur.caller && !cur.evt && !cur.visit;
   function answer(idx, conf) {
     if (!cur || cur.empty || cur.done || view !== 'q') return;
     if (cur.elder && cur.elderStage < 2) { if (idx >= 0 && idx < 2 && cur.elderStage === 0) elderPick(); return; }
@@ -6110,6 +6399,7 @@ const World = (function () {
     save();
     checkAwards();
     if (cur.lab) { S.labN = (S.labN || 0) + 1; save(); } else if (cur.visit) { if (cur.hero) World.himReact(ok); else World.visitorReact(ok); } else World.react(ok, pay);
+    if (q.draw && cur.dscore) extra += '<p class="why"><b>Your drawing:</b> ' + esc(cur.dscore.reason) + '</p>';
     const correctText = q.ms ? cur.opts.filter(o2 => o2.ok).map(o2 => o2.t).join(' · ') : cur.opts.find(o2 => o2.ok).t;
     cur.resHTML = `<div class="result ${ok ? 'good' : 'fail'}" id="result"><h3>${esc(head)}</h3>
       ${ok ? '' : q.ms ? msMiss() : `<p><b>Answer:</b> ${esc(correctText)}</p>`}${!ok && idx >= 0 && !q.ms && whyNot(o.t) ? '<p class="whynot"><b>Why not \u201C' + esc(o.t) + '\u201D?</b> ' + whyNot(o.t) + '</p>' : ''}${extra}
@@ -6229,15 +6519,45 @@ const World = (function () {
       ${isK ? `<div class="ktimer" role="timer" aria-label="Time before Karen leaves"><div class="timer"><i id="timerbar"></i></div><b id="tcount">${KAREN_SEC}</b><small>sec</small></div>` : ''}
       <div class="rx-body">
         <div class="patient">${avatar(cur.seed, cur.done ? (cur.ok ? 'ok' : 'bad') : 'idle', cur.karen, cur.sweaty, cur.elder, cur.name === 'Himothy')}<div class="bubble"><em>${esc(cur.flavor)}</em><p>${esc(q.q)}</p></div></div>
-        <div class="opts" role="group" aria-label="Answer choices">${opts}${jimHTML()}</div>${q.ms && !cur.done && cur.pend === undefined ? `<div class="msbar"><span>Select all that apply (${Object.keys(cur.sel).length} picked)</span><button type="button" class="btn go" id="msgo" ${Object.keys(cur.sel).length ? '' : 'disabled'}>Submit answer</button></div>` : ''}${labToolsHTML()}
+        ${q.draw ? `<div class="drawbox">${drawHTML()}</div>${jimHTML()}` : `<div class="opts" role="group" aria-label="Answer choices">${opts}${jimHTML()}</div>`}${q.ms && !cur.done && cur.pend === undefined ? `<div class="msbar"><span>Select all that apply (${Object.keys(cur.sel).length} picked)</span><button type="button" class="btn go" id="msgo" ${Object.keys(cur.sel).length ? '' : 'disabled'}>Submit answer</button></div>` : ''}${labToolsHTML()}
         ${cur.pend !== undefined && !cur.done ? confBar() : ''}
         ${cur.binder ? `<div class="binderbox" role="note"><b>\uD83D\uDCD8 Reference binder</b><span>${binderNote(q)}</span></div>` : ''}
-        <div class="tools pwtools"><button type="button" class="btn" id="hintbtn" ${S.pw.hint < 1 || cur.hint || cur.done ? 'disabled' : ''}>\uD83D\uDC8A Hint pill (${S.pw.hint})</button>
-          <button type="button" class="btn" id="secbtn" aria-pressed="${!!cur.secArmed}" ${(S.pw.second < 1 && !cur.secArmed) || cur.secUsed || cur.done ? 'disabled' : ''}>\uD83D\uDD01 Second chance (${S.pw.second})${cur.secArmed ? ' ready' : ''}</button>
-          <button type="button" class="btn" id="bindbtn" ${S.pw.binder < 1 || cur.binder || cur.done ? 'disabled' : ''}>\uD83D\uDCD8 Binder (${S.pw.binder})</button>
+        <div class="tools pwtools"><button type="button" class="btn" id="hintbtn" ${S.pw.hint < 1 || cur.hint || cur.done || q.draw ? 'disabled' : ''}>\uD83D\uDC8A Hint pill (${S.pw.hint})</button>
+          <button type="button" class="btn" id="secbtn" aria-pressed="${!!cur.secArmed}" ${(S.pw.second < 1 && !cur.secArmed) || cur.secUsed || cur.done || q.draw ? 'disabled' : ''}>\uD83D\uDD01 Second chance (${S.pw.second})${cur.secArmed ? ' ready' : ''}</button>
+          <button type="button" class="btn" id="bindbtn" ${S.pw.binder < 1 || cur.binder || cur.done || q.draw ? 'disabled' : ''}>\uD83D\uDCD8 Binder (${S.pw.binder})</button>
           ${S.pw.hint + S.pw.second + S.pw.binder < 1 && !cur.done ? '<button type="button" class="mini" data-act="pwshop">Get power-ups</button>' : ''}
           <span class="keyhint">${isK ? 'Karen leaves in ' + KAREN_SEC + ' s. A wrong answer costs an upgrade.' : cur.lab ? 'Lab bench: no timer. Pays x1.5.' : timerOn() ? 'Speed bonus fades over 20 s' : focusOn() ? 'Focus mode: no timer' : 'Timer bonus is off'}</span></div>
       </div>${cur.resHTML || ''}</article>`;
+  }
+  /* ---- draw-the-hormone-line question (cycle.js) ---- */
+  function drawHTML() {
+    const q = cur.q, pts = cur.dpts || [], n = pts.length;
+    const msg = cur.done ? (cur.dscore ? esc(cur.dscore.reason) : '') : 'Press and drag across the graph from day 1 to day 28. Draw the line for <b>' + esc(CYC[q.draw].name) + '</b>.';
+    return cycSVG(q.draw, pts, cur.done, cur.ok) + `<p class="drawnote" aria-live="polite">${msg}</p>` + (cur.done ? `<p class="drawkey"><i class="k1"></i> your line <i class="k2" style="--c:${CYC[q.draw].col}"></i> the real ${esc(CYC[q.draw].name)} curve</p>` : `<div class="btnrow"><button type="button" class="btn" id="drawclr" ${n ? '' : 'disabled'}>Clear</button><button type="button" class="btn go" id="drawgo" ${n >= 8 ? '' : 'disabled'}>Submit drawing</button></div>`);
+  }
+  function drawPt(e) {
+    const svg = $('#cycsvg'); if (!svg) return null;
+    const r = svg.getBoundingClientRect(), vx = (e.clientX - r.left) / r.width * 360, vy = (e.clientY - r.top) / r.height * 222;
+    const x = Math.max(CYC_X0, Math.min(CYC_X1, vx)), y = Math.max(CYC_Y0, Math.min(CYC_Y1, vy));
+    return [1 + (x - CYC_X0) / (CYC_X1 - CYC_X0) * 27, (CYC_Y1 - y) / (CYC_Y1 - CYC_Y0)];
+  }
+  function drawSync() {
+    const pl = $('#cycuser'); if (pl && cur && cur.dpts) pl.setAttribute('points', cur.dpts.map(p => cycX(p[0]).toFixed(1) + ',' + cycY(p[1]).toFixed(1)).join(' '));
+    const go = $('#drawgo'), cl = $('#drawclr'); if (go) go.disabled = !(cur.dpts && cur.dpts.length >= 8); if (cl) cl.disabled = !(cur.dpts && cur.dpts.length);
+  }
+  document.addEventListener('pointerdown', (e) => {
+    const s = e.target.closest && e.target.closest('#cycsvg'); if (!s || !cur || !cur.q || !cur.q.draw || cur.done) return;
+    e.preventDefault(); cur.dstroke = true; cur.tPick = cur.tPick || 0; try { s.setPointerCapture(e.pointerId); } catch (x) { /* ignore */ }
+    const p = drawPt(e); if (p) { (cur.dpts = cur.dpts || []).push(p); drawSync(); }
+  });
+  document.addEventListener('pointermove', (e) => { if (!cur || !cur.dstroke || !cur.q || !cur.q.draw || cur.done) return; const p = drawPt(e); if (p) { cur.dpts.push(p); drawSync(); } });
+  const drawEnd = () => { if (cur) cur.dstroke = false; };
+  document.addEventListener('pointerup', drawEnd); document.addEventListener('pointercancel', drawEnd);
+  function drawSubmit() {
+    if (!cur || !cur.q || !cur.q.draw || cur.done) return;
+    cur.dscore = cycScore(cur.q.draw, cur.dpts || []);
+    if (cur.dscore.reason && !cur.dscore.ok && /^(Draw a line|Draw the line all|A flat)/.test(cur.dscore.reason)) { const n = $('.drawnote'); if (n) n.textContent = cur.dscore.reason; cur.dscore = null; return; }
+    cur.tPick = Date.now(); answer(cur.dscore.ok ? 0 : 1);
   }
   function confBar() {
     return '<div class="confbar" role="group" aria-label="How sure are you?"><b>How sure are you?</b><div class="confbtns"><button type="button" class="btn confbtn" data-conf="guess"><kbd>1</kbd> Guess</button><button type="button" class="btn confbtn" data-conf="sure"><kbd>2</kbd> Pretty sure</button><button type="button" class="btn confbtn" data-conf="certain"><kbd>3</kbd> Certain</button></div><small>Pick your answer first, then rate it. The result shows after.</small></div>';
@@ -6276,10 +6596,10 @@ const World = (function () {
   }
   function settingsHTML() {
     const st = S.set, mc = missedByCat(), ms = masteryByCat();
-    const chipOf = c => `<button type="button" class="chip tp" data-act="topic" data-v="${c[0]}" aria-pressed="${!!st.topics[c[0]]}"><span class="cn">${c[0] === 'PT3' ? 'Exam 3: your exam questions' : c[0] === 'PT3G' ? 'Exam 3: drug-list practice' : c[0] === 'PT4' ? 'Exam 4: mania and psychosis drugs' : c[0] === 'TH3' ? 'Exam 3: diarrhea, constipation, IBS' : c[0] === 'T553' ? 'Relevant otherwise: Therapeutics III topics' : c[0] === 'TP3' ? 'Top 300 weekly drugs' : c[1]}${c[0] === 'TOP' && curWeek() ? ' <small class="mc wk">wk ' + curWeek() + '</small>' : ''}${mc[c[0]] ? ` <small class="mc">${mc[c[0]]} missed</small>` : ''}</span>${ms[c[0]] && ms[c[0]].n ? (() => { const pc = Math.round(100 * ms[c[0]].s / ms[c[0]].n); return `<span class="mbar" role="img" aria-label="${pc}% mastered"><i style="width:${pc}%"></i><em>${pc}%</em></span>`; })() : ''}</button>`;
-    const topics = CATS.filter(c => c[0] !== 'MY' && c[0] !== 'PT3' && c[0] !== 'PT3G' && c[0] !== 'PT4' && c[0] !== 'TH3' && c[0] !== 'TP3' && c[0] !== 'T553' || c[0] === 'MY' && S.decks.length).map(chipOf).join('');
+    const chipOf = c => `<button type="button" class="chip tp" data-act="topic" data-v="${c[0]}" aria-pressed="${!!st.topics[c[0]]}"><span class="cn">${c[0] === 'PT3' ? 'Exam 3: your exam questions' : c[0] === 'PT3G' ? 'Exam 3: drug-list practice' : c[0] === 'PT4' ? 'Exam 4: mania and psychosis drugs' : c[0] === 'TH3' ? 'Exam 3: IBD, ulcers, hemorrhoids and the rest' : c[0] === 'TH3F' ? 'Exam 3: IBS, constipation, diarrhea' : c[0] === 'TH3C' ? 'Exam 3: contraceptives' : c[0] === 'T553' ? 'Relevant otherwise: Therapeutics III topics' : c[0] === 'TP3' ? 'Top 300 weekly drugs' : c[1]}${c[0] === 'TOP' && curWeek() ? ' <small class="mc wk">wk ' + curWeek() + '</small>' : ''}${mc[c[0]] ? ` <small class="mc">${mc[c[0]]} missed</small>` : ''}</span>${ms[c[0]] && ms[c[0]].n ? (() => { const pc = Math.round(100 * ms[c[0]].s / ms[c[0]].n); return `<span class="mbar" role="img" aria-label="${pc}% mastered"><i style="width:${pc}%"></i><em>${pc}%</em></span>`; })() : ''}</button>`;
+    const topics = CATS.filter(c => c[0] !== 'MY' && c[0] !== 'PT3' && c[0] !== 'PT3G' && c[0] !== 'PT4' && c[0] !== 'TH3' && c[0] !== 'TH3F' && c[0] !== 'TH3C' && c[0] !== 'TP3' && c[0] !== 'T553' || c[0] === 'MY' && S.decks.length).map(chipOf).join('');
     const tox = CATS.filter(c => c[0] === 'PT3' || c[0] === 'PT3G' || c[0] === 'PT4').map(chipOf).join('');
-    const thx = CATS.filter(c => c[0] === 'TH3').map(chipOf).join('');
+    const thx = CATS.filter(c => c[0] === 'TH3F' || c[0] === 'TH3C' || c[0] === 'TH3').map(chipOf).join('');
     const diffs = [[1, 'Level 1 easy'], [2, 'Level 2 medium'], [3, 'Level 3 hard']].map(d => `<button type="button" class="chip" data-act="diff" data-v="${d[0]}" aria-pressed="${st.diffs.indexOf(d[0]) >= 0}">${d[1]}</button>`).join('');
     const modes = MODES.map(m => `<button type="button" class="chip" data-act="mode" data-v="${m[0]}" aria-pressed="${st.mode === m[0]}">${m[1]}${m[0] === 'review' && dueCount() ? ' (' + dueCount() + ' due)' : ''}</button>`).join('');
     const n = poolQs().length;
@@ -8283,7 +8603,7 @@ const World = (function () {
       <div class="btnrow"><button type="button" class="btn go" data-act="back">Back to the pharmacy</button></div></div>`;
   }
 
-  const GAME_VERSION = 113;
+  const GAME_VERSION = 114;
   const b64u = (u8) => { let s = ''; for (let i = 0; i < u8.length; i += 0x8000) s += String.fromCharCode.apply(null, u8.subarray(i, i + 0x8000)); return btoa(s).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); };
   const unb64u = (t) => { const s = atob(t.replace(/-/g, '+').replace(/_/g, '/')), u = new Uint8Array(s.length); for (let i = 0; i < s.length; i++) u[i] = s.charCodeAt(i); return u; };
   const chk = (t) => { let h = 2166136261; for (let i = 0; i < t.length; i++) { h ^= t.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36); };
@@ -8471,6 +8791,8 @@ const World = (function () {
     if (t.id === 'hangbtn') return hangUp();
     if (t.dataset.conf) { if (cur && cur.pend !== undefined && !cur.done) answer(cur.pend, t.dataset.conf); return; }
     if (t.id === 'msgo') return answer(-2);
+    if (t.id === 'drawgo') return drawSubmit();
+    if (t.id === 'drawclr') { if (cur && !cur.done) { cur.dpts = []; renderPanel(); } return; }
     if (t.classList.contains('opt')) return cur && cur.q && cur.q.ms ? msToggle(+t.dataset.i) : answer(+t.dataset.i);
     if (t.id === 'nextbtn') { if (cur && cur.insp && cur.insp.n < cur.insp.of) return inspContinue(); if (cur && cur.visit) return endVisit(); if (shiftDue()) return openShift(); return newCard(); }
     if (t.id === 'hintbtn') return useHint();
@@ -8502,6 +8824,7 @@ const World = (function () {
       else if (e.key === 'Enter' && phone.call && phone.call.done && !e.target.closest('button')) hangUp();
       return;
     }
+    if (view === 'q' && !cur.done && !cur.empty && cur.q && cur.q.draw) return;
     if (view === 'q' && !cur.done && !cur.empty && cur.q && cur.q.ms && cur.pend !== undefined && ['1', '2', '3'].indexOf(e.key) >= 0) { answer(-2, ['guess', 'sure', 'certain'][+e.key - 1]); return; }
     if (view === 'q' && !cur.done && !cur.empty && cur.q && cur.q.ms) { if (['1', '2', '3', '4', '5', '6'].indexOf(e.key) >= 0) msToggle(+e.key - 1); else if (e.key === 'Enter' && Object.keys(cur.sel).length) { e.preventDefault(); answer(-2); } return; }
     if (view === 'q' && cur.pend !== undefined && !cur.done && !cur.empty && ['1', '2', '3'].indexOf(e.key) >= 0) { answer(cur.pend, ['guess', 'sure', 'certain'][+e.key - 1]); return; }

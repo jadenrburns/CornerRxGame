@@ -1,5 +1,6 @@
-/* Therapeutics Exam 3: diarrhea, constipation, IBS, IBD, peptic ulcer disease and hemorrhoids (from the lecture slides and class questions) */
-const T = (t, d, q, a, w, e, s) => Q("TH3", d, q, a, w, e, t, s);
+/* Therapeutics Exam 3: IBS, constipation, diarrhea, IBD, peptic ulcer disease, hemorrhoids and GI tests (from the lecture slides and class questions) */
+/* Three categories: TH3F = IBS, constipation and diarrhea; TH3C = contraceptives (th3c.js); TH3 = everything else */
+const T = (t, d, q, a, w, e, s) => Q(/^(Diarrhea|Constipation|IBS|Opioid-induced)/.test(t) ? "TH3F" : "TH3", d, q, a, w, e, t, s);
 
 /* ---------- Diarrhea ---------- */
 T("Diarrhea",2,"A 26-year-old has had six loose stools and cramping for 18 hours, with no fever or blood. Yesterday they ate at a street fair. Ibuprofen and cannabis use were occasional. What is the most likely cause?","A food- or waterborne organism picked up at the street fair",["Early type 2 diabetes","HIV infection","An ibuprofen and cannabis interaction"],"Sudden onset, no red flags and a recent food exposure point to infectious acute diarrhea. Family history of diabetes does not explain it.");

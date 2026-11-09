@@ -8,10 +8,10 @@
 3. Run the tests from `src/` (see below).
 4. `cp src/corner-rx.html ../index.html` and commit both `src/` and `index.html`.
 
-`build.sh` concatenates, in order: `head.html`, the three.js r128 CDN tag, then `bank.js pt3*.js pt4.js th3.js th553.js him.js lab.js ind.js drugs.js shop.js deck.js crowd.js world.js game.full.js` into one page. `ext.js` is spliced into `game.js` at the `/*@EXT@*/` marker to make `game.full.js`. Add new question files to the list in `build.sh`.
+`build.sh` concatenates, in order: `head.html`, the three.js r128 CDN tag, then `bank.js pt3*.js pt4.js cycle.js th3.js th3c.js th553.js him.js lab.js ind.js drugs.js shop.js deck.js crowd.js world.js game.full.js` into one page. `ext.js` is spliced into `game.js` at the `/*@EXT@*/` marker to make `game.full.js`. Add new question files to the list in `build.sh`.
 
 ## Files
-- Questions: `Q(category, difficulty 1-3, question, correct, [3 wrongs], explanation, section)` in `bank.js`. Category files: `pt3*.js`, `pt4.js` (PharmTox), `th3.js` (Therapeutics Exam 3, category `TH3`), `th553.js` (`T553`), `him.js` (`HIM`, Himothy's heart failure questions), `lab.js`, `ind.js`. Weekly drug questions are generated from `drugs.js`.
+- Questions: `Q(category, difficulty 1-3, question, correct, [3 wrongs], explanation, section)` in `bank.js`. Category files: `pt3*.js`, `pt4.js` (PharmTox), `th3.js` (Therapeutics Exam 3), `th3c.js` (contraceptives), `th553.js` (`T553`), `him.js` (`HIM`, Himothy's heart failure questions), `lab.js`, `ind.js`. Weekly drug questions are generated from `drugs.js`.
 - Categories are listed in `CATS` near the top of `game.js` (also `FLAVOR` and the topic chips). A new category needs entries there.
 - `world.js`: the 3D pharmacy (three.js) with patients, queue, sky events, Himothy. `crowd.js`: movement and collisions. `ext.js`: events (visitors, inspector, driver), Himothy game logic, blessing buff. `game.js`: everything else (cards, menus, saves, awards).
 - Dev mode: add `?dev=1` to the URL for the "Test:" buttons (events, Himothy walk / ascension / angel flyover / smash).
@@ -25,6 +25,10 @@
 - Recall patients (`S.recall`): a missed question returns about a day later with the same seed/body (same look). Regulars (`S.reg`): mastering a whole week unlocks one, who asks questions from that week. Both are rolled by `specialRoll` (passed to `World.init`), ignore topic filters on purpose, and the card shows a purple (recall) or gold (regular) banner (`spBanner`). `World.setMastery(list)` draws one jar per regular on the left-wall mastery shelf.
 - Dev (`?dev=1`): "Test: recall patient", "Test: regular patient". Tests: `te44` (power-ups), `te45` (daily goals), `te46` (recall and regulars).
 - CSS goes inside the `<style>` block in `head.html`, above `</style>`. Anything appended after the markup is not applied.
+
+## Therapeutics Exam 3 categories and draw questions
+- Exam 3 is split into three categories (chips under Topics > Therapeutics): `TH3F` (IBS, constipation, diarrhea, including opioid-induced constipation), `TH3C` (contraceptives, `th3c.js`) and `TH3` (everything else: IBD, ulcers, hemorrhoids, GI tests, bowel prep). `th3.js`'s `T()` picks `TH3F` or `TH3` from the section name; `th3c.js` uses `CT()`. `load()` copies a switched-off `TH3` to the two new chips.
+- Draw questions: `CTDRAW(hormone, ...)` in `th3c.js` adds `q.draw` (`FSH`, `LH`, `E2`, `P4`). The card shows a blank 28-day graph (`cycle.js`, `cycSVG`) and the player drags a line; `cycScore` compares shape (smoothed, min-max scaled, correlation and mean error, plus peak day) with curves traced from the instructor's worksheet. `drawHTML` and the pointer handlers are in `game.js`; they skip the confidence prompt, hint pill, second chance and binder. The text answer (`a`) describes the curve so review lists still read. Tests: `te50`.
 
 ## Quizlet import
 My studies has an "Import from Quizlet" box (`addQuizlet`, `quizletToJson` in `deck.js`). Players paste Quizlet's Export text (term, tab, definition); it becomes a normal deck of multiple-choice cards (wrong answers filled from other cards, so 4+ cards). Direction toggle: term to definition or definition to term. An optional https://quizlet.com/ link is saved as `deck.url` and shows an "Open Quizlet" button. Quizlet has no public API and blocks browser fetches, so the game never reads the link. Test: `te49`.

@@ -6,7 +6,7 @@
   const CATS = [
     ['BG', 'Brand / Generic'], ['CL', 'Drug classes'], ['MOA', 'Mechanisms'], ['AE', 'Adverse effects'],
     ['DDI', 'Interactions'], ['CN', 'Counseling'], ['AD', 'Antidotes'], ['SIG', 'Sig & law'],
-    ['TOP', 'Weekly drugs'], ['TP3', 'Weekly drugs \u00B7 P3'], ['CALC', 'Calculations'], ['PT3', 'PharmTox \u00B7 Exam 3 questions'], ['PT3G', 'PharmTox \u00B7 Exam 3 drug practice'], ['PT4', 'PharmTox \u00B7 Exam 4 drug practice'], ['TH3', 'Therapeutics \u00B7 Exam 3'], ['T553', 'Therapeutics III \u00B7 Syllabus topics'], ['HIM', 'Himothy \u00B7 Heart failure'], ['MY', 'My studies']
+    ['TOP', 'Weekly drugs'], ['TP3', 'Weekly drugs \u00B7 P3'], ['CALC', 'Calculations'], ['PT3', 'PharmTox \u00B7 Exam 3 questions'], ['PT3G', 'PharmTox \u00B7 Exam 3 drug practice'], ['PT4', 'PharmTox \u00B7 Exam 4 drug practice'], ['TH3', 'Therapeutics \u00B7 Exam 3'], ['TH3F', 'Therapeutics \u00B7 IBS, constipation, diarrhea'], ['TH3C', 'Therapeutics \u00B7 Contraceptives'], ['T553', 'Therapeutics III \u00B7 Syllabus topics'], ['HIM', 'Himothy \u00B7 Heart failure'], ['MY', 'My studies']
   ];
   const CATNAME = {}; CATS.forEach(c => CATNAME[c[0]] = c[1]);
   const FLAVOR = {
@@ -23,6 +23,9 @@
     TP3: ['P3 drug list: this one is on the sheet.', 'Quiz week! Do you know this one?', 'Straight off the Top 300 sheet.'],
     T553: ['My doctor changed my plan, can you explain?', 'Quick therapy question before I go.', 'Is this the right treatment for me?'],
     HIM: ['*high knees* Quick heart failure question!', 'Is my ejection fraction a problem?', 'Which pills do I take for my heart?'],
+    TH3C: ['I have a question about birth control.', 'My doctor mentioned contraception, can you explain?', 'Quick question about my pill.'],
+    TH3F: ['My stomach has been off for days.', 'Is this bowel problem normal?', 'Which one should I take for my gut?'],
+    TH3: ['Quick gut and stomach question.', 'My doctor mentioned this, can you explain?', 'Is this the right treatment for me?'],
     MY: ['A question from your own notes.', 'Straight from your study sheet.', 'This one is on your exam list.']
   };
   const KAREN_LINES = ['I WANT TO SPEAK TO YOUR MANAGER!', 'This is UNACCEPTABLE. Answer me right now!', 'I have been coming here for twenty years!', 'Do you even know what you are doing?!'];
@@ -78,6 +81,7 @@
         f.awards = { frames: ((o.awards || {}).frames || []).slice(), pets: ((o.awards || {}).pets || []).slice(), calW: (o.awards || {}).calW || 0, wkDone: (o.awards || {}).wkDone ? o.awards.wkDone.slice() : null };
         const d = defaults().set, os = o.set || {};
         f.set = Object.assign(d, os); f.set.topics = Object.assign(defaults().set.topics, os.topics || {});
+        if (os.topics && os.topics.TH3 === false) { if (os.topics.TH3F === undefined) f.set.topics.TH3F = false; if (os.topics.TH3C === undefined) f.set.topics.TH3C = false; }
         if (!Array.isArray(f.set.diffs) || !f.set.diffs.length) f.set.diffs = [1, 2, 3];
         if (!MODES.some(m => m[0] === f.set.mode)) f.set.mode = 'mixed'; // Even shuffle / Linear was removed
         if (!Array.isArray(f.decks)) f.decks = [];
@@ -535,7 +539,7 @@
     const himDev = forceHim; forceHim = false;
     if (!q) { cur = { empty: true, seed: info.seed, karen: false }; renderPanel(); return; }
     const himWalk = q.c === 'HIM' && !evt && !karen && !sweaty && !elder && !calm && World.ok && !!World.himArrive && (!S.himDone || himDev);
-    const opts = q.ms ? shuffle(q.as.map(t => ({ t, ok: true })).concat(q.w.map(t => ({ t, ok: false })))) : shuffle([q.a, ...q.w].map((t, i) => ({ t, ok: i === 0 })));
+    const opts = q.draw ? [{ t: q.a, ok: true }, { t: 'Your line did not match the real curve closely enough', ok: false }] : q.ms ? shuffle(q.as.map(t => ({ t, ok: true })).concat(q.w.map(t => ({ t, ok: false })))) : shuffle([q.a, ...q.w].map((t, i) => ({ t, ok: i === 0 })));
     cur = { q, sel: {}, wasMissed: S.missed.indexOf(q.k) >= 0, opts, t0: Date.now(), done: false, hint: false, karen, sweaty, elder, elderStage: elder ? 0 : 2, ask: pick(ELDER_ASK), caller: !!info.caller && !calm, name: karen ? 'Karen' : sweaty ? 'Jittery Jim' : elder ? pick(info.seed % 2 === 0 ? ELDER_F : ELDER_M) : evt && EV_NAME[evt] ? pick(EV_NAME[evt]) : pick(NAMES), flavor: info.caller ? pick(CALLER_LINES) : evt ? pick(EV_FLAVOR[evt]) : karen ? pick(KAREN_LINES) : sweaty ? pick(JIM_LINES) : pick(FLAVOR[q.c] || FLAVOR.MY), seed: info.seed, num: S.served + 1, picked: -1, ok: false, resHTML: '', interrupt: null, evt: evt, insp: evt === 'inspector' ? { n: 1, of: 3, ok: 0, used: [q.k] } : null, review: reviewDue(S.mastery[q.k]), body: info.body || 'normal' };
     if (info.recall) delete spOut['r' + info.recall]; if (info.regular) delete spOut['g' + info.regular];
     if (sp) spApply(sp);
@@ -557,7 +561,7 @@
     World.karenLoss(u.id);
     return { lost: u, from, to: from - 1 };
   }
-  const confNeeded = () => S.set.conf !== false && srOn() && cur && cur.q && !askedToday(cur.q.k) && cur && cur.q && !cur.q.gen && !cur.karen && !cur.sweaty && !cur.elder && !cur.lab && !cur.caller && !cur.evt && !cur.visit;
+  const confNeeded = () => S.set.conf !== false && srOn() && cur && cur.q && !askedToday(cur.q.k) && cur && cur.q && !cur.q.gen && !cur.q.draw && !cur.karen && !cur.sweaty && !cur.elder && !cur.lab && !cur.caller && !cur.evt && !cur.visit;
   function answer(idx, conf) {
     if (!cur || cur.empty || cur.done || view !== 'q') return;
     if (cur.elder && cur.elderStage < 2) { if (idx >= 0 && idx < 2 && cur.elderStage === 0) elderPick(); return; }
@@ -667,6 +671,7 @@
     save();
     checkAwards();
     if (cur.lab) { S.labN = (S.labN || 0) + 1; save(); } else if (cur.visit) { if (cur.hero) World.himReact(ok); else World.visitorReact(ok); } else World.react(ok, pay);
+    if (q.draw && cur.dscore) extra += '<p class="why"><b>Your drawing:</b> ' + esc(cur.dscore.reason) + '</p>';
     const correctText = q.ms ? cur.opts.filter(o2 => o2.ok).map(o2 => o2.t).join(' · ') : cur.opts.find(o2 => o2.ok).t;
     cur.resHTML = `<div class="result ${ok ? 'good' : 'fail'}" id="result"><h3>${esc(head)}</h3>
       ${ok ? '' : q.ms ? msMiss() : `<p><b>Answer:</b> ${esc(correctText)}</p>`}${!ok && idx >= 0 && !q.ms && whyNot(o.t) ? '<p class="whynot"><b>Why not \u201C' + esc(o.t) + '\u201D?</b> ' + whyNot(o.t) + '</p>' : ''}${extra}
@@ -786,15 +791,45 @@
       ${isK ? `<div class="ktimer" role="timer" aria-label="Time before Karen leaves"><div class="timer"><i id="timerbar"></i></div><b id="tcount">${KAREN_SEC}</b><small>sec</small></div>` : ''}
       <div class="rx-body">
         <div class="patient">${avatar(cur.seed, cur.done ? (cur.ok ? 'ok' : 'bad') : 'idle', cur.karen, cur.sweaty, cur.elder, cur.name === 'Himothy')}<div class="bubble"><em>${esc(cur.flavor)}</em><p>${esc(q.q)}</p></div></div>
-        <div class="opts" role="group" aria-label="Answer choices">${opts}${jimHTML()}</div>${q.ms && !cur.done && cur.pend === undefined ? `<div class="msbar"><span>Select all that apply (${Object.keys(cur.sel).length} picked)</span><button type="button" class="btn go" id="msgo" ${Object.keys(cur.sel).length ? '' : 'disabled'}>Submit answer</button></div>` : ''}${labToolsHTML()}
+        ${q.draw ? `<div class="drawbox">${drawHTML()}</div>${jimHTML()}` : `<div class="opts" role="group" aria-label="Answer choices">${opts}${jimHTML()}</div>`}${q.ms && !cur.done && cur.pend === undefined ? `<div class="msbar"><span>Select all that apply (${Object.keys(cur.sel).length} picked)</span><button type="button" class="btn go" id="msgo" ${Object.keys(cur.sel).length ? '' : 'disabled'}>Submit answer</button></div>` : ''}${labToolsHTML()}
         ${cur.pend !== undefined && !cur.done ? confBar() : ''}
         ${cur.binder ? `<div class="binderbox" role="note"><b>\uD83D\uDCD8 Reference binder</b><span>${binderNote(q)}</span></div>` : ''}
-        <div class="tools pwtools"><button type="button" class="btn" id="hintbtn" ${S.pw.hint < 1 || cur.hint || cur.done ? 'disabled' : ''}>\uD83D\uDC8A Hint pill (${S.pw.hint})</button>
-          <button type="button" class="btn" id="secbtn" aria-pressed="${!!cur.secArmed}" ${(S.pw.second < 1 && !cur.secArmed) || cur.secUsed || cur.done ? 'disabled' : ''}>\uD83D\uDD01 Second chance (${S.pw.second})${cur.secArmed ? ' ready' : ''}</button>
-          <button type="button" class="btn" id="bindbtn" ${S.pw.binder < 1 || cur.binder || cur.done ? 'disabled' : ''}>\uD83D\uDCD8 Binder (${S.pw.binder})</button>
+        <div class="tools pwtools"><button type="button" class="btn" id="hintbtn" ${S.pw.hint < 1 || cur.hint || cur.done || q.draw ? 'disabled' : ''}>\uD83D\uDC8A Hint pill (${S.pw.hint})</button>
+          <button type="button" class="btn" id="secbtn" aria-pressed="${!!cur.secArmed}" ${(S.pw.second < 1 && !cur.secArmed) || cur.secUsed || cur.done || q.draw ? 'disabled' : ''}>\uD83D\uDD01 Second chance (${S.pw.second})${cur.secArmed ? ' ready' : ''}</button>
+          <button type="button" class="btn" id="bindbtn" ${S.pw.binder < 1 || cur.binder || cur.done || q.draw ? 'disabled' : ''}>\uD83D\uDCD8 Binder (${S.pw.binder})</button>
           ${S.pw.hint + S.pw.second + S.pw.binder < 1 && !cur.done ? '<button type="button" class="mini" data-act="pwshop">Get power-ups</button>' : ''}
           <span class="keyhint">${isK ? 'Karen leaves in ' + KAREN_SEC + ' s. A wrong answer costs an upgrade.' : cur.lab ? 'Lab bench: no timer. Pays x1.5.' : timerOn() ? 'Speed bonus fades over 20 s' : focusOn() ? 'Focus mode: no timer' : 'Timer bonus is off'}</span></div>
       </div>${cur.resHTML || ''}</article>`;
+  }
+  /* ---- draw-the-hormone-line question (cycle.js) ---- */
+  function drawHTML() {
+    const q = cur.q, pts = cur.dpts || [], n = pts.length;
+    const msg = cur.done ? (cur.dscore ? esc(cur.dscore.reason) : '') : 'Press and drag across the graph from day 1 to day 28. Draw the line for <b>' + esc(CYC[q.draw].name) + '</b>.';
+    return cycSVG(q.draw, pts, cur.done, cur.ok) + `<p class="drawnote" aria-live="polite">${msg}</p>` + (cur.done ? `<p class="drawkey"><i class="k1"></i> your line <i class="k2" style="--c:${CYC[q.draw].col}"></i> the real ${esc(CYC[q.draw].name)} curve</p>` : `<div class="btnrow"><button type="button" class="btn" id="drawclr" ${n ? '' : 'disabled'}>Clear</button><button type="button" class="btn go" id="drawgo" ${n >= 8 ? '' : 'disabled'}>Submit drawing</button></div>`);
+  }
+  function drawPt(e) {
+    const svg = $('#cycsvg'); if (!svg) return null;
+    const r = svg.getBoundingClientRect(), vx = (e.clientX - r.left) / r.width * 360, vy = (e.clientY - r.top) / r.height * 222;
+    const x = Math.max(CYC_X0, Math.min(CYC_X1, vx)), y = Math.max(CYC_Y0, Math.min(CYC_Y1, vy));
+    return [1 + (x - CYC_X0) / (CYC_X1 - CYC_X0) * 27, (CYC_Y1 - y) / (CYC_Y1 - CYC_Y0)];
+  }
+  function drawSync() {
+    const pl = $('#cycuser'); if (pl && cur && cur.dpts) pl.setAttribute('points', cur.dpts.map(p => cycX(p[0]).toFixed(1) + ',' + cycY(p[1]).toFixed(1)).join(' '));
+    const go = $('#drawgo'), cl = $('#drawclr'); if (go) go.disabled = !(cur.dpts && cur.dpts.length >= 8); if (cl) cl.disabled = !(cur.dpts && cur.dpts.length);
+  }
+  document.addEventListener('pointerdown', (e) => {
+    const s = e.target.closest && e.target.closest('#cycsvg'); if (!s || !cur || !cur.q || !cur.q.draw || cur.done) return;
+    e.preventDefault(); cur.dstroke = true; cur.tPick = cur.tPick || 0; try { s.setPointerCapture(e.pointerId); } catch (x) { /* ignore */ }
+    const p = drawPt(e); if (p) { (cur.dpts = cur.dpts || []).push(p); drawSync(); }
+  });
+  document.addEventListener('pointermove', (e) => { if (!cur || !cur.dstroke || !cur.q || !cur.q.draw || cur.done) return; const p = drawPt(e); if (p) { cur.dpts.push(p); drawSync(); } });
+  const drawEnd = () => { if (cur) cur.dstroke = false; };
+  document.addEventListener('pointerup', drawEnd); document.addEventListener('pointercancel', drawEnd);
+  function drawSubmit() {
+    if (!cur || !cur.q || !cur.q.draw || cur.done) return;
+    cur.dscore = cycScore(cur.q.draw, cur.dpts || []);
+    if (cur.dscore.reason && !cur.dscore.ok && /^(Draw a line|Draw the line all|A flat)/.test(cur.dscore.reason)) { const n = $('.drawnote'); if (n) n.textContent = cur.dscore.reason; cur.dscore = null; return; }
+    cur.tPick = Date.now(); answer(cur.dscore.ok ? 0 : 1);
   }
   function confBar() {
     return '<div class="confbar" role="group" aria-label="How sure are you?"><b>How sure are you?</b><div class="confbtns"><button type="button" class="btn confbtn" data-conf="guess"><kbd>1</kbd> Guess</button><button type="button" class="btn confbtn" data-conf="sure"><kbd>2</kbd> Pretty sure</button><button type="button" class="btn confbtn" data-conf="certain"><kbd>3</kbd> Certain</button></div><small>Pick your answer first, then rate it. The result shows after.</small></div>';
@@ -833,10 +868,10 @@
   }
   function settingsHTML() {
     const st = S.set, mc = missedByCat(), ms = masteryByCat();
-    const chipOf = c => `<button type="button" class="chip tp" data-act="topic" data-v="${c[0]}" aria-pressed="${!!st.topics[c[0]]}"><span class="cn">${c[0] === 'PT3' ? 'Exam 3: your exam questions' : c[0] === 'PT3G' ? 'Exam 3: drug-list practice' : c[0] === 'PT4' ? 'Exam 4: mania and psychosis drugs' : c[0] === 'TH3' ? 'Exam 3: diarrhea, constipation, IBS' : c[0] === 'T553' ? 'Relevant otherwise: Therapeutics III topics' : c[0] === 'TP3' ? 'Top 300 weekly drugs' : c[1]}${c[0] === 'TOP' && curWeek() ? ' <small class="mc wk">wk ' + curWeek() + '</small>' : ''}${mc[c[0]] ? ` <small class="mc">${mc[c[0]]} missed</small>` : ''}</span>${ms[c[0]] && ms[c[0]].n ? (() => { const pc = Math.round(100 * ms[c[0]].s / ms[c[0]].n); return `<span class="mbar" role="img" aria-label="${pc}% mastered"><i style="width:${pc}%"></i><em>${pc}%</em></span>`; })() : ''}</button>`;
-    const topics = CATS.filter(c => c[0] !== 'MY' && c[0] !== 'PT3' && c[0] !== 'PT3G' && c[0] !== 'PT4' && c[0] !== 'TH3' && c[0] !== 'TP3' && c[0] !== 'T553' || c[0] === 'MY' && S.decks.length).map(chipOf).join('');
+    const chipOf = c => `<button type="button" class="chip tp" data-act="topic" data-v="${c[0]}" aria-pressed="${!!st.topics[c[0]]}"><span class="cn">${c[0] === 'PT3' ? 'Exam 3: your exam questions' : c[0] === 'PT3G' ? 'Exam 3: drug-list practice' : c[0] === 'PT4' ? 'Exam 4: mania and psychosis drugs' : c[0] === 'TH3' ? 'Exam 3: IBD, ulcers, hemorrhoids and the rest' : c[0] === 'TH3F' ? 'Exam 3: IBS, constipation, diarrhea' : c[0] === 'TH3C' ? 'Exam 3: contraceptives' : c[0] === 'T553' ? 'Relevant otherwise: Therapeutics III topics' : c[0] === 'TP3' ? 'Top 300 weekly drugs' : c[1]}${c[0] === 'TOP' && curWeek() ? ' <small class="mc wk">wk ' + curWeek() + '</small>' : ''}${mc[c[0]] ? ` <small class="mc">${mc[c[0]]} missed</small>` : ''}</span>${ms[c[0]] && ms[c[0]].n ? (() => { const pc = Math.round(100 * ms[c[0]].s / ms[c[0]].n); return `<span class="mbar" role="img" aria-label="${pc}% mastered"><i style="width:${pc}%"></i><em>${pc}%</em></span>`; })() : ''}</button>`;
+    const topics = CATS.filter(c => c[0] !== 'MY' && c[0] !== 'PT3' && c[0] !== 'PT3G' && c[0] !== 'PT4' && c[0] !== 'TH3' && c[0] !== 'TH3F' && c[0] !== 'TH3C' && c[0] !== 'TP3' && c[0] !== 'T553' || c[0] === 'MY' && S.decks.length).map(chipOf).join('');
     const tox = CATS.filter(c => c[0] === 'PT3' || c[0] === 'PT3G' || c[0] === 'PT4').map(chipOf).join('');
-    const thx = CATS.filter(c => c[0] === 'TH3').map(chipOf).join('');
+    const thx = CATS.filter(c => c[0] === 'TH3F' || c[0] === 'TH3C' || c[0] === 'TH3').map(chipOf).join('');
     const diffs = [[1, 'Level 1 easy'], [2, 'Level 2 medium'], [3, 'Level 3 hard']].map(d => `<button type="button" class="chip" data-act="diff" data-v="${d[0]}" aria-pressed="${st.diffs.indexOf(d[0]) >= 0}">${d[1]}</button>`).join('');
     const modes = MODES.map(m => `<button type="button" class="chip" data-act="mode" data-v="${m[0]}" aria-pressed="${st.mode === m[0]}">${m[1]}${m[0] === 'review' && dueCount() ? ' (' + dueCount() + ' due)' : ''}</button>`).join('');
     const n = poolQs().length;
@@ -1770,7 +1805,7 @@
   function maybeTour() { if (S.me.done && !S.tutDone && !tourEl) showTour(); }
   /* ---- save code: the whole save as one long code, to move progress between devices or keep a backup ---- */
 /*@EXT@*/
-  const GAME_VERSION = 113;
+  const GAME_VERSION = 114;
   const b64u = (u8) => { let s = ''; for (let i = 0; i < u8.length; i += 0x8000) s += String.fromCharCode.apply(null, u8.subarray(i, i + 0x8000)); return btoa(s).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); };
   const unb64u = (t) => { const s = atob(t.replace(/-/g, '+').replace(/_/g, '/')), u = new Uint8Array(s.length); for (let i = 0; i < s.length; i++) u[i] = s.charCodeAt(i); return u; };
   const chk = (t) => { let h = 2166136261; for (let i = 0; i < t.length; i++) { h ^= t.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36); };
@@ -1958,6 +1993,8 @@
     if (t.id === 'hangbtn') return hangUp();
     if (t.dataset.conf) { if (cur && cur.pend !== undefined && !cur.done) answer(cur.pend, t.dataset.conf); return; }
     if (t.id === 'msgo') return answer(-2);
+    if (t.id === 'drawgo') return drawSubmit();
+    if (t.id === 'drawclr') { if (cur && !cur.done) { cur.dpts = []; renderPanel(); } return; }
     if (t.classList.contains('opt')) return cur && cur.q && cur.q.ms ? msToggle(+t.dataset.i) : answer(+t.dataset.i);
     if (t.id === 'nextbtn') { if (cur && cur.insp && cur.insp.n < cur.insp.of) return inspContinue(); if (cur && cur.visit) return endVisit(); if (shiftDue()) return openShift(); return newCard(); }
     if (t.id === 'hintbtn') return useHint();
@@ -1989,6 +2026,7 @@
       else if (e.key === 'Enter' && phone.call && phone.call.done && !e.target.closest('button')) hangUp();
       return;
     }
+    if (view === 'q' && !cur.done && !cur.empty && cur.q && cur.q.draw) return;
     if (view === 'q' && !cur.done && !cur.empty && cur.q && cur.q.ms && cur.pend !== undefined && ['1', '2', '3'].indexOf(e.key) >= 0) { answer(-2, ['guess', 'sure', 'certain'][+e.key - 1]); return; }
     if (view === 'q' && !cur.done && !cur.empty && cur.q && cur.q.ms) { if (['1', '2', '3', '4', '5', '6'].indexOf(e.key) >= 0) msToggle(+e.key - 1); else if (e.key === 'Enter' && Object.keys(cur.sel).length) { e.preventDefault(); answer(-2); } return; }
     if (view === 'q' && cur.pend !== undefined && !cur.done && !cur.empty && ['1', '2', '3'].indexOf(e.key) >= 0) { answer(cur.pend, ['guess', 'sure', 'certain'][+e.key - 1]); return; }
