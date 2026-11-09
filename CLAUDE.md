@@ -26,6 +26,9 @@
 - Dev (`?dev=1`): "Test: recall patient", "Test: regular patient". Tests: `te44` (power-ups), `te45` (daily goals), `te46` (recall and regulars).
 - CSS goes inside the `<style>` block in `head.html`, above `</style>`. Anything appended after the markup is not applied.
 
+## Quizlet import
+My studies has an "Import from Quizlet" box (`addQuizlet`, `quizletToJson` in `deck.js`). Players paste Quizlet's Export text (term, tab, definition); it becomes a normal deck of multiple-choice cards (wrong answers filled from other cards, so 4+ cards). Direction toggle: term to definition or definition to term. An optional https://quizlet.com/ link is saved as `deck.url` and shows an "Open Quizlet" button. Quizlet has no public API and blocks browser fetches, so the game never reads the link. Test: `te49`.
+
 ## Study sources
 `Q(...)` takes an optional 8th argument `s`, a short source like `IBD lecture, slides 33, 36`. It shows as "Study source" under the explanation. `th3.js`'s `T(section, d, q, a, w, e, s)` passes it through. When adding questions from a lecture deck, cite the slide numbers. The extracted slide text is not stored in the repo; ask the user to attach the deck again.
 

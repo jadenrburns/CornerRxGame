@@ -363,7 +363,7 @@
 
   /* ---- question selection ---- */
   let cur = null, lastKey = null, view = 'q', dirty = false, armed = null, armedDeck = null, sweatyOwed = false;
-  const draft = { name: '', text: '', from: '' };
+  const draft = { name: '', text: '', from: '' }, qz = { name: '', url: '', text: '', dir: 'td' };
   let studyMsg = '';
 
   const todayStr = () => { const d = new Date(); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); };
@@ -871,7 +871,7 @@
   function studiesHTML() {
     const decks = S.decks.map(d => `<div class="deckrow"><b>${esc(d.name)}</b><span>${d.items.length} question${d.items.length === 1 ? '' : 's'}</span>${lockNote(d)}
       <div class="acts"><button type="button" class="mini ${d.enabled ? 'on' : ''}" data-act="deck-toggle" data-id="${d.id}" aria-pressed="${d.enabled}">${d.enabled ? 'In use' : 'Off'}</button>
-      <button type="button" class="mini" data-act="deck-copy" data-id="${d.id}">Copy as text</button>
+      <button type="button" class="mini" data-act="deck-copy" data-id="${d.id}">Copy as text</button>${quizletOK(d.url) ? `<a class="mini" href="${esc(d.url)}" target="_blank" rel="noopener noreferrer">Open Quizlet</a>` : ''}
       <button type="button" class="mini danger ${armedDeck === d.id ? 'arm' : ''}" data-act="deck-del" data-id="${d.id}">${armedDeck === d.id ? 'Tap again to delete' : 'Delete'}</button></div></div>`).join('');
     return `<div class="pane nbk ${nbClosing ? 'closing' : ''}"><div class="nbcover"><span class="nbtitle">My studies</span></div><div class="nbsheet">${hubTabs('studies')}<h3>My studies</h3><p class="sub">Add your own questions and they join the patients in line. Same format every time.</p>
       ${studyMsg ? `<div class="prev good" role="status">${esc(studyMsg)}</div>` : ''}
@@ -882,6 +882,15 @@
         <textarea id="studytext" class="field" spellcheck="false" aria-label="Questions in the standard format" placeholder="Q: Question text&#10;A: Correct answer&#10;W: Wrong answer&#10;W: Wrong answer&#10;W: Wrong answer&#10;E: Why it is right&#10;&#10;or quick cards:  question | answer">${esc(draft.text)}</textarea>
         <div class="btnrow"><button type="button" class="btn" data-act="preview">Preview</button><button type="button" class="btn go" data-act="addstudy">Add to my deck</button></div>
         <div id="studyprev" aria-live="polite"></div>
+      </div>
+      <div class="grp"><b>Import from Quizlet</b>
+        <p class="note">In Quizlet open your set, tap the three dots, choose Export, then Copy text. Paste it here and each card becomes a question. Wrong choices come from your other cards, so the set needs at least 4 cards.</p>
+        <input id="qzname" class="field" type="text" maxlength="60" placeholder="Deck name (for example Pharmacology unit 2)" value="${esc(qz.name)}" aria-label="Quizlet deck name">
+        <input id="qzurl" class="field" type="url" maxlength="200" placeholder="Link to your Quizlet set (optional)" value="${esc(qz.url)}" aria-label="Quizlet set link">
+        <div class="chips"><button type="button" class="chip" data-act="qz-dir" data-v="td" aria-pressed="${qz.dir === 'td'}">Show term, pick definition</button><button type="button" class="chip" data-act="qz-dir" data-v="dt" aria-pressed="${qz.dir === 'dt'}">Show definition, pick term</button></div>
+        <textarea id="qztext" class="field" spellcheck="false" aria-label="Quizlet export text" placeholder="term&#9;definition&#10;term&#9;definition">${esc(qz.text)}</textarea>
+        <div class="btnrow"><button type="button" class="btn go" data-act="qz-add">Import Quizlet cards</button></div>
+        <div id="qzprev" aria-live="polite"></div>
       </div>
       <div class="grp"><b>Shortcuts</b><div class="btnrow"><button type="button" class="mini" data-act="template">Insert example</button><button type="button" class="mini" data-act="ai-prompt">Copy prompt for an AI helper</button></div>
         <p class="note">The prompt tells Claude or any chatbot to turn your notes into this exact format. Paste its answer above.</p></div>
@@ -1691,6 +1700,7 @@
   function syncBrand() { const h = document.querySelector('.brand h1'); if (h) h.textContent = shopName(); }
   function readShop() { const el = $('#shopname'); if (el) { S.shop = el.value.replace(/\s+/g, ' ').trim().slice(0, 24); save(); syncBrand(); } }
   function readDraft() {
+    readQz();
     const t = $('#studytext'), n = $('#deckname');
     if (t) draft.text = t.value; if (n) draft.name = n.value; const dd = $('#deckdate'); if (dd) draft.from = dd.value;
   }
@@ -1701,24 +1711,38 @@
     if (r.warnings.length) h += `<div>Notes: ${esc(r.warnings.slice(0, 3).map(w => 'line ' + w.line + ' ' + w.msg).join(' '))}</div>`;
     return `<div class="prev ${r.errors.length ? 'err' : 'good'}">${h}</div>`;
   }
-  function addStudy() {
-    readDraft();
-    const r = parseStudy(draft.text, 'My notes');
+  const quizletOK = u => /^https:\/\/(www\.)?quizlet\.com\//i.test(String(u || ''));
+  function readQz() { const g = id => { const e = $(id); return e ? e.value : null; }; const n = g('#qzname'), u = g('#qzurl'), t = g('#qztext'); if (n !== null) qz.name = n; if (u !== null) qz.url = u; if (t !== null) qz.text = t; }
+  function addQuizlet() {
+    readQz();
+    const c = quizletToJson(qz.text, qz.dir), url = qz.url.trim();
+    const bad = m => { $('#qzprev').innerHTML = `<div class="prev err">${esc(m)}</div>`; };
+    if (url && !quizletOK(url)) return bad('The link should start with https://quizlet.com/. Clear it to import without a link.');
+    if (c.count < 4) return bad(c.count ? 'Only ' + c.count + ' card(s) found. Quizlet sets need at least 4 cards so wrong choices can be filled in.' : 'No cards found. Paste the exported text with the term and definition on each line separated by a tab.');
+    const r = parseStudy(c.json, 'Quizlet set');
+    if (!r.items.length) return bad(r.errors.length ? r.errors[0].msg : 'Nothing could be imported.');
+    addStudy(r, (qz.name.trim() || 'Quizlet set').slice(0, 60), url);
+    qz.text = ''; qz.url = ''; qz.name = ''; renderPanel();
+  }
+  function addStudy(pre, preName, preUrl) {
+    if (!pre) readDraft();
+    const r = pre || parseStudy(draft.text, 'My notes');
     if (!r.items.length) { $('#studyprev').innerHTML = previewHTML(r); return; }
-    const name = (draft.name.trim() || r.deckName || 'My notes').slice(0, 60);
+    const name = preName || (draft.name.trim() || r.deckName || 'My notes').slice(0, 60);
     let deck = findDeck(name);
     if (!deck) { deck = { id: 'd' + Date.now().toString(36), name, enabled: true, items: [] }; S.decks.push(deck); }
+    if (preUrl) deck.url = preUrl;
     const have = {}; deck.items.forEach(q => { have[q.k] = q; });
     let added = 0;
     r.items.forEach(it => {
-      const from = it.from || draft.from || '';
+      const from = it.from || (pre ? '' : draft.from) || '';
       const q = { c: 'MY', d: it.d, q: it.q, a: it.a, w: it.w, e: it.e, t: it.t, from: from, k: hash(deck.id + '|' + it.q) };
       if (!have[q.k]) { deck.items.push(q); have[q.k] = q; added++; } else if (from) have[q.k].from = from;
     });
     S.set.topics.MY = true; deck.enabled = true; dirty = true;
     rebuildIndex(); save();
     studyMsg = `Added ${added} question${added === 1 ? '' : 's'} to "${name}"` + (r.items.length - added ? ` (${r.items.length - added} duplicates skipped)` : '') + (r.errors.length ? `, ${r.errors.length} skipped because of problems` : '') + '. They join your next patients.';
-    draft.text = ''; renderPanel(); renderMastery(); renderReview();
+    if (!pre) draft.text = ''; renderPanel(); renderMastery(); renderReview();
     if (World.ok) World.sync();
   }
   /* ---- first-run tour (menus only; events stay a surprise) ---- */
@@ -1746,7 +1770,7 @@
   function maybeTour() { if (S.me.done && !S.tutDone && !tourEl) showTour(); }
   /* ---- save code: the whole save as one long code, to move progress between devices or keep a backup ---- */
 /*@EXT@*/
-  const GAME_VERSION = 112;
+  const GAME_VERSION = 113;
   const b64u = (u8) => { let s = ''; for (let i = 0; i < u8.length; i += 0x8000) s += String.fromCharCode.apply(null, u8.subarray(i, i + 0x8000)); return btoa(s).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); };
   const unb64u = (t) => { const s = atob(t.replace(/-/g, '+').replace(/_/g, '/')), u = new Uint8Array(s.length); for (let i = 0; i < s.length; i++) u[i] = s.charCodeAt(i); return u; };
   const chk = (t) => { let h = 2166136261; for (let i = 0; i < t.length; i++) { h ^= t.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36); };
@@ -1909,6 +1933,8 @@
       case 'reset-set': S.set = defaults().set; break;
       case 'preview': readDraft(); $('#studyprev').innerHTML = previewHTML(parseStudy(draft.text, 'My notes')); return;
       case 'addstudy': return addStudy();
+      case 'qz-dir': readQz(); readDraft(); qz.dir = v === 'dt' ? 'dt' : 'td'; renderPanel(); return;
+      case 'qz-add': return addQuizlet();
       case 'template': readDraft(); draft.text = STUDY_TEMPLATE; studyMsg = ''; renderPanel(); return;
       case 'ai-prompt': readDraft(); copyText(STUDY_AI_PROMPT); return;
       case 'deck-toggle': { const d = S.decks.find(x => x.id === t.dataset.id); if (d) { d.enabled = !d.enabled; dirty = true; save(); renderPanel(); } return; }
