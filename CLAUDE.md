@@ -30,6 +30,9 @@
 - Exam 3 is split into three categories (chips under Topics > Therapeutics): `TH3F` (IBS, constipation, diarrhea, including opioid-induced constipation), `TH3C` (contraceptives, `th3c.js`) and `TH3` (everything else: IBD, ulcers, hemorrhoids, GI tests, bowel prep). `th3.js`'s `T()` picks `TH3F` or `TH3` from the section name; `th3c.js` uses `CT()`. `load()` copies a switched-off `TH3` to the two new chips.
 - Draw questions: `CTDRAW(hormone, ...)` in `th3c.js` adds `q.draw` (`FSH`, `LH`, `E2`, `P4`). The card shows a blank 28-day graph (`cycle.js`, `cycSVG`) and the player drags a line; `cycScore` compares shape (smoothed, min-max scaled, correlation and mean error, plus peak day) with curves traced from the instructor's worksheet. `drawHTML` and the pointer handlers are in `game.js`; they skip the confidence prompt, hint pill, second chance and binder. The text answer (`a`) describes the curve so review lists still read. Tests: `te50`.
 
+## Geriatrics
+`ger.js` (`GQ(section, d, q, a, w, e, slide)`, category `GER`, chip "Geriatrics: aging, polypharmacy, deprescribing" under the Therapeutics chips) holds 119 questions from the PHAR 451 Geriatric Pharmacotherapy handout, each citing the handout slide number. It sits in the P2 folder. Test: `te51`.
+
 ## Quizlet import
 My studies has an "Import from Quizlet" box (`addQuizlet`, `quizletToJson` in `deck.js`). Players paste Quizlet's Export text (term, tab, definition); it becomes a normal deck of multiple-choice cards (wrong answers filled from other cards, so 4+ cards). Direction toggle: term to definition or definition to term. An optional https://quizlet.com/ link is saved as `deck.url` and shows an "Open Quizlet" button. Quizlet has no public API and blocks browser fetches, so the game never reads the link. Test: `te49`.
 
