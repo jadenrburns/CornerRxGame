@@ -1,4 +1,4 @@
-/* Himothy (event character): heart failure, HFrEF vs HFpEF. 20 test questions, easy to replace. */
+/* Andy (event character): heart failure, HFrEF vs HFpEF. 20 test questions, easy to replace. */
 const HM = (t, d, q, a, w, e) => Q("HIM", d, q, a, w, e, t);
 
 HM("Defining HF",1,"Heart failure with reduced ejection fraction (HFrEF) is defined by an LVEF of:","40% or lower",["41% to 49%","50% or higher","Above 65%"],"HFrEF is an LVEF of 40% or less. Mildly reduced (HFmrEF) is 41% to 49% and preserved (HFpEF) is 50% or more.");

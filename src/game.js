@@ -6,7 +6,7 @@
   const CATS = [
     ['BG', 'Brand / Generic'], ['CL', 'Drug classes'], ['MOA', 'Mechanisms'], ['AE', 'Adverse effects'],
     ['DDI', 'Interactions'], ['CN', 'Counseling'], ['AD', 'Antidotes'], ['SIG', 'Sig & law'],
-    ['TOP', 'Weekly drugs'], ['TP3', 'Weekly drugs \u00B7 P3'], ['CALC', 'Calculations'], ['PT3', 'PharmTox \u00B7 Exam 3 questions'], ['PT3G', 'PharmTox \u00B7 Exam 3 drug practice'], ['PT4', 'PharmTox \u00B7 Exam 4 drug practice'], ['TH3', 'Therapeutics \u00B7 Exam 3'], ['TH3F', 'Therapeutics \u00B7 IBS, constipation, diarrhea'], ['TH3C', 'Therapeutics \u00B7 Contraceptives'], ['GER', 'Therapeutics \u00B7 Geriatrics'], ['T553', 'Therapeutics III \u00B7 Syllabus topics'], ['HIM', 'Himothy \u00B7 Heart failure'], ['MY', 'My studies']
+    ['TOP', 'Weekly drugs'], ['TP3', 'Weekly drugs \u00B7 P3'], ['CALC', 'Calculations'], ['PT3', 'PharmTox \u00B7 Exam 3 questions'], ['PT3G', 'PharmTox \u00B7 Exam 3 drug practice'], ['PT4', 'PharmTox \u00B7 Exam 4 drug practice'], ['TH3', 'Therapeutics \u00B7 Exam 3'], ['TH3F', 'Therapeutics \u00B7 IBS, constipation, diarrhea'], ['TH3C', 'Therapeutics \u00B7 Contraceptives'], ['GER', 'Therapeutics \u00B7 Geriatrics'], ['T553', 'Therapeutics III \u00B7 Syllabus topics'], ['HIM', 'Andy \u00B7 Heart failure'], ['MY', 'My studies']
   ];
   const CATNAME = {}; CATS.forEach(c => CATNAME[c[0]] = c[1]);
   const FLAVOR = {
@@ -544,7 +544,7 @@
     cur = { q, sel: {}, wasMissed: S.missed.indexOf(q.k) >= 0, opts, t0: Date.now(), done: false, hint: false, karen, sweaty, elder, elderStage: elder ? 0 : 2, ask: pick(ELDER_ASK), caller: !!info.caller && !calm, name: karen ? 'Karen' : sweaty ? 'Jittery Jim' : elder ? pick(info.seed % 2 === 0 ? ELDER_F : ELDER_M) : evt && EV_NAME[evt] ? pick(EV_NAME[evt]) : pick(NAMES), flavor: info.caller ? pick(CALLER_LINES) : evt ? pick(EV_FLAVOR[evt]) : karen ? pick(KAREN_LINES) : sweaty ? pick(JIM_LINES) : pick(FLAVOR[q.c] || FLAVOR.MY), seed: info.seed, num: S.served + 1, picked: -1, ok: false, resHTML: '', interrupt: null, evt: evt, insp: evt === 'inspector' ? { n: 1, of: 3, ok: 0, used: [q.k] } : null, review: reviewDue(S.mastery[q.k]), body: info.body || 'normal' };
     if (info.recall) delete spOut['r' + info.recall]; if (info.regular) delete spOut['g' + info.regular];
     if (sp) spApply(sp);
-    if (q.c === 'HIM') { cur.name = 'Himothy'; if (himWalk) World.himArrive(); }
+    if (q.c === 'HIM') { cur.name = 'Andy'; if (himWalk) World.himArrive(); }
     if (evt === 'inspector') SFX.play('siren'); else if (evt === 'driver') SFX.play('thud'); else if (S.served > 0) SFX.play('bell');
     if (sweatyOwed && calm) sweatyOwed = false;
     if (sweatyOwed) { sweatyOwed = false; cur.interrupt = { t0: Date.now(), dur: 7000, a: Math.floor(Math.random() * 3), dismissed: false, line: pick(JIM_BREAK) }; World.interrupt(true); }
@@ -599,7 +599,7 @@
       const lucky = Math.random() < 0.06 * S.up.robot, fr = franchiseMult();
       pay = Math.max(1, Math.round(base * shelf * speed * streak * fr * buffPay() * (lucky ? 2 : 1) * (cur.hint ? 0.5 : 1) * (cur.secUsed ? 0.5 : 1) * (cur.binder ? 0.85 : 1) * (cur.recall ? 1.5 : 1) * (cur.regular ? 1.25 : 1) * (karen ? 2 : 1) * (sweaty ? 1.5 : 1) * (rush.on ? 1.5 : 1) * (cur.lab ? 1.5 : 1)));
       chips.push(`<span class="big">+${money(pay)}</span>`, `<span>base $${base.toFixed(0)}</span>`);
-      if (blessOn()) chips.push('<span>Himothy\u2019s blessing x' + BLESS_MULT.toFixed(2) + '</span>');
+      if (blessOn()) chips.push('<span>Andy\u2019s blessing x' + BLESS_MULT.toFixed(2) + '</span>');
       if (S.up.shelf) chips.push(`<span>shelves x${shelf.toFixed(2)}</span>`);
       if (timerOn()) chips.push(`<span>speed x${speed.toFixed(2)}</span>`);
       if (streakN > 0) chips.push(`<span>streak x${streak.toFixed(2)} (${S.streak} in a row)</span>`);
@@ -791,7 +791,7 @@
         ${showTimer ? '<div class="timer" aria-hidden="true"><i id="timerbar"></i></div>' : ''}</div>
       ${isK ? `<div class="ktimer" role="timer" aria-label="Time before Karen leaves"><div class="timer"><i id="timerbar"></i></div><b id="tcount">${KAREN_SEC}</b><small>sec</small></div>` : ''}
       <div class="rx-body">
-        <div class="patient">${avatar(cur.seed, cur.done ? (cur.ok ? 'ok' : 'bad') : 'idle', cur.karen, cur.sweaty, cur.elder, cur.name === 'Himothy')}<div class="bubble"><em>${esc(cur.flavor)}</em><p>${esc(q.q)}</p></div></div>
+        <div class="patient">${avatar(cur.seed, cur.done ? (cur.ok ? 'ok' : 'bad') : 'idle', cur.karen, cur.sweaty, cur.elder, cur.name === 'Andy')}<div class="bubble"><em>${esc(cur.flavor)}</em><p>${esc(q.q)}</p></div></div>
         ${q.draw ? `<div class="drawbox">${drawHTML()}</div>${jimHTML()}` : `<div class="opts" role="group" aria-label="Answer choices">${opts}${jimHTML()}</div>`}${q.ms && !cur.done && cur.pend === undefined ? `<div class="msbar"><span>Select all that apply (${Object.keys(cur.sel).length} picked)</span><button type="button" class="btn go" id="msgo" ${Object.keys(cur.sel).length ? '' : 'disabled'}>Submit answer</button></div>` : ''}${labToolsHTML()}
         ${cur.pend !== undefined && !cur.done ? confBar() : ''}
         ${cur.binder ? `<div class="binderbox" role="note"><b>\uD83D\uDCD8 Reference binder</b><span>${binderNote(q)}</span></div>` : ''}
@@ -1807,7 +1807,7 @@
   function maybeTour() { if (S.me.done && !S.tutDone && !tourEl) showTour(); }
   /* ---- save code: the whole save as one long code, to move progress between devices or keep a backup ---- */
 /*@EXT@*/
-  const GAME_VERSION = 117;
+  const GAME_VERSION = 118;
   const b64u = (u8) => { let s = ''; for (let i = 0; i < u8.length; i += 0x8000) s += String.fromCharCode.apply(null, u8.subarray(i, i + 0x8000)); return btoa(s).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); };
   const unb64u = (t) => { const s = atob(t.replace(/-/g, '+').replace(/_/g, '/')), u = new Uint8Array(s.length); for (let i = 0; i < s.length; i++) u[i] = s.charCodeAt(i); return u; };
   const chk = (t) => { let h = 2166136261; for (let i = 0; i < t.length; i++) { h ^= t.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36); };
@@ -1922,10 +1922,10 @@
       case 'fc-no': return fcRate(false);
       case 'dev-sky': case 'dev-plant': { const ok = World.ok && World.devCapsule(a === 'dev-sky' ? 'sky' : 'plant'); toast(ok ? 'A capsule is out. Tap it.' : 'Could not spawn one.'); return; }
       case 'dev-insp': case 'dev-driver': { const k = { 'dev-insp': 'inspector', 'dev-driver': 'driver' }[a]; learnOff(); if (!(World.ok && World.devEvent && World.devEvent(k))) forceEvt = k; toast(!World.ok ? 'A visitor is next in line. Use "Test: skip to next patient".' : 'The visitor is walking in. Wait for them behind the counter, then click them.'); return; }
-      case 'dev-him-walk': learnOff(); forceHim = true; if (cur && (cur.done || cur.empty) && view === 'q') newCard(); else toast('Himothy is the next patient. Finish this one first (or use "skip to next patient").'); return;
-      case 'dev-him-asc': { learnOff(); if (!World.ok || !World.himArrive) { toast('Needs the 3D pharmacy (turn off Focus mode).'); return; } if (!World.himAtCounter()) World.himArrive(); toast('Himothy is walking in. Watch the counter.'); setTimeout(() => himFarewell(true), 4500); return; }
+      case 'dev-him-walk': learnOff(); forceHim = true; if (cur && (cur.done || cur.empty) && view === 'q') newCard(); else toast('Andy is the next patient. Finish this one first (or use "skip to next patient").'); return;
+      case 'dev-him-asc': { learnOff(); if (!World.ok || !World.himArrive) { toast('Needs the 3D pharmacy (turn off Focus mode).'); return; } if (!World.himAtCounter()) World.himArrive(); toast('Andy is walking in. Watch the counter.'); setTimeout(() => himFarewell(true), 4500); return; }
       case 'dev-him-angel': { learnOff(); toast(World.ok && World.devHimAngel() ? 'The angel is up in the clouds. Click him!' : 'Could not start the flyover.'); return; }
-      case 'dev-him-smash': { learnOff(); toast(World.ok && World.devHimSmash() ? 'Himothy is diving in...' : 'Could not start the smash.'); return; }
+      case 'dev-him-smash': { learnOff(); toast(World.ok && World.devHimSmash() ? 'Andy is diving in...' : 'Could not start the smash.'); return; }
       case 'tour': return showTour();
       case 'shop-save': { const el = $('#shopname2'); const v = el ? el.value.replace(/\s+/g, ' ').trim().slice(0, 24) : ''; if (v) { S.shop = v; save(); syncBrand(); toast('Your pharmacy is now ' + v + '.'); renderPanel(); } return; }
       case 'tour-next': if (tourStep >= TOUR.length - 1) endTour(); else { tourStep++; drawTour(); } return;
@@ -2077,7 +2077,7 @@
     const menu = $('#menu'), close = menu && menu.querySelector('.menuclose');
     if (menu && close) {
       const hr = document.createElement('hr'); menu.insertBefore(hr, close);
-      [['dev-pill', 'Test: pop a pill'], ['dev-elder', 'Test: elder patient next'], ['dev-next', 'Test: skip to next patient'], ['dev-recall', 'Test: recall patient'], ['dev-regular', 'Test: regular patient'], ['dev-bottle', 'Test: bottle check'], ['dev-shelve', 'Test: restock'], ['dev-prior', 'Test: prior auth'], ['dev-rush', 'Test: rush hour'], ['dev-insp', 'Test: health inspector next'], ['dev-driver', 'Test: delivery next'], ['dev-sky', 'Test: sky capsule'], ['dev-him-walk', 'Test: Himothy walks in next'], ['dev-him-asc', 'Test: Himothy ascension'], ['dev-him-angel', 'Test: Himothy angel flyover'], ['dev-him-smash', 'Test: Himothy smash (skip click)'], ['dev-plant', 'Test: plant capsule'], ['dev-fast', 'Test: skip slow start']].forEach(b => {
+      [['dev-pill', 'Test: pop a pill'], ['dev-elder', 'Test: elder patient next'], ['dev-next', 'Test: skip to next patient'], ['dev-recall', 'Test: recall patient'], ['dev-regular', 'Test: regular patient'], ['dev-bottle', 'Test: bottle check'], ['dev-shelve', 'Test: restock'], ['dev-prior', 'Test: prior auth'], ['dev-rush', 'Test: rush hour'], ['dev-insp', 'Test: health inspector next'], ['dev-driver', 'Test: delivery next'], ['dev-sky', 'Test: sky capsule'], ['dev-him-walk', 'Test: Andy walks in next'], ['dev-him-asc', 'Test: Andy ascension'], ['dev-him-angel', 'Test: Andy angel flyover'], ['dev-him-smash', 'Test: Andy smash (skip click)'], ['dev-plant', 'Test: plant capsule'], ['dev-fast', 'Test: skip slow start']].forEach(b => {
         const el = document.createElement('button'); el.type = 'button'; el.dataset.act = b[0]; el.innerHTML = '<i aria-hidden="true">\u2699</i><span>' + b[1] + '</span>'; menu.insertBefore(el, close);
       });
     }

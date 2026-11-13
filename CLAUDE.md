@@ -11,10 +11,10 @@
 `build.sh` concatenates, in order: `head.html`, the three.js r128 CDN tag, then `bank.js pt3*.js pt4.js cycle.js th3.js th3c.js th553.js him.js lab.js ind.js drugs.js shop.js deck.js crowd.js world.js game.full.js` into one page. `ext.js` is spliced into `game.js` at the `/*@EXT@*/` marker to make `game.full.js`. Add new question files to the list in `build.sh`.
 
 ## Files
-- Questions: `Q(category, difficulty 1-3, question, correct, [3 wrongs], explanation, section)` in `bank.js`. Category files: `pt3*.js`, `pt4.js` (PharmTox), `th3.js` (Therapeutics Exam 3), `th3c.js` (contraceptives), `th553.js` (`T553`), `him.js` (`HIM`, Himothy's heart failure questions), `lab.js`, `ind.js`. Weekly drug questions are generated from `drugs.js`.
+- Questions: `Q(category, difficulty 1-3, question, correct, [3 wrongs], explanation, section)` in `bank.js`. Category files: `pt3*.js`, `pt4.js` (PharmTox), `th3.js` (Therapeutics Exam 3), `th3c.js` (contraceptives), `th553.js` (`T553`), `him.js` (`HIM`, Andy's heart failure questions), `lab.js`, `ind.js`. Weekly drug questions are generated from `drugs.js`.
 - Categories are listed in `CATS` near the top of `game.js` (also `FLAVOR` and the topic chips). A new category needs entries there.
-- `world.js`: the 3D pharmacy (three.js) with patients, queue, sky events, Himothy. `crowd.js`: movement and collisions. `ext.js`: events (visitors, inspector, driver), Himothy game logic, blessing buff. `game.js`: everything else (cards, menus, saves, awards).
-- Dev mode: add `?dev=1` to the URL for the "Test:" buttons (events, Himothy walk / ascension / angel flyover / smash).
+- `world.js`: the 3D pharmacy (three.js) with patients, queue, sky events, Andy. `crowd.js`: movement and collisions. `ext.js`: events (visitors, inspector, driver), Andy game logic, blessing buff. `game.js`: everything else (cards, menus, saves, awards).
+- Dev mode: add `?dev=1` to the URL for the "Test:" buttons (events, Andy walk / ascension / angel flyover / smash).
 
 ## Shop
 `shop.js` holds the shop item lists (wall paint, floors, technician uniforms with buffs, decorations, pharmacist hairstyles, cyborg parts). Purchases are saved in `S.store` (`own` ids, equipped `walls`, `floor`, `uni`, `deco`). The UI is the Shop tab on the Character screen (`shopHTML`, `shopBuy`, `shopUse` in `game.js`). `world.js` draws it: `api.setStore` (walls, floor, decorations), `api.setStaffLook` (uniforms), cyborg parts in `buildCosm`/the arm loop, hair styles 12 and 13. Uniform buffs: `uniBuff()` feeds `techRate` and `buffPay`, and only applies with at least one technician. Never rename a shipped item id. Prices and buffs are placeholders; tune them in `shop.js`. Test: `te41`.
@@ -31,7 +31,7 @@
 - Draw questions: `CTDRAW(hormone, ...)` in `th3c.js` adds `q.draw` (`FSH`, `LH`, `E2`, `P4`). The card shows a blank 28-day graph (`cycle.js`, `cycSVG`) and the player drags a line; `cycScore` compares shape (smoothed, min-max scaled, correlation and mean error, plus peak day) with curves traced from the instructor's worksheet. `drawHTML` and the pointer handlers are in `game.js`; they skip the confidence prompt, hint pill, second chance and binder. The text answer (`a`) describes the curve so review lists still read. Tests: `te50`.
 
 ## Geriatrics
-`ger.js` (`GQ(section, d, q, a, w, e, slide)`, category `GER`, chip "Geriatrics: aging, polypharmacy, deprescribing" under the Therapeutics chips) holds 119 questions from the PHAR 451 Geriatric Pharmacotherapy handout, each citing the handout slide number. It sits in the P2 folder. Test: `te51`.
+`ger.js` (`GQ(section, d, q, a, w, e, slide)`, category `GER`, chip "Geriatrics: aging, polypharmacy, deprescribing" under the Therapeutics chips) holds 99 questions from the PHAR 451 Geriatric Pharmacotherapy handout, each citing the handout slide number. It sits in the P2 folder. Test: `te51`.
 
 ## Quizlet import
 My studies has an "Import from Quizlet" box (`addQuizlet`, `quizletToJson` in `deck.js`). Players paste Quizlet's Export text (term, tab, definition); it becomes a normal deck of multiple-choice cards (wrong answers filled from other cards, so 4+ cards). Direction toggle: term to definition or definition to term. An optional https://quizlet.com/ link is saved as `deck.url` and shows an "Open Quizlet" button. Quizlet has no public API and blocks browser fetches, so the game never reads the link. Test: `te49`.
@@ -40,7 +40,7 @@ My studies has an "Import from Quizlet" box (`addQuizlet`, `quizletToJson` in `d
 `Q(...)` takes an optional 8th argument `s`, a short source like `IBD lecture, slides 33, 36`. It shows as "Study source" under the explanation. `th3.js`'s `T(section, d, q, a, w, e, s)` passes it through. When adding questions from a lecture deck, cite the slide numbers. The extracted slide text is not stored in the repo; ask the user to attach the deck again.
 
 ## Tests
-Node + Playwright, run from `src/`: `node te38.js` etc. They load `corner-rx.html` with `three-stub2.js` standing in for three.js (so the 3D logic runs but nothing is drawn). Useful ones: `te19`, `te26`, `te28`, `te37` (folder switches), `te38` (Himothy events), `te39` (weekly quiz achievements). Look for `errs []` in the output. A `Failed to load resource` console line is just the blocked CDN.
+Node + Playwright, run from `src/`: `node te38.js` etc. They load `corner-rx.html` with `three-stub2.js` standing in for three.js (so the 3D logic runs but nothing is drawn). Useful ones: `te19`, `te26`, `te28`, `te37` (folder switches), `te38` (Andy events), `te39` (weekly quiz achievements). Look for `errs []` in the output. A `Failed to load resource` console line is just the blocked CDN.
 
 ## Conventions
 - Wrong answers must not be arguably correct (for example an indication shared with the right drug). Keep the correct answer from being the longest option every time. Audited in v115: across the hand-written bank the correct answer is the longest option in about 31% of questions (was 49%). Check the share per category after adding questions (count questions where the correct answer is strictly longer than every wrong one) and keep each category roughly 25 to 40%. Fix by lengthening plausible wrong answers, not by padding the correct one. Do not push a category to 0%, that is also a tell.
@@ -55,3 +55,6 @@ Node + Playwright, run from `src/`: `node te38.js` etc. They load `corner-rx.htm
 
 ## Background tabs
 Hidden tabs throttle `setInterval` and pause `requestAnimationFrame`. Use real elapsed time (`tickDt` in the 250ms loop in `game.js`), never a fixed per-tick amount, for income and countdowns. `world.js` runs exactly one render loop through `startLoop()` (it cancels the pending frame); starting a second chain after a hide/show doubled the game speed (v117). Test: `te52`.
+
+## Therapeutics content rule
+Do not write Therapeutics questions about study results or how often something occurs (population percentages, trial findings, incidence, typical-use failure rates). Thresholds, doses, goals, definitions and mechanisms are fine. The v118 pass removed 28 such questions (8 contraceptive, 20 geriatrics) and stripped incidence percentages from three answers. The event character is now named Andy (ids and categories such as `HIM` keep their old names).

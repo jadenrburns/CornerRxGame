@@ -311,7 +311,7 @@ const World = (function () {
   function walkAnim(p, t, walking, dt) {
     const P = p.userData.P, k = Math.min(1, dt * 10);
     if (P.him) {
-      // Himothy marches with his knees up high, opposite arm swinging back
+      // Andy marches with his knees up high, opposite arm swinging back
       const k2 = Math.min(1, dt * 14);
       for (let i = 0; i < 2; i++) {
         const u = walking ? Math.sin(t * 9 + i * PI) : 0, th = u > 0 ? -1.25 * u : -0.4 * u, sh = u > 0 ? 1.45 * u : -0.25 * u;
@@ -2071,7 +2071,7 @@ const World = (function () {
   api._capClick = function () { const had = !!capObj; capClick(); return had; };
   api.devCapsule = function (kind) { if (!api.ok || !capG) return false; capRemove(); return spawnCap(kind === 'plant' ? 'plant' : 'sky'); };
 
-  /* ---- Himothy: the heart failure event character ----
+  /* ---- Andy: the heart failure event character ----
      walk: he strides in with high knees and takes the next question
      ascend: when his questions are mastered he says goodbye and a golden light carries him up
      angel: every 10 minutes (after he has ascended) he passes over in the clouds; click him
@@ -2083,7 +2083,7 @@ const World = (function () {
   function headX(P, a) { P.head.rotation.x = a; P.head.position.y = 1.65 * (1 - Math.cos(a)); P.head.position.z = -1.65 * Math.sin(a); }
   const easeIO = (k) => k * k * (3 - 2 * k);
   const hcam = { sup: 0, k: 0, want: 0, ex: 0, ey: 0, ez: 0, tx: 0, ty: 0, tz: 0 };
-  // zoom the camera in on Himothy, in front of him (on the side the normal camera looks from)
+  // zoom the camera in on Andy, in front of him (on the side the normal camera looks from)
   function himCam(p, on) {
     hcam.want = on && hcam.sup <= 0 ? 1 : 0; if (!on) return;
     hcam.tx = p.x; hcam.ty = p.y + 1.7; hcam.tz = p.z; hcam.ex = p.x + Math.sin(th) * 6.4; hcam.ey = p.y + 2.8; hcam.ez = p.z + Math.cos(th) * 6.4;
@@ -2099,7 +2099,7 @@ const World = (function () {
     const e = document.createElement('div'); e.className = cls; e.setAttribute('aria-hidden', 'true'); if (text) e.textContent = text; host.appendChild(e);
     setTimeout(() => { if (e.parentNode) e.parentNode.removeChild(e); }, ms);
   }
-  // halo + wings that are parented to a Himothy figure (figure space: shoulders about y 1.8, head top about y 2.5)
+  // halo + wings that are parented to a Andy figure (figure space: shoulders about y 1.8, head top about y 2.5)
   function angelParts(fig) {
     const grp = new T.Group(), wing = []; fig.add(grp);
     [-1, 1].forEach(s => {

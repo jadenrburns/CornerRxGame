@@ -598,12 +598,12 @@
   }
 
 
-  /* ---------------- Himothy (heart failure event character) ---------------- */
+  /* ---------------- Andy (heart failure event character) ---------------- */
   let forceHim = false, himPending = false;
   const BLESS_MS = 120000, BLESS_MULT = 1.5; // placeholder blessing: money x1.5 for 2 minutes
   const blessOn = () => Date.now() < (S.blessUntil || 0);
   const blessMult = () => blessOn() ? BLESS_MULT : 1;
-  const HIM_LINES = ['*lands in a cloud of dust* Heart failure emergency!', 'Citizens! I need one quick pharmacology answer!', 'Never fear, Himothy is here. One question!'];
+  const HIM_LINES = ['*lands in a cloud of dust* Heart failure emergency!', 'Citizens! I need one quick pharmacology answer!', 'Never fear, Andy is here. One question!'];
   const himQs = () => BANK.filter(x => x.c === 'HIM');
   const himAllMastered = () => { const a = himQs(); return a.length > 0 && a.every(x => (S.mastery[x.k] || {}).box >= 2); };
   function himPick() {
@@ -615,7 +615,7 @@
   // his questions are mastered: the panel closes, he says goodbye and a golden light carries him up
   function himFarewell(dev) {
     if (!dev) { S.himDone = true; save(); }
-    if (!(World.ok && World.himAscend && World.himAtCounter && World.himAtCounter())) { toast('Himothy’s work here is done. He will pass over in the clouds now and then.'); return; }
+    if (!(World.ok && World.himAscend && World.himAtCounter && World.himAtCounter())) { toast('Andy’s work here is done. He will pass over in the clouds now and then.'); return; }
     view = 'him'; renderPanel();
     setTimeout(() => { World.himAscend(() => { newCard(); }); }, 1100);
   }
@@ -635,15 +635,15 @@
     visitSaved = cur; if (!cur.done && !cur.empty && !cur.pausedAt) cur.pausedAt = Date.now();
     endInterrupt();
     const opts = shuffle([q.a, ...q.w].map((t, i) => ({ t, ok: i === 0 })));
-    cur = { q: q, wasMissed: S.missed.indexOf(q.k) >= 0, opts: opts, t0: Date.now(), done: false, hint: false, karen: false, sweaty: false, elder: false, elderStage: 2, ask: '', caller: false, name: 'Himothy', flavor: pick(HIM_LINES), seed: 4242, num: S.served + 1, picked: -1, ok: false, resHTML: '', interrupt: null, evt: null, insp: null, review: false, visit: true, hero: true };
+    cur = { q: q, wasMissed: S.missed.indexOf(q.k) >= 0, opts: opts, t0: Date.now(), done: false, hint: false, karen: false, sweaty: false, elder: false, elderStage: 2, ask: '', caller: false, name: 'Andy', flavor: pick(HIM_LINES), seed: 4242, num: S.served + 1, picked: -1, ok: false, resHTML: '', interrupt: null, evt: null, insp: null, review: false, visit: true, hero: true };
     SFX.play('thud'); qExpand(); renderPanel(); return true;
   }
   let blessEl = null, blessTimer = null;
   function blessTick() {
     const left = (S.blessUntil || 0) - Date.now();
-    if (left <= 0) { clearInterval(blessTimer); blessTimer = null; if (blessEl) { blessEl.remove(); blessEl = null; } toast('Himothy’s blessing fades.'); return; }
+    if (left <= 0) { clearInterval(blessTimer); blessTimer = null; if (blessEl) { blessEl.remove(); blessEl = null; } toast('Andy’s blessing fades.'); return; }
     const s = Math.ceil(left / 1000);
-    if (blessEl) blessEl.textContent = '✨ Himothy’s blessing ' + Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0') + ' · money x' + BLESS_MULT.toFixed(2);
+    if (blessEl) blessEl.textContent = '✨ Andy’s blessing ' + Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0') + ' · money x' + BLESS_MULT.toFixed(2);
   }
   function blessStart(fresh) {
     if (fresh !== false) { S.blessUntil = Date.now() + BLESS_MS; save(); }

@@ -188,7 +188,7 @@ T("PUD: antacids",1,"Antacids are used for what in ulcer disease?","Fast symptom
 T("PUD: sucralfate",2,"For which ulcers is sucralfate FDA indicated?","Duodenal ulcers only",["Gastric ulcers only","Esophageal ulcers","Both gastric and duodenal ulcers"],"Sucralfate is prescription only. It binds exposed tissue in the presence of acid, so it is taken on an empty stomach.",PUL+", slide 28");
 T("PUD: sucralfate",2,"How should sucralfate be separated from other drugs?","By 2 hours",["By 30 minutes","By 12 hours","It does not need separation"],"Sucralfate has the same binding interactions as aluminum, such as fluoroquinolones. It can also cause constipation (up to 9%).",PUL+", slide 28");
 T("PUD: misoprostol",2,"What is misoprostol mainly used for in peptic disease?","Preventing NSAID-induced ulcers",["Treating an active ulcer","Eradicating H. pylori","Neutralizing acid"],"Misoprostol is a prostaglandin analog. It is as effective as a daily PPI for NSAID ulcer prevention but is rarely used because of side effects.",PUL+", slide 29");
-T("PUD: misoprostol",2,"Which adverse effect is common with misoprostol at full dose?","Diarrhea (20 to 40%)",["Constipation","Gynecomastia","Hypermagnesemia"],"Misoprostol is not used for acute ulcer treatment.",PUL+", slide 29");
+T("PUD: misoprostol",2,"Which adverse effect is common with misoprostol at full dose?","Diarrhea",["Constipation","Gynecomastia","Hypermagnesemia"],"Misoprostol is not used for acute ulcer treatment.",PUL+", slide 29");
 
 /* ---------- Hemorrhoids (Hemorrhoids lecture, 2026) ---------- */
 const HRL = "Hemorrhoids lecture";
