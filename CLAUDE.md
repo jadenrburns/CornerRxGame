@@ -58,3 +58,6 @@ Hidden tabs throttle `setInterval` and pause `requestAnimationFrame`. Use real e
 
 ## Therapeutics content rule
 Do not write Therapeutics questions about study results or how often something occurs (population percentages, trial findings, incidence, typical-use failure rates). Thresholds, doses, goals, definitions and mechanisms are fine. The v118 pass removed 28 such questions (8 contraceptive, 20 geriatrics) and stripped incidence percentages from three answers. The event character is now named Andy (ids and categories such as `HIM` keep their old names).
+
+## Symptom duration questions
+Any question about how many days or weeks symptoms last, or how long to self-treat before referral, must name the disease state in the question text itself (for example "minor hemorrhoid symptoms", not "minor symptoms"), and must not lean on "the same patient" from another card. Test: `te53` flags Therapeutics questions that mention a time span plus symptoms or referral but no disease word. Add new disease words to its list when a new topic needs one.
