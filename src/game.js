@@ -1399,12 +1399,13 @@
       '<svg class="pptr" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 2l16 9-7 2 4 8-3 1.5-4-8-5 5z" fill="#fff" stroke="#111" stroke-width="1.6" stroke-linejoin="round"/></svg>';
   }
   /* ---- rush hour: the old busy pace, with bonus pay ---- */
+  let tickDt = 0.25;
   const rush = { on: false, left: 0, next: Date.now() + 600000 };
   function rushBadge() { const el = $('#rush3d'); if (!el) return; el.hidden = !rush.on; if (rush.on) el.textContent = 'RUSH HOUR \u00B7 +50% pay \u00B7 ' + Math.ceil(rush.left) + 's'; }
   function rushTick() {
     if (!World.ok || focusOn() || learning() || labOn()) return;
     if (rush.on) {
-      if (!fp.on && view === 'q') rush.left -= 0.25;
+      if (!fp.on && view === 'q') rush.left -= tickDt;
       if (rush.left <= 0) { rush.on = false; rush.next = Date.now() + (480 + Math.random() * 240) * 1000; World.setRush(false); toast('Rush hour is over. The line thins out.'); }
       rushBadge(); return;
     }
@@ -1806,7 +1807,7 @@
   function maybeTour() { if (S.me.done && !S.tutDone && !tourEl) showTour(); }
   /* ---- save code: the whole save as one long code, to move progress between devices or keep a backup ---- */
 /*@EXT@*/
-  const GAME_VERSION = 116;
+  const GAME_VERSION = 117;
   const b64u = (u8) => { let s = ''; for (let i = 0; i < u8.length; i += 0x8000) s += String.fromCharCode.apply(null, u8.subarray(i, i + 0x8000)); return btoa(s).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); };
   const unb64u = (t) => { const s = atob(t.replace(/-/g, '+').replace(/_/g, '/')), u = new Uint8Array(s.length); for (let i = 0; i < s.length; i++) u[i] = s.charCodeAt(i); return u; };
   const chk = (t) => { let h = 2166136261; for (let i = 0; i < t.length; i++) { h ^= t.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36); };
@@ -2036,13 +2037,16 @@
   });
 
   /* ---- loops ---- */
+  let tickAt = Date.now();
   setInterval(() => {
-    if (S.up.tech > 0) { const g = passive() * 0.25; S.cash += g; S.earned += g; }
+    // real elapsed time, not a fixed 0.25s: hidden tabs throttle timers, which used to make income and countdowns lag
+    const nowT = Date.now(); tickDt = Math.max(0, Math.min(120, (nowT - tickAt) / 1000)); tickAt = nowT;
+    if (S.up.tech > 0) { const g = passive() * tickDt; S.cash += g; S.earned += g; }
     const c = $('#cashv'); if (c) c.textContent = money(S.cash);
     document.querySelectorAll('[data-buy]').forEach(b => { const max = b.textContent === 'MAX'; b.disabled = max || S.cash < +b.dataset.cost; });
     const fb = $('#frbtn'); if (fb) fb.disabled = S.cash < frCost();
     const rb = $('#retirebtn'); if (rb) rb.disabled = S.cash < RETIRE_AT;
-    if (!document.hidden && !tourEl) S.playSec = (S.playSec || 0) + 0.25;
+    if (!document.hidden && !tourEl) S.playSec = (S.playSec || 0) + Math.min(1, tickDt);
     World.setSlow(learning());
     World.refreshTags(); phoneTick(); rushTick(); eventTick(); evtExpire(); holSync();
     const uh = document.querySelector('#ups h2 small'); if (uh) uh.textContent = money(S.cash) + ' on hand';

@@ -1517,7 +1517,7 @@ const World = (function () {
   api.fpEnd = function () { fpT = 0; fpScreen = false; if (pharm) pharm.g.visible = true; setFpHover(null); };
   api.fpActive = function () { return fpT === 1; };
   let paused = false;
-  api.setPaused = function (p) { paused = !!p; if (!paused && !running && api.ok && !document.hidden) { running = true; last = performance.now(); requestAnimationFrame(frame); } };
+  api.setPaused = function (p) { paused = !!p; if (!paused && !running && api.ok && !document.hidden) { startLoop(); } };
   api._dbg = function () { return { visitor: visitor, fpEye: fpEyeV, shelfN: shelfN, gth: gth, gph: gph, grad: grad, bodies, cops, copJob, queue, staff, fpK, fpT, cam: camera.position.clone(), pharmVis: pharm && pharm.g.visible, bottles: !!fpG, ids: fpItems.map(i => i.id + (i.off ? '*' : '')) }; };
   api._click = function (id) { if (B.onFp) B.onFp(id); };
   // Wrong bottle: a random waiting patient collapses (X eyes). Police come in and drag the body out.
@@ -1632,10 +1632,14 @@ const World = (function () {
     return w;
   }
   function lerpAngle(a, b, t) { let d = ((b - a + PI) % (2 * PI) + 2 * PI) % (2 * PI) - PI; return a + d * t; }
+  // one render loop only: a hidden tab leaves a pending frame behind, and a second chain started on return would double the game speed
+  let raf = 0;
+  function startLoop() { if (raf) cancelAnimationFrame(raf); running = true; last = performance.now(); raf = requestAnimationFrame(frame); }
   function frame(now) {
+    raf = 0;
     if (!running) return;
     if (paused) { running = false; return; }
-    requestAnimationFrame(frame);
+    raf = requestAnimationFrame(frame);
     const dt = Math.min(0.05, (now - last) / 1000 || 0.016); last = now; time += dt;
     if (labOn) labTick(dt);
     if (synOn) synTick(dt);
@@ -2766,9 +2770,9 @@ const World = (function () {
       resize();
       const mq = window.matchMedia('(prefers-color-scheme: dark)'); if (mq.addEventListener) mq.addEventListener('change', applyTheme);
       new MutationObserver(applyTheme).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
-      if (window.IntersectionObserver) new IntersectionObserver(es => { const on = es[0].isIntersecting && !document.hidden; if (on && !running) { running = true; last = performance.now(); requestAnimationFrame(frame); } else if (!on) running = false; }).observe(host);
-      document.addEventListener('visibilitychange', () => { if (!document.hidden && !running) { running = true; last = performance.now(); requestAnimationFrame(frame); } else if (document.hidden) running = false; });
-      api.ok = true; running = true; last = performance.now(); requestAnimationFrame(frame);
+      if (window.IntersectionObserver) new IntersectionObserver(es => { const on = es[0].isIntersecting && !document.hidden; if (on && !running) { startLoop(); } else if (!on) running = false; }).observe(host);
+      document.addEventListener('visibilitychange', () => { if (!document.hidden && !running) { startLoop(); } else if (document.hidden) running = false; });
+      api.ok = true; startLoop();
       return true;
     } catch (e) { if (window.console) console.error(e); api.ok = false; return false; }
   };
