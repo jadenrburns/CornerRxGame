@@ -12,15 +12,19 @@
   /* The Topics menu is built from this table. A new category needs a CATS entry above and a slot in one course here
      (or a new course). Order here is the order on screen. `sched` attaches a weekly drug schedule (WKCFG key). */
   const COURSES = [
-    { id: 'core', name: 'Core skills', tag: 'Every year', cats: ['BG', 'CL', 'MOA', 'AE', 'DDI', 'CN', 'AD', 'SIG', 'CALC'], note: 'The everyday counter questions: names, classes, mechanisms, side effects, interactions, counseling, antidotes, sig and law, calculations.' },
-    { id: 'p443', name: 'PharmTox', code: 'PHAR 443', tag: 'P2', cats: ['TOP', 'PT3', 'PT3G', 'PT4'], sched: 'p2', note: 'Weekly drug sheets plus the exam question sets.' },
-    { id: 'p451', name: 'Therapeutics', code: 'PHAR 451', tag: 'P2', cats: ['TH3F', 'TH3C', 'TH3', 'GER', 'HIM'], note: 'Exam 3 GI and contraception topics, geriatrics, and Andy\u2019s heart failure questions.' },
-    { id: 'p3top', name: 'Top 300 weekly drugs', short: 'Top 300', tag: 'P3', cats: ['TP3'], sched: 'p3', note: 'Drug list sheets by system, one set per week.' },
-    { id: 'p553', name: 'Therapeutics III', code: 'PHAR 553', tag: 'P3', cats: ['T553'], note: 'Syllabus topics: asthma, COPD, renal, diabetes, gout, migraine, RA and SLE, thyroid, liver, hepatitis, blood pressure, lipids, pain, nutrition, fluids and electrolytes.' },
-    { id: 'my', name: 'My studies', tag: 'Yours', cats: ['MY'], note: 'Decks you wrote or imported from Quizlet. Add and manage them on the My studies tab.' }
+    { id: 'core', name: 'Core skills', tag: 'Every year', year: 'all', cats: ['BG', 'CL', 'MOA', 'AE', 'DDI', 'CN', 'AD', 'SIG', 'CALC', 'HIM'], note: 'The everyday counter questions: names, classes, mechanisms, side effects, interactions, counseling, antidotes, sig and law, calculations, and Andy’s heart failure questions.' },
+    { id: 'p443', name: 'PharmTox', code: 'PHAR 443', tag: 'P2', year: 'P2', cats: ['TOP', 'PT3', 'PT3G', 'PT4'], sched: 'p2', note: 'Weekly drug sheets plus the exam question sets.' },
+    { id: 'p451', name: 'Therapeutics', code: 'PHAR 451', tag: 'P2', year: 'P2', cats: ['TH3F', 'TH3C', 'TH3', 'GER'], note: 'Exam 3 GI and contraception topics, and geriatrics.' },
+    { id: 'p3top', name: 'Top 300 weekly drugs', short: 'Top 300', tag: 'P3', year: 'P3', cats: ['TP3'], sched: 'p3', note: 'Drug list sheets by system, one set per week.' },
+    { id: 'p553', name: 'Therapeutics III', code: 'PHAR 553', tag: 'P3', year: 'P3', cats: ['T553'], note: 'Syllabus topics: asthma, COPD, renal, diabetes, gout, migraine, RA and SLE, thyroid, liver, hepatitis, blood pressure, lipids, pain, nutrition, fluids and electrolytes.' },
+    { id: 'my', name: 'My studies', tag: 'Yours', year: 'all', cats: ['MY'], note: 'Decks you wrote or imported from Quizlet. Add and manage them on the My studies tab.' }
   ];
-  const CHIP = { TOP: 'Weekly drugs', PT3: 'Exam 3: your exam questions', PT3G: 'Exam 3: drug-list practice', PT4: 'Exam 4: mania and psychosis drugs', TH3: 'Exam 3: IBD, ulcers, hemorrhoids and the rest', TH3F: 'Exam 3: IBS, constipation, diarrhea', TH3C: 'Exam 3: contraceptives', GER: 'Geriatrics: aging, polypharmacy, deprescribing', HIM: 'Heart failure: Andy\u2019s questions', T553: 'Therapeutics III topics', TP3: 'Top 300 weekly drugs', MY: 'My studies' };
+  const CHIP = { TOP: 'Weekly drugs', PT3: 'Exam 3: your exam questions', PT3G: 'Exam 3: drug-list practice', PT4: 'Exam 4: mania and psychosis drugs', TH3: 'Exam 3: IBD, ulcers, hemorrhoids and the rest', TH3F: 'Exam 3: IBS, constipation, diarrhea', TH3C: 'Exam 3: contraceptives', GER: 'Geriatrics: aging, polypharmacy, deprescribing', HIM: 'Heart failure: Andy’s questions', T553: 'Therapeutics III topics', TP3: 'Top 300 weekly drugs', MY: 'My studies' };
   const courseCats = (c) => c.cats.filter(k => k !== 'MY' || S.decks.length);
+  const YEARS = ['P1', 'P2', 'P3'];
+  const curYear = () => YEARS.indexOf(S.set.year) >= 0 ? S.set.year : 'P2';
+  const inYear = (c, y) => c.year === 'all' || c.year === y;
+  const yearCats = (y) => { const o = []; COURSES.forEach(c => { if (inYear(c, y)) o.push.apply(o, courseCats(c)); }); return o; };
   const FLAVOR = {
     BG: ['Doc wrote the brand name, can you match it?', 'My insurance wants the generic.', 'The label on my bottle looks different.'],
     CL: ['What type of medicine is this one?', 'I want to understand what I am taking.', 'The last pharmacist called it a class, which one?'],
@@ -96,6 +100,7 @@
         f.set = Object.assign(d, os); f.set.topics = Object.assign(defaults().set.topics, os.topics || {});
         if (os.topics && os.topics.TH3 === false) { if (os.topics.TH3F === undefined) f.set.topics.TH3F = false; if (os.topics.TH3C === undefined) f.set.topics.TH3C = false; }
         if (!Array.isArray(f.set.diffs) || !f.set.diffs.length) f.set.diffs = [1, 2, 3];
+        if (!f.set.year && (os.folder === 'P1' || os.folder === 'P3')) f.set.year = os.folder; delete f.set.folder;
         if (os.p2fold === undefined) f.set.p2fold = true; if (os.p3fold === undefined) f.set.p3fold = true; // v120: schedules start collapsed inside the course cards
         if (!MODES.some(m => m[0] === f.set.mode)) f.set.mode = 'mixed'; // Even shuffle / Linear was removed
         if (!Array.isArray(f.decks)) f.decks = [];
@@ -507,7 +512,7 @@
     const stage = cur.elderStage, hear = stage === 1;
     const opts = ELDER_GREET[cur.seed % ELDER_GREET.length].map((t, i) => `<button type="button" class="opt" style="grid-row:${i + 1};grid-column:1" data-elder="${i}" ${hear ? 'disabled' : ''}><kbd>${i + 1}</kbd><span>${esc(t)}</span></button>`).join('');
     return `<article class="rx elder"><div class="rx-head"><span class="rx-sym" aria-hidden="true">&#8478;</span><div class="rx-meta"><b>${esc(cur.name.toUpperCase())} \u00B7 prescription pick-up</b><span>Say hello</span></div></div>
-      <div class="rx-body"><div class="patient ${hear ? 'hear' : ''}">${avatar(cur.seed, 'idle', false, false, true)}${hear ? '<span class="cmarks" aria-hidden="true"><i>?</i><i>?</i><i>?!</i></span>' : ''}<div class="bubble"><em>${hear ? '*cups a hand to her ear*' : esc(cur.name)}</em><p>${hear ? 'WHAT?? I can\u2019t hear you!' : esc(cur.ask)}</p></div></div>
+      <div class="rx-body"><div class="patient ${hear ? 'hear' : ''}">${avatar(cur.seed, 'idle', false, false, true)}${hear ? '<span class="cmarks" aria-hidden="true"><i>?</i><i>?</i><i>?!</i></span>' : ''}<div class="bubble"><em>${hear ? '*cups a hand to her ear*' : esc(cur.name)}</em><p>${hear ? 'WHAT?? I can’t hear you!' : esc(cur.ask)}</p></div></div>
       <div class="opts" role="group" aria-label="Greeting choices">${opts}</div>
       <div class="tools"><span class="keyhint">${hear ? 'She leans in closer...' : 'Pick a greeting.'}</span></div></div></article>`;
   }
@@ -612,7 +617,7 @@
       const lucky = Math.random() < 0.06 * S.up.robot, fr = franchiseMult();
       pay = Math.max(1, Math.round(base * shelf * speed * streak * fr * buffPay() * (lucky ? 2 : 1) * (cur.hint ? 0.5 : 1) * (cur.secUsed ? 0.5 : 1) * (cur.binder ? 0.85 : 1) * (cur.recall ? 1.5 : 1) * (cur.regular ? 1.25 : 1) * (karen ? 2 : 1) * (sweaty ? 1.5 : 1) * (rush.on ? 1.5 : 1) * (cur.lab ? 1.5 : 1)));
       chips.push(`<span class="big">+${money(pay)}</span>`, `<span>base $${base.toFixed(0)}</span>`);
-      if (blessOn()) chips.push('<span>Andy\u2019s blessing x' + BLESS_MULT.toFixed(2) + '</span>');
+      if (blessOn()) chips.push('<span>Andy’s blessing x' + BLESS_MULT.toFixed(2) + '</span>');
       if (S.up.shelf) chips.push(`<span>shelves x${shelf.toFixed(2)}</span>`);
       if (timerOn()) chips.push(`<span>speed x${speed.toFixed(2)}</span>`);
       if (streakN > 0) chips.push(`<span>streak x${streak.toFixed(2)} (${S.streak} in a row)</span>`);
@@ -882,7 +887,8 @@
       <div class="btnrow"><button type="button" class="btn go nbback" data-act="back">Close notebook and return to counter</button><button type="button" class="btn" data-act="tour">Replay tour</button><button type="button" class="btn" data-act="reset-set">Reset settings</button></div>`; };
   /* "Only this course": every topic outside the course is off (and something inside is on) */
   const courseOnly = (c) => { const st = S.set, ins = courseCats(c); return ins.some(k => st.topics[k]) && CATS.every(x => ins.indexOf(x[0]) >= 0 || !st.topics[x[0]] || (x[0] === 'MY' && !S.decks.length)); };
-  const weekOnly = () => S.set.topics.TOP && CATS.every(x => x[0] === 'TOP' || !S.set.topics[x[0]] || (x[0] === 'MY' && !S.decks.length)) && wkOnlyNow('p2');
+  const weekOnly = (k) => { const cat = WKCFG[k].topic; return S.set.topics[cat] && CATS.every(x => x[0] === cat || !S.set.topics[x[0]] || (x[0] === 'MY' && !S.decks.length)) && wkOnlyNow(k); };
+  const yearOnly = (y) => { const ins = yearCats(y); return ins.some(k => S.set.topics[k]) && CATS.every(x => ins.indexOf(x[0]) >= 0 || !S.set.topics[x[0]] || (x[0] === 'MY' && !S.decks.length)); };
   function setOnly(keep) { // keep: list of cats to leave on; remembers the rest so a second tap restores them
     const st = S.set; st.restore = {}; CATS.forEach(c => { st.restore[c[0]] = !!st.topics[c[0]]; st.topics[c[0]] = keep.indexOf(c[0]) >= 0 ? (c[0] === 'MY' ? !!S.decks.length : true) : false; });
   }
@@ -901,12 +907,18 @@
         <div class="crsb"><div class="crsr"><span class="note">${esc(c.note)}</span><span class="grpr"><button type="button" class="link" data-act="course-all" data-v="${c.id}">All</button> &middot; <button type="button" class="link" data-act="course-none" data-v="${c.id}">None</button> &middot; <button type="button" class="link${courseOnly(c) ? ' arm' : ''}" data-act="course-only" data-v="${c.id}">${courseOnly(c) ? 'Only this (tap to undo)' : 'Only this'}</button></span></div>
         <div class="chips">${cats.map(chipOf).join('')}</div>${c.sched ? wkSchedHTML(c.sched, c.sched === 'p3' ? 'Weekly schedule' : 'Weekly schedule') : ''}</div></details>`;
     };
-    const quick = [`<button type="button" class="chip" data-act="week-only" aria-pressed="${weekOnly()}">This week’s drugs only</button>`].concat(COURSES.filter(c => courseCats(c).length && c.id !== 'my').map(c => `<button type="button" class="chip" data-act="course-only" data-v="${c.id}" aria-pressed="${courseOnly(c)}">Only ${esc(c.short || c.name)}</button>`)).join('');
+    const yr = curYear(), inY = COURSES.filter(c => c.year === yr && courseCats(c).length).concat(COURSES.filter(c => c.year === 'all' && courseCats(c).length)), sched = inY.find(c => c.sched); // this year's courses first, shared ones (Core skills, My studies) after
+    const quick = [`<button type="button" class="chip" data-act="year-only" data-v="${yr}" aria-pressed="${yearOnly(yr)}">Only ${yr} topics</button>`]
+      .concat(sched ? [`<button type="button" class="chip" data-act="week-only" data-v="${sched.sched}" aria-pressed="${weekOnly(sched.sched)}">This week’s drugs only</button>`] : [])
+      .concat(inY.filter(c => c.id !== 'my' && c.id !== 'core').map(c => `<button type="button" class="chip" data-act="course-only" data-v="${c.id}" aria-pressed="${courseOnly(c)}">Only ${esc(c.short || c.name)}</button>`)).join('');
+    const yearTabs = '<div class="fcab" role="tablist" aria-label="Year">' + YEARS.map((f, i) => `<button type="button" role="tab" class="ftab ft${i + 1}" aria-selected="${yr === f}" data-act="year" data-v="${f}"><span>${f}</span></button>`).join('') + '</div>';
+    const empty = inY.every(c => c.year === 'all') ? `<div class="crs off"><div class="crsb"><p class="note">Nothing is filed under ${yr} yet. Core skills stay available in every year.</p></div></div>` : '';
     const inner = `${hubTabs('set')}
       <div class="tsum"><b>${onN} of ${total} topics on</b><span class="grpr"><button type="button" class="link" data-act="topics-all">All on</button> &middot; <button type="button" class="link" data-act="topics-none">All off</button></span></div>
-      <div class="grp"><b>Quick picks</b><div class="chips">${quick}</div><p class="note">One tap focuses on a course or this week’s drugs. Tap it again to bring the other topics back.</p></div>
-      <label class="find"><span class="vh">Find a topic</span><input type="search" id="tfind" placeholder="Find a topic or week" value="${esc(findQ)}" autocomplete="off"></label>
-      <div class="crsl">${COURSES.map(card).join('')}</div>
+      ${yearTabs}<div class="fbody fb-${yr}" role="tabpanel" aria-label="${yr} courses">
+      <div class="grp"><b>Quick picks</b><div class="chips">${quick}</div><p class="note">One tap focuses on this year, one course, or this week’s drugs. Tap it again to bring the other topics back.</p></div>
+      <label class="find"><span class="vh">Find a topic</span><input type="search" id="tfind" placeholder="Find a topic or week in ${yr}" value="${esc(findQ)}" autocomplete="off"></label>
+      <div class="crsl">${inY.map(card).join('')}${empty}</div></div>
       <p class="note nomatch" hidden>Nothing matches that. Try a shorter word.</p>
       ${nbFoot()}`;
     return nbWrap('Topics', inner);
@@ -1851,7 +1863,7 @@
   function maybeTour() { if (S.me.done && !S.tutDone && !tourEl) showTour(); }
   /* ---- save code: the whole save as one long code, to move progress between devices or keep a backup ---- */
 /*@EXT@*/
-  const GAME_VERSION = 120;
+  const GAME_VERSION = 121;
   const b64u = (u8) => { let s = ''; for (let i = 0; i < u8.length; i += 0x8000) s += String.fromCharCode.apply(null, u8.subarray(i, i + 0x8000)); return btoa(s).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); };
   const unb64u = (t) => { const s = atob(t.replace(/-/g, '+').replace(/_/g, '/')), u = new Uint8Array(s.length); for (let i = 0; i < s.length; i++) u[i] = s.charCodeAt(i); return u; };
   const chk = (t) => { let h = 2166136261; for (let i = 0; i < t.length; i++) { h ^= t.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36); };
@@ -1884,7 +1896,7 @@
     }
     const raw = ta.value.trim(); if (!raw) { say('Paste a save code above first.', true); return; }
     let s; try { s = await readCode(raw); } catch (e) { say('That code is not valid. Copy the whole thing, including the RX at the start.', true); armedLoad = false; return; }
-    if (!armedLoad) { armedLoad = true; say('Valid code. Loading replaces this device\u2019s progress. Tap Load code again to confirm.'); setTimeout(() => { armedLoad = false; }, 8000); return; }
+    if (!armedLoad) { armedLoad = true; say('Valid code. Loading replaces this device’s progress. Tap Load code again to confirm.'); setTimeout(() => { armedLoad = false; }, 8000); return; }
     armedLoad = false; clearTimeout(saveTimer);
     window.__rxLoading = true;
     try { localStorage.setItem(SAVE_KEY, JSON.stringify(s)); say('Loaded. Restarting\u2026'); setTimeout(() => location.reload(), 300); } catch (e) { say('This browser would not store the save.', true); }
@@ -2000,7 +2012,9 @@
       case 'course-all': { const c = COURSES.find(x => x.id === v); if (c) courseCats(c).forEach(k => st.topics[k] = true); break; }
       case 'course-none': { const c = COURSES.find(x => x.id === v); if (c) courseCats(c).forEach(k => st.topics[k] = false); break; }
       case 'course-only': { const c = COURSES.find(x => x.id === v); if (!c) break; if (courseOnly(c)) { unsetOnly(); toast('The other topics are back on.'); } else { setOnly(courseCats(c)); toast('Only ' + c.name + ' topics are on.'); } break; }
-      case 'week-only': { if (weekOnly()) { unsetOnly(); wkPick('p2', '', 'only'); toast('The other topics and weeks are back on.'); } else { if (!curWeek()) { toast('No week has started yet.'); return; } setOnly(['TOP']); if (!wkOnlyNow('p2')) wkPick('p2', '', 'only'); toast('Only this week\u2019s drugs are on.'); } break; }
+      case 'week-only': { const k = WKCFG[v] ? v : 'p2', cat = WKCFG[k].topic; if (weekOnly(k)) { unsetOnly(); wkPick(k, '', 'only'); toast('The other topics and weeks are back on.'); } else { if (!WKCFG[k].cur()) { toast('No week has started yet.'); return; } setOnly([cat]); if (!wkOnlyNow(k)) wkPick(k, '', 'only'); toast('Only this week’s drugs are on.'); } break; }
+      case 'year': st.year = YEARS.indexOf(v) >= 0 ? v : 'P2'; findQ = ''; break;
+      case 'year-only': { if (yearOnly(v)) { unsetOnly(); toast('The other years are back on.'); } else { if (!COURSES.some(c => c.year === v && courseCats(c).length)) { toast(v + ' has no courses filed yet.'); return; } setOnly(yearCats(v)); toast('Only ' + v + ' topics are on.'); } break; }
       case 'wkpick': { const [k, x] = v.split(':'); const a = x === 'all' || x === 'none' || x === 'only' ? x : 'toggle'; if (wkPick(k, a === 'toggle' ? x : '', a) === false) return; break; }
       case 'wkcourse': { const i = v.indexOf(':'); wkPick(v.slice(0, i), v.slice(i + 1), 'course'); break; }
       case 'wkfold': st[v + 'fold'] = !st[v + 'fold']; break;
