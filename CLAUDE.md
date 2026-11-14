@@ -12,7 +12,7 @@
 
 ## Files
 - Questions: `Q(category, difficulty 1-3, question, correct, [3 wrongs], explanation, section)` in `bank.js`. Category files: `pt3*.js`, `pt4.js` (PharmTox), `th3.js` (Therapeutics Exam 3), `th3c.js` (contraceptives), `th553.js` (`T553`), `him.js` (`HIM`, Andy's heart failure questions), `lab.js`, `ind.js`. Weekly drug questions are generated from `drugs.js`.
-- Categories are listed in `CATS` near the top of `game.js` (also `FLAVOR` and the topic chips). A new category needs entries there.
+- Categories are listed in `CATS` near the top of `game.js` (also `FLAVOR`). A new category also needs a slot in `COURSES` (which course card it sits in) and a chip label in `CHIP`; see "Topics menu".
 - `world.js`: the 3D pharmacy (three.js) with patients, queue, sky events, Andy. `crowd.js`: movement and collisions. `ext.js`: events (visitors, inspector, driver), Andy game logic, blessing buff. `game.js`: everything else (cards, menus, saves, awards).
 - Dev mode: add `?dev=1` to the URL for the "Test:" buttons (events, Andy walk / ascension / angel flyover / smash).
 
@@ -27,11 +27,11 @@
 - CSS goes inside the `<style>` block in `head.html`, above `</style>`. Anything appended after the markup is not applied.
 
 ## Therapeutics Exam 3 categories and draw questions
-- Exam 3 is split into three categories (chips under Topics > Therapeutics): `TH3F` (IBS, constipation, diarrhea, including opioid-induced constipation), `TH3C` (contraceptives, `th3c.js`) and `TH3` (everything else: IBD, ulcers, hemorrhoids, GI tests, bowel prep). `th3.js`'s `T()` picks `TH3F` or `TH3` from the section name; `th3c.js` uses `CT()`. `load()` copies a switched-off `TH3` to the two new chips.
+- Exam 3 is split into three categories (chips in the Therapeutics course card): `TH3F` (IBS, constipation, diarrhea, including opioid-induced constipation), `TH3C` (contraceptives, `th3c.js`) and `TH3` (everything else: IBD, ulcers, hemorrhoids, GI tests, bowel prep). `th3.js`'s `T()` picks `TH3F` or `TH3` from the section name; `th3c.js` uses `CT()`. `load()` copies a switched-off `TH3` to the two new chips.
 - Draw questions: `CTDRAW(hormone, ...)` in `th3c.js` adds `q.draw` (`FSH`, `LH`, `E2`, `P4`). The card shows a blank 28-day graph (`cycle.js`, `cycSVG`) and the player drags a line; `cycScore` compares shape (smoothed, min-max scaled, correlation and mean error, plus peak day) with curves traced from the instructor's worksheet. `drawHTML` and the pointer handlers are in `game.js`; they skip the confidence prompt, hint pill, second chance and binder. The text answer (`a`) describes the curve so review lists still read. Tests: `te50`.
 
 ## Geriatrics
-`ger.js` (`GQ(section, d, q, a, w, e, slide)`, category `GER`, chip "Geriatrics: aging, polypharmacy, deprescribing" under the Therapeutics chips) holds 99 questions from the PHAR 451 Geriatric Pharmacotherapy handout, each citing the handout slide number. It sits in the P2 folder. Test: `te51`.
+`ger.js` (`GQ(section, d, q, a, w, e, slide)`, category `GER`, chip "Geriatrics: aging, polypharmacy, deprescribing" in the Therapeutics course card) holds 99 questions from the PHAR 451 Geriatric Pharmacotherapy handout, each citing the handout slide number. Test: `te51`.
 
 ## Quizlet import
 My studies has an "Import from Quizlet" box (`addQuizlet`, `quizletToJson` in `deck.js`). Players paste Quizlet's Export text (term, tab, definition); it becomes a normal deck of multiple-choice cards (wrong answers filled from other cards, so 4+ cards). Direction toggle: term to definition or definition to term. An optional https://quizlet.com/ link is saved as `deck.url` and shows an "Open Quizlet" button. Quizlet has no public API and blocks browser fetches, so the game never reads the link. Test: `te49`.
@@ -40,7 +40,7 @@ My studies has an "Import from Quizlet" box (`addQuizlet`, `quizletToJson` in `d
 `Q(...)` takes an optional 8th argument `s`, a short source like `IBD lecture, slides 33, 36`. It shows as "Study source" under the explanation. `th3.js`'s `T(section, d, q, a, w, e, s)` passes it through. When adding questions from a lecture deck, cite the slide numbers. The extracted slide text is not stored in the repo; ask the user to attach the deck again.
 
 ## Tests
-Node + Playwright, run from `src/`: `node te38.js` etc. They load `corner-rx.html` with `three-stub2.js` standing in for three.js (so the 3D logic runs but nothing is drawn). Useful ones: `te19`, `te26`, `te28`, `te37` (folder switches), `te38` (Andy events), `te39` (weekly quiz achievements). Look for `errs []` in the output. A `Failed to load resource` console line is just the blocked CDN.
+Node + Playwright, run from `src/`: `node te38.js` etc. They load `corner-rx.html` with `three-stub2.js` standing in for three.js (so the 3D logic runs but nothing is drawn). Useful ones: `te19`, `te26`, `te28`, `te54` (Topics menu), `te38` (Andy events), `te39` (weekly quiz achievements). `te35` and `te37` tested the old P1/P2/P3 folder tabs and were removed in v120. Look for `errs []` in the output. A `Failed to load resource` console line is just the blocked CDN.
 
 ## Conventions
 - Wrong answers must not be arguably correct (for example an indication shared with the right drug). Keep the correct answer from being the longest option every time. Audited in v115: across the hand-written bank the correct answer is the longest option in about 31% of questions (was 49%). Check the share per category after adding questions (count questions where the correct answer is strictly longer than every wrong one) and keep each category roughly 25 to 40%. Fix by lengthening plausible wrong answers, not by padding the correct one. Do not push a category to 0%, that is also a tell.
@@ -61,3 +61,10 @@ Do not write Therapeutics questions about study results or how often something o
 
 ## Symptom duration questions
 Any question about how many days or weeks symptoms last, or how long to self-treat before referral, must name the disease state in the question text itself (for example "minor hemorrhoid symptoms", not "minor symptoms"), and must not lean on "the same patient" from another card. Test: `te53` flags Therapeutics questions that mention a time span plus symptoms or referral but no disease word. Add new disease words to its list when a new topic needs one.
+
+## Topics menu (v120)
+The notebook has three tabs: Topics (what to study), Settings (mode, difficulty, focus, confidence, timer, compounding; view `opts`, `optionsHTML`) and My studies. The old P1/P2/P3 folder tabs and the "Only P2 topics" switch are gone (`st.folder`, `folder-only` and `p3-only` handlers removed).
+- `COURSES` in `game.js` drives the Topics tab: one collapsible card per course (`<details class="crs">`, open state in `S.set.cclose`), each with its chips, All / None / Only this, a status pill and a mastery bar. `CHIP` holds chip labels (falls back to `CATNAME`). `sched: 'p2' | 'p3'` embeds the weekly schedule (`wkSchedHTML`), which starts folded (`p2fold`, `p3fold` default true; `load()` sets them for older saves) and now renders every week row (upcoming ones hidden with class `upc`) so the find box can reach them.
+- Quick picks: "This week's drugs only" (`week-only`: only `TOP` plus `wkPick('p2', '', 'only')`) and "Only <course>" (`course-only`). Both remember the previous topic set in `S.set.restore` (`setOnly` / `unsetOnly`) and a second tap restores it.
+- Find box (`#tfind`, `findQ`, `applyFind`): filters chips and schedule rows by `data-find` text in place, opens matching cards, hides the rest, no re-render.
+- Adding a topic: `CATS` entry, `FLAVOR` lines, `CHIP` label, and its id in a `COURSES` card (or a new course object). Test: `te54`.

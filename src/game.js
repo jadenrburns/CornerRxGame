@@ -9,6 +9,18 @@
     ['TOP', 'Weekly drugs'], ['TP3', 'Weekly drugs \u00B7 P3'], ['CALC', 'Calculations'], ['PT3', 'PharmTox \u00B7 Exam 3 questions'], ['PT3G', 'PharmTox \u00B7 Exam 3 drug practice'], ['PT4', 'PharmTox \u00B7 Exam 4 drug practice'], ['TH3', 'Therapeutics \u00B7 Exam 3'], ['TH3F', 'Therapeutics \u00B7 IBS, constipation, diarrhea'], ['TH3C', 'Therapeutics \u00B7 Contraceptives'], ['GER', 'Therapeutics \u00B7 Geriatrics'], ['T553', 'Therapeutics III \u00B7 Syllabus topics'], ['HIM', 'Andy \u00B7 Heart failure'], ['MY', 'My studies']
   ];
   const CATNAME = {}; CATS.forEach(c => CATNAME[c[0]] = c[1]);
+  /* The Topics menu is built from this table. A new category needs a CATS entry above and a slot in one course here
+     (or a new course). Order here is the order on screen. `sched` attaches a weekly drug schedule (WKCFG key). */
+  const COURSES = [
+    { id: 'core', name: 'Core skills', tag: 'Every year', cats: ['BG', 'CL', 'MOA', 'AE', 'DDI', 'CN', 'AD', 'SIG', 'CALC'], note: 'The everyday counter questions: names, classes, mechanisms, side effects, interactions, counseling, antidotes, sig and law, calculations.' },
+    { id: 'p443', name: 'PharmTox', code: 'PHAR 443', tag: 'P2', cats: ['TOP', 'PT3', 'PT3G', 'PT4'], sched: 'p2', note: 'Weekly drug sheets plus the exam question sets.' },
+    { id: 'p451', name: 'Therapeutics', code: 'PHAR 451', tag: 'P2', cats: ['TH3F', 'TH3C', 'TH3', 'GER', 'HIM'], note: 'Exam 3 GI and contraception topics, geriatrics, and Andy\u2019s heart failure questions.' },
+    { id: 'p3top', name: 'Top 300 weekly drugs', short: 'Top 300', tag: 'P3', cats: ['TP3'], sched: 'p3', note: 'Drug list sheets by system, one set per week.' },
+    { id: 'p553', name: 'Therapeutics III', code: 'PHAR 553', tag: 'P3', cats: ['T553'], note: 'Syllabus topics: asthma, COPD, renal, diabetes, gout, migraine, RA and SLE, thyroid, liver, hepatitis, blood pressure, lipids, pain, nutrition, fluids and electrolytes.' },
+    { id: 'my', name: 'My studies', tag: 'Yours', cats: ['MY'], note: 'Decks you wrote or imported from Quizlet. Add and manage them on the My studies tab.' }
+  ];
+  const CHIP = { TOP: 'Weekly drugs', PT3: 'Exam 3: your exam questions', PT3G: 'Exam 3: drug-list practice', PT4: 'Exam 4: mania and psychosis drugs', TH3: 'Exam 3: IBD, ulcers, hemorrhoids and the rest', TH3F: 'Exam 3: IBS, constipation, diarrhea', TH3C: 'Exam 3: contraceptives', GER: 'Geriatrics: aging, polypharmacy, deprescribing', HIM: 'Heart failure: Andy\u2019s questions', T553: 'Therapeutics III topics', TP3: 'Top 300 weekly drugs', MY: 'My studies' };
+  const courseCats = (c) => c.cats.filter(k => k !== 'MY' || S.decks.length);
   const FLAVOR = {
     BG: ['Doc wrote the brand name, can you match it?', 'My insurance wants the generic.', 'The label on my bottle looks different.'],
     CL: ['What type of medicine is this one?', 'I want to understand what I am taking.', 'The last pharmacist called it a class, which one?'],
@@ -58,7 +70,7 @@
     return { cash: 0, earned: 0, rep: 50, streak: 0, best: 0, correct: 0, wrong: 0, served: 0, franchises: 0,
       pw: { hint: 0, second: 0, binder: 0 }, daily: null, recall: [], reg: {}, calcOK: 0, mastery: {}, missed: [], karenCd: 0, karenWin: 0, karenLoss: 0, sweatyCd: 0, jimWin: 0, jimLoss: 0, phoneOK: 0, phoneBad: 0, phoneMiss: 0, lastShelve: 0, retired: 0, shelveOK: 0, shelveBad: 0, priorN: 0, decks: [],
       me: { done: false, body: 'normal', gender: 'n', hair: 0, hairColor: 0, skin: 1, scrub: 0, shirt: 0, shoes: 3 }, awards: { frames: [], pets: [] },
-      set: { topics: topics, diffs: [1, 2, 3], mode: 'mixed', timer: true, focus: false, conf: true },
+      set: { topics: topics, diffs: [1, 2, 3], mode: 'mixed', timer: true, focus: false, conf: true, p2fold: true, p3fold: true },
       vial: [], cosm: [], cosmOn: {}, pillN: 0, store: { own: [], walls: 'w0', floor: 'f0', uni: '', deco: [] },
       up: { shelf: 0, tech: 0, train: 0, counsel: 0, robot: 0 } };
   }
@@ -84,6 +96,7 @@
         f.set = Object.assign(d, os); f.set.topics = Object.assign(defaults().set.topics, os.topics || {});
         if (os.topics && os.topics.TH3 === false) { if (os.topics.TH3F === undefined) f.set.topics.TH3F = false; if (os.topics.TH3C === undefined) f.set.topics.TH3C = false; }
         if (!Array.isArray(f.set.diffs) || !f.set.diffs.length) f.set.diffs = [1, 2, 3];
+        if (os.p2fold === undefined) f.set.p2fold = true; if (os.p3fold === undefined) f.set.p3fold = true; // v120: schedules start collapsed inside the course cards
         if (!MODES.some(m => m[0] === f.set.mode)) f.set.mode = 'mixed'; // Even shuffle / Linear was removed
         if (!Array.isArray(f.decks)) f.decks = [];
       }
@@ -419,21 +432,21 @@
   function wkSchedHTML(k, title) {
     const st = S.set, c = WKCFG[k], t = todayStr(), cw = c.cur(), n = c.L.filter(w => wkOn(k, w.n)).length;
     const row = (w) => { const on = wkOn(k, w.n), started = w.from <= t, cnt = k === 'p3' ? w.ids.length : DRUGS.filter(d => d.w === w.n).length, lab = (w.t ? 'Wk ' + w.wk + ' · ' : '') + w.d;
-      return `<li class="${w.n === cw ? 'now' : started || on ? '' : 'lock'}${on ? '' : ' off'}"><button type="button" data-act="wkpick" data-v="${k}:${w.n}" aria-pressed="${on}" aria-label="${esc(lab)} ${esc(w.topic)}: ${on ? 'on' : 'off'}"><i class="p3box">${on ? '✓' : ''}</i><b>${esc(lab)}</b><span>${esc(w.topic)}</span><small>${on ? cnt + ' drugs' + (w.n === cw ? ' · this week' : started ? '' : ' · upcoming') : 'off'}</small></button></li>`; };
+      return `<li class="${w.n === cw ? 'now' : started || on ? '' : 'lock'}${on ? '' : ' off'}${shown(w) ? '' : ' upc'}"${shown(w) ? '' : ' hidden'} data-find="${esc(('week ' + w.wk + ' wk ' + w.wk + ' ' + (w.t || '') + ' ' + w.d + ' ' + w.topic + (w.n === cw ? ' this week now' : '')).toLowerCase())}"><button type="button" data-act="wkpick" data-v="${k}:${w.n}" aria-pressed="${on}" aria-label="${esc(lab)} ${esc(w.topic)}: ${on ? 'on' : 'off'}"><i class="p3box">${on ? '✓' : ''}</i><b>${esc(lab)}</b><span>${esc(w.topic)}</span><small>${on ? cnt + ' drugs' + (w.n === cw ? ' · this week' : started ? '' : ' · upcoming') : 'off'}</small></button></li>`; };
     const started = c.L.filter(w => w.from <= t), up = c.L.filter(w => w.from > t), foldUp = up.length > 3 && !st[k + 'up'];
     const shown = (w) => w.from <= t || !foldUp || wkOn(k, w.n);
     let body = '';
     const courses = [];
     c.L.forEach(w => { if (w.t && courses.indexOf(w.t) < 0) courses.push(w.t); });
     if (courses.length) courses.forEach(cr => {
-      const ws = c.L.filter(w => w.t === cr), vis = ws.filter(shown); if (!vis.length) return;
+      const ws = c.L.filter(w => w.t === cr), vis = ws.filter(shown); if (!vis.length) return; // upcoming rows are rendered hidden (class upc) so the find box can reach them
       const allOn = ws.every(w => wkOn(k, w.n));
-      body += `<div class="crshd"><b>${esc(cr)}</b><span><button type="button" class="link" data-act="wkcourse" data-v="${k}:${esc(cr)}|1">All</button> &middot; <button type="button" class="link" data-act="wkcourse" data-v="${k}:${esc(cr)}|0">None</button></span></div><ol class="p3sched">${vis.map(row).join('')}</ol>`;
+      body += `<div class="crshd"><b>${esc(cr)}</b><span><button type="button" class="link" data-act="wkcourse" data-v="${k}:${esc(cr)}|1">All</button> &middot; <button type="button" class="link" data-act="wkcourse" data-v="${k}:${esc(cr)}|0">None</button></span></div><ol class="p3sched">${ws.map(row).join('')}</ol>`;
     });
-    else body = `<ol class="p3sched">${c.L.filter(shown).map(row).join('')}</ol>`;
+    else body = `<ol class="p3sched">${c.L.map(row).join('')}</ol>`;
     const hidden = c.L.filter(w => !shown(w)).length;
     const more = up.length > 3 ? `<button type="button" class="link upmore" data-act="wkup" data-v="${k}">${st[k + 'up'] ? 'Hide' : 'Show'} upcoming weeks${hidden ? ' (' + hidden + ' more)' : ''}</button>` : '';
-    return `<div class="grp"><div class="grphd"><button type="button" class="fold" data-act="wkfold" data-v="${k}" aria-expanded="${!st[k + 'fold']}"><i>${st[k + 'fold'] ? '▸' : '▾'}</i> ${title}</button><span class="grpr"><button type="button" class="chip sm" data-act="wkpick" data-v="${k}:only" aria-pressed="${wkOnlyNow(k)}">This week only</button><button type="button" class="link" data-act="wkpick" data-v="${k}:all">All</button> &middot; <button type="button" class="link" data-act="wkpick" data-v="${k}:none">None</button></span></div>${st[k + 'fold'] ? `<p class="note">${n} of ${c.L.length} weeks on. Tap ${title} to show the schedule.</p>` : body + more + `<p class="note">${k === 'p3' ? weekNote3() : weekNote()}</p>`}<div class="chips" aria-label="Weekly question types">${WK_TYPES.map(x => `<button type="button" class="chip" data-act="wktype" data-v="${x[0]}" aria-pressed="${!(st.wkTypes && st.wkTypes[x[0]] === false)}">${x[1]}</button>`).join('')}</div></div>`;
+    return `<div class="grp"><div class="grphd"><button type="button" class="fold" data-act="wkfold" data-v="${k}" aria-expanded="${!st[k + 'fold']}"><i>${st[k + 'fold'] ? '▸' : '▾'}</i> ${title}</button><span class="grpr"><button type="button" class="chip sm" data-act="wkpick" data-v="${k}:only" aria-pressed="${wkOnlyNow(k)}">This week only</button><button type="button" class="link" data-act="wkpick" data-v="${k}:all">All</button> &middot; <button type="button" class="link" data-act="wkpick" data-v="${k}:none">None</button></span></div>${st[k + 'fold'] ? `<p class="note wkfoldnote">${n} of ${c.L.length} weeks on. Tap ${title} to show the schedule.</p>` : ''}<div class="wkbody"${st[k + 'fold'] ? ' hidden' : ''}>${body + more}<p class="note">${k === 'p3' ? weekNote3() : weekNote()}</p></div><div class="chips" aria-label="Weekly question types">${WK_TYPES.map(x => `<button type="button" class="chip" data-act="wktype" data-v="${x[0]}" aria-pressed="${!(st.wkTypes && st.wkTypes[x[0]] === false)}">${x[1]}</button>`).join('')}</div></div>`;
   }
   const wkTypeOff = (q) => !!(S.set.wkTypes && S.set.wkTypes[q.wt] === false);
   const focusOn = () => !!S.set.focus;
@@ -856,49 +869,79 @@
     return m;
   }
   function hubTabs(active) {
-    const n = customCount();
-    return `<div class="hubtabs" role="tablist"><button type="button" role="tab" aria-selected="${active === 'set'}" data-act="tab-set">Topics</button><button type="button" role="tab" aria-selected="${active === 'studies'}" data-act="tab-studies">My studies${n ? ' (' + n + ')' : ''}</button></div>`;
-  }
-  function cabinetHTML(active) {
-    return '<div class="fcab" role="tablist" aria-label="Folders">' + ['P1', 'P2', 'P3'].map((f, i) => `<button type="button" role="tab" class="ftab ft${i + 1}" aria-selected="${active === f}" data-act="folder" data-v="${f}"><span>${f}</span></button>`).join('') + '</div>';
+    const n = customCount(), tab = (id, act, label) => `<button type="button" role="tab" aria-selected="${active === id}" data-act="${act}">${label}</button>`;
+    return `<div class="hubtabs" role="tablist">${tab('set', 'tab-set', 'Topics')}${tab('opts', 'tab-opts', 'Settings')}${tab('studies', 'tab-studies', 'My studies' + (n ? ' (' + n + ')' : ''))}</div>`;
   }
   function weekNote3() {
     const n = curWeek3(), w = WK3[n];
     if (!w) { const f = P3WEEKS[0]; return 'P3 weekly drugs start on ' + esc(f.from) + ' (' + esc(f.topic) + '). Tap a week to preview it now.'; }
     return 'Now: ' + esc(w.d) + ' \u00B7 ' + esc(w.topic) + '. Tap a week to add or remove it, including upcoming weeks.';
   }
+  const nbWrap = (title, inner) => `<div class="pane nbk ${nbClosing ? 'closing' : ''}"><div class="nbcover"><span class="nbtitle">${title}</span></div><div class="nbsheet">${inner}</div></div>`;
+  const nbFoot = () => { const n = poolQs().length; return `<p class="count">${n} question${n === 1 ? '' : 's'} match${calcOn() ? ' + endless calculations' : ''}</p>
+      <div class="btnrow"><button type="button" class="btn go nbback" data-act="back">Close notebook and return to counter</button><button type="button" class="btn" data-act="tour">Replay tour</button><button type="button" class="btn" data-act="reset-set">Reset settings</button></div>`; };
+  /* "Only this course": every topic outside the course is off (and something inside is on) */
+  const courseOnly = (c) => { const st = S.set, ins = courseCats(c); return ins.some(k => st.topics[k]) && CATS.every(x => ins.indexOf(x[0]) >= 0 || !st.topics[x[0]] || (x[0] === 'MY' && !S.decks.length)); };
+  const weekOnly = () => S.set.topics.TOP && CATS.every(x => x[0] === 'TOP' || !S.set.topics[x[0]] || (x[0] === 'MY' && !S.decks.length)) && wkOnlyNow('p2');
+  function setOnly(keep) { // keep: list of cats to leave on; remembers the rest so a second tap restores them
+    const st = S.set; st.restore = {}; CATS.forEach(c => { st.restore[c[0]] = !!st.topics[c[0]]; st.topics[c[0]] = keep.indexOf(c[0]) >= 0 ? (c[0] === 'MY' ? !!S.decks.length : true) : false; });
+  }
+  function unsetOnly() { const st = S.set, rs = st.restore || {}; CATS.forEach(c => st.topics[c[0]] = rs[c[0]] !== undefined ? rs[c[0]] : true); delete st.restore; }
   function settingsHTML() {
     const st = S.set, mc = missedByCat(), ms = masteryByCat();
-    const chipOf = c => `<button type="button" class="chip tp" data-act="topic" data-v="${c[0]}" aria-pressed="${!!st.topics[c[0]]}"><span class="cn">${c[0] === 'PT3' ? 'Exam 3: your exam questions' : c[0] === 'PT3G' ? 'Exam 3: drug-list practice' : c[0] === 'PT4' ? 'Exam 4: mania and psychosis drugs' : c[0] === 'TH3' ? 'Exam 3: IBD, ulcers, hemorrhoids and the rest' : c[0] === 'TH3F' ? 'Exam 3: IBS, constipation, diarrhea' : c[0] === 'TH3C' ? 'Exam 3: contraceptives' : c[0] === 'GER' ? 'Geriatrics: aging, polypharmacy, deprescribing' : c[0] === 'T553' ? 'Relevant otherwise: Therapeutics III topics' : c[0] === 'TP3' ? 'Top 300 weekly drugs' : c[1]}${c[0] === 'TOP' && curWeek() ? ' <small class="mc wk">wk ' + curWeek() + '</small>' : ''}${mc[c[0]] ? ` <small class="mc">${mc[c[0]]} missed</small>` : ''}</span>${ms[c[0]] && ms[c[0]].n ? (() => { const pc = Math.round(100 * ms[c[0]].s / ms[c[0]].n); return `<span class="mbar" role="img" aria-label="${pc}% mastered"><i style="width:${pc}%"></i><em>${pc}%</em></span>`; })() : ''}</button>`;
-    const topics = CATS.filter(c => c[0] !== 'MY' && c[0] !== 'PT3' && c[0] !== 'PT3G' && c[0] !== 'PT4' && c[0] !== 'TH3' && c[0] !== 'TH3F' && c[0] !== 'TH3C' && c[0] !== 'GER' && c[0] !== 'TP3' && c[0] !== 'T553' || c[0] === 'MY' && S.decks.length).map(chipOf).join('');
-    const tox = CATS.filter(c => c[0] === 'PT3' || c[0] === 'PT3G' || c[0] === 'PT4').map(chipOf).join('');
-    const thx = CATS.filter(c => c[0] === 'TH3F' || c[0] === 'TH3C' || c[0] === 'GER' || c[0] === 'TH3').map(chipOf).join('');
+    const bar = (n, sn) => { if (!n) return ''; const pc = Math.round(100 * sn / n); return `<span class="mbar" role="img" aria-label="${pc}% mastered"><i style="width:${pc}%"></i><em>${pc}%</em></span>`; };
+    const chipOf = k => { const m = ms[k] || { n: 0, s: 0 }; return `<button type="button" class="chip tp" data-act="topic" data-v="${k}" aria-pressed="${!!st.topics[k]}" data-find="${esc((CHIP[k] || CATNAME[k]).toLowerCase())}"><span class="cn">${CHIP[k] || CATNAME[k]}${k === 'TOP' && curWeek() ? ' <small class="mc wk">wk ' + curWeek() + '</small>' : ''}${mc[k] ? ` <small class="mc">${mc[k]} missed</small>` : ''}</span>${bar(m.n, m.s)}</button>`; };
+    const total = CATS.filter(c => c[0] !== 'MY' || S.decks.length).length, onN = CATS.filter(c => st.topics[c[0]] && (c[0] !== 'MY' || S.decks.length)).length;
+    const card = (c) => {
+      const cats = courseCats(c); if (!cats.length) return '';
+      const on = cats.filter(k => st.topics[k]).length, open = !(st.cclose || {})[c.id];
+      let n = 0, sn = 0; cats.forEach(k => { const m = ms[k]; if (m) { n += m.n; sn += m.s; } });
+      const status = on === 0 ? 'off' : on === cats.length ? (cats.length === 1 ? 'on' : 'all ' + cats.length + ' on') : on + ' of ' + cats.length + ' on';
+      return `<details class="crs${on ? '' : ' off'}" data-crs="${c.id}"${open ? ' open' : ''}><summary><i class="caret" aria-hidden="true"></i><span class="crsn"><b>${esc(c.name)}</b><small>${c.code ? esc(c.code) + ' · ' : ''}${esc(c.tag)}</small></span><span class="crsst">${status}</span>${bar(n, sn)}</summary>
+        <div class="crsb"><div class="crsr"><span class="note">${esc(c.note)}</span><span class="grpr"><button type="button" class="link" data-act="course-all" data-v="${c.id}">All</button> &middot; <button type="button" class="link" data-act="course-none" data-v="${c.id}">None</button> &middot; <button type="button" class="link${courseOnly(c) ? ' arm' : ''}" data-act="course-only" data-v="${c.id}">${courseOnly(c) ? 'Only this (tap to undo)' : 'Only this'}</button></span></div>
+        <div class="chips">${cats.map(chipOf).join('')}</div>${c.sched ? wkSchedHTML(c.sched, c.sched === 'p3' ? 'Weekly schedule' : 'Weekly schedule') : ''}</div></details>`;
+    };
+    const quick = [`<button type="button" class="chip" data-act="week-only" aria-pressed="${weekOnly()}">This week’s drugs only</button>`].concat(COURSES.filter(c => courseCats(c).length && c.id !== 'my').map(c => `<button type="button" class="chip" data-act="course-only" data-v="${c.id}" aria-pressed="${courseOnly(c)}">Only ${esc(c.short || c.name)}</button>`)).join('');
+    const inner = `${hubTabs('set')}
+      <div class="tsum"><b>${onN} of ${total} topics on</b><span class="grpr"><button type="button" class="link" data-act="topics-all">All on</button> &middot; <button type="button" class="link" data-act="topics-none">All off</button></span></div>
+      <div class="grp"><b>Quick picks</b><div class="chips">${quick}</div><p class="note">One tap focuses on a course or this week’s drugs. Tap it again to bring the other topics back.</p></div>
+      <label class="find"><span class="vh">Find a topic</span><input type="search" id="tfind" placeholder="Find a topic or week" value="${esc(findQ)}" autocomplete="off"></label>
+      <div class="crsl">${COURSES.map(card).join('')}</div>
+      <p class="note nomatch" hidden>Nothing matches that. Try a shorter word.</p>
+      ${nbFoot()}`;
+    return nbWrap('Topics', inner);
+  }
+  function optionsHTML() {
+    const st = S.set;
     const diffs = [[1, 'Level 1 easy'], [2, 'Level 2 medium'], [3, 'Level 3 hard']].map(d => `<button type="button" class="chip" data-act="diff" data-v="${d[0]}" aria-pressed="${st.diffs.indexOf(d[0]) >= 0}">${d[1]}</button>`).join('');
     const modes = MODES.map(m => `<button type="button" class="chip" data-act="mode" data-v="${m[0]}" aria-pressed="${st.mode === m[0]}">${m[1]}${m[0] === 'review' && dueCount() ? ' (' + dueCount() + ' due)' : ''}</button>`).join('');
-    const n = poolQs().length;
-    const fold = st.folder === 'P1' || st.folder === 'P3' ? st.folder : 'P2';
-    const inFold = (f, c) => f === 'P3' ? (c[0] === 'TP3' || c[0] === 'T553') : f === 'P2' ? !(c[0] === 'TP3' || c[0] === 'T553') : false;
-    const onlyOn = (f) => { const o = CATS.filter(c => !inFold(f, c)); return f !== 'P1' && o.length > 0 && o.every(c => !st.topics[c[0]]); };
-    const fsw = (f) => `<div class="fsw${f === 'P1' ? ' dis' : ''}"><span class="fswl" id="fsw-${f}">Only ${f} topics<small>${f === 'P1' ? 'Nothing is filed here yet' : onlyOn(f) ? 'Other folders are switched off' : 'Switch off the other folders\u2019 topics'}</small></span><button type="button" class="swt" role="switch" aria-labelledby="fsw-${f}" aria-checked="${onlyOn(f)}" data-act="folder-only" data-v="${f}"${f === 'P1' ? ' disabled' : ''}><i></i></button></div>`;
-    const p2 = `${fsw('P2')}<h3>Question settings</h3><p class="sub">Changes apply to the next patient.</p>
-      <div class="grp"><b>Focus mode</b><div class="chips"><button type="button" class="chip" data-act="focus" aria-pressed="${!!st.focus}">Focus mode ${st.focus ? 'on' : 'off'}</button></div><p class="note">Hides the 3D pharmacy and turns off the timer, patient events, phone calls, Karen and Jim, so it is only questions.</p></div>
-      <div class="grp"><b>Topics <span><button type="button" class="link" data-act="topics-all">All</button> &middot; <button type="button" class="link" data-act="topics-none">None</button></span></b><div class="chips">${topics}</div>${tox ? '<div class="subgrp"><b class="subh">PharmTox</b><div class="chips">' + tox + '</div></div>' : ''}${thx ? '<div class="subgrp"><b class="subh">Therapeutics</b><div class="chips">' + thx + '</div></div>' : ''}</div>
-      <div class="grp"><b>Difficulty</b><div class="chips">${diffs}</div></div>
+    const inner = `${hubTabs('opts')}<h3>How you study</h3><p class="sub">Changes apply to the next patient.</p>
       <div class="grp"><b>Mode</b><div class="chips">${modes}</div><p class="note">${MODES.find(m => m[0] === st.mode)[2]}</p></div>
-      <div class="grp"><b>Compounding pharmacy</b><div class="chips"><button type="button" class="chip" data-act="labk" data-v="comp" aria-pressed="${(S.labK || {}).comp !== false}">Compounding math</button><button type="button" class="chip" data-act="labk" data-v="pk" aria-pressed="${(S.labK || {}).pk !== false}">Kinetics</button></div><p class="note">Used when you tap Switch to compounding in the menu. Level chips above apply there too. ${S.labN ? 'Solved at the bench: ' + S.labOK + ' of ' + S.labN + '.' : ''}</p></div>
-      ${wkSchedHTML('p2', 'Weekly drugs')}
+      <div class="grp"><b>Difficulty</b><div class="chips">${diffs}</div></div>
+      <div class="grp"><b>Focus mode</b><div class="chips"><button type="button" class="chip" data-act="focus" aria-pressed="${!!st.focus}">Focus mode ${st.focus ? 'on' : 'off'}</button></div><p class="note">Hides the 3D pharmacy and turns off the timer, patient events, phone calls, Karen and Jim, so it is only questions.</p></div>
       <div class="grp"><b>Confidence ratings</b><div class="chips"><button type="button" class="chip" data-act="conf" aria-pressed="${st.conf !== false}">Ask how sure I am ${st.conf !== false ? 'on' : 'off'}</button></div><p class="note">After you pick an answer, rate Guess, Pretty sure or Certain before the result shows. Works in Smart mix and Individual review only. Spaced review (SM-2) uses it: certain and right pushes a question far out, a guess comes back soon, certain but wrong returns first.</p></div>
       <div class="grp"><b>Speed bonus</b><div class="chips"><button type="button" class="chip" data-act="timer" aria-pressed="${st.timer}">Timer bonus ${st.timer ? 'on' : 'off'}</button></div><p class="note">Turn it off to study without time pressure. Karen still has a limit.</p></div>
-      `;
-    const p3 = `${fsw('P3')}<h3>P3 weekly drugs</h3><p class="sub">Drug list sheets by system, one set per week. Changes apply to the next patient.</p>
-      ${wkSchedHTML('p3', 'Top 300')}
-      <div class="grp"><b>Relevant otherwise</b><div class="chips">${CATS.filter(c => c[0] === 'T553').map(chipOf).join('')}</div><p class="note">Therapeutics III (PHAR 553) syllabus topics: asthma, COPD, renal, diabetes, gout, migraine, RA and SLE, thyroid, liver, hepatitis, blood pressure, lipids, pain, nutrition, fluids and electrolytes.</p></div>
-      <div class="grp"><b>Focus</b><div class="chips"><button type="button" class="chip" data-act="topics-all">Turn every topic back on</button></div><p class="note">Use the switch at the top of this folder to ask only P3 topics.</p></div>`;
-    const p1 = `${fsw('P1')}<h3>P1 folder</h3><p class="sub">Nothing is filed here yet.</p><div class="grp"><b>Empty folder</b><p class="note">P1 drug lists and exam questions will go in this folder. Your current question settings live in the P2 folder.</p></div>`;
-    return `<div class="pane nbk ${nbClosing ? 'closing' : ''}"><div class="nbcover"><span class="nbtitle">Topics</span></div><div class="nbsheet">${hubTabs('set')}${cabinetHTML(fold)}<div class="fbody fb-${fold}" role="tabpanel" aria-label="${fold} folder">${fold === 'P1' ? p1 : fold === 'P3' ? p3 : p2}</div>
-      <p class="count">${n} question${n === 1 ? '' : 's'} match${calcOn() ? ' + endless calculations' : ''}</p>
-      <div class="btnrow"><button type="button" class="btn go nbback" data-act="back">Close notebook and return to counter</button><button type="button" class="btn" data-act="tour">Replay tour</button><button type="button" class="btn" data-act="reset-set">Reset settings</button></div></div></div>`;
+      <div class="grp"><b>Compounding pharmacy</b><div class="chips"><button type="button" class="chip" data-act="labk" data-v="comp" aria-pressed="${(S.labK || {}).comp !== false}">Compounding math</button><button type="button" class="chip" data-act="labk" data-v="pk" aria-pressed="${(S.labK || {}).pk !== false}">Kinetics</button></div><p class="note">Used when you tap Switch to compounding in the menu. The level chips above apply there too. ${S.labN ? 'Solved at the bench: ' + S.labOK + ' of ' + S.labN + '.' : ''}</p></div>
+      ${nbFoot()}`;
+    return nbWrap('Settings', inner);
   }
+  /* find box: filters topic chips and schedule rows in place, no re-render */
+  let findQ = '';
+  function applyFind() {
+    const root = document.querySelector('.crsl'); if (!root) return;
+    const q = findQ.trim().toLowerCase(); let any = false;
+    root.querySelectorAll('.crs').forEach(d => {
+      let hit = 0, tot = 0;
+      d.querySelectorAll('.chip.tp, .p3sched li').forEach(el => { tot++; const t = (el.dataset.find || el.textContent).toLowerCase(); const ok = !q || t.indexOf(q) >= 0; el.hidden = !ok || (!q && el.classList.contains('upc')); if (ok) hit++; });
+      const nameHit = q && (d.querySelector('.crsn').textContent.toLowerCase().indexOf(q) >= 0);
+      if (nameHit) { d.querySelectorAll('.chip.tp, .p3sched li').forEach(el => { el.hidden = el.classList.contains('upc'); }); hit = tot; }
+      d.querySelectorAll('.wkbody').forEach(wb => { const rows = [...wb.querySelectorAll('.p3sched li')]; const rowHit = rows.some(r => !r.hidden); const k = (wb.parentElement.querySelector('.fold') || {}).dataset ? wb.parentElement.querySelector('.fold').dataset.v : ''; const folded = !!S.set[k + 'fold']; wb.hidden = q ? !rowHit : folded; const fn = wb.parentElement.querySelector('.wkfoldnote'); if (fn) fn.hidden = q ? rowHit : false; wb.querySelectorAll('.upmore').forEach(u => { u.hidden = !!q; }); });
+      d.hidden = !!q && !hit; if (q && hit) { d.open = true; any = true; } if (!q) { d.open = !(S.set.cclose || {})[d.dataset.crs]; any = true; }
+    });
+    const nm = document.querySelector('.nomatch'); if (nm) nm.hidden = any;
+  }
+  document.addEventListener('input', (e) => { if (e.target && e.target.id === 'tfind') { findQ = e.target.value; applyFind(); } });
+  document.addEventListener('toggle', (e) => { const d = e.target; if (!d.classList || !d.classList.contains('crs') || findQ.trim()) return; S.set.cclose = S.set.cclose || {}; if (d.open) delete S.set.cclose[d.dataset.crs]; else S.set.cclose[d.dataset.crs] = true; save(); }, true);
   function lockNote(d) {
     const t = todayStr(), l = d.items.filter(q => q.from && q.from > t); if (!l.length) return '';
     const next = l.map(q => q.from).sort()[0];
@@ -1564,7 +1607,7 @@
   function renderPanel() {
     const pn = $('#qpanel'); if (!pn) return;
     pn.classList.toggle('karen', !!(cur && cur.karen && !cur.done && view === 'q'));
-    const body = view === 'create' ? createHTML() : view === 'awards' ? awardsHTML() : view === 'phone' ? phoneHTML() : view === 'fp' || view === 'him' ? '' : view === 'shift' ? shiftHTML() : view === 'daily' ? dailyHTML() : view === 'flash' ? fcHTML() : view === 'syn' ? synHTML() : view === 'ref' ? refHTML() : view === 'retire' ? retireHTML() : view === 'set' ? settingsHTML() : view === 'studies' ? studiesHTML() : (cur ? cardHTML() : '');
+    const body = view === 'create' ? createHTML() : view === 'awards' ? awardsHTML() : view === 'phone' ? phoneHTML() : view === 'fp' || view === 'him' ? '' : view === 'shift' ? shiftHTML() : view === 'daily' ? dailyHTML() : view === 'flash' ? fcHTML() : view === 'syn' ? synHTML() : view === 'ref' ? refHTML() : view === 'retire' ? retireHTML() : view === 'set' ? settingsHTML() : view === 'opts' ? optionsHTML() : view === 'studies' ? studiesHTML() : (cur ? cardHTML() : '');
     $('#counter').innerHTML = qbar() + body;
     const nb = document.querySelector('.nbk');
     if (nb) {
@@ -1572,6 +1615,7 @@
       else if (lastRendered === view) nb.classList.add('still');
     }
     flipTab = false; lastRendered = view;
+    if (view === 'set') applyFind();
     fitPanel();
     observeInset();
   }
@@ -1623,11 +1667,11 @@
   document.addEventListener('click', (e) => { const b = e.target.closest && e.target.closest('#qgrab'); if (!b) return; const p = $('#qpanel'), min = p.classList.toggle('min'); b.setAttribute('aria-expanded', String(!min)); b.firstElementChild.textContent = min ? 'Show question card' : 'Hide card to look around'; if (World.ok) updateInset(); fitPanel(); });
   document.addEventListener('keydown', (e) => { if (e.key === 'Escape') document.body.classList.remove('drawer'); });
   function backToQ() {
-    if ((view === 'studies' || view === 'set') && !nbClosing) {
+    if ((view === 'studies' || view === 'set' || view === 'opts') && !nbClosing) {
       const pane = document.querySelector('.nbk');
       if (pane) { nbClosing = true; pane.classList.add('closing'); setTimeout(() => { backToQ(); nbClosing = false; }, 320); return; }
     }
-    if ((view === 'studies' || view === 'set') && nbClosing && !document.querySelector('.nbk.closing')) return;
+    if ((view === 'studies' || view === 'set' || view === 'opts') && nbClosing && !document.querySelector('.nbk.closing')) return;
     view = 'q';
     if (dirty) { dirty = false; newCard(); return; }
     resumeTimers();
@@ -1786,7 +1830,7 @@
   let tourEl = null, tourStep = 0, tourPaused = 0;
   const TOUR = [
     { t: 'Welcome to Corner Rx', p: 'You are the pharmacist at the counter. Each patient asks one question. Pick the right answer to earn cash and reputation, and read the explanation when you miss one. Take your time at first.' },
-    { t: 'The menu', p: 'Tap the menu button in the top right.', l: [['Upgrades', 'spend your cash on the pharmacy'], ['Progress & awards', 'mastery, photos, pets and the weekly calendar'], ['Topics', 'choose topics and weekly drugs, or add your own questions'], ['Focus mode', 'just the questions, no 3D world'], ['Drug reference', 'the weekly drug lists']] },
+    { t: 'The menu', p: 'Tap the menu button in the top right.', l: [['Upgrades', 'spend your cash on the pharmacy'], ['Progress & awards', 'mastery, photos, pets and the weekly calendar'], ['Topics', 'pick courses, topics and weekly drugs; the Settings tab has mode and difficulty; add your own questions under My studies'], ['Focus mode', 'just the questions, no 3D world'], ['Drug reference', 'the weekly drug lists']] },
     { t: 'Look around', p: 'Drag to look around the pharmacy and pinch to zoom. Tap glowing spots to build upgrades. The corner button makes the game full screen, and the bar above the question card hides it so you can see the shop.' },
     { t: 'Your progress', p: 'Everything saves in this browser. To back up or move to another device, open Progress and copy your save code. Good luck out there.' }
   ];
@@ -1807,7 +1851,7 @@
   function maybeTour() { if (S.me.done && !S.tutDone && !tourEl) showTour(); }
   /* ---- save code: the whole save as one long code, to move progress between devices or keep a backup ---- */
 /*@EXT@*/
-  const GAME_VERSION = 119;
+  const GAME_VERSION = 120;
   const b64u = (u8) => { let s = ''; for (let i = 0; i < u8.length; i += 0x8000) s += String.fromCharCode.apply(null, u8.subarray(i, i + 0x8000)); return btoa(s).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); };
   const unb64u = (t) => { const s = atob(t.replace(/-/g, '+').replace(/_/g, '/')), u = new Uint8Array(s.length); for (let i = 0; i < s.length; i++) u[i] = s.charCodeAt(i); return u; };
   const chk = (t) => { let h = 2166136261; for (let i = 0; i < t.length; i++) { h ^= t.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36); };
@@ -1952,20 +1996,15 @@
       case 'focus': st.focus = !st.focus; applyFocus(); toast(st.focus ? 'Focus mode on. No timer, events or 3D world.' : 'Focus mode off. The pharmacy is back.'); break;
       case 'tab-set': flipTab = true; openView('set'); return;
       case 'tab-studies': flipTab = true; openView('studies'); return;
+      case 'tab-opts': flipTab = true; openView('opts'); return;
+      case 'course-all': { const c = COURSES.find(x => x.id === v); if (c) courseCats(c).forEach(k => st.topics[k] = true); break; }
+      case 'course-none': { const c = COURSES.find(x => x.id === v); if (c) courseCats(c).forEach(k => st.topics[k] = false); break; }
+      case 'course-only': { const c = COURSES.find(x => x.id === v); if (!c) break; if (courseOnly(c)) { unsetOnly(); toast('The other topics are back on.'); } else { setOnly(courseCats(c)); toast('Only ' + c.name + ' topics are on.'); } break; }
+      case 'week-only': { if (weekOnly()) { unsetOnly(); wkPick('p2', '', 'only'); toast('The other topics and weeks are back on.'); } else { if (!curWeek()) { toast('No week has started yet.'); return; } setOnly(['TOP']); if (!wkOnlyNow('p2')) wkPick('p2', '', 'only'); toast('Only this week\u2019s drugs are on.'); } break; }
       case 'wkpick': { const [k, x] = v.split(':'); const a = x === 'all' || x === 'none' || x === 'only' ? x : 'toggle'; if (wkPick(k, a === 'toggle' ? x : '', a) === false) return; break; }
       case 'wkcourse': { const i = v.indexOf(':'); wkPick(v.slice(0, i), v.slice(i + 1), 'course'); break; }
       case 'wkfold': st[v + 'fold'] = !st[v + 'fold']; break;
       case 'wkup': st[v + 'up'] = !st[v + 'up']; break;
-      case 'folder': st.folder = v === 'P1' || v === 'P3' ? v : 'P2'; break;
-      case 'p3-only': CATS.forEach(c => st.topics[c[0]] = c[0] === 'TP3' || c[0] === 'T553'); break;
-      case 'folder-only': {
-        if (v === 'P1') { toast('P1 has no topics yet.'); break; }
-        const inF = c => v === 'P3' ? (c[0] === 'TP3' || c[0] === 'T553') : !(c[0] === 'TP3' || c[0] === 'T553');
-        const outs = CATS.filter(c => !inF(c)), isOn = outs.every(c => !st.topics[c[0]]);
-        if (isOn) { const rs = st.restore || {}; outs.forEach(c => st.topics[c[0]] = rs[c[0]] !== false); delete st.restore; toast('Other folders are back on.'); }
-        else { st.restore = {}; outs.forEach(c => { st.restore[c[0]] = !!st.topics[c[0]]; st.topics[c[0]] = false; }); toast('Only ' + v + ' topics are on.'); }
-        break;
-      }
       case 'wktype': { st.wkTypes = st.wkTypes || {}; const on = WK_TYPES.filter(x => st.wkTypes[x[0]] !== false).length; if (st.wkTypes[v] !== false && on <= 1) { toast('Keep at least one kind of weekly question on.'); return; } st.wkTypes[v] = st.wkTypes[v] === false; break; }
       case 'reset-set': S.set = defaults().set; break;
       case 'preview': readDraft(); $('#studyprev').innerHTML = previewHTML(parseStudy(draft.text, 'My notes')); return;
