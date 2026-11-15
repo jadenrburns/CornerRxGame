@@ -18,8 +18,9 @@
       { id: 'sort-all', board: 'res', name: 'Fill the whole handout', n: 14, cells: ['paiv', 'papo', 'mrsaiv', 'mrsapo', 'vreiv', 'vrepo', 'anaiv', 'anapo', 'atyd'], help: 'Drag each drug into the right IV or PO box. A drug that fits more than one box goes in any of them.' }
     ],
     gram: [
-      { id: 'sort-gp', board: 'gp', name: 'Fill the Gram-positive tree', n: 11, cells: ['gpba', 'gpca', 'gpch', 'gpcp', 'gpcn'], help: 'This is the Gram-positive tree from the survival guide. Drag each bug from the bank onto the paper where it belongs on the lab table, or tap a bug and then tap a paper.' },
-      { id: 'sort-gn', board: 'gn', name: 'Fill the Gram-negative tree', n: 9, cells: ['gndi', 'gncc', 'gnnl', 'gnlf', 'gnan'], help: 'This is the Gram-negative tree from the survival guide. Drag each bug onto the paper where it belongs on the lab table.' }
+      { id: 'sort-gp', bugs: true, board: 'gp', name: 'Fill the Gram-positive tree', n: 11, cells: ['gpba', 'gpca', 'gpch', 'gpcp', 'gpcn'], help: 'This is the Gram-positive tree from the survival guide. Drag each bug from the bank onto the paper where it belongs on the lab table, or tap a bug and then tap a paper.' },
+      { id: 'sort-gn', bugs: true, board: 'gn', name: 'Fill the Gram-negative tree', n: 9, cells: ['gndi', 'gncc', 'gnnl', 'gnlf', 'gnan'], help: 'This is the Gram-negative tree from the survival guide. Drag each bug onto the paper where it belongs on the lab table.' }
+      , { id: 'sort-gb', bugs: true, board: 'gb', name: 'Fill both trees', n: 20, cells: ['gpba', 'gpca', 'gpch', 'gpcp', 'gpcn', 'gndi', 'gncc', 'gnnl', 'gnlf', 'gnan'], help: 'Both trees from the survival guide are on the lab table, Gram-positive on the left and Gram-negative on the right. Drag each bug from the bank onto the paper where it belongs, or tap a bug and then tap a paper.' }
     ],
     pk: [{ id: 'sort-pk', board: 'pk', name: 'Fill the three boxes', n: 10, cells: ['time', 'conc', 'norenal'], help: 'The last page of the handout has three boxes. Drag each antibiotic into the box it belongs in: time-dependent, concentration-dependent or not renally adjusted. A few fit two boxes.' }]
   };
@@ -40,6 +41,8 @@
       PN('gnnl', 'NOT lactose fermenting', -0.4, 1.5, 2.5, 1.5), PN('gnlf', 'Lactose fermenting', 2.3, 1.5, 2.5, 1.5)],
       edges: [['gn0', 'gnA'], ['gn0', 'gnN'], ['gnA', 'gndi'], ['gnA', 'gncc'], ['gnA', 'gnB'], ['gnN', 'gnBn'], ['gnBn', 'gnan'], ['gnB', 'gnnl'], ['gnB', 'gnlf']] }
   };
+  { const sc = 0.52, mk = (k, dx) => BOARDS[k].nodes.map(n => Object.assign({}, n, { x: n.x * sc + dx, z: n.z * sc, w: n.w * sc, h: n.h * sc })); BOARDS.gb = { nodes: mk('gp', -2.75).concat(mk('gn', 2.75)), edges: BOARDS.gp.edges.concat(BOARDS.gn.edges) }; }
+  BOARDS.pk.nodes[0].icon = 'clock'; BOARDS.pk.nodes[1].icon = 'conc'; BOARDS.pk.nodes[2].icon = 'kidney';
   const MICBOARD_OF = { res: 'res', pk: 'pk', gram: 'gp' };
   function micBoardSpec(key, active) {
     const B = BOARDS[key], by = {}; B.nodes.forEach(n => { by[n.id] = n; });
@@ -169,7 +172,7 @@ const micLab3 = () => !!(World.ok && World.setMic);
         <div class="btnrow"><button type="button" class="btn go" data-act="mic-again" data-v="${R.sid}">Again</button><button type="button" class="btn" data-act="mic-menu">Back to the lab</button></div></div></div>`;
     }
     const dishes = R.chips.map(c => `<button type="button" class="petri ${R.bugs ? 'bug' : ''} ${c.used ? 'used' : ''} ${R.sel === c.id ? 'sel' : ''} ${R.shake === c.id ? 'shake' : ''}" data-chip="${c.id}" style="--d:${c.id * 1.7 % 7}" ${c.used ? 'disabled' : ''}>${R.bugs ? micCrit(c.id * 7 + c.t.length) : micDish(c.t, 'drug', c.id * 7 + c.t.length)}<span>${esc(c.t)}</span></button>`).join('');
-    return `<div class="pane micpane round">${micTop(true)}${head}${count}<p class="micmsg" aria-live="polite">${esc(R.msg || (R.sel !== null ? (R.kind === 'board' ? 'Picked. Tap the right box.' : 'Drug picked. Tap the right dish.') : ''))}</p><div class="mdishes" aria-label="Petri dish word bank">${dishes}</div><p class="note nmiss">Misses: <b>${R.mist}</b></p>
+    return `<div class="pane micpane round">${micTop(true)}${head}${count}<p class="micmsg" aria-live="polite">${esc(R.msg || (R.sel !== null ? (R.kind === 'board' ? (R.bugs ? 'Bug picked. Tap the right paper.' : 'Drug picked. Tap the right box.') : (R.bugs ? 'Bug picked. Tap the right dish.' : 'Drug picked. Tap the right dish.')) : ''))}</p><div class="mdishes" aria-label="Petri dish word bank">${dishes}</div><p class="note nmiss">Misses: <b>${R.mist}</b></p>
       <div class="btnrow"><button type="button" class="btn" data-act="mic-menu">Back to the lab</button></div></div>`;
   }
   const micAl = (g, i) => (g.al && g.al[i]) || [];
@@ -224,14 +227,15 @@ const micLab3 = () => !!(World.ok && World.setMic);
 
   /* ---- menu ---- */
   function micSortRows(sorts, title) {
-    return `<div class="grp"><b>${title}</b><ul class="miclist">${sorts.map(x => `<li><button type="button" class="microw" data-act="mic-go" data-v="${x.id}"><span class="mrn">${esc(x.name)}</span><small>${x.n} ${x.kind ? 'bugs' : 'drugs'}</small><span class="mstars" aria-label="${micRec(x.id).d ? 1 : 0} of 1 star"><i class="${micRec(x.id).d ? 'on' : ''}">\u2605</i></span></button></li>`).join('')}</ul></div>`;
+    return `<div class="grp"><b>${title}</b><ul class="miclist">${sorts.map(x => `<li><button type="button" class="microw" data-act="mic-go" data-v="${x.id}"><span class="mrn">${esc(x.name)}</span><small>${x.n} ${x.kind || x.bugs ? 'bugs' : 'drugs'}</small><span class="mstars" aria-label="${micRec(x.id).d ? 1 : 0} of 1 star"><i class="${micRec(x.id).d ? 'on' : ''}">\u2605</i></span></button></li>`).join('')}</ul></div>`;
   }
   function micHTML() {
     const m = micS(), set = micSet(m.set);
     if (micR) return micR.sort ? micSortHTML() : micRoundHTML();
     const srt = World.ok && World.setMic ? micAllSorts() : [], total = MICSETS.reduce((n, s) => n + s.groups.length * 2, 0) + srt.length, got = MICSETS.reduce((n, s) => n + s.groups.reduce((a, g) => a + micStars(g), 0), 0) + srt.filter(x => micRec(x.id).d).length;
     const tabs = MICSETS.map(s => `<button type="button" class="seg-b ${s.id === set.id ? 'on' : ''}" data-act="mic-set" data-v="${s.id}" aria-pressed="${s.id === set.id}">${esc(s.name)}</button>`).join('');
-    const modes = [['drag', 'Drag from the petri dish'], ['fill', 'Fill in the blank']].map(a => `<button type="button" class="seg-b ${m.mode === a[0] ? 'on' : ''}" data-act="mic-mode" data-v="${a[0]}" aria-pressed="${m.mode === a[0]}">${a[1]}</button>`).join('');
+    const gramOnly = set.id === 'gram' && World.ok && World.setMic;
+    const modes = gramOnly ? '' : [['drag', 'Drag from the petri dish'], ['fill', 'Fill in the blank']].map(a => `<button type="button" class="seg-b ${m.mode === a[0] ? 'on' : ''}" data-act="mic-mode" data-v="${a[0]}" aria-pressed="${m.mode === a[0]}">${a[1]}</button>`).join('');
     let body = '';
     if (set.id === 'body') {
       const sites = set.groups.filter(g => !g.fam), fams = set.groups.filter(g => g.fam), sel = micSelG && micGrp(set, micSelG);
@@ -242,12 +246,12 @@ const micLab3 = () => !!(World.ok && World.setMic);
         <div class="micfam"><b>Bug families</b>${fams.map(g => `<button type="button" class="btn" data-act="mic-go" data-v="${g.id}">${esc(g.name)} ${micStarsHTML(g)}</button>`).join('')}</div>
         <p class="note small">Normally sterile (no bugs): bone, heart, lower respiratory area, the central nervous system, and the blood.</p></div></div>`;
     } else {
-      const sorts = m.mode === 'drag' ? micSortsFor(set.id) : [];
-      body = (sorts.length ? micSortRows(sorts, set.id === 'res' ? 'Fill in the handout boxes' : 'Fill in the three boxes') + '<div class="grp"><b>Or fill the slots for one list</b></div>' : '') + `<ul class="miclist">${set.groups.map(g => `<li><button type="button" class="microw" data-act="mic-go" data-v="${g.id}"><span class="mrn">${esc(g.name)}</span><small>${g.items.length} to place</small>${micStarsHTML(g)}</button></li>`).join('')}</ul>`;
+      const sorts = (m.mode === 'drag' || gramOnly) ? micSortsFor(set.id) : [];
+      if (gramOnly) body = micSortRows(sorts, 'Fill in the tree'); else body = (sorts.length ? micSortRows(sorts, set.id === 'res' ? 'Fill in the handout boxes' : 'Fill in the three boxes') + '<div class="grp"><b>Or fill the slots for one list</b></div>' : '') + `<ul class="miclist">${set.groups.map(g => `<li><button type="button" class="microw" data-act="mic-go" data-v="${g.id}"><span class="mrn">${esc(g.name)}</span><small>${g.items.length} to place</small>${micStarsHTML(g)}</button></li>`).join('')}</ul>`;
     }
     const bug = S.binBug ? '<p class="micbug">🦠 The trash can is crawling with bacteria! Finish a round to clean it up and earn double.</p>' : '';
     return `<div class="pane micpane">${micTop(false)}<h3>Microbe lab</h3><p class="sub">${esc(set.sub)}. Stars: <b>${got}</b> of ${total}. One star per mode when you finish a group with no misses and no hint.</p>${bug}
-      <div class="seg" role="group" aria-label="Study mode">${modes}</div><div class="seg sets" role="group" aria-label="List">${tabs}</div>${body}</div>`;
+      ${modes ? `<div class="seg" role="group" aria-label="Study mode">${modes}</div>` : ''}<div class="seg sets" role="group" aria-label="List">${tabs}</div>${body}</div>`;
   }
 
   /* ---- a round ---- */

@@ -341,8 +341,8 @@ const World = (function () {
         put(new T.BoxGeometry(legW + 0.06, 0.1, legW + 0.22), own(o.shoes), 0, -legL / 2 + 0.05, 0.07, sh);
       } else {
         { const th = put(new T.CylinderGeometry(legW * 0.66, legW * 0.54, legL * 0.5, 12), pants, 0, -legL / 4, 0, leg); th.scale.z = 1.15; put(new T.IcosahedronGeometry(legW * 0.56, 1), pants, 0, -legL / 2, 0.01, leg);
-          const cf = put(new T.CylinderGeometry(legW * 0.54, legW * 0.4, legL * 0.5, 12), pants, 0, -legL * 0.75, 0, leg); cf.scale.z = 1.1; put(new T.IcosahedronGeometry(legW * 0.5, 1), pants, 0, -legL * 0.58, -0.015, leg).scale.set(1, 1.5, 0.9); }
-        { const sm = own(o.shoes || '#2A2A34'), sh = put(new T.IcosahedronGeometry(0.1, 1), sm, 0, -legL + 0.05, 0.07, leg); sh.scale.set(legW * 6, 0.55, 2.3); }
+          const ch = legL * 0.5 - 0.09, cf = put(new T.CylinderGeometry(legW * 0.54, legW * 0.4, ch, 12), pants, 0, -legL * 0.5 - ch / 2, 0, leg); cf.scale.z = 1.1; put(new T.IcosahedronGeometry(legW * 0.5, 1), pants, 0, -legL * 0.58, -0.015, leg).scale.set(1, 1.5, 0.9); }
+        { const sm = own(o.shoes || '#2A2A34'), sh = put(new T.IcosahedronGeometry(0.1, 1), sm, 0, -legL + 0.06, 0.07, leg); sh.scale.set(legW * 6.4, 0.9, 2.4); }
       }
       P.legs.push(leg);
       const arm = new T.Group(); arm.position.set(s * (jacked ? 0.86 : obese ? 0.78 : slim ? (o.him ? 0.37 : 0.38) : 0.46), 1.5, 0); up.add(arm);
@@ -420,7 +420,6 @@ const World = (function () {
       const ap = (R0 + (R1 - R0) * (0.58 / H)) * Math.cos(PI / 12) + 0.006, b = bx(sl, 0.035, 0.74, 0.02, '#8F9795', 0, 0.58, ap); b.rotation.x = -Math.atan((R1 - R0) / H); b.castShadow = false;
     }
     bx(binG, 0.3, 0.06, 0.22, '#E9E1CE', 0.02, 1.0, 0.05).rotation.z = 0.2; bx(binG, 0.22, 0.2, 0.2, '#D7CDB4', -0.12, 1.12, -0.02).rotation.z = 0.4; bx(binG, 0.16, 0.14, 0.16, '#E9E1CE', 0.14, 1.1, -0.1).rotation.y = 0.6;
-    binGlow = new T.Mesh(new T.CylinderGeometry(1.9, 1.9, 0.02, 16), new T.MeshBasicMaterial({ color: 0x7ED321, transparent: true, opacity: 0.0, depthWrite: false })); binGlow.position.y = 0.04; binGlow.userData.bin = true; binG.add(binGlow);
     // bacteria: little cartoon rods and cocci with legs and eyes that walk on the floor and up and down the wall
     const cols = ['#8BE04A', '#B26BE0', '#E8C23A', '#38C9B0', '#F0804B'];
     for (let i = 0; i < 14; i++) {
@@ -2166,7 +2165,7 @@ const World = (function () {
   /* ---- microbe lab: a separate room with a low-poly man (brain and leg bone popping out) and labeled petri dishes ---- */
   let micPaperMap = {}, micPaperG = null, micPaperHot = null, micRig = null, micLay = null, manBed = null, micV = null, micG = null, micOn = false, micHid = [], micSaved = null, micManG = null, micPinMap = {}, micDishMap = {}, micSel = null, micHoverId = null, micHot = null, micLabEl = null, micBench = null, micTt = 0;
   const micItems = [];
-  const MICPOS = { cns: [0, 2.3, 0.0], ear: [0.37, 1.86, 0.02], mouth: [0, 1.68, 0.42], upper: [0, 1.5, 0.41], lower: [-0.14, 1.37, 0.48], heart: [0.07, 1.2, 0.52], intra: [-0.1, 1.03, 0.46], gi: [0.11, 1.0, 0.46], uti: [0, 0.74, 0.44], sti: [0.17, 0.66, 0.34], skin: [0.62, 1.05, 0.12], bone: [0.15, 0.47, 0.2] };
+  const MICPOS = { cns: [0, 2.3, 0.0], ear: [0.37, 1.86, 0.02], mouth: [0, 1.68, 0.42], upper: [0, 1.5, 0.53], lower: [-0.14, 1.37, 0.6], heart: [0.07, 1.2, 0.64], intra: [-0.1, 1.03, 0.58], gi: [0.11, 1.0, 0.5], uti: [0, 0.74, 0.5], sti: [0.17, 0.66, 0.34], skin: [0.62, 1.05, 0.12], bone: [-0.15, 0.4, 0.06] };
   function micText(txt, w, h, bg, fg) {
     const cv = document.createElement('canvas'); cv.width = w; cv.height = h; const c = cv.getContext('2d');
     if (c) { c.fillStyle = bg; const r = h / 2; c.beginPath(); c.moveTo(r, 4); c.lineTo(w - r, 4); c.arc(w - r, h / 2, h / 2 - 4, -PI / 2, PI / 2); c.lineTo(r, h - 4); c.arc(r, h / 2, h / 2 - 4, PI / 2, PI * 1.5); c.fill(); c.lineWidth = 5; c.strokeStyle = '#10292C'; c.stroke(); c.fillStyle = fg; c.textAlign = 'center'; c.textBaseline = 'middle'; let fs = h * 0.5; c.font = '800 ' + fs + 'px sans-serif'; while (c.measureText(txt).width > w - h && fs > 16) { fs -= 2; c.font = '800 ' + fs + 'px sans-serif'; } c.fillText(txt, w / 2, h / 2 + 2); }
@@ -2184,7 +2183,13 @@ const World = (function () {
     for (let i = 0; i < 5; i++) { const tx = -3.6 + i * 1.8; cy(g, 0.14, 0.14, 0.6, 8, ['#8BE04A', '#B26BE0', '#E8C23A', '#38C9B0', '#F0804B'][i], tx, 1.64, -7.1, null, { transparent: true, opacity: 0.8 }); cy(g, 0.17, 0.17, 0.06, 8, '#6B7F85', tx, 1.97, -7.1); }
     const mc = bx(g, 0.5, 0.9, 0.5, '#2A3B4D', 4.1, 1.8, -7.1); cy(g, 0.12, 0.12, 0.5, 8, '#2A3B4D', 4.1, 2.4, -7.1).rotation.x = 0.4; cy(g, 0.3, 0.3, 0.06, 10, '#6B7F85', 4.1, 1.38, -7.1);
     const sg = new T.Mesh(new T.PlaneGeometry(5.6, 1.1), new T.MeshBasicMaterial({ map: micText('MICROBE LAB', 640, 126, '#F4F9F9', '#07514B') })); sg.position.set(0, 6.6, -8.15); g.add(sg);
-    micBench = new T.Group(); micBench.visible = false; g.add(micBench); bx(micBench, 11, 0.5, 7.4, '#1E5C68', 0, 0.25, 0.0); bx(micBench, 11.2, 0.08, 7.6, '#2E8294', 0, 0.54, 0.0);
+    micBench = new T.Group(); micBench.visible = false; g.add(micBench); bx(micBench, 11, 0.5, 7.4, '#1E5C68', 0, 0.25, 0.0); bx(micBench, 11.2, 0.08, 7.6, '#D8CCAA', 0, 0.54, 0.0);
+    { const cv = document.createElement('canvas'); cv.width = 1024; cv.height = 700; const c = cv.getContext('2d');
+      if (c) { c.fillStyle = '#E9DFC2'; c.fillRect(0, 0, 1024, 700); let sd = 7; const rn = () => { sd = (sd * 16807) % 2147483647; return sd / 2147483647; };
+        for (let i = 0; i < 2600; i++) { c.fillStyle = rn() < 0.5 ? 'rgba(170,150,105,0.16)' : 'rgba(255,252,236,0.4)'; c.fillRect(rn() * 1024, rn() * 700, 1 + rn() * 5, 1 + rn() * 1.6); }
+        c.strokeStyle = 'rgba(120,150,170,0.28)'; c.lineWidth = 1.5; for (let x = 0; x <= 1024; x += 46) { c.beginPath(); c.moveTo(x, 0); c.lineTo(x, 700); c.stroke(); } for (let y = 0; y <= 700; y += 46) { c.beginPath(); c.moveTo(0, y); c.lineTo(1024, y); c.stroke(); }
+        c.strokeStyle = 'rgba(150,125,80,0.6)'; c.lineWidth = 8; c.strokeRect(4, 4, 1016, 692); }
+      const dt = new T.CanvasTexture(cv), dm = new T.Mesh(new T.PlaneGeometry(11.1, 7.5), new T.MeshBasicMaterial({ map: dt })); dm.rotation.x = -PI / 2; dm.position.set(0, 0.585, 0); micBench.add(dm); }
     // a hospital bed, and the man lying on his back on it: head lid lifted to show the brain, thigh opened to show the femur from hip to knee
     const rig = new T.Group(); rig.scale.set(1.55, 1.55, 1.55); rig.position.set(0, 0, 0.2); g.add(rig); micRig = rig;
     manBed = new T.Group(); rig.add(manBed);
@@ -2193,30 +2198,35 @@ const World = (function () {
     [[-2.6, -1.05], [-2.6, 1.05], [2.6, -1.05], [2.6, 1.05]].forEach(q => { cy(manBed, 0.07, 0.07, 1.2, 6, dark, q[0], 0.62, q[1]); cy(manBed, 0.16, 0.16, 0.14, 8, '#2A3B4D', q[0], 0.08, q[1]); });
     bx(manBed, 0.16, 1.5, 2.4, frame, -3.0, 1.9, 0); bx(manBed, 0.16, 0.9, 2.4, frame, 3.0, 1.65, 0);
     [-1.2, 0.4, 1.4].forEach(x => bx(manBed, 0.08, 0.5, 0.08, dark, x, 2.1, -1.22)); bx(manBed, 3.2, 0.07, 0.07, dark, 0.1, 2.28, -1.22); bx(manBed, 3.2, 0.07, 0.07, dark, 0.1, 1.98, -1.22);
-    bx(manBed, 1.2, 0.28, 1.5, '#FFFFFF', -2.3, 1.93, 0); bx(manBed, 0.07, 0.5, 1.2, '#6FD0C8', -2.4, 2.4, -1.3);
+    bx(manBed, 1.2, 0.28, 1.5, '#FFFFFF', -2.3, 1.93, 0);
     const lay = new T.Group(); lay.rotation.y = PI / 2; lay.position.set(2.15, 2.5, 0); rig.add(lay); micLay = lay;
     micManG = new T.Group(); micManG.scale.set(2.0, 2.0, 2.0); micManG.rotation.x = -PI / 2; lay.add(micManG);
     const man = person(5, false, false, false, undefined, { skin: '#F2C9A5', hair: '#6B4A2E', shirt: '#2BB5A5', hairStyle: 8, gender: 'm', scrub: '#3F5F8C', tag: { micMan: true }, openHead: true }); micManG.add(man); micManG.userData.micMan = true;
     const P = man.userData.P, hd = P && P.head;
     if (hd) hd.traverse(o => { if (o.userData && o.userData.micMan) o.userData.micSite = 'cns'; });
-    // exposed femur: an opened strip of thigh with the bone from the hip joint (ball) down to the knee
-    const bone = new T.Group(); bone.position.set(0.15, 0, 0.115); micManG.add(bone);
-    const flesh = mat('#8E2B2B'), muscle = mat('#C4463B'), bmat = mat('#F4F0E2'), kmat = mat('#E8E2CE');
-    const strip = new T.Mesh(new T.BoxGeometry(0.15, 0.46, 0.03), flesh); strip.position.set(0, 0.46, 0.012); bone.add(strip);
-    [-1, 1].forEach(s => { const m = new T.Mesh(new T.BoxGeometry(0.035, 0.5, 0.05), muscle); m.position.set(s * 0.085, 0.46, 0.02); bone.add(m); });
-    const shaft = new T.Mesh(new T.CylinderGeometry(0.03, 0.038, 0.36, 8), bmat); shaft.position.set(0, 0.47, 0.045); bone.add(shaft);
-    const head = new T.Mesh(new T.IcosahedronGeometry(0.06, 1), bmat); head.position.set(-0.02, 0.68, 0.045); bone.add(head);
-    const neck = new T.Mesh(new T.CylinderGeometry(0.026, 0.03, 0.1, 6), bmat); neck.position.set(-0.01, 0.645, 0.045); neck.rotation.z = 0.5; bone.add(neck);
-    const trochanter = new T.Mesh(new T.IcosahedronGeometry(0.04, 0), kmat); trochanter.position.set(0.04, 0.63, 0.045); bone.add(trochanter);
-    [-1, 1].forEach(s => { const k = new T.Mesh(new T.IcosahedronGeometry(0.048, 1), kmat); k.position.set(s * 0.03, 0.28, 0.05); bone.add(k); });
+    // the near leg is bone only: pants, thigh, calf and shoe are hidden and one connected skeleton (hip ball, femur, knee, tibia, foot) shows instead
+    const bleg = P && P.legs && P.legs.find(l => l.position.x < 0);
+    if (bleg) bleg.children.forEach(c => { c.visible = false; });
+    const bone = new T.Group(); bone.position.set(-0.15, 0.68, 0.0); micManG.add(bone);
+    micOrg = {};
+    const bmk = (geo, c, x, y, z, rz, sx, sy, sz) => { const m = new T.Mesh(geo, new T.MeshStandardMaterial({ color: new T.Color(c), flatShading: true, roughness: 0.6, emissive: new T.Color(0x000000) })); m.position.set(x, y, z); if (rz) m.rotation.z = rz; m.scale.set(sx || 1, sy || 1, sz || 1); bone.add(m); (micOrg.bone = micOrg.bone || []).push(m); return m; };
+    const BC = '#F4F0E2', KC = '#E8E2CE';
+    bmk(new T.IcosahedronGeometry(0.065, 1), BC, -0.03, -0.015, 0);
+    bmk(new T.CylinderGeometry(0.028, 0.032, 0.1, 6), BC, -0.01, -0.05, 0, 0.5);
+    bmk(new T.IcosahedronGeometry(0.042, 0), KC, 0.045, -0.06, 0);
+    bmk(new T.CylinderGeometry(0.036, 0.044, 0.3, 8), BC, 0, -0.2, 0);
+    [-1, 1].forEach(s2 => bmk(new T.IcosahedronGeometry(0.05, 1), KC, s2 * 0.03, -0.37, 0));
+    bmk(new T.CylinderGeometry(0.03, 0.036, 0.27, 8), BC, 0, -0.5, 0);
+    bmk(new T.CylinderGeometry(0.014, 0.016, 0.25, 6), BC, 0.045, -0.5, 0);
+    bmk(new T.IcosahedronGeometry(0.04, 1), KC, 0, -0.65, 0);
+    bmk(new T.BoxGeometry(0.1, 0.035, 0.2), BC, 0, -0.68, 0.06);
     bone.userData.micSite = 'bone'; bone.traverse(o => { o.userData.micSite = 'bone'; });
     // open chest and belly: a cut window with the organs sitting in it (no genitalia); each organ is clickable for its site
-    const cav = new T.Group(); micManG.add(cav);
+    const cav = new T.Group(); cav.position.z = 0.12; micManG.add(cav);
     const cb = (w, h, d, c, x, y, z) => { const m = new T.Mesh(new T.BoxGeometry(w, h, d), mat(c)); m.position.set(x, y, z); cav.add(m); return m; };
     cb(0.54, 0.9, 0.03, '#5A1E22', 0, 1.1, 0.305); cb(0.58, 0.04, 0.05, '#B84A44', 0, 1.56, 0.31); cb(0.58, 0.04, 0.05, '#B84A44', 0, 0.64, 0.31); cb(0.04, 0.9, 0.05, '#B84A44', -0.28, 1.1, 0.31); cb(0.04, 0.9, 0.05, '#B84A44', 0.28, 1.1, 0.31);
     [1.46, 1.38, 1.3].forEach(y => cb(0.5, 0.022, 0.03, '#F1E8D4', 0, y, 0.325));
     cb(0.03, 0.2, 0.03, '#F1E8D4', 0, 1.35, 0.325);
-    micOrg = {};
     const org = (id, geo, c, x, y, z, sx, sy, sz, rz) => { const m = new T.Mesh(geo, new T.MeshStandardMaterial({ color: new T.Color(c), flatShading: true, roughness: 0.55, emissive: new T.Color(0x000000) })); m.position.set(x, y, z); m.scale.set(sx || 1, sy || 1, sz || 1); if (rz) m.rotation.z = rz; cav.add(m); m.userData.micSite = id; (micOrg[id] = micOrg[id] || []).push(m); return m; };
     org('upper', new T.CylinderGeometry(0.024, 0.024, 0.2, 7), '#EBD8C2', 0, 1.47, 0.36); org('upper', new T.CylinderGeometry(0.016, 0.016, 0.12, 6), '#EBD8C2', -0.04, 1.4, 0.36, 1, 1, 1, 0.8); org('upper', new T.CylinderGeometry(0.016, 0.016, 0.12, 6), '#EBD8C2', 0.04, 1.4, 0.36, 1, 1, 1, -0.8);
     org('lower', new T.IcosahedronGeometry(0.11, 1), '#E58A9A', -0.13, 1.32, 0.37, 0.85, 1.5, 0.7); org('lower', new T.IcosahedronGeometry(0.11, 1), '#E58A9A', 0.14, 1.32, 0.37, 0.8, 1.5, 0.7);
@@ -2281,9 +2291,10 @@ const World = (function () {
     c.clearRect(0, 0, W, H);
     const lab = s.kind === 'label', note = s.kind === 'note';
     if (note) { c.fillStyle = 'rgba(255,255,255,0.75)'; c.fillRect(0, 0, W, H); c.fillStyle = '#4A5E63'; c.textAlign = 'center'; c.textBaseline = 'middle'; c.font = 'italic 700 ' + Math.round(H * 0.3) + 'px sans-serif'; const ws = String(s.title).split(' / '); ws.forEach((t, i) => c.fillText(t, W / 2, H / 2 + (i - (ws.length - 1) / 2) * H * 0.36)); p.tex.needsUpdate = true; return; }
-    c.fillStyle = lab ? '#10292C' : s.off ? '#CBD5D8' : '#FBF7EA'; c.fillRect(0, 0, W, H);
+    c.fillStyle = lab ? '#10292C' : s.off ? '#CBD5D8' : '#FFFDF5'; c.fillRect(0, 0, W, H);
+    if (!lab && !s.off && !s.rows) { c.strokeStyle = '#D3E2EA'; c.lineWidth = 2; for (let y = Math.round(H * 0.24); y < H - 8; y += 30) { c.beginPath(); c.moveTo(8, y); c.lineTo(W - 8, y); c.stroke(); } c.strokeStyle = '#EBA9A5'; c.beginPath(); c.moveTo(34, 0); c.lineTo(34, H); c.stroke(); }
     if (st.flash) { c.fillStyle = st.flash === 'ok' ? 'rgba(80,210,120,0.45)' : 'rgba(235,70,60,0.5)'; c.fillRect(0, 0, W, H); }
-    c.lineWidth = st.hot ? 12 : 6; c.strokeStyle = st.hot ? '#0E9A8E' : '#10292C'; c.strokeRect(c.lineWidth / 2, c.lineWidth / 2, W - c.lineWidth, H - c.lineWidth);
+    c.lineWidth = st.hot ? 12 : lab ? 6 : 4; c.strokeStyle = st.hot ? '#0E9A8E' : lab ? '#10292C' : '#BDB39B'; c.strokeRect(c.lineWidth / 2, c.lineWidth / 2, W - c.lineWidth, H - c.lineWidth);
     const fit = (t, w, fs, wt) => { let f = fs; c.font = (wt || 800) + ' ' + f + 'px sans-serif'; while (c.measureText(t).width > w && f > 12) { f -= 2; c.font = (wt || 800) + ' ' + f + 'px sans-serif'; } return f; };
     c.textAlign = 'center'; c.textBaseline = 'middle';
     if (lab) { c.fillStyle = '#FFFFFF'; fit(s.title, W - 24, Math.round(H * 0.5)); c.fillText(s.title, W / 2, H / 2 + 2); p.tex.needsUpdate = true; return; }
@@ -2306,20 +2317,46 @@ const World = (function () {
     p.tex.needsUpdate = true;
   }
   function micClearPapers() { if (micPaperG) { const i = micItems.indexOf(micPaperG); if (i >= 0) micItems.splice(i, 1); micBench.remove(micPaperG); } micPaperG = null; micPaperMap = {}; micPaperHot = null; }
+  /* small 3D logos that stand behind a paper: a clock (time), a beaker with a rising arrow (concentration), a kidney with a no sign (not renally adjusted) */
+  function micIcon(kind) {
+    const g = new T.Group(), M = (c, e) => new T.MeshStandardMaterial({ color: new T.Color(c), flatShading: true, roughness: 0.5, emissive: new T.Color(e || 0x000000) });
+    const add = (geo, c, x, y, z, rx, ry, rz, e) => { const m = new T.Mesh(geo, M(c, e)); m.position.set(x, y, z); m.rotation.x = rx || 0; m.rotation.y = ry || 0; m.rotation.z = rz || 0; g.add(m); return m; };
+    if (kind === 'clock') {
+      add(new T.CylinderGeometry(0.62, 0.62, 0.16, 20), '#FFFFFF', 0, 0, 0, PI / 2);
+      add(new T.TorusGeometry(0.62, 0.08, 6, 20), '#F28A1E', 0, 0, 0);
+      [[0, 0.5], [0.5, 0], [0, -0.5], [-0.5, 0]].forEach(q => add(new T.BoxGeometry(0.06, 0.06, 0.04), '#10292C', q[0], q[1], 0.1));
+      add(new T.BoxGeometry(0.06, 0.4, 0.04), '#10292C', 0, 0.18, 0.11); const mh = add(new T.BoxGeometry(0.05, 0.28, 0.04), '#C0392B', 0.1, -0.02, 0.12, 0, 0, -1.0);
+      add(new T.IcosahedronGeometry(0.06, 0), '#10292C', 0, 0, 0.12);
+      [-1, 1].forEach(s2 => add(new T.SphereGeometry(0.13, 7, 5), '#F28A1E', s2 * 0.5, 0.58, 0, 0, 0, 0));
+    } else if (kind === 'conc') {
+      add(new T.CylinderGeometry(0.4, 0.4, 0.95, 12, 1, true), '#CFEFF5', 0, 0, 0);
+      add(new T.CylinderGeometry(0.38, 0.38, 0.62, 12), '#F2B233', 0, -0.16, 0);
+      add(new T.CylinderGeometry(0.43, 0.43, 0.05, 12), '#9DBFC8', 0, 0.48, 0);
+      add(new T.CylinderGeometry(0.1, 0.1, 0.5, 8), '#D93A2F', 0.0, 0.85, 0.0); add(new T.ConeGeometry(0.26, 0.34, 8), '#D93A2F', 0, 1.3, 0);
+      [[-0.1, -0.2], [0.14, 0.0], [-0.04, 0.12]].forEach(q => add(new T.IcosahedronGeometry(0.05, 0), '#FFFFFF', q[0], q[1], 0.38));
+    } else if (kind === 'kidney') {
+      add(new T.TorusGeometry(0.32, 0.2, 7, 12, PI * 1.45), '#B5473C', 0, 0, 0, 0, 0, 0.9);
+      add(new T.CylinderGeometry(0.05, 0.05, 0.3, 6), '#E58A7E', -0.08, -0.38, 0, 0, 0, 0.3);
+      add(new T.TorusGeometry(0.72, 0.07, 6, 20), '#D93A2F', 0, 0, 0.05); add(new T.BoxGeometry(1.4, 0.1, 0.07), '#D93A2F', 0, 0, 0.08, 0, 0, -0.78);
+    }
+    g.traverse(o => { o.castShadow = false; });
+    return g;
+  }
   api.micPapers = function (spec) {
     if (!micG) return; micClearPapers(); if (!spec || !spec.nodes || !spec.nodes.length) { micItemsFix(); return; }
     const G = new T.Group(); micPaperG = G; micBench.add(G); micItems.push(G);
     (spec.edges || []).forEach(e => {
-      const zm = (e[1] + e[3]) / 2, seg = (x1, z1, x2, z2) => { const w = Math.abs(x2 - x1) + 0.05, d = Math.abs(z2 - z1) + 0.05; bx(G, w, 0.03, d, '#E8F4F6', (x1 + x2) / 2, 0.58, (z1 + z2) / 2); };
+      const zm = (e[1] + e[3]) / 2, seg = (x1, z1, x2, z2) => { const w = Math.abs(x2 - x1) + 0.05, d = Math.abs(z2 - z1) + 0.05; bx(G, w, 0.03, d, '#5C5038', (x1 + x2) / 2, 0.6, (z1 + z2) / 2); };
       seg(e[0], e[1], e[0], zm); seg(e[0], zm, e[2], zm); seg(e[2], zm, e[2], e[3]);
     });
     spec.nodes.forEach((n, i) => {
       const W = Math.round(n.w * 150), H = Math.round(n.h * 150), cv = document.createElement('canvas'); cv.width = W; cv.height = H;
-      const tex = new T.CanvasTexture(cv), grp = new T.Group(); grp.position.set(n.x, 0.62, n.z); G.add(grp);
+      const tex = new T.CanvasTexture(cv), grp = new T.Group(); grp.position.set(n.x, 0.62, n.z); grp.rotation.y = n.kind === 'label' ? 0 : (((i * 37) % 11) - 5) * 0.006; G.add(grp);
       const sh = new T.Mesh(new T.PlaneGeometry(n.w + 0.1, n.h + 0.1), new T.MeshBasicMaterial({ color: 0x0B3038, transparent: true, opacity: 0.45 })); sh.rotation.x = -PI / 2; sh.position.set(0.05, -0.03, 0.06); if (n.kind !== 'note') grp.add(sh);
       const m = new T.Mesh(new T.PlaneGeometry(n.w, n.h), new T.MeshBasicMaterial({ map: tex, transparent: n.kind === 'note' })); m.rotation.x = -PI / 2; grp.add(m);
       const p = { id: n.id, spec: n, st: {}, cv, tex, g: grp, mesh: m, t: -i * 0.035, flash: 0 };
       if (n.kind !== 'label' && n.kind !== 'note' && !n.off) m.userData.micPaper = n.id;
+      if (n.icon) { const ic = micIcon(n.icon); ic.position.set(0, 0.8, -n.h / 2 - 0.1); grp.add(ic); p.icon = ic; }
       grp.scale.set(0.001, 0.001, 0.001); micPaperMap[n.id] = p; micPaperDraw(p);
     });
     micItemsFix();
@@ -2366,6 +2403,7 @@ const World = (function () {
     scene.children.forEach(c => { if (c !== micG && c !== hemi && c !== sun && c.visible && !(c.userData && c.userData.fx)) { c.visible = false; if (micHid.indexOf(c) < 0) micHid.push(c); } });
     Object.keys(micPinMap).forEach(id => { const m = micPinMap[id], on = id === micSel, hv = id === micHoverId, s = (on ? 1.5 + Math.sin(micTt * 6) * 0.15 : hv ? 1.3 : 1) * (m.ster ? 1 : 1); m.g.scale.set(s, s, s); if (on) m.dot.material.color.setHex(0xE04F3A); if (m.flash > 0) { m.flash -= dt; m.dot.material.color.setHex(m.flashOk ? 0x2FD07F : 0xE23B2E); m.g.scale.set(s * 1.6, s * 1.6, s * 1.6); } });
     Object.keys(micPaperMap).forEach(id => { const p = micPaperMap[id]; if (p.t < 0.4) { p.t += dt; const k = Math.max(0.001, Math.min(1, p.t / 0.35)), e = 1 - Math.pow(1 - k, 3) * (1 + (1 - k) * 0.4); p.g.scale.set(e, e, e); } if (p.flash > 0) { p.flash -= dt; if (p.flash <= 0) api.micPaperSet(id, { flash: null }); } });
+    Object.keys(micPaperMap).forEach(k => { const ic = micPaperMap[k].icon; if (ic) { ic.rotation.y = Math.sin(micTt * 1.1) * 0.55; ic.position.y = 0.8 + Math.sin(micTt * 2) * 0.05; } });
     Object.keys(micOrg).forEach(id => { const k = id === micSel ? 0.5 + Math.sin(micTt * 6) * 0.15 : id === micHoverId ? 0.35 : 0; micOrg[id].forEach(m => m.material.emissive.setRGB(k * 0.6, k * 0.5, k * 0.2)); });
     Object.keys(micDishMap).forEach(id => { const d = micDishMap[id]; d.ring.visible = micHot === id; d.g.scale.y = 1; if (d.flash > 0) { d.flash -= dt; const k = Math.max(0, d.flash) / 0.7; d.agar.material.emissive.setRGB(d.flashOk ? 0.1 * k : 0.55 * k, d.flashOk ? 0.5 * k : 0.05 * k, d.flashOk ? 0.1 * k : 0.05 * k); } });
     if (micLabEl) {

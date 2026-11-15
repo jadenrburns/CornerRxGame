@@ -85,7 +85,7 @@ const { chromium } = require('playwright');
     console.log('skin cover', JSON.stringify(sk)); if (!sk.aur || !sk.epi || !sk.pyo || !sk.vir || sk.no || !sk.fill) fail.push('skin cover ' + JSON.stringify(sk)); }
   // sort rounds (labeled dishes): every drug has a valid dish; wrong drops are misses; all right earns a star
   await clickSel('[data-act="mic-menu"]'); await clickSel('[data-act="mic-mode"][data-v="drag"]');
-  for (const sid of ['sort-man', 'sort-dis', 'sort-iv', 'sort-po', 'sort-all', 'sort-pk', 'sort-fam', 'sort-gp', 'sort-gn']) {
+  for (const sid of ['sort-man', 'sort-dis', 'sort-iv', 'sort-po', 'sort-all', 'sort-pk', 'sort-fam', 'sort-gp', 'sort-gn', 'sort-gb']) {
     const info = await p.evaluate(sid => { const d = window.__rxDbg().micDbg(); d.startSort(sid); const R = d.R; const wrongDish = R.dishes.find(x => R.chips[0].valid.indexOf(x.id) < 0); return { n: R.chips.length, noValid: R.chips.filter(c => !c.valid.length).length, dishes: R.dishes.length, wrong: wrongDish && wrongDish.id }; }, sid);
     if (info.noValid || info.n < 6) fail.push('sort chips ' + sid + ' ' + JSON.stringify(info));
     if (info.wrong) { await p.evaluate(w => { const d = window.__rxDbg().micDbg(); d.drop(0, w); }, info.wrong); const mm = await p.evaluate(() => window.__rxDbg().micDbg().R.mist); if (mm !== 1) fail.push('sort miss ' + sid); }
@@ -101,7 +101,7 @@ const { chromium } = require('playwright');
   const ids = await p.evaluate(() => MICSETS.reduce((a, s) => a.concat(s.groups.map(g => [s.id, g.id, g.items.length])), []));
   for (const mode of ['drag', 'fill']) {
     await clickSel('[data-act="mic-menu"]'); await clickSel('[data-act="mic-mode"][data-v="' + mode + '"]');
-    for (const [sid, gid, cnt] of ids) {
+    for (const [sid, gid, cnt] of ids) { if (sid === 'gram') continue;
       await clickSel('[data-act="mic-menu"]'); await clickSel('[data-act="mic-set"][data-v="' + sid + '"]'); if (sid === 'body') await p.evaluate(g => { window.__rxDbg().micDbg().sel(g); }, gid); await clickSel('[data-act="mic-go"][data-v="' + gid + '"]');
       const got = await p.evaluate(m => { const R = window.__rxDbg().micDbg().R; return m === 'drag' ? [R.slots.length, document.querySelectorAll('.petri').length] : [R.vals.length, 0]; }, mode);
       if (got[0] !== cnt) fail.push(mode + ' ' + gid + ' count ' + got[0] + '/' + cnt);

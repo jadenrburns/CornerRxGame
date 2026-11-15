@@ -6,6 +6,6 @@ await p.addInitScript(()=>{localStorage.setItem('cornerRx.v1',JSON.stringify({me
 await p.goto('file://'+process.cwd()+'/corner-rx.html?noconf=1');await p.waitForTimeout(3500);
 await p.evaluate(()=>document.querySelectorAll('.tour,.unlock').forEach(e=>e.remove()));
 await p.evaluate(()=>{document.querySelector('#menu [data-act="mic"]').click()});await p.waitForTimeout(1500);
-await p.evaluate(()=>{World.devCam(0.2,3.0,0.2,0.0,0.6,6)});await p.waitForTimeout(1500);await p.screenshot({path:process.argv[2]+'/chest.png'});
+await p.evaluate(()=>{World.devCam(0.2,3.0,0.2,0.0,0.9,11)});await p.waitForTimeout(1500);await p.screenshot({path:process.argv[2]+'/chest.png'});
 const r=await p.evaluate(()=>{const o={};for(let y=60;y<740;y+=4)for(let x=20;x<700;x+=4){const id=World.micSiteAt(x,y);if(id)o[id]=(o[id]||0)+1}return o});console.log(JSON.stringify(r));
 console.log('errs',JSON.stringify(errs));await b.close()})();
