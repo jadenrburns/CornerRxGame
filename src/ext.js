@@ -733,17 +733,40 @@
     renderStats(); if (view === 'awards') renderPanel();
   }
   /* ---------------- lost pills: vial, tablet buff, capsule cosmetics ---------------- */
-  const COSM = [
-    ['face', 'mustache', 'Mustache', '🥸'], ['face', 'handlebar', 'Handlebar mustache', '🤵'], ['face', 'goatee', 'Goatee', '🧔'], ['face', 'beard', 'Full beard', '🧔‍♂️'], ['face', 'soulpatch', 'Soul patch', '😏'], ['face', 'chops', 'Mutton chops', '🤠'],
-    ['hat', 'beanie', 'Beanie', '🧶'], ['hat', 'tophat', 'Top hat', '🎩'], ['hat', 'cowboy', 'Cowboy hat', '🤠'], ['hat', 'party', 'Party hat', '🥳'], ['hat', 'crown', 'Gold crown', '👑'], ['hat', 'chef', 'Chef hat', '👨‍🍳'], ['hat', 'propeller', 'Propeller cap', '🚁'], ['hat', 'wizard', 'Wizard hat', '🧙'],
-    ['eyes', 'monocle', 'Monocle', '🧐'], ['eyes', 'eyepatch', 'Eyepatch', '🏴‍☠️'], ['extra', 'bowtie', 'Bow tie', '🎀'], ['extra', 'clownnose', 'Clown nose', '🤡'], ['extra', 'headphones', 'Headphones', '🎧'], ['extra', 'earring', 'Gold earrings', '💎'], ['eyes', 'goggles', 'Goggles', '🥽']
-  ];
-  const COSM_SLOT = { face: 'Facial hair', eyes: 'Glasses', hat: 'Hats', extra: 'Extras' };
-  const STD_EYES = [['eyes', 'round', 'Round glasses'], ['eyes', 'square', 'Square glasses']];
-  const SHOP_COS = SHOP_CYBER.map(c => [c[0], c[1], c[2], c[3]]);
-  const cosmById = id => COSM.find(c => c[1] === id) || STD_EYES.find(c => c[1] === id) || SHOP_COS.find(c => c[1] === id);
-  const cosmHave = id => (S.cosm || []).indexOf(id) >= 0 || STD_EYES.some(c => c[1] === id) || ((S.store || {}).own || []).indexOf(id) >= 0;
-  function cosmSpec() { const on = S.cosmOn || {}, o = { face: '', eyes: '', hat: '', extra: '', cyber: '' }; Object.keys(on).forEach(k => { const id = on[k], c = id && cosmHave(id) ? cosmById(id) : null; if (c) o[c[0]] = id; }); return o; }
+  /* gear helpers (the item table is GEAR in gear.js) */
+  const COSM_SLOTS = ['face', 'eyes', 'hat', 'neck', 'coat', 'hands', 'extra', 'cyber'];
+  const gearById = id => GEAR_BY[id] || null;
+  const gearHave = id => { const g = gearById(id); if (!g) return false;
+    if (g.src === 'start') return true; if (g.src === 'rank') return (S.acc || 0) >= g.rank; if (g.src === 'shop') return ((S.store || {}).own || []).indexOf(id) >= 0;
+    if (g.slot === 'pet') return ((S.awards || {}).pets || []).indexOf(g.kind) >= 0; return (S.cosm || []).indexOf(id) >= 0; };
+  const gearOn = id => { const g = gearById(id); if (!g || !gearHave(id)) return false; if (g.slot === 'pet') return true; if (g.slot === 'hair') return S.me.hair === g.hv; return ((S.cosmOn || {})[g.slot]) === id; };
+  const gearSrcText = g => g.src === 'start' ? 'Everyone starts with it' : g.src === 'shop' ? 'Shop, ' + money(g.price) : g.src === 'rank' ? 'Rank: ' + RANKS[g.rank][1] : g.src === 'award' ? 'Mastery award (see Awards)' : RAR[g.r].n + ' capsule';
+  const buffText2 = b => { b = b || {}; const o = []; if (b.pay) o.push('+' + Math.round(b.pay * 100) + '% pay'); if (b.tech) o.push('+' + Math.round(b.tech * 100) + '% tech tips'); if (b.time) o.push('+' + b.time + ' s on the timer'); if (b.rep) o.push('+' + b.rep + ' reputation per fill'); if (b.pills) o.push('+' + Math.round(b.pills * 100) + '% lost pills'); if (b.streak) o.push('+' + b.streak + ' streak cap'); return o.join(', '); };
+  /* total bonus from everything equipped plus every pet you own */
+  function gearBuff() {
+    const t = { pay: 0, tech: 0, time: 0, rep: 0, pills: 0, streak: 0 };
+    GEAR.forEach(g => { if (gearOn(g.id)) Object.keys(g.buff || {}).forEach(k => { t[k] += g.buff[k]; }); });
+    return t;
+  }
+  /* what the 3D pharmacist wears: rank gear travels as accOn (world.js draws it by rank number), the rest as cosm by slot */
+  function cosmSpec() { const on = S.cosmOn || {}, o = {}; COSM_SLOTS.forEach(k => { o[k] = ''; }); Object.keys(on).forEach(k => { const id = on[k], g = id && gearHave(id) ? gearById(id) : null; if (g && g.slot === k && g.src !== 'rank' && g.slot !== 'pet' && g.slot !== 'hair') o[g.slot] = id; }); return o; }
+  function accOnList() { const out = []; GEAR.forEach(g => { if (g.src === 'rank' && gearOn(g.id)) out.push(g.rank); }); return out; }
+  /* older saves: rank gear used to be always on (minus S.accOff); put each unlocked piece into its slot once */
+  function gearMigrate() {
+    if (S.gearV >= 1) return; S.gearV = 1; S.cosmOn = S.cosmOn || {}; const off = S.accOff || [];
+    GEAR.forEach(g => { if (g.src === 'rank' && (S.acc || 0) >= g.rank && off.indexOf(g.rank) < 0 && !S.cosmOn[g.slot]) S.cosmOn[g.slot] = g.id; });
+    if (S.cosmOn.extra === 'bowtie') { if (!S.cosmOn.neck) S.cosmOn.neck = 'bowtie'; delete S.cosmOn.extra; } // bow tie moved to the neck slot
+    delete S.accOff;
+  }
+  /* capsule rarity: rolled when the pill is picked up, so the vial can show it */
+  function rollRarity(boost) { let r = Math.random() * 100; const keys = ['legendary', 'epic', 'rare', 'common']; for (const k of keys) { const w = RAR[k].w * (k === 'common' ? 1 : 1 + (boost || 0)); if (r < w) return k; r -= w; } return 'common'; }
+  const capsulePool = (r) => GEAR.filter(g => g.src === 'capsule' && g.r === r && !gearHave(g.id));
+  function capsulePick(r) { const order = { common: ['common', 'rare', 'epic', 'legendary'], rare: ['rare', 'common', 'epic', 'legendary'], epic: ['epic', 'rare', 'legendary', 'common'], legendary: ['legendary', 'epic', 'rare', 'common'] }[r] || ['common']; for (const k of order) { const pool = capsulePool(k); if (pool.length) return pick(pool); } return null; }
+  function gearGrant(g, equip) {
+    if (g.slot === 'pet') { S.awards.pets = S.awards.pets || []; if (S.awards.pets.indexOf(g.kind) < 0) S.awards.pets.push(g.kind); try { World.setAwards(worldAwards()); World.unlockPet(g.kind); } catch (e) { /* ignore */ } return; }
+    S.cosm = S.cosm || []; if (S.cosm.indexOf(g.id) < 0) S.cosm.push(g.id);
+    if (equip) { S.cosmOn = S.cosmOn || {}; if (g.slot === 'hair') S.me.hair = g.hv; else S.cosmOn[g.slot] = g.id; }
+  }
   const PNAME = { '#F4F4F0': 'white', '#F2A516': 'orange', '#E04F3A': 'red', '#4C7BD9': 'blue', '#2FAE66': 'green', '#F29BC1': 'pink', '#8A63C9': 'purple', '#7FD6E8': 'sky blue', '#F6E27A': 'yellow' };
   const PSHAPE = { disc: 'round tablet', oval: 'oval tablet', caplet: 'caplet tablet', sq: 'square tablet', two: 'two-tone capsule', band: 'banded capsule', gel: 'softgel capsule' };
   function pillName(p) { const c = PNAME[p.c] || 'colorful'; return (p.k === 'c' && p.s !== 'gel' && p.c2 && p.c2 !== p.c ? c + ' and ' + (PNAME[p.c2] || 'white') + ' ' : c + ' ') + (PSHAPE[p.s] || (p.k === 't' ? 'tablet' : 'capsule')); }
@@ -766,14 +789,14 @@
   }
   const pillOk = () => !focusOn() && !labOn() && !learning() && view === 'q' && !document.querySelector('.vdlg');
   function onPill(sp) {
-    S.vial = S.vial || []; S.vial.push({ k: sp.k, c: sp.c, c2: sp.c2 || '', s: sp.s }); if (S.vial.length > 24) S.vial.shift();
+    S.vial = S.vial || []; const ent = { k: sp.k, c: sp.c, c2: sp.c2 || '', s: sp.s }; if (sp.k === 'c') ent.r = sp.r || rollRarity(); S.vial.push(ent); if (S.vial.length > 24) S.vial.shift();
     S.pillN = (S.pillN || 0) + 1; save(); vialSync(); SFX.play('ok');
-    toast('Added to the lost pills vial: ' + pillName(sp) + '.');
+    toast('Added to the lost pills vial: ' + pillName(sp) + (sp.k === 'c' && ent.r !== 'common' ? ' (it shimmers, a ' + RAR[ent.r].n.toLowerCase() + ' capsule).' : '.'));
   }
   /* tablet buff */
   const BUFF_MS = 90000; let buffUntil = 0, buffSlips = 0, buffTimer = null, buffEl = null;
   const buffOn = () => Date.now() < buffUntil;
-  const buffPay = () => (buffOn() ? 2 : 1) * blessMult() * (1 + (uniBuff().pay || 0));
+  const buffPay = () => (buffOn() ? 2 : 1) * blessMult() * (1 + (uniBuff().pay || 0) + gearBuff().pay);
   function buffKeep() { if (buffOn() && buffSlips > 0) { buffSlips--; return true; } return false; }
   function buffTick() {
     const left = buffUntil - Date.now();
@@ -821,40 +844,42 @@
   function vdraw() {
     if (!vdlg) return; const v = S.vial || [], sel = v[vSel];
     vdlg.innerHTML = '<div class="tourcard vcard" role="dialog" aria-modal="true" aria-labelledby="vtitle"><h3 id="vtitle">Lost pills vial</h3>' +
-      (v.length ? '<p>Pills that popped out of bottles around the pharmacy. Pick one to take.</p><div class="vgrid">' + v.map((p, i) => '<button type="button" class="vpill" data-i="' + i + '" aria-pressed="' + (i === vSel) + '" aria-label="' + esc(pillName(p)) + '">' + pillSvg(p, 40) + '</button>').join('') + '</div>' : '<p>Empty. Watch the shelves and other spots around the pharmacy for pills that pop out, then tap them to collect.</p>') +
-      (sel ? '<p class="vdesc"><b>' + esc(pillName(sel)) + '.</b> ' + (sel.k === 't' ? 'Tablets are rare and strong. For 90 seconds the screen warps and your pharmacist feels sharp: money ×2, streak bonus ×3, and two free slips that keep your streak.' : 'Capsules pop open to reveal a cosmetic: facial hair, a hat, or an accessory.') + '</p>' : '') +
+      (v.length ? '<p>Pills that popped out of bottles around the pharmacy. Pick one to take.</p><div class="vgrid">' + v.map((p, i) => '<button type="button" class="vpill' + (p.k === 'c' && p.r && p.r !== 'common' ? ' rar-' + p.r : '') + '" data-i="' + i + '" aria-pressed="' + (i === vSel) + '" aria-label="' + esc(pillName(p)) + (p.r && p.r !== 'common' ? ', ' + RAR[p.r].n.toLowerCase() : '') + '">' + pillSvg(p, 40) + '</button>').join('') + '</div>' : '<p>Empty. Watch the shelves and other spots around the pharmacy for pills that pop out, then tap them to collect.</p>') +
+      (sel ? '<p class="vdesc"><b>' + esc(pillName(sel)) + '.</b> ' + (sel.k === 't' ? 'Tablets are rare and strong. For 90 seconds the screen warps and your pharmacist feels sharp: money ×2, streak bonus ×3, and two free slips that keep your streak.' : (sel.r && sel.r !== 'common' ? 'This one shimmers: a <b>' + RAR[sel.r].n.toLowerCase() + '</b> capsule. ' : '') + 'Capsules pop open to reveal gear for your pharmacist (hats, glasses, coats, things to hold) or, if you are lucky, a new pet. Rarer capsules hold rarer gear with bigger bonuses.') + '</p>' : '') +
       '<div class="tourbtns">' + (sel ? '<button type="button" class="btn go" data-take>Take it</button>' : '') + '<button type="button" class="btn" data-close>Close</button></div></div>';
   }
   /* capsule reveal */
   function capsuleOpen(p) {
-    const left = COSM.filter(c => !cosmHave(c[1])), res = left.length ? pick(left) : null;
+    const tier = p.r || rollRarity(), res = capsulePick(tier), rr = res ? res.r : tier;
     vOpenAt = Date.now(); vBack = document.activeElement;
-    const el = document.createElement('div'); el.className = 'tour vdlg capdlg'; document.body.appendChild(el); vdlg = el;
+    const el = document.createElement('div'); el.className = 'tour vdlg capdlg rar-' + rr; document.body.appendChild(el); vdlg = el;
     document.addEventListener('keydown', vdlgKey, true);
     const c1 = p.c, c2 = p.c2 || p.c, st = 'stroke="#1d2b2e" stroke-width="2.4"';
-    el.innerHTML = '<div class="tourcard vcard" role="dialog" aria-modal="true" aria-labelledby="ctitle"><h3 id="ctitle">The capsule is opening...</h3><div class="capstage"><svg viewBox="0 0 120 60" class="capbig" aria-hidden="true"><g class="chalf l"><path d="M60 14H30a16 16 0 0 0 0 32h30z" fill="' + c1 + '" ' + st + '/></g><g class="chalf r"><path d="M60 14h30a16 16 0 0 1 0 32H60z" fill="' + c2 + '" ' + st + '/></g></svg><div class="reel" id="creel" aria-hidden="true">?</div></div><p class="rname" id="cname" aria-live="polite"></p><div id="cprev"></div><div class="tourbtns"><button type="button" class="btn go" data-close disabled id="cdone">Nice</button></div></div>';
+    el.innerHTML = '<div class="tourcard vcard" role="dialog" aria-modal="true" aria-labelledby="ctitle"><div class="rarband">' + RAR[rr].n + ' capsule</div><h3 id="ctitle">The capsule is opening...</h3><div class="capstage"><svg viewBox="0 0 120 60" class="capbig" aria-hidden="true"><g class="chalf l"><path d="M60 14H30a16 16 0 0 0 0 32h30z" fill="' + c1 + '" ' + st + '/></g><g class="chalf r"><path d="M60 14h30a16 16 0 0 1 0 32H60z" fill="' + c2 + '" ' + st + '/></g></svg><div class="reel" id="creel" aria-hidden="true"></div></div><p class="rname" id="cname">&nbsp;</p><div id="cprev" class="capprevwrap"></div><div class="tourbtns"><button type="button" class="btn go" id="cdone" data-close disabled>Nice</button></div></div>';
     el.addEventListener('click', ev => { const t = ev.target.closest('button'); if (t && t.dataset.close !== undefined && !t.disabled) vdlgClose(); });
     const reel = el.querySelector('#creel'), nm = el.querySelector('#cname'), title = el.querySelector('#ctitle'), done = el.querySelector('#cdone');
     const reduce = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
-    const icons = {}; COSM.forEach(c => { icons[c[1]] = World.ok && World.cosmIcon ? World.cosmIcon(c[0], c[1]) : null; });
-    const showIt = (it) => { const u = icons[it[1]]; reel.innerHTML = u ? '<img alt="" src="' + u + '">' : it[3]; };
+    const spin = GEAR.filter(g => g.src === 'capsule'), icons = {};
+    spin.forEach(g => { icons[g.id] = g.slot !== 'pet' && World.ok && World.cosmIcon ? World.cosmIcon(g.slot, g.id) : null; });
+    const showIt = (g) => { const u = icons[g.id]; reel.innerHTML = u ? '<img alt="" src="' + u + '">' : '<span class="capemo">' + g.e + '</span>'; reel.className = 'reel rar-' + g.r + (reel.classList.contains('land') ? ' land' : ''); };
     let ticks = reduce ? 4 : 22, i = 0, last = -1; const t0 = reduce ? 200 : 900;
     setTimeout(() => { el.querySelector('.capstage').classList.add('open'); SFX.play('unlock'); step(); }, t0);
     function step() {
       if (!vdlg || vdlg !== el) return;
-      i++; let k; do { k = Math.floor(Math.random() * COSM.length); } while (k === last && COSM.length > 1); last = k;
-      const fin = i >= ticks; const it = fin ? (res || COSM[k]) : COSM[k];
+      i++; let k; do { k = Math.floor(Math.random() * spin.length); } while (k === last && spin.length > 1); last = k;
+      const fin = i >= ticks; const it = fin ? (res || spin[k]) : spin[k];
       showIt(it); reel.classList.toggle('land', fin);
       if (!fin) { setTimeout(step, 70 + Math.pow(i / ticks, 2.4) * 380); return; }
       let msg = '';
       if (res) {
-        S.cosm = (S.cosm || []).concat([res[1]]); S.cosmOn = S.cosmOn || {}; S.cosmOn[res[0]] = res[1];
-        msg = 'New ' + COSM_SLOT[res[0]].toLowerCase().replace(/s$/, '') + ': ' + res[2] + '! It is on your pharmacist now (change it any time in Character). ' + S.cosm.length + '/' + COSM.length + ' found.';
-        if (S.cosm.length === COSM.length) { S.cash += 1000; S.earned += 1000; pwAdd('hint', 3); msg += ' Every cosmetic found: +' + money(1000) + ' and 3 hint pills!'; }
-      } else { const b = Math.round(250 * franchiseMult()); S.cash += b; S.earned += b; msg = 'You found every cosmetic already, so the capsule held ' + money(b) + ' instead.'; }
+        gearGrant(res, true);
+        const bt = buffText2(res.buff), found = GEAR.filter(g => g.src === 'capsule' && gearHave(g.id)).length, all = GEAR.filter(g => g.src === 'capsule').length;
+        msg = (res.slot === 'pet' ? res.name + ' joins the pharmacy! Find it on the floor. Drag it anywhere you like.' : 'New ' + SLOT_NAME[res.slot].toLowerCase() + ': ' + res.name + '. It is on your pharmacist now (change it any time in Character).') + (bt ? ' Bonus: ' + bt + '.' : '') + ' ' + found + '/' + all + ' capsule finds.';
+        if (found === all) { S.cash += 1000; S.earned += 1000; pwAdd('hint', 3); msg += ' Every capsule item found: +' + money(1000) + ' and 3 hint pills!'; }
+      } else { const b = Math.round({ common: 250, rare: 600, epic: 1500, legendary: 4000 }[tier] * franchiseMult()); S.cash += b; S.earned += b; msg = 'You already found everything a capsule can hold, so this one held ' + money(b) + ' instead.'; }
       save(); try { World.setPharmacist(meSpec()); } catch (e) { /* ignore */ }
-      title.textContent = res ? 'Unlocked: ' + res[2] : 'Cash capsule'; nm.textContent = msg; done.disabled = false; done.focus(); SFX.play('streak'); renderStats();
-      if (res && World.ok && World.pharmPortrait) { const u = World.pharmPortrait(meSpec()); if (u) el.querySelector('#cprev').innerHTML = '<img class="mepv-img capprev" alt="Your pharmacist wearing the new item" src="' + u + '">'; }
+      title.textContent = res ? (rr === 'legendary' ? 'Legendary! ' : rr === 'epic' ? 'Epic find: ' : rr === 'rare' ? 'Rare find: ' : 'Unlocked: ') + res.name : 'Cash capsule'; nm.textContent = msg; done.disabled = false; done.focus(); SFX.play(rr === 'legendary' || rr === 'epic' ? 'streak' : 'unlock'); renderStats();
+      if (res && res.slot !== 'pet' && World.ok && World.pharmPortrait) { const u = World.pharmPortrait(meSpec()); if (u) el.querySelector('#cprev').innerHTML = '<img class="mepv-img capprev" alt="Your pharmacist wearing the new item" src="' + u + '">'; }
       if (view === 'create') renderPanel();
     }
   }

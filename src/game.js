@@ -337,7 +337,7 @@
   const shopOwn = id => !!id && ((S.store || {}).own || []).indexOf(id) >= 0;
   const uniOf = () => SHOP_UNI.find(u => u[0] === (S.store || {}).uni);
   const uniBuff = () => { const u = uniOf(); return u && S.up.tech >= 1 ? u[5] : {}; };
-  const techRate = () => 0.4 * (0.5 + S.rep / 100) * franchiseMult() * (1 + 0.25 * S.up.shelf) * (1 + 0.4 * S.up.train) * (1 + (uniBuff().tech || 0));
+  const techRate = () => 0.4 * (0.5 + S.rep / 100) * franchiseMult() * (1 + 0.25 * S.up.shelf) * (1 + 0.4 * S.up.train) * (1 + (uniBuff().tech || 0) + gearBuff().tech);
   const passive = () => S.up.tech * techRate();
   /* power-ups: consumables bought in the Shop (Power-ups). Counts live in S.pw. */
   const PW_MAX = 9;
@@ -612,8 +612,8 @@
       S.streak++; S.best = Math.max(S.best, S.streak); S.correct++; holCorrect();
       const base = 10 * [1, 1.6, 2.4][q.d - 1];
       const shelf = 1 + 0.25 * S.up.shelf;
-      const speed = timerOn() ? 1 + 0.5 * Math.max(0, 1 - elapsed / 20) : 1;
-      const bz = buffOn() ? 3 : 1, streakN = Math.min(S.streak * bz, (5 + 3 * S.up.counsel) * bz), streak = 1 + 0.05 * streakN;
+      const speed = timerOn() ? 1 + 0.5 * Math.max(0, 1 - elapsed / (20 + gearBuff().time)) : 1;
+      const bz = buffOn() ? 3 : 1, streakN = Math.min(S.streak * bz, (5 + 3 * S.up.counsel + gearBuff().streak) * bz), streak = 1 + 0.05 * streakN;
       const lucky = Math.random() < 0.06 * S.up.robot, fr = franchiseMult();
       pay = Math.max(1, Math.round(base * shelf * speed * streak * fr * buffPay() * (lucky ? 2 : 1) * (cur.hint ? 0.5 : 1) * (cur.secUsed ? 0.5 : 1) * (cur.binder ? 0.85 : 1) * (cur.recall ? 1.5 : 1) * (cur.regular ? 1.25 : 1) * (karen ? 2 : 1) * (sweaty ? 1.5 : 1) * (rush.on ? 1.5 : 1) * (cur.lab ? 1.5 : 1)));
       chips.push(`<span class="big">+${money(pay)}</span>`, `<span>base $${base.toFixed(0)}</span>`);
@@ -632,7 +632,7 @@
       if (cur.regular) chips.push('<span>regular x1.25</span>');
       if (karen) chips.push('<span>Karen calmed x2</span>');
       if (sweaty) chips.push('<span>Jim relieved x1.5</span>');
-      S.cash += pay; S.earned += pay; S.rep = Math.min(100, S.rep + (karen ? 5 : sweaty ? 3 : 2));
+      S.cash += pay; S.earned += pay; S.rep = Math.min(100, S.rep + (karen ? 5 : sweaty ? 3 : 2) + gearBuff().rep);
       if (q.gen) S.calcOK++;
       if (cur.lab) { S.labOK = (S.labOK || 0) + 1; }
       if (karen) S.karenWin++;
@@ -953,7 +953,7 @@
     const nm = document.querySelector('.nomatch'); if (nm) nm.hidden = any;
   }
   document.addEventListener('input', (e) => { if (e.target && e.target.id === 'tfind') { findQ = e.target.value; applyFind(); } });
-  document.addEventListener('toggle', (e) => { const d = e.target; if (!d.classList || !d.classList.contains('crs') || findQ.trim()) return; S.set.cclose = S.set.cclose || {}; if (d.open) delete S.set.cclose[d.dataset.crs]; else S.set.cclose[d.dataset.crs] = true; save(); }, true);
+  document.addEventListener('toggle', (e) => { const d = e.target; if (d.dataset && d.dataset.shop) { shopOpen[d.dataset.shop] = d.open; return; } if (!d.classList || !d.classList.contains('crs') || findQ.trim()) return; S.set.cclose = S.set.cclose || {}; if (d.open) delete S.set.cclose[d.dataset.crs]; else S.set.cclose[d.dataset.crs] = true; save(); }, true);
   function lockNote(d) {
     const t = todayStr(), l = d.items.filter(q => q.from && q.from > t); if (!l.length) return '';
     const next = l.map(q => q.from).sort()[0];
@@ -997,9 +997,8 @@
   const ME_SHOES = [['#27384F', 'Navy shoes'], ['#F4F4F0', 'White sneakers'], ['#E04F3A', 'Red sneakers'], ['#2B2B33', 'Black shoes'], ['#F2C94C', 'Gold shoes'], ['#3FD07F', 'Green sneakers'], ['#8A63C9', 'Purple sneakers']];
   const ME_BODIES = [['slim', 'Slim'], ['normal', 'Average'], ['jacked', 'Jacked'], ['obese', 'Round']];
   const ME_GENDERS = [['f', 'Woman'], ['m', 'Man'], ['n', 'Nonbinary']];
-  const ME_HAIRS = ['Short', 'Bob', 'Long', 'Bun', 'Curly', 'Spiky', 'Bald'].concat(SHOP_HAIR.map(h => h[1]));
+  const ME_HAIRS = ['Short', 'Bob', 'Long', 'Bun', 'Curly', 'Spiky', 'Bald'];
   function meSpec() { const m = S.me; return { body: m.body, gender: m.gender, hair: m.hair, skin: ME_SKIN[m.skin], hairCol: ME_HAIR[m.hairColor], scrub: ME_SCRUB[m.scrub], shirtCol: (ME_SHIRT[m.shirt | 0] || ME_SHIRT[0])[0], shoes: (ME_SHOES[m.shoes === undefined ? 3 : m.shoes] || ME_SHOES[3])[0], acc: S.acc || 0, accOn: accOnList(), cosm: cosmSpec() }; }
-  function accOnList() { const off = S.accOff || [], out = []; for (let k = 1; k <= (S.acc || 0); k++) if (off.indexOf(k) < 0) out.push(k); return out; }
   function meSVG() {
     const m = S.me, skin = ME_SKIN[m.skin], hair = ME_HAIR[m.hairColor], scrub = ME_SCRUB[m.scrub];
     const w = ({ slim: 24, normal: 32, jacked: 46, obese: 50 }[m.body] || 32) * (m.gender === 'f' ? 0.92 : m.gender === 'm' ? 1.06 : 1);
@@ -1026,63 +1025,78 @@
     const url = World.ok && World.pharmPortrait ? World.pharmPortrait(meSpec()) : null;
     return url ? '<img class="mepv-img" alt="Preview of your pharmacist" src="' + url + '">' : meSVG();
   }
-  /* ---- character screen: one slider row per part, top to bottom ---- */
+  /* ---- character screen: one slider row per part, top to bottom. Gear comes from GEAR (gear.js). ---- */
+  const rdot = (r) => `<i class="rdot r-${r}" title="${RAR[r].n}" aria-label="${RAR[r].n}"></i>`;
+  function gearOpts(slot) { // the choices in a gear slider: None, then everything you own in that slot
+    return [{ v: '', n: 'None' }].concat(GEAR.filter(g => g.slot === slot && gearHave(g.id)).map(g => ({ v: g.id, n: g.name, r: g.r, b: buffText2(g.buff), g })));
+  }
+  function gearLocked(slot) { return GEAR.filter(g => g.slot === slot && !gearHave(g.id)); }
   function crows() {
-    const m = S.me, on = cosmSpec(), N = (arr) => arr.map((x, i) => ({ v: i, n: x[1] || x, c: x[0] && x[0][0] === '#' ? x[0] : '' }));
-    const cos = (slot, std) => [{ v: '', n: 'None' }].concat((std || []).map(c => ({ v: c[1], n: c[2] })), COSM.concat(SHOP_COS).filter(c => c[0] === slot && cosmHave(c[1])).map(c => ({ v: c[1], n: c[2] })));
-    return [
+    const m = S.me, on = S.cosmOn || {};
+    const hairOpts = ME_HAIRS.map((n, i) => ({ v: i, n })).concat(GEAR.filter(g => g.slot === 'hair' && gearHave(g.id)).map(g => ({ v: g.hv, n: g.name, r: g.r, g })));
+    const coatOpts = ME_SHIRT.map((x, i) => ({ v: i, n: x[1], c: x[0] })).concat(gearOpts('coat').slice(1));
+    const cur = (slot) => gearHave(on[slot]) && gearById(on[slot]).slot === slot ? on[slot] : '';
+    const rows = [
       { k: 'gender', t: 'Gender', cur: m.gender, o: ME_GENDERS.map(x => ({ v: x[0], n: x[1] })) },
       { k: 'body', t: 'Body type', cur: m.body, o: ME_BODIES.map(x => ({ v: x[0], n: x[1] })) },
       { k: 'skin', t: 'Skin tone', cur: m.skin, o: ME_SKIN.map((c, i) => ({ v: i, n: ME_SKIN_N[i], c })) },
-      { k: 'hair', t: 'Hair style', cur: m.hair, o: ME_HAIRS.map((n, i) => ({ v: i, n })).filter(x => x.v < 7 || shopOwn(SHOP_HAIR[x.v - 7][0])) },
+      { k: 'hair', t: 'Hair style', cur: m.hair, o: hairOpts, lock: gearLocked('hair') },
       { k: 'hairColor', t: 'Hair color', cur: m.hairColor, o: ME_HAIR.map((c, i) => ({ v: i, n: ME_HAIR_N[i], c })) },
-      { k: 'face', t: 'Facial hair', cur: on.face, o: cos('face') },
-      { k: 'eyes', t: 'Glasses', cur: on.eyes, o: cos('eyes', STD_EYES) },
-      { k: 'hat', t: 'Hat', cur: on.hat, o: cos('hat') },
-      { k: 'shirt', t: 'Shirt', cur: m.shirt | 0, o: ME_SHIRT.map((x, i) => ({ v: i, n: x[1], c: x[0] })) },
+      { k: 'face', t: 'Facial hair', cur: cur('face'), o: gearOpts('face'), lock: gearLocked('face') },
+      { k: 'eyes', t: 'Glasses', cur: cur('eyes'), o: gearOpts('eyes'), lock: gearLocked('eyes') },
+      { k: 'hat', t: 'Hat', cur: cur('hat'), o: gearOpts('hat'), lock: gearLocked('hat') },
+      { k: 'neck', t: 'Neck', cur: cur('neck'), o: gearOpts('neck'), lock: gearLocked('neck') },
+      { k: 'coat', t: 'Coat', cur: cur('coat') || (m.shirt | 0), o: coatOpts, lock: gearLocked('coat') },
       { k: 'scrub', t: 'Pants', cur: m.scrub, o: ME_SCRUB.map((c, i) => ({ v: i, n: ME_SCRUB_N[i] + ' pants', c })) },
       { k: 'shoes', t: 'Shoes', cur: m.shoes === undefined ? 3 : m.shoes, o: ME_SHOES.map((x, i) => ({ v: i, n: x[1], c: x[0] })) },
-      { k: 'extra', t: 'Extras', cur: on.extra, o: cos('extra') }
-    ].concat(SHOP_CYBER.some(c => shopOwn(c[1])) ? [{ k: 'cyber', t: 'Cyborg parts', cur: on.cyber, o: cos('cyber') }] : []);
+      { k: 'hands', t: 'In hand', cur: cur('hands'), o: gearOpts('hands'), lock: gearLocked('hands') },
+      { k: 'extra', t: 'Extras', cur: cur('extra'), o: gearOpts('extra'), lock: gearLocked('extra') },
+      { k: 'cyber', t: 'Cyborg parts', cur: cur('cyber'), o: gearOpts('cyber'), lock: gearLocked('cyber') }
+    ];
+    return rows;
   }
   function crowHTML(r) {
     const n = r.o.length, i = Math.max(0, r.o.findIndex(x => x.v === r.cur)), c = r.o[i], dis = n < 2 ? ' disabled' : '';
-    return `<div class="crow" data-k="${r.k}"><span class="clab">${r.t}</span><div class="cslide"><button type="button" class="carr" data-act="cyc" data-k="${r.k}" data-d="-1" aria-label="Previous ${r.t.toLowerCase()}"${dis}>&#8249;</button><div class="cval" role="status" aria-live="polite">${c.c ? `<i class="csw" style="background:${c.c}"></i>` : ''}<span>${esc(c.n)}</span><small>${i + 1} of ${n}</small></div><button type="button" class="carr" data-act="cyc" data-k="${r.k}" data-d="1" aria-label="Next ${r.t.toLowerCase()}"${dis}>&#8250;</button></div></div>`;
+    const lock = r.lock && r.lock.length ? `<details class="clock"><summary>${r.lock.length} more to unlock</summary><ul>${r.lock.map(g => `<li>${rdot(g.r)}<b>${esc(g.name)}</b><span>${esc(gearSrcText(g))}${g.buff && buffText2(g.buff) ? ' · ' + esc(buffText2(g.buff)) : ''}</span></li>`).join('')}</ul></details>` : '';
+    return `<div class="crow" data-k="${r.k}"><span class="clab">${r.t}</span><div class="cslide"><button type="button" class="carr" data-act="cyc" data-k="${r.k}" data-d="-1" aria-label="Previous ${r.t.toLowerCase()}"${dis}>&#8249;</button><div class="cval" role="status" aria-live="polite">${c.c ? `<i class="csw" style="background:${c.c}"></i>` : c.r ? rdot(c.r) : ''}<span>${esc(c.n)}${c.b ? `<em class="cbuff">${esc(c.b)}</em>` : ''}</span><small>${i + 1}/${n}</small></div><button type="button" class="carr" data-act="cyc" data-k="${r.k}" data-d="1" aria-label="Next ${r.t.toLowerCase()}"${dis}>&#8250;</button></div>${lock}</div>`;
   }
   function setCrow(k, v) {
-    if (['face', 'eyes', 'hat', 'extra', 'cyber'].indexOf(k) >= 0) { S.cosmOn = S.cosmOn || {}; const keep = {}; Object.keys(S.cosmOn).forEach(s => { const c = S.cosmOn[s] && cosmById(S.cosmOn[s]); if (c && c[0] !== k) keep[c[0]] = S.cosmOn[s]; }); S.cosmOn = keep; if (v) S.cosmOn[k] = v; }
-    else S.me[k] = (typeof v === 'number') ? v : v;
+    S.cosmOn = S.cosmOn || {};
+    if (k === 'coat') { if (typeof v === 'number') { S.me.shirt = v; delete S.cosmOn.coat; } else S.cosmOn.coat = v; return; }
+    if (COSM_SLOTS.indexOf(k) >= 0) { if (v) S.cosmOn[k] = v; else delete S.cosmOn[k]; return; }
+    S.me[k] = v;
   }
   /* ---- shop (a tab on the Character screen) ---- */
-  let cTab = 'me', shopCat = 'walls';
+  let cTab = 'me'; const shopOpen = { walls: true };
   const buffText = b => [b.tech ? '+' + Math.round(b.tech * 100) + '% tech tips' : '', b.pay ? '+' + Math.round(b.pay * 100) + '% pay' : ''].filter(Boolean).join(', ');
   function uniSpec() { const u = uniOf(); return u ? { shirt: u[2], scrub: u[3], cosm: { hat: u[4] || '', eyes: u[0] === 'u5' ? 'goggles' : '' } } : null; }
   function applyShop() { if (!World.ok) return; World.setStore(S.store); World.setStaffLook(uniSpec()); World.setPharmacist(meSpec()); }
-  const SHOP_CATS = [['walls', 'Wall paint'], ['floors', 'Floors'], ['uni', 'Tech uniforms'], ['deco', 'Decor'], ['hair', 'Hairstyles'], ['cyber', 'Cyborg'], ['pow', 'Power-ups']];
+  const SHOP_CATS = [['walls', 'Wall paint'], ['floors', 'Floors'], ['uni', 'Tech uniforms'], ['deco', 'Decor'], ['wear', 'Wardrobe'], ['pow', 'Power-ups']];
   function shopRows(cat) {
     const st = S.store;
     if (cat === 'walls') return SHOP_WALLS.map(w => ({ id: w[0], name: w[1], price: w[4], free: !w[4], on: st.walls === w[0], sw: [w[2], w[3]], note: '' }));
     if (cat === 'floors') return SHOP_FLOORS.map(f => ({ id: f[0], name: f[1], price: f[4], free: !f[4], on: st.floor === f[0], sw: [f[2], f[3]], note: '' }));
     if (cat === 'uni') return [{ id: '', name: 'Standard coats', price: 0, free: true, on: !st.uni, sw: ['#F4FAFA', '#27384F'], note: 'No bonus.' }].concat(SHOP_UNI.map(u => ({ id: u[0], name: u[1], price: u[6], on: st.uni === u[0], sw: [u[2], u[3]], note: buffText(u[5]) + '. ' + u[7] })));
     if (cat === 'deco') return SHOP_DECOR.map(d => ({ id: d[0], name: d[1], price: d[2], on: (st.deco || []).indexOf(d[0]) >= 0, emoji: d[4], note: d[3], toggle: true }));
-    if (cat === 'hair') return SHOP_HAIR.map((h, i) => ({ id: h[0], name: h[1], price: h[3], on: S.me.hair === 7 + i, emoji: '💇', note: 'For your pharmacist.' }));
     if (cat === 'pow') return Object.keys(PW).map(k => ({ id: k, name: PW[k].name, price: pwCost(k), emoji: PW[k].emoji, note: PW[k].note, stack: true, count: S.pw[k] || 0 }));
-    return SHOP_CYBER.map(c => ({ id: c[1], name: c[2], price: c[4], on: ((S.cosmOn || {}).cyber) === c[1], emoji: c[3], note: 'For your pharmacist.' }));
+    return GEAR.filter(g => g.src === 'shop').map(g => ({ id: g.id, name: g.name, price: g.price, on: gearOn(g.id), emoji: g.e, r: g.r, note: SLOT_NAME[g.slot] + (buffText2(g.buff) ? ' · ' + buffText2(g.buff) : '') + (g.d ? '. ' + g.d : '') }));
   }
   function shopHTML() {
-    const cash = S.cash, rows = shopRows(shopCat);
-    const cats = SHOP_CATS.map(c => `<button type="button" class="chip" data-act="shopcat" data-v="${c[0]}" aria-pressed="${shopCat === c[0]}">${c[1]}</button>`).join('');
-    const cards = rows.map(r => {
-      const own = r.stack ? false : r.free || shopOwn(r.id), sw = r.sw ? `<span class="spsw"><i style="background:${r.sw[0]}"></i><i style="background:${r.sw[1]}"></i></span>` : `<span class="spem" aria-hidden="true">${r.emoji || ''}</span>`;
-      let btn;
-      if (!own) btn = `<button type="button" class="btn go" data-act="shop-buy" data-k="${shopCat}" data-id="${r.id}"${cash < r.price || (r.stack && r.count >= PW_MAX) ? ' disabled' : ''}>${r.stack && r.count >= PW_MAX ? 'Full' : 'Buy ' + money(r.price)}</button>`;
-      else if (r.toggle) btn = `<button type="button" class="btn" data-act="shop-use" data-k="${shopCat}" data-id="${r.id}" aria-pressed="${r.on}">${r.on ? 'Remove' : 'Place'}</button>`;
-      else btn = r.on ? '<span class="spon">Equipped</span>' : `<button type="button" class="btn" data-act="shop-use" data-k="${shopCat}" data-id="${r.id}">Use</button>`;
-      return `<div class="spcard${r.on ? ' on' : ''}">${sw}<div class="sptx"><b>${esc(r.name)}${r.stack ? ' <em class="pwn">x' + r.count + '</em>' : ''}</b>${r.note ? `<small>${esc(r.note)}</small>` : ''}</div>${btn}</div>`;
+    const cash = S.cash, bf = buffText(uniBuff()), hasT = S.up.tech >= 1;
+    const secs = SHOP_CATS.map(c => {
+      const rows = shopRows(c[0]), ownN = rows.filter(r => r.stack ? r.count > 0 : r.free || shopOwn(r.id)).length;
+      const cards = rows.map(r => {
+        const own = r.stack ? false : r.free || shopOwn(r.id), sw = r.sw ? `<span class="spsw"><i style="background:${r.sw[0]}"></i><i style="background:${r.sw[1]}"></i></span>` : `<span class="spem" aria-hidden="true">${r.emoji || ''}</span>`;
+        let btn;
+        if (!own) btn = `<button type="button" class="btn go" data-act="shop-buy" data-k="${c[0]}" data-id="${r.id}"${cash < r.price || (r.stack && r.count >= PW_MAX) ? ' disabled' : ''}>${r.stack && r.count >= PW_MAX ? 'Full' : 'Buy ' + money(r.price)}</button>`;
+        else if (r.toggle) btn = `<button type="button" class="btn" data-act="shop-use" data-k="${c[0]}" data-id="${r.id}" aria-pressed="${r.on}">${r.on ? 'Remove' : 'Place'}</button>`;
+        else btn = r.on ? '<span class="spon">Equipped</span>' : `<button type="button" class="btn" data-act="shop-use" data-k="${c[0]}" data-id="${r.id}">Use</button>`;
+        return `<div class="spcard${r.on ? ' on' : ''}">${sw}<div class="sptx"><b>${r.r ? rdot(r.r) : ''}${esc(r.name)}${r.stack ? ' <em class="pwn">x' + r.count + '</em>' : ''}</b>${r.note ? `<small>${esc(r.note)}</small>` : ''}</div>${btn}</div>`;
+      }).join('');
+      const note = c[0] === 'uni' ? `<p class="note">${hasT ? (bf ? 'Your techs are earning bonuses: ' + bf + '.' : 'Pick a uniform to give your techs a bonus.') : 'Hire a Pharmacy Technician first. Uniform bonuses work once you have at least one tech.'}</p>` : c[0] === 'wear' ? '<p class="note">Bought gear lands in the matching slider on the Character tab, with its bonus.</p>' : '';
+      return `<details class="crs" data-shop="${c[0]}"${shopOpen[c[0]] ? ' open' : ''}><summary><i class="caret" aria-hidden="true"></i><span class="crsn"><b>${c[1]}</b><small>${c[0] === 'pow' ? rows.reduce((a, r) => a + r.count, 0) + ' in stock' : ownN + ' of ' + rows.length + ' owned'}</small></span></summary><div class="crsb">${note}<div class="spgrid">${cards}</div></div></details>`;
     }).join('');
-    const bf = buffText(uniBuff()), hasT = S.up.tech >= 1;
-    const note = shopCat === 'uni' ? `<p class="note">${hasT ? (bf ? 'Your techs are earning bonuses: ' + bf + '.' : 'Pick a uniform to give your techs a bonus.') : 'Hire a Pharmacy Technician first. Uniform bonuses work once you have at least one tech.'}</p>` : shopCat === 'cyber' || shopCat === 'hair' ? '<p class="note">Bought items show up in the Character tab, where you can mix and match.</p>' : '';
-    return `<div class="spcash">Cash <b>${money(cash)}</b></div><div class="chips spcats" role="group" aria-label="Shop sections">${cats}</div>${note}<div class="spgrid">${cards}</div>`;
+    return `<div class="spcash">Cash <b>${money(cash)}</b></div><div class="crsl">${secs}</div>`;
   }
   function shopBuy(kind, id) {
     if (kind === 'pow') {
@@ -1099,21 +1113,35 @@
     const st = S.store;
     if (kind === 'walls') st.walls = id; else if (kind === 'floors') st.floor = id; else if (kind === 'uni') st.uni = id;
     else if (kind === 'deco') { const i = st.deco.indexOf(id); if (i >= 0 && !quiet) st.deco.splice(i, 1); else if (i < 0) st.deco.push(id); }
-    else if (kind === 'hair') { const i = SHOP_HAIR.findIndex(h => h[0] === id); if (i >= 0) S.me.hair = 7 + i; }
-    else if (kind === 'cyber') { S.cosmOn = S.cosmOn || {}; S.cosmOn.cyber = id; }
+    else if (kind === 'wear' || kind === 'hair' || kind === 'cyber') { const g = gearById(id); if (g) { if (g.slot === 'hair') S.me.hair = g.hv; else { S.cosmOn = S.cosmOn || {}; S.cosmOn[g.slot] = id; } } }
     save(); applyShop(); if (view === 'create') renderPanel();
   }
+  function outfitHTML() {
+    const b = gearBuff(), t = buffText2(b), own = GEAR.filter(g => g.slot !== 'pet' && g.src !== 'start' && gearHave(g.id)).length, all = GEAR.filter(g => g.slot !== 'pet' && g.src !== 'start').length;
+    return `<div class="tsum outfit"><b>Outfit bonus: ${t ? esc(t) : 'none yet'}</b><span>${own}/${all} gear found</span></div>`;
+  }
+  function petsHTML() {
+    const have = (S.awards || {}).pets || [];
+    const rows = GEAR.filter(g => g.slot === 'pet').map(g => {
+      const on = have.indexOf(g.kind) >= 0, pd = PET_DEFS.find(p => p.id === g.id), prog = pd ? Math.min(pd.n, petProgress(pd)) : 0;
+      const how = on ? 'Roaming the pharmacy. Tap it to say hi, or press and drag to carry it somewhere else.' : pd ? prog + '/' + pd.n + ' topics at ' + TIER[pd.tier - 1] + ' or better (see Awards)' : gearSrcText(g);
+      return `<div class="awp${on ? ' on' : ''}"><span aria-hidden="true">${g.e}</span><div><b>${rdot(g.r)}${esc(g.name)}</b><small>${esc(g.d)}${buffText2(g.buff) ? ' Bonus: ' + esc(buffText2(g.buff)) + '.' : ''}</small><small>${esc(how)}</small>${pd && !on ? `<span class="awbar pbar"><i style="width:${Math.round(100 * prog / pd.n)}%"></i></span>` : ''}</div></div>`;
+    }).join('');
+    const fish = S.awards.pets.indexOf('fish') >= 0;
+    return `<p class="note">Pets wander the floor. Press and hold one, then drag to carry it; let go to set it down. ${fish ? 'The goldfish tank stays put.' : ''}</p><div class="awpl">${rows}</div>`;
+  }
   function createHTML() {
-    const tabs = S.me.done ? `<div class="chips ctabs" role="tablist" aria-label="Character screen"><button type="button" class="chip" role="tab" data-act="ctab" data-v="me" aria-pressed="${cTab === 'me'}">Character</button><button type="button" class="chip" role="tab" data-act="ctab" data-v="shop" aria-pressed="${cTab === 'shop'}">Shop</button></div>` : '';
-    if (S.me.done && cTab === 'shop') return `<div class="pane cpane"><h3>Pharmacy shop</h3>${tabs}${shopCat === 'hair' || shopCat === 'cyber' ? '<div class="mepv sticky">' + mePreview() + '</div>' : ''}${shopHTML()}<div class="btnrow"><button type="button" class="btn go" data-act="me-done">Done</button></div></div>`;
+    const seg = (id, label) => `<button type="button" role="tab" aria-selected="${cTab === id}" data-act="ctab" data-v="${id}">${label}</button>`;
+    const tabs = S.me.done ? `<div class="hubtabs" role="tablist" aria-label="Character screen">${seg('me', 'Wardrobe')}${seg('shop', 'Shop')}${seg('pets', 'Pets')}</div>` : '';
+    if (S.me.done && cTab === 'shop') return `<div class="pane cpane"><h3>Pharmacy shop</h3>${tabs}<div class="mepv sticky">${mePreview()}</div>${shopHTML()}<div class="btnrow"><button type="button" class="btn go" data-act="me-done">Done</button></div></div>`;
+    if (S.me.done && cTab === 'pets') return `<div class="pane cpane"><h3>Pets</h3>${tabs}${petsHTML()}<div class="btnrow"><button type="button" class="btn go" data-act="me-done">Done</button></div></div>`;
     const m = S.me, rows = crows().map(crowHTML).join('');
-    const gear = (S.acc || 0) < 1 ? '' : `<div class="grp"><b>Rank gear</b><div class="chips">${ACCS.map((a, i) => { const k = i + 1, un = k <= (S.acc || 0), onN = un && (S.accOff || []).indexOf(k) < 0; return un ? `<button type="button" class="chip" data-act="acc-tog" data-v="${k}" aria-pressed="${onN}">${a[1]} ${a[0]}</button>` : ''; }).join('')}</div></div>`;
-    const found = (S.cosm || []).length;
     return `<div class="pane cpane"><h3>Your character</h3>${tabs}
       <div class="mepv sticky">${mePreview()}</div>
+      ${m.done ? outfitHTML() : ''}
       <div class="grp"><b>Name your pharmacy</b><input id="shopname" class="field" type="text" maxlength="24" autocomplete="off" placeholder="Corner Rx" value="${esc(S.shop || '')}" aria-label="Pharmacy name"><p class="note">It goes on the sign above your shelves.</p></div>
-      <p class="note">Use the arrows on each row to flip through your options, top to bottom. ${found ? found + '/' + COSM.length + ' cosmetics found.' : 'Open capsules from the lost pills vial (top bar) to unlock facial hair, hats, glasses and more.'}</p>
-      <div class="crows">${rows}</div>${gear}
+      <p class="note">Use the arrows on each row to flip through what you own. Gear comes from capsules in the lost pills vial (top bar), the Shop tab and rank promotions, and each piece carries a small bonus for your pharmacy.</p>
+      <div class="crows">${rows}</div>
       <div class="btnrow"><button type="button" class="btn go" data-act="me-done">${m.done ? 'Done' : 'Start working'}</button></div></div>`;
   }
 
@@ -1183,16 +1211,17 @@
     showUnlock({ emoji: '\uD83D\uDCC5', title: 'Weekly drug calendar: ' + CAL_NAMES[t - 1], sub: n + (n === 1 ? ' week' : ' weeks') + ' fully mastered', target: { kind: 'cal' }, land: () => { land(); if (view === 'awards') renderPanel(); } });
   }
   /* pharmacist wardrobe: one accessory per promotion */
-  const ACCS = [['Gold chain', '\u26D3\uFE0F'], ['Sunglasses', '\uD83D\uDD76\uFE0F'], ['Brass knuckles', '\uD83D\uDC4A'], ['Gold grill', '\uD83E\uDDB7'], ['Fedora', '\uD83C\uDFA9'], ['Cane', '\uD83E\uDDAF'], ['Purple fur coat', '\uD83E\uDDE5']];
+  const RANK_GEAR = GEAR.filter(g => g.src === 'rank').sort((a, b) => a.rank - b.rank), ACCS = RANK_GEAR.map(g => [g.name, g.e]);
+  const rankEquip = (k) => { const g = RANK_GEAR[k - 1]; if (g) { S.cosmOn = S.cosmOn || {}; S.cosmOn[g.slot] = g.id; } };
   const rankIdx = () => { let i = 0; for (let k = 0; k < RANKS.length; k++) if (S.correct >= RANKS[k][0]) i = k; return i; };
   function syncRank(silent) {
     const target = Math.min(ACCS.length, rankIdx());
     let earned = S.accEarned || 0; if (target <= earned) { if ((S.acc || 0) < earned) { S.acc = earned; World.setPharmacist(meSpec()); } return; }
-    if (silent && target - earned > 1) { earned = target - 1; S.accEarned = earned; S.acc = earned; World.setPharmacist(meSpec()); }
+    if (silent && target - earned > 1) { earned = target - 1; S.accEarned = earned; S.acc = earned; for (let q = 1; q <= earned; q++) rankEquip(q); World.setPharmacist(meSpec()); }
     for (let k = earned + 1; k <= target; k++) {
       S.accEarned = k;
-      if (silent && k < target) { S.acc = k; continue; }
-      showUnlock({ emoji: ACCS[k - 1][1], title: ACCS[k - 1][0] + ' unlocked', sub: 'Promoted to ' + RANKS[k][1], target: { kind: 'pharm', id: k }, land: () => { S.acc = Math.max(S.acc || 0, k); save(); World.setPharmacist(meSpec()); if (view === 'awards') renderPanel(); } });
+      if (silent && k < target) { S.acc = k; rankEquip(k); continue; }
+      showUnlock({ emoji: ACCS[k - 1][1], title: ACCS[k - 1][0] + ' unlocked', sub: 'Promoted to ' + RANKS[k][1], target: { kind: 'pharm', id: k }, land: () => { S.acc = Math.max(S.acc || 0, k); rankEquip(k); save(); World.setPharmacist(meSpec()); if (view === 'awards' || view === 'create') renderPanel(); } });
     }
     save();
   }
@@ -1863,7 +1892,7 @@
   function maybeTour() { if (S.me.done && !S.tutDone && !tourEl) showTour(); }
   /* ---- save code: the whole save as one long code, to move progress between devices or keep a backup ---- */
 /*@EXT@*/
-  const GAME_VERSION = 121;
+  const GAME_VERSION = 122;
   const b64u = (u8) => { let s = ''; for (let i = 0; i < u8.length; i += 0x8000) s += String.fromCharCode.apply(null, u8.subarray(i, i + 0x8000)); return btoa(s).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); };
   const unb64u = (t) => { const s = atob(t.replace(/-/g, '+').replace(/_/g, '/')), u = new Uint8Array(s.length); for (let i = 0; i < s.length; i++) u[i] = s.charCodeAt(i); return u; };
   const chk = (t) => { let h = 2166136261; for (let i = 0; i < t.length; i++) { h ^= t.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36); };
@@ -1918,18 +1947,16 @@
     switch (a) {
       case 'settings': openView(view === 'set' ? 'q' : 'set'); if (view === 'q') { resumeTimers(); renderPanel(); } return;
       case 'studies': openView(view === 'studies' ? 'q' : 'studies'); if (view === 'q') { resumeTimers(); renderPanel(); } return;
-      case 'acc-tog': { readShop(); const k = +v; S.accOff = S.accOff || []; const i = S.accOff.indexOf(k); if (i >= 0) S.accOff.splice(i, 1); else S.accOff.push(k); save(); World.setPharmacist(meSpec()); renderPanel(); return; }
       case 'vial': openVial(); return;
       case 'cyc': { readShop(); const k = t.dataset.k, d = +t.dataset.d, r = crows().find(x => x.k === k); if (!r || r.o.length < 2) return; const i = Math.max(0, r.o.findIndex(x => x.v === r.cur)), nx = r.o[(i + d + r.o.length) % r.o.length]; setCrow(k, nx.v); save(); World.setPharmacist(meSpec());
         const row = document.querySelector('.crow[data-k="' + k + '"]'), nr = crows().find(x => x.k === k); if (row && nr) { row.outerHTML = crowHTML(nr); const nb = document.querySelector('.crow[data-k="' + k + '"] [data-d="' + d + '"]'); if (nb) nb.focus(); } const pv = document.querySelector('.mepv'); if (pv) pv.innerHTML = mePreview(); return; }
       case 'create': openView(view === 'create' ? 'q' : 'create'); if (view === 'q') { resumeTimers(); renderPanel(); } return;
       case 'awards': openView(view === 'awards' ? 'q' : 'awards'); if (view === 'q') { resumeTimers(); renderPanel(); } return;
       case 'me': { readShop(); const k = t.dataset.k, v = t.dataset.v; S.me[k] = (k === 'hair' || k === 'hairColor' || k === 'skin' || k === 'scrub') ? +v : v; save(); World.setPharmacist(meSpec()); renderPanel(); return; }
-      case 'ctab': readShop(); cTab = v === 'shop' ? 'shop' : 'me'; renderPanel(); return;
-      case 'shopcat': shopCat = v; renderPanel(); return;
+      case 'ctab': readShop(); cTab = v === 'shop' || v === 'pets' ? v : 'me'; renderPanel(); return;
       case 'shop-buy': shopBuy(t.dataset.k, t.dataset.id); if (view === 'create') renderPanel(); return;
       case 'shop-use': shopUse(t.dataset.k, t.dataset.id); return;
-      case 'pwshop': cTab = 'shop'; shopCat = 'pow'; openView('create'); return;
+      case 'pwshop': cTab = 'shop'; Object.keys(shopOpen).forEach(k => { shopOpen[k] = false; }); shopOpen.pow = true; openView('create'); return;
       case 'me-done': readShop(); S.me.done = true; save(); syncBrand(); backToQ(); maybeTour(); return;
       case 'back': if (view === 'syn') synExit(); if (view === 'shift') return shiftNext(false); readDraft(); const wasC = view === 'create' && !S.me.done; if (view === 'create') readShop(); if (wasC) { S.me.done = true; save(); } backToQ(); if (wasC) maybeTour(); return;
       case 'phone': return openPhone();
@@ -1946,6 +1973,7 @@
       case 'dev-recall': { const q = BANK.find(x => !x.ms && x.k !== lastKey); if (!q) return; S.recall = S.recall || []; if (!S.recall.some(r => r.k === q.k)) S.recall.push({ k: q.k, seed: 4321, body: 'obese', name: 'Rosa', due: 0, tries: 0, at: Date.now() - 2 * 864e5 }); forceSp = { recall: q.k, seed: 4321, body: 'obese' }; if (view === 'q') newCard(); return; }
       case 'dev-regular': { const w = WEEKS[0]; S.reg = S.reg || {}; if (!S.reg[w.n]) { S.reg[w.n] = { n: w.n, name: 'Big Mike', seed: 7000 + w.n * 137, body: 'jacked', visits: 0, ok: 0, at: Date.now() }; if (World.ok && World.setMastery) World.setMastery(masteryList()); } forceSp = { regular: w.n, seed: S.reg[w.n].seed, body: 'jacked' }; if (view === 'q') newCard(); return; }
       case 'dev-pill': { const ok = World.ok && World.devPill(); toast(ok ? 'A pill popped out. Tap it.' : 'Could not spawn one.'); return; }
+      case 'dev-legcap': { S.vial = S.vial || []; S.vial.push({ k: 'c', c: '#F2A516', c2: '#F4F4F0', s: 'two', r: 'legendary' }); save(); vialSync(); toast('A legendary capsule is in the vial.'); return; }
       case 'dev-bottle': learnOff(); fp.cool = 0; return startBottles();
       case 'dev-shelve': learnOff(); return startShelve(false);
       case 'dev-prior': learnOff(); return startPrior();
@@ -2120,8 +2148,8 @@
   setInterval(() => { if (window.__rxLoading) return; try { localStorage.setItem(SAVE_KEY, JSON.stringify(S)); } catch (e) { /* ignore */ } }, 5000);
 
   { const sc = $('#savecard'); if (sc) sc.innerHTML = saveBoxHTML(); }
-  World.init({ host: $('#stage'), getS: () => S, specialRoll: specialRoll, tagInfo: tagInfo, onBuy: buyUp, onNotes: () => openView('studies'), notesInfo: customCount, karenRoll: karenRoll, sweatyRoll: sweatyRoll, elderRoll: elderRoll, eventRoll: eventRoll, onVisitor: visitClick, onVisitorArrive: visitArrive, capsuleOk: capsuleOk, onCapsule: onCapsule, onBrain: synEnter, onSynSite: onSynSite, onEvt: onEvt, pillOk: pillOk, onPill: onPill, onPhone: openPhone, onPolice: policeCome, himOk: himOk, onHimSpawn: onHimSpawn, onHimAngel: himAngelOk, onHimLand: himLand, onHimBless: onHimBless, onFp: fpClick, sign: () => shopName() + '|' + tierName() + ' #' + (S.franchises + 1) });
-  window.__rxDbg = () => ({ sr: srUpdate, nc: newCard, sp: specialRoll, fp: fp, S: S, view: view, rush: rush, phoneR: phone.ringing, TOPQ: TOPQ, pool: poolQs, cur: cur, synQ: () => (typeof SYN !== 'undefined' ? SYN.q : null), synTap: id => onSynSite(id), offer: k => offerEvt(k, 'test'), onEvt: onEvt, holiday: () => holNow(), holN: () => holCount(), renderStats: renderStats, passive: passive, techRate: techRate, buyUp: buyUp, openVial: openVial, tabletTake: tabletTake, capsuleOpen: capsuleOpen, buffOn: buffOn, COSM: COSM });
+  World.init({ host: $('#stage'), getS: () => S, specialRoll: specialRoll, tagInfo: tagInfo, onBuy: buyUp, onNotes: () => openView('studies'), notesInfo: customCount, karenRoll: karenRoll, sweatyRoll: sweatyRoll, elderRoll: elderRoll, eventRoll: eventRoll, onVisitor: visitClick, onVisitorArrive: visitArrive, capsuleOk: capsuleOk, onCapsule: onCapsule, onBrain: synEnter, onSynSite: onSynSite, onEvt: onEvt, pillOk: pillOk, onPill: onPill, pillBoost: () => gearBuff().pills, onPhone: openPhone, onPolice: policeCome, himOk: himOk, onHimSpawn: onHimSpawn, onHimAngel: himAngelOk, onHimLand: himLand, onHimBless: onHimBless, onFp: fpClick, sign: () => shopName() + '|' + tierName() + ' #' + (S.franchises + 1) });
+  window.__rxDbg = () => ({ sr: srUpdate, nc: newCard, sp: specialRoll, fp: fp, S: S, view: view, rush: rush, phoneR: phone.ringing, TOPQ: TOPQ, pool: poolQs, cur: cur, synQ: () => (typeof SYN !== 'undefined' ? SYN.q : null), synTap: id => onSynSite(id), offer: k => offerEvt(k, 'test'), onEvt: onEvt, holiday: () => holNow(), holN: () => holCount(), renderStats: renderStats, passive: passive, techRate: techRate, buyUp: buyUp, openVial: openVial, tabletTake: tabletTake, capsuleOpen: capsuleOpen, buffOn: buffOn, GEAR: GEAR, gearBuff: gearBuff, gearHave: gearHave });
   if (!World.ok) $('#stage').classList.add('flat');
   else { document.body.classList.add('fx'); World.setPharmacist(meSpec()); World.setStore(S.store); World.setStaffLook(uniSpec()); World.setAwards(S.awards); World.setCalendar(Math.min(4, S.awards.calW || 0), false, S.awards.calW || 0); }
   applyFocus(); syncBrand(); sfxLabel();
@@ -2130,13 +2158,13 @@
     const menu = $('#menu'), close = menu && menu.querySelector('.menuclose');
     if (menu && close) {
       const hr = document.createElement('hr'); menu.insertBefore(hr, close);
-      [['dev-pill', 'Test: pop a pill'], ['dev-elder', 'Test: elder patient next'], ['dev-next', 'Test: skip to next patient'], ['dev-recall', 'Test: recall patient'], ['dev-regular', 'Test: regular patient'], ['dev-bottle', 'Test: bottle check'], ['dev-shelve', 'Test: restock'], ['dev-prior', 'Test: prior auth'], ['dev-rush', 'Test: rush hour'], ['dev-insp', 'Test: health inspector next'], ['dev-driver', 'Test: delivery next'], ['dev-sky', 'Test: sky capsule'], ['dev-him-walk', 'Test: Andy walks in next'], ['dev-him-asc', 'Test: Andy ascension'], ['dev-him-angel', 'Test: Andy angel flyover'], ['dev-him-smash', 'Test: Andy smash (skip click)'], ['dev-plant', 'Test: plant capsule'], ['dev-fast', 'Test: skip slow start']].forEach(b => {
+      [['dev-pill', 'Test: pop a pill'], ['dev-legcap', 'Test: legendary capsule in vial'], ['dev-elder', 'Test: elder patient next'], ['dev-next', 'Test: skip to next patient'], ['dev-recall', 'Test: recall patient'], ['dev-regular', 'Test: regular patient'], ['dev-bottle', 'Test: bottle check'], ['dev-shelve', 'Test: restock'], ['dev-prior', 'Test: prior auth'], ['dev-rush', 'Test: rush hour'], ['dev-insp', 'Test: health inspector next'], ['dev-driver', 'Test: delivery next'], ['dev-sky', 'Test: sky capsule'], ['dev-him-walk', 'Test: Andy walks in next'], ['dev-him-asc', 'Test: Andy ascension'], ['dev-him-angel', 'Test: Andy angel flyover'], ['dev-him-smash', 'Test: Andy smash (skip click)'], ['dev-plant', 'Test: plant capsule'], ['dev-fast', 'Test: skip slow start']].forEach(b => {
         const el = document.createElement('button'); el.type = 'button'; el.dataset.act = b[0]; el.innerHTML = '<i aria-hidden="true">\u2699</i><span>' + b[1] + '</span>'; menu.insertBefore(el, close);
       });
     }
   }
   if (S.libRefund) { const r = S.libRefund; delete S.libRefund; toast('The Reference Library is retired. Refunded ' + money(r) + '. Hint pills and more power-ups are in the Shop.'); save(); }
-  checkAwards(true); dailyBadge(); if (World.ok && World.setMastery) World.setMastery(masteryList()); checkRegulars();
+  gearMigrate(); checkAwards(true); dailyBadge(); if (World.ok && World.setMastery) World.setMastery(masteryList()); checkRegulars();
   if (blessOn()) blessStart(false);
   if (S.lab && World.ok && World.setLab) World.setLab(true);
   syncLab();

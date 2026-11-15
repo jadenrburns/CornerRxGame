@@ -95,6 +95,9 @@ const World = (function () {
       else if (h === 'crown') { put(new T.CylinderGeometry(0.3, 0.3, 0.12, 8), mk('#F2C94C'), 0, 2.12, 0); for (let i = 0; i < 5; i++) { const a = i / 5 * PI * 2; put(new T.ConeGeometry(0.06, 0.16, 4), mk('#F2C94C'), Math.cos(a) * 0.26, 2.26, Math.sin(a) * 0.26); put(new T.IcosahedronGeometry(0.03, 0), mk(['#E04F3A', '#3E72D9', '#2FAE66', '#8A63C9', '#E04F3A'][i]), Math.cos(a) * 0.26, 2.36, Math.sin(a) * 0.26); } }
       else if (h === 'chef') { put(new T.CylinderGeometry(0.3, 0.32, 0.18, 8), mk('#FFFFFF'), 0, 2.1, 0); const pf = put(new T.IcosahedronGeometry(0.3, 0), mk('#FFFFFF'), 0, 2.32, 0); pf.scale.set(1.05, 0.85, 1.05); }
       else if (h === 'propeller') { put(new T.CylinderGeometry(0.3, 0.33, 0.12, 8), mk('#3E72D9'), 0, 2.11, 0); put(new T.CylinderGeometry(0.02, 0.02, 0.14, 5), mk('#F4F4F0'), 0, 2.24, 0); const rot = put(G(0.5, 0.025, 0.08), mk('#E04F3A'), 0, 2.32, 0); const r2 = put(G(0.08, 0.025, 0.5), mk('#F2C94C'), 0, 2.32, 0); P.spin = [rot, r2]; }
+      else if (h === 'surgcap') { const cp = put(new T.IcosahedronGeometry(0.33, 0), mk('#4AA6A0'), 0, 2.08, 0); cp.scale.set(1, 0.6, 1); put(new T.CylinderGeometry(0.34, 0.34, 0.06, 8), mk('#3B8D88'), 0, 2.03, 0); put(G(0.08, 0.05, 0.1), mk('#3B8D88'), 0, 2.02, -0.33); }
+      else if (h === 'visor') { put(new T.CylinderGeometry(0.33, 0.33, 0.08, 10), mk('#0E9A8E'), 0, 2.02, 0); const bl = put(new T.CylinderGeometry(0.44, 0.44, 0.03, 10, 1, false, -0.7, 1.4), mk('#F4F4F0'), 0, 2.0, 0.08); bl.scale.set(1, 1, 1.1); }
+      else if (h === 'halo') { const hl = put(tw(0.3, 0.035, 6, 16), mk('#F2C94C'), 0, 2.28, 0); hl.rotation.x = PI / 2; if (hl.material.emissive && hl.material.emissive.setHex) { hl.material.emissive.setHex(0xD9A000); hl.material.emissiveIntensity = 0.7; } P.halo = hl; }
       else if (h === 'wizard') { put(new T.CylinderGeometry(0.46, 0.46, 0.03, 10), mk('#4A2E86'), 0, 2.07, 0); const cn = put(new T.ConeGeometry(0.3, 0.7, 8), mk('#4A2E86'), 0, 2.42, 0); cn.rotation.z = -0.12; put(new T.IcosahedronGeometry(0.045, 0), mk('#F2C94C'), 0.08, 2.5, 0.28); put(new T.IcosahedronGeometry(0.035, 0), mk('#F2C94C'), -0.1, 2.3, 0.26); }
     }
     if (C.eyes) {
@@ -103,6 +106,8 @@ const World = (function () {
       else if (x === 'square') { [-1, 1].forEach(s => { const cx = s * 0.11; put(G(0.17, 0.014, 0.016), fr, cx, 1.96, 0.318); put(G(0.17, 0.014, 0.016), fr, cx, 1.8, 0.318); put(G(0.014, 0.16, 0.016), fr, cx - 0.085, 1.88, 0.318); put(G(0.014, 0.16, 0.016), fr, cx + 0.085, 1.88, 0.318); glass(put(G(0.16, 0.15, 0.008), mk('#BFE3F0'), cx, 1.88, 0.318)); }); put(G(0.07, 0.014, 0.014), fr, 0, 1.91, 0.318); }
       else if (x === 'monocle') { put(tw(0.08, 0.013, 4, 12), mk('#F2C94C'), 0.11, 1.88, 0.325); put(G(0.012, 0.22, 0.012), mk('#F2C94C'), 0.2, 1.74, 0.322); }
       else if (x === 'eyepatch') { put(G(0.16, 0.14, 0.03), mk('#101018'), -0.11, 1.88, 0.318); const sd = put(G(0.025, 0.34, 0.02), mk('#101018'), -0.04, 1.97, 0.3); sd.rotation.z = -0.95; }
+      else if (x === 'readers') { [-1, 1].forEach(s => { const hm = put(tw(0.08, 0.012, 4, 12, PI), mk('#8B5A2B'), s * 0.11, 1.86, 0.318); hm.rotation.z = PI; const gl = put(new T.CylinderGeometry(0.075, 0.075, 0.01, 10), mk('#DCEBFA'), s * 0.11, 1.845, 0.316); gl.rotation.x = PI / 2; gl.scale.set(1, 1, 1); glass(gl); }); put(G(0.07, 0.012, 0.012), mk('#8B5A2B'), 0, 1.86, 0.318); }
+      else if (x === 'aviators') { const gold = mk('#F2C94C'); [-1, 1].forEach(s => { put(tw(0.095, 0.012, 4, 12), gold, s * 0.115, 1.87, 0.318); const gl = put(new T.CylinderGeometry(0.088, 0.088, 0.012, 10), mk('#5A3A1A'), s * 0.115, 1.87, 0.318); gl.rotation.x = PI / 2; gl.scale.set(1, 1.15, 1); gl.material.transparent = true; gl.material.opacity = 0.75; }); put(G(0.07, 0.014, 0.014), gold, 0, 1.9, 0.318); [-1, 1].forEach(s => put(G(0.16, 0.012, 0.012), gold, s * 0.26, 1.88, 0.2).rotation.y = s * 0.9); }
       else if (x === 'goggles') { [-1, 1].forEach(s => { put(tw(0.085, 0.022, 5, 10), fr, s * 0.115, 2.0, 0.31); const gl = put(new T.CylinderGeometry(0.075, 0.075, 0.02, 8), mk('#7FD6E8'), s * 0.115, 2.0, 0.315); gl.rotation.x = PI / 2; }); const bd = put(tw(0.31, 0.022, 5, 12), fr, 0, 2.0, 0); bd.rotation.x = PI / 2; }
     }
     if (C.cyber) {
@@ -112,9 +117,24 @@ const World = (function () {
       if (y === 'cyant' || kit) { [[0.13, 0.4, -0.25], [-0.1, 0.32, 0.18]].forEach(a => { put(new T.CylinderGeometry(0.014, 0.014, a[1], 5), metal, a[0], 2.12 + a[1] / 2, -0.04).rotation.z = a[2]; put(new T.IcosahedronGeometry(0.045, 0), red, a[0] + Math.sin(-a[2]) * a[1] * 0.5, 2.12 + a[1] * 0.95, -0.04); }); put(new T.CylinderGeometry(0.06, 0.07, 0.05, 6), dk, 0, 2.1, -0.04); }
       if (y === 'cyjet' || kit) { [-1, 1].forEach(sd => { put(new T.CylinderGeometry(0.09, 0.09, 0.5, 7), metal, sd * 0.11, 1.18, -(bz + 0.09), true); put(new T.ConeGeometry(0.075, 0.14, 7), org, sd * 0.11, 0.86, -(bz + 0.09), true).rotation.x = PI; }); put(G(0.34, 0.12, 0.1), dk, 0, 1.38, -(bz + 0.06), true); }
     }
+    if (C.neck) {
+      const x = C.neck, zf = bz;
+      if (x === 'lanyard') { [-1, 1].forEach(s => { const st = put(G(0.025, 0.42, 0.012), mk('#0E9A8E'), s * 0.11, 1.42, zf); st.rotation.z = s * -0.18; }); put(G(0.16, 0.12, 0.02), mk('#F4F4F0'), 0, 1.18, zf + 0.01); put(G(0.1, 0.02, 0.022), mk('#2B3A55'), 0, 1.2, zf + 0.012); put(G(0.08, 0.015, 0.022), mk('#8A97A8'), -0.02, 1.16, zf + 0.012); }
+      else if (x === 'bowtie') { put(G(0.06, 0.07, 0.04), mk('#B32635'), 0, 1.55, zf, true); [-1, 1].forEach(s => { const fl = put(G(0.13, 0.09, 0.03), mk('#D9374A'), s * 0.095, 1.55, zf, true); fl.rotation.z = s * 0.28; }); }
+      else if (x === 'scarf') { const sc = put(tw(0.3, 0.09, 6, 10), mk('#B32635'), 0, 1.56, 0.02); sc.rotation.x = PI / 2; const tl = put(G(0.14, 0.42, 0.05), mk('#B32635'), 0.17, 1.33, zf + 0.02); tl.rotation.z = 0.08; [1.5, 1.4, 1.3].forEach(y => put(G(0.142, 0.05, 0.052), mk('#F4F4F0'), 0.17, y - 0.03, zf + 0.02).rotation.z = 0.08); }
+      else if (x === 'steth') { const tb = mk('#2B2B33'); [-1, 1].forEach(s => { const t = put(tw(0.26, 0.025, 5, 10, PI * 0.8), tb, 0, 1.52, 0.1); t.rotation.set(PI / 2, 0, s > 0 ? 0.15 : PI - 0.15); }); [-1, 1].forEach(s => { const tube = put(G(0.025, 0.38, 0.025), tb, s * 0.2, 1.3, zf + 0.01); tube.rotation.z = s * 0.1; }); const bell = put(new T.CylinderGeometry(0.07, 0.07, 0.03, 10), mk('#C9CDD3'), 0.22, 1.1, zf + 0.02); bell.rotation.x = PI / 2; }
+      else if (x === 'mortar') { const gold = mk('#F2C94C'); const ch = put(tw(0.3, 0.02, 5, 12), gold, 0, 1.56, 0.02); ch.rotation.x = PI / 2; put(new T.CylinderGeometry(0.07, 0.05, 0.08, 8), gold, 0, 1.32, zf + 0.02); put(new T.CylinderGeometry(0.015, 0.015, 0.14, 5), gold, 0.03, 1.38, zf + 0.03).rotation.z = -0.6; if (gold.emissive && gold.emissive.setHex) { gold.emissive.setHex(0x8A6A00); gold.emissiveIntensity = 0.4; } }
+    }
+    if (C.coat) {
+      const x = C.coat, zf = bz;
+      if (x === 'hoodie') { const hd = mk('#3B4A7A'); const hood = put(new T.IcosahedronGeometry(0.36, 0), hd, 0, 1.62, -0.2); hood.scale.set(1.05, 0.7, 0.9); put(G(0.42, 0.16, 0.06), hd, 0, 1.0, zf, true); [-1, 1].forEach(s => put(G(0.02, 0.3, 0.03), mk('#F4F4F0'), s * 0.07, 1.4, zf + 0.01, true)); }
+      else if (x === 'goldcoat') { const gold = mk('#F2C94C'); put(G(0.03, 0.9, 0.03), gold, 0, 1.1, zf + 0.01, true); [1.42, 1.22, 1.02, 0.82].forEach(y => put(new T.IcosahedronGeometry(0.03, 0), gold, 0.07, y, zf + 0.02, true)); [-1, 1].forEach(s => { const lp = put(G(0.14, 0.26, 0.02), gold, s * 0.12, 1.42, zf + 0.005, true); lp.rotation.z = s * 0.5; }); }
+      else if (x === 'cape') { const cp = put(G(0.72, 1.05, 0.05), mk('#B32635'), 0, 1.02, -(zf + 0.03), true); cp.rotation.x = 0.1; const col = put(tw(0.33, 0.05, 5, 10), mk('#D9374A'), 0, 1.58, 0); col.rotation.x = PI / 2; put(new T.IcosahedronGeometry(0.05, 0), mk('#F2C94C'), 0, 1.56, zf + 0.01, true); }
+    }
     if (C.extra) {
       const x = C.extra;
-      if (x === 'clownnose') put(new T.IcosahedronGeometry(0.065, 0), mk('#E0262F'), 0, 1.8, 0.345);
+      if (x === 'pin') { const pn = put(new T.CylinderGeometry(0.045, 0.045, 0.02, 10), mk('#F2C94C'), -0.18, 1.4, bz + 0.005, true); pn.rotation.x = PI / 2; put(G(0.03, 0.04, 0.012), mk('#2B3A55'), -0.18, 1.4, bz + 0.02, true); }
+      else if (x === 'clownnose') put(new T.IcosahedronGeometry(0.065, 0), mk('#E0262F'), 0, 1.8, 0.345);
       else if (x === 'headphones') { const bd = put(tw(0.33, 0.03, 5, 14, PI), mk('#2B2B33'), 0, 1.87, 0); bd.scale.set(1, 0.72, 1); [-1, 1].forEach(s => { const cup = put(new T.CylinderGeometry(0.11, 0.11, 0.09, 8), mk('#E04F3A'), s * 0.335, 1.87, 0); cup.rotation.z = PI / 2; }); }
       else if (x === 'earring') { [-1, 1].forEach(s => put(new T.IcosahedronGeometry(0.035, 0), mk('#F2C94C'), s * 0.31, 1.73, 0.04)); }
       else if (x === 'bowtie') { put(G(0.06, 0.07, 0.04), mk('#B32635'), 0, 1.55, bz, true); [-1, 1].forEach(s => { const fl = put(G(0.13, 0.09, 0.03), mk('#D9374A'), s * 0.095, 1.55, bz, true); fl.rotation.z = s * 0.28; }); }
@@ -297,6 +317,13 @@ const World = (function () {
       if (on(3)) put(new T.BoxGeometry(0.2, 0.09, 0.13), goldM, 0, -0.7, 0.02, arm);
       if ((on(6) || o.elder) && s === 1) { put(new T.CylinderGeometry(0.025, 0.025, 1.05, 5), own('#5B3A21'), 0, -1.02, 0.06, arm); put(new T.IcosahedronGeometry(0.07, 0), goldM, 0, -0.5, 0.06, arm); }
       if (o.cosm && (o.cosm.cyber === 'cyarm' || o.cosm.cyber === 'cykit') && s === 1) { const mt = own('#9AA7B5'), dk2 = own('#2B3340'), gl = own('#2CCDBB'); if (gl.emissive && gl.emissive.setHex) { gl.emissive.setHex(0x1FB5A5); gl.emissiveIntensity = 0.9; } put(new T.BoxGeometry(0.2, 0.36, 0.21), mt, 0, -0.44, 0, arm); put(new T.BoxGeometry(0.22, 0.06, 0.23), dk2, 0, -0.25, 0, arm); put(new T.BoxGeometry(0.21, 0.04, 0.22), gl, 0, -0.62, 0, arm); [-1, 1].forEach(cs => put(new T.BoxGeometry(0.05, 0.14, 0.06), dk2, cs * 0.05, -0.76, 0.03, arm)); }
+      if (o.cosm && o.cosm.hands && s === 1) {
+        const hh = o.cosm.hands;
+        if (hh === 'mug') { put(new T.CylinderGeometry(0.08, 0.07, 0.15, 8), own('#0E9A8E'), 0, -0.72, 0.1, arm); put(new T.CylinderGeometry(0.082, 0.082, 0.04, 8), own('#F4F4F0'), 0, -0.72, 0.1, arm); const hd = put(new T.TorusGeometry(0.045, 0.014, 5, 8), own('#0E9A8E'), 0.09, -0.72, 0.1, arm); hd.rotation.y = PI / 2; put(new T.CylinderGeometry(0.065, 0.065, 0.01, 8), own('#5B3A21'), 0, -0.645, 0.1, arm); }
+        else if (hh === 'clipboard') { put(new T.BoxGeometry(0.28, 0.36, 0.03), own('#8B5A2B'), 0.02, -0.72, 0.14, arm); put(new T.BoxGeometry(0.24, 0.3, 0.02), own('#FFFFFF'), 0.02, -0.73, 0.16, arm); put(new T.BoxGeometry(0.1, 0.04, 0.05), own('#9AA7B5'), 0.02, -0.55, 0.15, arm); [-0.8, -0.72, -0.64].forEach(y => put(new T.BoxGeometry(0.16, 0.012, 0.022), own('#9AA7B5'), 0.02, y, 0.17, arm)); }
+        else if (hh === 'pillbottle') { put(new T.CylinderGeometry(0.11, 0.11, 0.34, 10), own('#F2A516'), 0.02, -0.74, 0.14, arm); put(new T.CylinderGeometry(0.12, 0.12, 0.07, 10), own('#F4F4F0'), 0.02, -0.54, 0.14, arm); put(new T.BoxGeometry(0.16, 0.14, 0.012), own('#FFFFFF'), 0.02, -0.76, 0.255, arm); }
+        else if (hh === 'wand') { const wd = put(new T.CylinderGeometry(0.014, 0.014, 0.5, 5), own('#2B2B33'), 0.03, -0.6, 0.1, arm); wd.rotation.x = 0.4; const st = own('#F2C94C'); if (st.emissive && st.emissive.setHex) { st.emissive.setHex(0xD9A000); st.emissiveIntensity = 0.9; } const star = put(new T.OctahedronGeometry(0.07, 0), st, 0.03, -0.36, 0.2, arm); P.wandStar = star; }
+      }
       if (karen && s === 1) put(new T.BoxGeometry(0.34, 0.27, 0.13), own('#8A63C9'), 0, -0.82, 0.06, arm);
       if (o.inspector && s === 1) { put(new T.BoxGeometry(0.3, 0.38, 0.04), own('#C9A06A'), 0, -0.8, 0.1, arm); put(new T.BoxGeometry(0.24, 0.3, 0.02), own('#FFFFFF'), 0, -0.8, 0.125, arm); }
     });
@@ -1037,6 +1064,7 @@ const World = (function () {
     const g = frameGroups[i], w = WALL[i]; if (!g || !w) return;
     popGroup(g); burst(new T.Vector3(w.x + (w.ry ? 0.6 : 0), w.y - 0.5, w.z + (w.ry ? 0 : 0.6)), 14, 0xF2A516, 0.9);
   };
+  api.petsInfo = function () { return pets.map(p => { const q = p.g.position, sc = api.screenOf ? api.screenOf(q.x, q.y + 0.3, q.z) : null; return { kind: p.kind, x: q.x, z: q.z, carried: !!p.carried, sx: sc && sc.x, sy: sc && sc.y }; }); };
   api.unlockPet = function (k) {
     if (k === 'fish') { if (fishG) { popGroup(fishG); burst(new T.Vector3(FISH_AT[0], 1.3, FISH_AT[1]), 12, 0x7FD6F0, 0.8); } return; }
     const p = pets.find(x => x.kind === k); if (!p) return;
@@ -1070,21 +1098,26 @@ const World = (function () {
   }
   /* ---- pets ---- */
   const pets = [];
+  const PET_BASE = { bunnyx: 'bunny', catx: 'cat', dogx: 'dog', orange: 'cat' };
   function petModel(kind) {
     const g = new T.Group(), pe = (geo, c, x, y, z) => { const m = add(g, geo, c, x, y, z); m.userData.pet = true; return m; };
     const B = (w, h, d) => new T.BoxGeometry(w, h, d), I = (r) => new T.IcosahedronGeometry(r, 0);
-    if (kind === 'bunny') {
+    const chubby = /x$/.test(kind), orange = kind === 'orange', base = PET_BASE[kind] || kind;
+    const CAT = orange ? '#F28C28' : '#9A9FB0', CAT2 = orange ? '#C96A12' : '#6F7488'; // base cat is a gray tabby, the orange cat is the special one
+    if (base === 'bunny') {
       sc(pe(I(0.22), '#F7F3EE', 0, 0.24, 0), 1, 0.9, 1.25); pe(I(0.15), '#F7F3EE', 0, 0.4, 0.24);
       rot(pe(B(0.06, 0.3, 0.05), '#F7F3EE', -0.07, 0.66, 0.2), 0.12); rot(pe(B(0.06, 0.3, 0.05), '#F7F3EE', 0.07, 0.66, 0.2), -0.12);
       pe(B(0.04, 0.2, 0.03), '#F4B6C2', -0.07, 0.66, 0.23); pe(B(0.04, 0.2, 0.03), '#F4B6C2', 0.07, 0.66, 0.23);
       pe(I(0.08), '#FFFFFF', 0, 0.28, -0.27); pe(B(0.03, 0.03, 0.03), '#1B1B24', -0.06, 0.43, 0.37); pe(B(0.03, 0.03, 0.03), '#1B1B24', 0.06, 0.43, 0.37); pe(B(0.04, 0.03, 0.03), '#F08A9C', 0, 0.38, 0.39);
-    } else if (kind === 'cat') {
-      pe(B(0.26, 0.24, 0.5), '#E0953A', 0, 0.3, 0); pe(I(0.17), '#E0953A', 0, 0.46, 0.3);
-      pe(new T.ConeGeometry(0.06, 0.13, 4), '#E0953A', -0.1, 0.63, 0.3); pe(new T.ConeGeometry(0.06, 0.13, 4), '#E0953A', 0.1, 0.63, 0.3);
-      rot(pe(B(0.05, 0.05, 0.42), '#C9792A', 0, 0.46, -0.4), 0).rotation.x = -0.7;
-      [[-0.09, 0.2], [0.09, 0.2], [-0.09, -0.2], [0.09, -0.2]].forEach(l => pe(B(0.07, 0.2, 0.07), '#C9792A', l[0], 0.1, l[1]));
-      pe(B(0.04, 0.04, 0.03), '#1B1B24', -0.07, 0.49, 0.45); pe(B(0.04, 0.04, 0.03), '#1B1B24', 0.07, 0.49, 0.45); pe(B(0.04, 0.03, 0.03), '#F08A9C', 0, 0.44, 0.47);
-      pe(B(0.27, 0.04, 0.12), '#C9792A', 0, 0.43, 0.04);
+    } else if (base === 'cat') {
+      pe(B(0.26, 0.24, 0.5), CAT, 0, 0.3, 0); pe(I(0.17), CAT, 0, 0.46, 0.3);
+      pe(new T.ConeGeometry(0.06, 0.13, 4), CAT, -0.1, 0.63, 0.3); pe(new T.ConeGeometry(0.06, 0.13, 4), CAT, 0.1, 0.63, 0.3);
+      rot(pe(B(0.05, 0.05, 0.42), CAT2, 0, 0.46, -0.4), 0).rotation.x = -0.7;
+      [[-0.09, 0.2], [0.09, 0.2], [-0.09, -0.2], [0.09, -0.2]].forEach(l => pe(B(0.07, 0.2, 0.07), CAT2, l[0], 0.1, l[1]));
+      pe(B(0.04, 0.04, 0.03), orange ? '#2E7D32' : '#1B1B24', -0.07, 0.49, 0.45); pe(B(0.04, 0.04, 0.03), orange ? '#2E7D32' : '#1B1B24', 0.07, 0.49, 0.45); pe(B(0.04, 0.03, 0.03), '#F08A9C', 0, 0.44, 0.47);
+      pe(B(0.27, 0.04, 0.12), CAT2, 0, 0.43, 0.04);
+      [-0.12, 0, 0.12].forEach(z => pe(B(0.28, 0.03, 0.05), CAT2, 0, 0.42, z)); // tabby stripes
+      if (orange) { pe(B(0.18, 0.1, 0.06), '#FFF4E0', 0, 0.3, 0.26); pe(new T.TorusGeometry(0.13, 0.025, 5, 10), '#F2C94C', 0, 0.37, 0.3).rotation.x = PI / 2; const bell = pe(I(0.035), '#F2C94C', 0, 0.3, 0.44); bell.material.emissive && bell.material.emissive.setHex && (bell.material.emissive.setHex(0xA07800), bell.material.emissiveIntensity = 0.6); }
     } else {
       pe(B(0.3, 0.3, 0.6), '#9B6A3C', 0, 0.36, 0); pe(B(0.26, 0.26, 0.26), '#9B6A3C', 0, 0.56, 0.4); pe(B(0.16, 0.14, 0.18), '#C9A06A', 0, 0.5, 0.56);
       rot(pe(B(0.07, 0.2, 0.14), '#6B4426', -0.15, 0.54, 0.36), 0.2); rot(pe(B(0.07, 0.2, 0.14), '#6B4426', 0.15, 0.54, 0.36), -0.2);
@@ -1092,6 +1125,8 @@ const World = (function () {
       rot(pe(B(0.06, 0.28, 0.06), '#6B4426', 0, 0.52, -0.36), 0.7);
       [[-0.1, 0.22], [0.1, 0.22], [-0.1, -0.22], [0.1, -0.22]].forEach(l => pe(B(0.08, 0.22, 0.08), '#6B4426', l[0], 0.11, l[1]));
     }
+    if (chubby) { g.scale.set(1.3, 1.1, 1.3); const belly = pe(I(base === 'bunny' ? 0.26 : 0.24), base === 'bunny' ? '#F7F3EE' : base === 'cat' ? CAT : '#9B6A3C', 0, base === 'bunny' ? 0.22 : 0.26, base === 'bunny' ? 0 : -0.02); belly.scale.set(1.15, 0.9, 1.25); }
+    if (orange) g.scale.set(1.2, 1.2, 1.2);
     return g;
   }
   function petTarget() {
@@ -1102,15 +1137,15 @@ const World = (function () {
   function spawnPet(kind, animate) {
     const g = petModel(kind); petG.add(g); const t = petTarget();
     g.position.set(animate ? 5 : t.x, 0, animate ? 8.6 : t.z);
-    const p = { g, kind, pet: true, r: 0.32, dy: 1.15, wp: [t], idle: 1 + Math.random() * 2, phase: Math.random() * 6, speed: kind === 'bunny' ? 1.9 : kind === 'cat' ? 1.5 : 1.7, hopH: 0.3, onStuck: pp => { pp.wp = [petTarget()]; } };
+    const p = { g, kind, pet: true, r: 0.32, dy: 1.15, wp: [t], idle: 1 + Math.random() * 2, phase: Math.random() * 6, speed: (kind === 'bunny' ? 1.9 : kind === 'cat' ? 1.5 : kind === 'orange' ? 1.6 : 1.7) * (/x$/.test(kind) ? 0.7 : 1), hopH: 0.3, onStuck: pp => { pp.wp = [petTarget()]; } };
     g.userData.P = { arms: [{ rotation: { x: 0 } }, { rotation: { x: 0 } }], legs: [], shirtM: { emissive: { setHex() { } } } };
     pets.push(p); return p;
   }
-  const PET_SAY = { bunny: ['🐰', 'Boing!'], cat: ['Meow!', '😺'], dog: ['Woof!', '🐶'] };
+  const PET_SAY = { bunny: ['🐰', 'Boing!'], cat: ['Meow!', '😺'], dog: ['Woof!', '🐶'], bunnyx: ['🐰', 'Hmph.', 'Snack?'], catx: ['Mrrp.', '😽', 'Nap time.'], dogx: ['Woof.', '🐶', 'Treat?'], orange: ['✨', 'Mrow!', '🧡', 'Zoomies!'] };
   function petReact(o) {
     if (o.fx && o.fx.type !== 'bump') return;
     o.fx = { type: 'hop', t: 0, dur: 0.8 }; o.stall = Math.max(o.stall || 0, 0.8);
-    const l = PET_SAY[o.kind]; say(o, l[Math.floor(Math.random() * l.length)], /^[^\w]*$/.test(l[0]) ? 'emo' : '');
+    const l = PET_SAY[o.kind] || PET_SAY.cat, w = l[Math.floor(Math.random() * l.length)]; say(o, w, /^[^\w]*$/.test(w) ? 'emo' : '');
   }
 
   function karenFx(c, dt) {
@@ -1181,11 +1216,16 @@ const World = (function () {
   function dismissHint() { if (hintGone) return; hintGone = true; const h = host.querySelector('.hint3d'); if (h) h.classList.add('gone'); }
   function bind() {
     // Drag to look around (mouse, touch or pen). One finger orbits, two fingers pinch to zoom. A tap still clicks.
-    const ptrs = new Map(); let drag = null, pinch = null, noClick = false;
+    const ptrs = new Map(); let drag = null, pinch = null, noClick = false, carry = null, carryCand = null;
+    // press on a pet and move: carry it around the floor; let go to set it down
+    const petOf = () => { let o = pickObj; while (o && o.parent && o.parent !== petG) o = o.parent; return o ? pets.find(p => p.g === o) : null; };
+    const floorAt = (e) => { const r = canvas.getBoundingClientRect(); ndc.x = ((e.clientX - r.left) / r.width) * 2 - 1; ndc.y = -((e.clientY - r.top) / r.height) * 2 + 1; raycaster.setFromCamera(ndc, camera); const o = raycaster.ray.origin, d = raycaster.ray.direction; if (Math.abs(d.y) < 1e-4) return null; const t = -o.y / d.y; if (t < 0) return null; return { x: clamp(o.x + d.x * t, -3.4, 8.0), z: clamp(o.z + d.z * t, 1.9, 6.0) }; };
+    const setDown = () => { if (!carry) return; const p = carry; carry = null; p.carried = false; p.g.position.y = 0; p.g.rotation.z = 0; p.wp = []; p.idle = 2 + Math.random() * 2; say(p, p.kind === 'orange' ? '✨' : '❤️', 'emo'); canvas.classList.remove('carrying'); if (B.onPetMove) B.onPetMove(p.kind); };
     canvas.addEventListener('pointerdown', e => {
       if (fpT || (e.pointerType === 'mouse' && e.button !== 0)) return;
       ptrs.set(e.pointerId, { x: e.clientX, y: e.clientY });
       try { canvas.setPointerCapture(e.pointerId); } catch (_) { /* ignore */ }
+      carryCand = null; if (ptrs.size === 1 && !labOn && !synOn) { const h = pick(e); if (h && h.pet) carryCand = petOf(); }
       if (ptrs.size === 1) drag = { sx: e.clientX, sy: e.clientY, lx: e.clientX, ly: e.clientY, on: false };
       else if (ptrs.size === 2) { const v = [...ptrs.values()]; pinch = { d: Math.hypot(v[0].x - v[1].x, v[0].y - v[1].y) || 1, g: grad }; if (drag) drag.on = true; canvas.classList.add('grabbing'); }
     });
@@ -1197,6 +1237,8 @@ const World = (function () {
         grad = clamp(pinch.g * pinch.d / d, baseRad * 0.55, baseRad * 1.3); noClick = true; dismissHint(); return;
       }
       if (!drag) return;
+      if (carry) { const f = floorAt(e); if (f) { carry.g.position.x = f.x; carry.g.position.z = f.z; } noClick = true; return; }
+      if (!drag.on && carryCand && Math.hypot(e.clientX - drag.sx, e.clientY - drag.sy) > 8) { carry = carryCand; carryCand = null; carry.carried = true; carry.wp = []; carry.fx = null; drag.on = true; canvas.classList.add('carrying'); dismissHint(); setHover(null); say(carry, '!', ''); return; }
       if (!drag.on && Math.hypot(e.clientX - drag.sx, e.clientY - drag.sy) > 8) { drag.on = true; canvas.classList.add('grabbing'); dismissHint(); setHover(null); }
       if (drag.on) {
         gth = clamp(gth - (e.clientX - drag.lx) * 0.0055, -0.9, 1.5);
@@ -1209,7 +1251,7 @@ const World = (function () {
       if (!ptrs.has(e.pointerId)) return;
       ptrs.delete(e.pointerId);
       if (ptrs.size < 2) pinch = null;
-      if (ptrs.size === 0) { if (drag && drag.on) noClick = true; drag = null; canvas.classList.remove('grabbing'); setTimeout(() => { noClick = false; }, 350); }
+      if (ptrs.size === 0) { if (carry) setDown(); carryCand = null; if (drag && drag.on) noClick = true; drag = null; canvas.classList.remove('grabbing'); setTimeout(() => { noClick = false; }, 350); }
     };
     canvas.addEventListener('pointerup', endPtr); canvas.addEventListener('pointercancel', endPtr);
     canvas.addEventListener('wheel', e => { if (fpT) return; e.preventDefault(); grad = clamp(grad + Math.sign(e.deltaY) * 1.5, baseRad * 0.55, baseRad * 1.3); dismissHint(); }, { passive: false });
@@ -1697,7 +1739,7 @@ const World = (function () {
       if (e.leaving && !e.wp.length) { custGroup.remove(e.g); extras.splice(i, 1); }
     }
     if (queue.length) { arriveT -= dt; if (arriveT <= 0) { arriveT = rushOn ? 5 + Math.random() * 4 : (15 + Math.random() * 9) * (slowOn ? 2.4 : 1); arrive(); } }
-    const all = queue.concat(leaving, extras, pets, cops.filter(c => copJob && copJob.phase === 'in'), visitor ? [visitor] : [], himH ? [himH] : []);
+    const all = queue.concat(leaving, extras, pets.filter(p => !p.carried), cops.filter(c => copJob && copJob.phase === 'in'), visitor ? [visitor] : [], himH ? [himH] : []);
     if (lineEl && queue.length !== lineN) { lineN = queue.length; lineEl.textContent = 'Line ' + lineN + '/' + maxq(); lineEl.className = 'line3d' + (lineN >= maxq() ? ' full' : lineN >= maxq() - 2 ? ' busy' : ''); }
     Crowd.separate(all, 1.15, onBump); Crowd.separate(stf, 1.0, onBump);
     Crowd.pushOut(all, 0.55); Crowd.pushOut(stf, 0.5);
@@ -1709,13 +1751,17 @@ const World = (function () {
     if (fishG) fishTick(dt);
     visitorTick(dt); himTick(dt);
     pets.forEach(pt => {
-      const w = moveTo(pt, pt.speed, dt, crowd); pt.phase += dt;
+      pt.phase += dt;
+      if (pt.carried) { pt.g.position.y = 0.55 + Math.sin(pt.phase * 6) * 0.04; pt.g.rotation.z = Math.sin(pt.phase * 3) * 0.12; return; }
+      if (pt.kind === 'orange' && Math.random() < dt * 0.35) burst(new T.Vector3(pt.g.position.x + (Math.random() - 0.5) * 0.4, 0.6 + Math.random() * 0.4, pt.g.position.z + (Math.random() - 0.5) * 0.4), 1, 0xF2C94C, 0.25);
+      const w = moveTo(pt, pt.speed, dt, crowd);
       if (!pt.fx) { pt.g.position.y = w ? Math.abs(Math.sin(pt.phase * (pt.kind === 'bunny' ? 10 : 13))) * (pt.kind === 'bunny' ? 0.16 : 0.05) : 0; pt.g.rotation.z = w ? Math.sin(pt.phase * 9) * 0.05 : 0; }
       if (!w) { pt.idle -= dt; if (pt.idle <= 0) { pt.idle = 1.5 + Math.random() * 4; pt.wp.push(petTarget()); if (Math.random() < 0.15) say(pt, '❤️', 'emo'); } }
     });
     if (pharm) {
       const P = pharm.g.userData.P, pp = pharm.g.position; pharm.phase += dt;
       if (P.spin) P.spin.forEach(m => { m.rotation.y += dt * 18; });
+      if (P.wandStar) P.wandStar.rotation.y += dt * 4; if (P.halo) P.halo.position.y = 2.28 + Math.sin(time * 2) * 0.03;
       if (buffOn) {
         const pu = 0.5 + 0.5 * Math.sin(time * 9); P.skinM.emissive.setRGB(0.34 + 0.22 * pu, 0.24 + 0.1 * pu, 0.02); buffCd -= dt;
         if (buffCd <= 0 && !pharm.fx) { buffCd = 2.6 + Math.random() * 1.6; startFx(pharm, Math.random() < 0.7 ? 'energy' : 'wave'); }
@@ -2368,7 +2414,7 @@ const World = (function () {
   function pillTick(dt) {
     if (!pillG) return;
     const ok = !labOn && !synOn && !paused && !fpT && (!B.pillOk || B.pillOk());
-    if (ok && pills.length < 2) { pillT -= dt; if (pillT <= 0) { pillT = 480 + Math.random() * 120; spawnPill(); } }
+    if (ok && pills.length < 2) { pillT -= dt; if (pillT <= 0) { pillT = (480 + Math.random() * 120) / (1 + (B.pillBoost ? B.pillBoost() : 0)); spawnPill(); } }
     for (let i = pills.length - 1; i >= 0; i--) {
       const o = pills[i], g = o.g, body = g.userData.body; o.t += dt;
       if (o.t < 0) continue; g.visible = true;
