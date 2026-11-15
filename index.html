@@ -89,6 +89,7 @@ button { font: inherit; color: inherit; cursor: pointer; }
 .stage { position: relative; height: clamp(560px, 50vw, 680px); border-radius: 22px; overflow: hidden; border: 1.5px solid var(--ink); box-shadow: 6px 6px 0 var(--teal); background: var(--stage); touch-action: pan-y; }
 .stage canvas { display: block; width: 100%; height: 100%; cursor: default; touch-action: pan-y; }
 .stage canvas.grabbing { cursor: grabbing; }
+.stage canvas.carrying { cursor: grabbing; }
 .tags { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
 .tag3d { position: absolute; left: 0; top: 0; pointer-events: auto; display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; background: var(--surface); color: var(--ink); border: 1.5px solid var(--ink); border-radius: 999px; padding: 4px 6px 4px 10px; font: 600 11px/1 var(--f-mono); box-shadow: 0 3px 0 rgba(0,0,0,.18); will-change: transform; }
 .tag3d span { font-family: var(--f-body); font-weight: 700; }
@@ -431,6 +432,7 @@ body.fx .toast3d { top: calc(var(--tb) + 52px); z-index: 8; }
 body.fx .qpanel { top: calc(var(--tb) + 8px); right: max(12px, env(safe-area-inset-right, 0px)); bottom: max(12px, env(safe-area-inset-bottom, 0px)); }
 body.fx .hint3d { bottom: max(12px, env(safe-area-inset-bottom, 0px)); left: max(12px, env(safe-area-inset-left, 0px)); }
 body.fx .stage canvas.grabbing { cursor: grabbing; }
+.stage canvas.carrying { cursor: grabbing; }
 /* the stats and upgrades slide up as a sheet inside the window */
 body.fx .below { position: fixed; left: 0; right: 0; bottom: 0; top: 8vh; top: 8dvh; z-index: 31; background: var(--bg); border-radius: 22px 22px 0 0; border-top: 2px solid var(--ink); padding: 62px max(14px, env(safe-area-inset-right, 0px)) max(28px, env(safe-area-inset-bottom, 0px)) max(14px, env(safe-area-inset-left, 0px)); overflow: auto; transform: translateY(110%); visibility: hidden; transition: transform .3s ease, visibility 0s .3s; box-shadow: 0 -10px 34px rgba(0,0,0,.3); overscroll-behavior: contain; -webkit-overflow-scrolling: touch; }
 body.fx.drawer .below { transform: none; visibility: visible; transition: transform .3s ease; }
@@ -574,6 +576,7 @@ body.fx .toast3d { top: calc(var(--tb) + 52px); z-index: 8; }
 body.fx .qpanel { top: calc(var(--tb) + 8px); right: max(12px, env(safe-area-inset-right, 0px)); bottom: max(12px, env(safe-area-inset-bottom, 0px)); }
 body.fx .hint3d { bottom: max(12px, env(safe-area-inset-bottom, 0px)); left: max(12px, env(safe-area-inset-left, 0px)); }
 body.fx .stage canvas.grabbing { cursor: grabbing; }
+.stage canvas.carrying { cursor: grabbing; }
 /* the stats and upgrades slide up as a sheet inside the window */
 body.fx .below { position: fixed; left: 0; right: 0; bottom: 0; top: 8vh; top: 8dvh; z-index: 31; background: var(--bg); border-radius: 22px 22px 0 0; border-top: 2px solid var(--ink); padding: 62px max(14px, env(safe-area-inset-right, 0px)) max(28px, env(safe-area-inset-bottom, 0px)) max(14px, env(safe-area-inset-left, 0px)); overflow: auto; transform: translateY(110%); visibility: hidden; transition: transform .3s ease, visibility 0s .3s; box-shadow: 0 -10px 34px rgba(0,0,0,.3); overscroll-behavior: contain; -webkit-overflow-scrolling: touch; }
 body.fx.drawer .below { transform: none; visibility: visible; transition: transform .3s ease; }
@@ -1052,6 +1055,66 @@ body.trip .stats .stat { animation: tripbob 1.4s ease-in-out infinite; }
 .drawkey { margin: 0; font-size: 12px; color: var(--muted); text-align: center; }
 .drawkey i { display: inline-block; width: 18px; height: 0; border-top: 3px solid var(--ink); vertical-align: middle; margin: 0 4px 0 8px; }
 .drawkey i.k2 { border-top-color: var(--c, #1d7a93); }
+
+/* Topics menu v120: summary strip, quick picks, find box, course cards */
+.tsum { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; padding: 8px 12px; border-radius: 12px; background: var(--teal-soft); border: 1.5px solid var(--teal); font: 700 13px/1.2 var(--f-body); color: var(--teal-ink); }
+.find { display: block; }
+.vh { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.find input { width: 100%; box-sizing: border-box; min-height: 42px; padding: 8px 12px 8px 36px; border: 1.5px solid var(--line); border-radius: 12px; background: #fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%236b7a7d' stroke-width='2.2' stroke-linecap='round'%3E%3Ccircle cx='11' cy='11' r='7'/%3E%3Cpath d='m20 20-3.5-3.5'/%3E%3C/svg%3E") 11px 50% / 16px no-repeat; font: 500 14px var(--f-body); color: var(--ink); }
+.find input:focus { outline: 2px solid var(--teal); outline-offset: 1px; border-color: var(--teal); }
+.crsl { display: grid; gap: 10px; }
+.crs { border: 1.5px solid var(--line); border-radius: 14px; background: rgba(255,253,244,.95); overflow: hidden; }
+.crs.off { border-style: dashed; }
+.crs summary { list-style: none; display: grid; grid-template-columns: 16px minmax(0, 1fr) auto; grid-template-areas: "c n s" "c b b"; column-gap: 10px; row-gap: 6px; align-items: center; padding: 10px 12px; cursor: pointer; background: var(--surface2); }
+.crs summary::-webkit-details-marker { display: none; }
+.crs summary:focus-visible { outline: 2px solid var(--teal); outline-offset: -2px; }
+.crs .caret { grid-area: c; width: 0; height: 0; border: 6px solid transparent; border-left: 8px solid var(--muted); border-right: 0; transform-origin: 3px 50%; transition: transform .2s; }
+.crs[open] .caret { transform: rotate(90deg); }
+.crsn { grid-area: n; display: flex; flex-direction: column; min-width: 0; }
+.crsn b { font: 800 15px/1.15 var(--f-display); color: var(--ink); }
+.crsn small { font: 700 10.5px/1.3 var(--f-mono); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+.crsst { grid-area: s; font: 700 11.5px/1 var(--f-mono); color: var(--teal-ink); background: var(--teal-soft); border: 1px solid var(--teal); border-radius: 999px; padding: 4px 9px; white-space: nowrap; }
+.crs.off .crsst { color: var(--muted); background: transparent; border-color: var(--line); }
+.crs summary .mbar { grid-area: b; height: 9px; }
+.crs summary .mbar em { font-size: 8px; line-height: 9px; }
+.crsb { display: grid; gap: 10px; padding: 10px 12px 12px; border-top: 1.5px solid var(--line); }
+.crsr { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+.crsr .note { flex: 1 1 200px; }
+.crsr .grpr { white-space: nowrap; }
+.crsb .grp { padding: 10px; border: 1.5px dashed var(--line); border-radius: 12px; }
+.nbsheet .crs .grp { background: transparent; }
+[hidden] { display: none !important; }
+
+/* wardrobe v122: rarity, gear sliders, locked lists, capsule tiers */
+.rdot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 6px; vertical-align: 1px; flex: none; box-shadow: 0 0 0 2px rgba(255,255,255,.7) inset; }
+.r-common { background: #7D8C99; } .r-rare { background: #3E72D9; } .r-epic { background: #8A63C9; } .r-legendary { background: #D99A00; box-shadow: 0 0 0 2px rgba(255,255,255,.7) inset, 0 0 8px #F2C94C; }
+.cval .cbuff { display: block; font: 500 10.5px/1.2 var(--f-body); color: var(--teal-ink); font-style: normal; margin-top: 2px; }
+.crow { grid-template-areas: "l s" ". k"; }
+.crow .clab { grid-area: l; } .crow .cslide { grid-area: s; } .crow .clock { grid-area: k; }
+.clock { font-size: 12px; color: var(--muted); }
+.clock summary { cursor: pointer; list-style: none; display: inline-block; padding: 2px 0; text-decoration: underline dotted; }
+.clock summary::-webkit-details-marker { display: none; }
+.clock ul { list-style: none; margin: 4px 0 2px; padding: 6px 10px; display: grid; gap: 4px; border: 1.5px dashed var(--line); border-radius: 10px; background: var(--surface2); }
+.clock li { display: grid; grid-template-columns: 16px minmax(0, 1fr); align-items: baseline; column-gap: 2px; line-height: 1.3; }
+.clock li .rdot { margin: 0; }
+.clock li span { grid-column: 2; }
+.clock li b { color: var(--ink); font-weight: 700; }
+.clock li span { color: var(--muted); font-size: 11.5px; }
+.tsum.outfit { margin: 8px 0 0; }
+.awpl { display: grid; gap: 8px; margin: 8px 0; }
+.awp b .rdot { margin-right: 5px; }
+.cpane .crs .spgrid { margin-top: 4px; }
+.rarband { display: inline-block; font: 700 11px/1 var(--f-mono); letter-spacing: .1em; text-transform: uppercase; padding: 5px 10px; border-radius: 999px; margin-bottom: 8px; background: #7D8C99; color: #fff; }
+.capdlg.rar-rare .rarband { background: #3E72D9; } .capdlg.rar-epic .rarband { background: #8A63C9; } .capdlg.rar-legendary .rarband { background: linear-gradient(90deg, #D99A00, #F2C94C, #D99A00); color: #3B2A00; }
+.capdlg.rar-rare .vcard { box-shadow: 0 0 0 3px #3E72D9, 0 12px 30px rgba(62,114,217,.35); }
+.capdlg.rar-epic .vcard { box-shadow: 0 0 0 3px #8A63C9, 0 12px 34px rgba(138,99,201,.4); }
+.capdlg.rar-legendary .vcard { box-shadow: 0 0 0 3px #F2C94C, 0 0 40px 6px rgba(242,201,76,.55); animation: legglow 1.6s ease-in-out infinite alternate; }
+@keyframes legglow { from { box-shadow: 0 0 0 3px #F2C94C, 0 0 24px 2px rgba(242,201,76,.4); } to { box-shadow: 0 0 0 3px #FFE38A, 0 0 48px 10px rgba(242,201,76,.7); } }
+.reel.rar-rare img, .reel.rar-rare .capemo { filter: drop-shadow(0 0 6px #3E72D9); } .reel.rar-epic img, .reel.rar-epic .capemo { filter: drop-shadow(0 0 8px #8A63C9); } .reel.rar-legendary img, .reel.rar-legendary .capemo { filter: drop-shadow(0 0 10px #F2C94C); }
+.capemo { font-size: 46px; line-height: 1; }
+.vpill.rar-rare { border-color: #3E72D9; box-shadow: 0 0 0 1px #3E72D9 inset; } .vpill.rar-epic { border-color: #8A63C9; box-shadow: 0 0 0 1px #8A63C9 inset, 0 0 8px rgba(138,99,201,.5); } .vpill.rar-legendary { border-color: #D99A00; box-shadow: 0 0 0 1px #F2C94C inset, 0 0 10px rgba(242,201,76,.8); }
+.vpill.rar-legendary[aria-pressed="true"], .vpill.rar-epic[aria-pressed="true"], .vpill.rar-rare[aria-pressed="true"] { box-shadow: 0 3px 0 var(--ink); }
+.cpane .hubtabs { margin-bottom: 8px; }
 </style>
 
 <div class="shell">
@@ -2806,6 +2869,101 @@ const SHOP_CYBER = [
   ['cyber', 'cyjet', 'Jetpack', '🚀', 1500],
   ['cyber', 'cykit', 'Full cyborg kit', '🦿', 3000]
 ];
+/* Wardrobe gear: every unlockable thing for the pharmacist (and the pets), in one table.
+   Fields: id, slot (which Character slider it lives in), name, e (emoji fallback), r (rarity key in RAR),
+   src: 'start' (everyone has it) | 'capsule' (drops from the lost pills vial) | 'shop' (price) | 'rank' (rank number) | 'award' (mastery awards),
+   buff: small tycoon bonuses that stack across equipped items:
+     pay    fraction added to cash per correct fill     tech   fraction added to technician tips
+     time   extra seconds before the speed bonus fades  rep    extra reputation per correct fill
+     pills  fraction more lost pills popping out        streak extra answers before the streak bonus caps
+   d: one line shown under the item. Never rename a shipped id (saves store them). */
+const RAR = {
+  common: { n: 'Common', c: '#7D8C99', w: 60 },
+  rare: { n: 'Rare', c: '#3E72D9', w: 28 },
+  epic: { n: 'Epic', c: '#8A63C9', w: 10 },
+  legendary: { n: 'Legendary', c: '#D99A00', w: 2 }
+};
+const SLOTS = [
+  ['face', 'Facial hair'], ['eyes', 'Glasses'], ['hat', 'Hat'], ['neck', 'Neck'], ['coat', 'Coat'], ['hands', 'In hand'], ['extra', 'Extras'], ['cyber', 'Cyborg parts'], ['hair', 'Hair style'], ['pet', 'Pets']
+];
+const GEAR = [
+  /* facial hair (capsules) */
+  { id: 'mustache', slot: 'face', name: 'Mustache', e: '🥸', r: 'common', src: 'capsule', buff: { rep: 1 }, d: 'Patients trust a tidy mustache.' },
+  { id: 'goatee', slot: 'face', name: 'Goatee', e: '🧔', r: 'common', src: 'capsule', buff: {}, d: 'Just looks sharp.' },
+  { id: 'soulpatch', slot: 'face', name: 'Soul patch', e: '😏', r: 'common', src: 'capsule', buff: {}, d: 'Jazz night at the counter.' },
+  { id: 'handlebar', slot: 'face', name: 'Handlebar mustache', e: '🤵', r: 'rare', src: 'capsule', buff: { rep: 1 }, d: 'Old-time apothecary energy.' },
+  { id: 'beard', slot: 'face', name: 'Full beard', e: '🧔‍♂️', r: 'rare', src: 'capsule', buff: { time: 1 }, d: 'Wise. Takes a second longer to be rushed.' },
+  { id: 'chops', slot: 'face', name: 'Mutton chops', e: '🤠', r: 'rare', src: 'capsule', buff: { streak: 1 }, d: 'Frontier pharmacist.' },
+  /* glasses */
+  { id: 'round', slot: 'eyes', name: 'Round glasses', e: '👓', r: 'common', src: 'start', buff: {}, d: '' },
+  { id: 'square', slot: 'eyes', name: 'Square glasses', e: '👓', r: 'common', src: 'start', buff: {}, d: '' },
+  { id: 'readers', slot: 'eyes', name: 'Reading glasses', e: '🤓', r: 'common', src: 'capsule', buff: { rep: 1 }, d: 'You read every label. Patients notice.' },
+  { id: 'goggles', slot: 'eyes', name: 'Lab goggles', e: '🥽', r: 'common', src: 'capsule', buff: { tech: 0.02 }, d: 'Compounding ready. Techs follow your lead.' },
+  { id: 'monocle', slot: 'eyes', name: 'Monocle', e: '🧐', r: 'rare', src: 'capsule', buff: { pay: 0.02 }, d: 'Distinguished. Fills pay a little more.' },
+  { id: 'eyepatch', slot: 'eyes', name: 'Eyepatch', e: '🏴‍☠️', r: 'rare', src: 'capsule', buff: { streak: 1 }, d: 'Nobody argues with the pirate pharmacist.' },
+  { id: 'shades', slot: 'eyes', name: 'Sunglasses', e: '🕶️', r: 'rare', src: 'rank', rank: 2, buff: { rep: 1 }, d: 'Promotion gift. Too cool to be rushed.' },
+  { id: 'aviators', slot: 'eyes', name: 'Gold aviators', e: '😎', r: 'epic', src: 'capsule', buff: { pay: 0.03 }, d: 'Top gun of the drive-through.' },
+  /* hats */
+  { id: 'visor', slot: 'hat', name: 'Pharmacy visor', e: '🧢', r: 'common', src: 'capsule', buff: { time: 1 }, d: 'Keeps the counter lights out of your eyes.' },
+  { id: 'beanie', slot: 'hat', name: 'Beanie', e: '🧶', r: 'common', src: 'capsule', buff: {}, d: 'Cold storage shift.' },
+  { id: 'party', slot: 'hat', name: 'Party hat', e: '🥳', r: 'common', src: 'capsule', buff: { rep: 1 }, d: 'Every fill is a celebration.' },
+  { id: 'surgcap', slot: 'hat', name: 'Scrub cap', e: '🩺', r: 'common', src: 'shop', price: 150, buff: { tech: 0.02 }, d: 'Clean room style. Techs work a bit faster.' },
+  { id: 'chef', slot: 'hat', name: 'Chef hat', e: '👨‍🍳', r: 'rare', src: 'capsule', buff: { tech: 0.02 }, d: 'Compounding is just cooking with rules.' },
+  { id: 'cowboy', slot: 'hat', name: 'Cowboy hat', e: '🤠', r: 'rare', src: 'capsule', buff: { streak: 1 }, d: 'Steady hands.' },
+  { id: 'tophat', slot: 'hat', name: 'Top hat', e: '🎩', r: 'rare', src: 'capsule', buff: { pay: 0.02 }, d: 'Fancy fills cost a little more.' },
+  { id: 'propeller', slot: 'hat', name: 'Propeller cap', e: '🚁', r: 'rare', src: 'capsule', buff: { time: 2 }, d: 'Thinking fast.' },
+  { id: 'fedora', slot: 'hat', name: 'Fedora', e: '🎩', r: 'rare', src: 'rank', rank: 5, buff: { pay: 0.02 }, d: 'Promotion gift.' },
+  { id: 'crown', slot: 'hat', name: 'Gold crown', e: '👑', r: 'epic', src: 'capsule', buff: { pay: 0.03, rep: 1 }, d: 'Ruler of the corner.' },
+  { id: 'wizard', slot: 'hat', name: 'Wizard hat', e: '🧙', r: 'epic', src: 'capsule', buff: { time: 3 }, d: 'Pharmacokinetics is basically magic.' },
+  { id: 'halo', slot: 'hat', name: 'Golden halo', e: '😇', r: 'legendary', src: 'capsule', buff: { pay: 0.05, rep: 2 }, d: 'Andy approves. Patients leave glowing.' },
+  /* neck */
+  { id: 'lanyard', slot: 'neck', name: 'ID badge lanyard', e: '🪪', r: 'common', src: 'capsule', buff: { tech: 0.02 }, d: 'Official. Techs take you seriously.' },
+  { id: 'bowtie', slot: 'neck', name: 'Bow tie', e: '🎀', r: 'common', src: 'capsule', buff: { rep: 1 }, d: 'Dapper counter service.' },
+  { id: 'scarf', slot: 'neck', name: 'Striped scarf', e: '🧣', r: 'common', src: 'capsule', buff: {}, d: 'Flu season chic.' },
+  { id: 'steth', slot: 'neck', name: 'Stethoscope', e: '🩺', r: 'rare', src: 'capsule', buff: { rep: 1, time: 1 }, d: 'Clinical. Patients relax and wait.' },
+  { id: 'chain', slot: 'neck', name: 'Gold chain', e: '⛓️', r: 'rare', src: 'rank', rank: 1, buff: { pay: 0.02 }, d: 'Promotion gift. Bling pays.' },
+  { id: 'mortar', slot: 'neck', name: 'Golden mortar pendant', e: '🏺', r: 'legendary', src: 'capsule', buff: { pay: 0.04, streak: 2 }, d: 'The symbol of the profession, in gold.' },
+  /* coats (the color coats are built in; these are gear) */
+  { id: 'hoodie', slot: 'coat', name: 'Pharmacy hoodie', e: '🧥', r: 'rare', src: 'capsule', buff: { time: 2 }, d: 'Night shift comfort.' },
+  { id: 'goldcoat', slot: 'coat', name: 'Gold-trim coat', e: '🥼', r: 'rare', src: 'shop', price: 900, buff: { pay: 0.02, rep: 1 }, d: 'The owner’s coat.' },
+  { id: 'cape', slot: 'coat', name: 'Pharmacist cape', e: '🦸', r: 'epic', src: 'capsule', buff: { streak: 3 }, d: 'Hero of the refill line.' },
+  { id: 'furcoat', slot: 'coat', name: 'Purple fur coat', e: '🧥', r: 'epic', src: 'rank', rank: 7, buff: { pay: 0.03 }, d: 'Promotion gift. Director energy.' },
+  /* in hand */
+  { id: 'mug', slot: 'hands', name: 'Coffee mug', e: '☕', r: 'common', src: 'capsule', buff: { time: 1 }, d: 'Caffeine buys a second.' },
+  { id: 'clipboard', slot: 'hands', name: 'Clipboard', e: '📋', r: 'common', src: 'capsule', buff: { tech: 0.02 }, d: 'Techs love a checklist.' },
+  { id: 'pillbottle', slot: 'hands', name: 'Giant pill bottle', e: '💊', r: 'rare', src: 'capsule', buff: { pills: 0.15 }, d: 'Lost pills pop out more often.' },
+  { id: 'knuckles', slot: 'hands', name: 'Brass knuckles', e: '👊', r: 'rare', src: 'rank', rank: 3, buff: { streak: 1 }, d: 'Promotion gift. Karen thinks twice.' },
+  { id: 'cane', slot: 'hands', name: 'Cane', e: '🦯', r: 'rare', src: 'rank', rank: 6, buff: { time: 2 }, d: 'Promotion gift. Nobody rushes the chief.' },
+  { id: 'wand', slot: 'hands', name: 'Sparkle wand', e: '🪄', r: 'epic', src: 'capsule', buff: { pay: 0.03 }, d: 'Abracadabra, your copay is lower.' },
+  /* extras */
+  { id: 'pin', slot: 'extra', name: 'Rx lapel pin', e: '📌', r: 'common', src: 'capsule', buff: { rep: 1 }, d: 'Small, proud.' },
+  { id: 'clownnose', slot: 'extra', name: 'Clown nose', e: '🤡', r: 'common', src: 'capsule', buff: {}, d: 'Pediatric counseling secret weapon.' },
+  { id: 'earring', slot: 'extra', name: 'Gold earrings', e: '💎', r: 'rare', src: 'capsule', buff: { pay: 0.01 }, d: 'A little shine.' },
+  { id: 'headphones', slot: 'extra', name: 'Headphones', e: '🎧', r: 'rare', src: 'capsule', buff: { time: 1 }, d: 'Lo-fi beats to count pills to.' },
+  { id: 'grill', slot: 'extra', name: 'Gold grill', e: '🦷', r: 'rare', src: 'rank', rank: 4, buff: { pay: 0.01 }, d: 'Promotion gift.' },
+  /* cyborg parts (shop) */
+  { id: 'cyeye', slot: 'cyber', name: 'Cyber eye', e: '🤖', r: 'rare', src: 'shop', price: 700, buff: { time: 2 }, d: 'Reads the sig before the patient finishes talking.' },
+  { id: 'cyant', slot: 'cyber', name: 'Antenna', e: '📡', r: 'rare', src: 'shop', price: 600, buff: { tech: 0.03 }, d: 'Beams instructions to the techs.' },
+  { id: 'cyarm', slot: 'cyber', name: 'Mech arm', e: '🦾', r: 'epic', src: 'shop', price: 1200, buff: { pay: 0.03 }, d: 'Counts by fives, never drops a pill.' },
+  { id: 'cyjet', slot: 'cyber', name: 'Jetpack', e: '🚀', r: 'epic', src: 'shop', price: 1500, buff: { time: 3 }, d: 'Shelf to counter in no time.' },
+  { id: 'cykit', slot: 'cyber', name: 'Full cyborg kit', e: '🦿', r: 'legendary', src: 'shop', price: 3000, buff: { pay: 0.05, tech: 0.05, time: 3 }, d: 'The whole upgrade.' },
+  /* hair styles (shop); hv is the style number in world.js */
+  { id: 'hmo', slot: 'hair', name: 'Mohawk', e: '💇', r: 'common', src: 'shop', price: 250, hv: 9, buff: {}, d: '' },
+  { id: 'haf', slot: 'hair', name: 'Afro', e: '💇', r: 'common', src: 'shop', price: 300, hv: 10, buff: {}, d: '' },
+  { id: 'hpo', slot: 'hair', name: 'Ponytail', e: '💇', r: 'common', src: 'shop', price: 250, hv: 11, buff: {}, d: '' },
+  { id: 'hpm', slot: 'hair', name: 'Pompadour', e: '💇', r: 'rare', src: 'shop', price: 400, hv: 12, buff: {}, d: '' },
+  { id: 'hsb', slot: 'hair', name: 'Space buns', e: '💇', r: 'rare', src: 'shop', price: 400, hv: 13, buff: {}, d: '' },
+  /* pets: award pets come from mastery; the rest drop from capsules. kind is the world.js pet kind. */
+  { id: 'bunny', slot: 'pet', name: 'Bunny', e: '🐰', r: 'common', src: 'award', kind: 'bunny', buff: {}, d: 'Hops around the floor.' },
+  { id: 'cat', slot: 'pet', name: 'Cat', e: '🐱', r: 'common', src: 'award', kind: 'cat', buff: {}, d: 'Gray tabby. Judges the queue.' },
+  { id: 'dog', slot: 'pet', name: 'Dog', e: '🐶', r: 'common', src: 'award', kind: 'dog', buff: {}, d: 'Greets every patient.' },
+  { id: 'bunnyx', slot: 'pet', name: 'Chubby bunny', e: '🐰', r: 'rare', src: 'capsule', kind: 'bunnyx', buff: { pills: 0.1 }, d: 'Nudges lost pills out of hiding.' },
+  { id: 'catx', slot: 'pet', name: 'Chubby cat', e: '🐱', r: 'epic', src: 'capsule', kind: 'catx', buff: { rep: 1 }, d: 'Patients stay to pet it.' },
+  { id: 'dogx', slot: 'pet', name: 'Chubby dog', e: '🐶', r: 'epic', src: 'capsule', kind: 'dogx', buff: { tech: 0.02 }, d: 'Morale officer for the techs.' },
+  { id: 'orange', slot: 'pet', name: 'Orange cat', e: '🐈', r: 'legendary', src: 'capsule', kind: 'orange', buff: { pay: 0.03, rep: 1 }, d: 'One shared brain cell, all of it charm. Sparkles.' }
+];
+const GEAR_BY = {}; GEAR.forEach(g => { GEAR_BY[g.id] = g; });
+const SLOT_NAME = {}; SLOTS.forEach(s => { SLOT_NAME[s[0]] = s[1]; });
 /* ---------------- Study decks: standard format, parser, exporter ---------------- */
 const STUDY_TEMPLATE =
 `# Deck: Cardiology week 3
@@ -3162,6 +3320,9 @@ const World = (function () {
       else if (h === 'crown') { put(new T.CylinderGeometry(0.3, 0.3, 0.12, 8), mk('#F2C94C'), 0, 2.12, 0); for (let i = 0; i < 5; i++) { const a = i / 5 * PI * 2; put(new T.ConeGeometry(0.06, 0.16, 4), mk('#F2C94C'), Math.cos(a) * 0.26, 2.26, Math.sin(a) * 0.26); put(new T.IcosahedronGeometry(0.03, 0), mk(['#E04F3A', '#3E72D9', '#2FAE66', '#8A63C9', '#E04F3A'][i]), Math.cos(a) * 0.26, 2.36, Math.sin(a) * 0.26); } }
       else if (h === 'chef') { put(new T.CylinderGeometry(0.3, 0.32, 0.18, 8), mk('#FFFFFF'), 0, 2.1, 0); const pf = put(new T.IcosahedronGeometry(0.3, 0), mk('#FFFFFF'), 0, 2.32, 0); pf.scale.set(1.05, 0.85, 1.05); }
       else if (h === 'propeller') { put(new T.CylinderGeometry(0.3, 0.33, 0.12, 8), mk('#3E72D9'), 0, 2.11, 0); put(new T.CylinderGeometry(0.02, 0.02, 0.14, 5), mk('#F4F4F0'), 0, 2.24, 0); const rot = put(G(0.5, 0.025, 0.08), mk('#E04F3A'), 0, 2.32, 0); const r2 = put(G(0.08, 0.025, 0.5), mk('#F2C94C'), 0, 2.32, 0); P.spin = [rot, r2]; }
+      else if (h === 'surgcap') { const cp = put(new T.IcosahedronGeometry(0.33, 0), mk('#4AA6A0'), 0, 2.08, 0); cp.scale.set(1, 0.6, 1); put(new T.CylinderGeometry(0.34, 0.34, 0.06, 8), mk('#3B8D88'), 0, 2.03, 0); put(G(0.08, 0.05, 0.1), mk('#3B8D88'), 0, 2.02, -0.33); }
+      else if (h === 'visor') { put(new T.CylinderGeometry(0.33, 0.33, 0.08, 10), mk('#0E9A8E'), 0, 2.02, 0); const bl = put(new T.CylinderGeometry(0.44, 0.44, 0.03, 10, 1, false, -0.7, 1.4), mk('#F4F4F0'), 0, 2.0, 0.08); bl.scale.set(1, 1, 1.1); }
+      else if (h === 'halo') { const hl = put(tw(0.3, 0.035, 6, 16), mk('#F2C94C'), 0, 2.28, 0); hl.rotation.x = PI / 2; if (hl.material.emissive && hl.material.emissive.setHex) { hl.material.emissive.setHex(0xD9A000); hl.material.emissiveIntensity = 0.7; } P.halo = hl; }
       else if (h === 'wizard') { put(new T.CylinderGeometry(0.46, 0.46, 0.03, 10), mk('#4A2E86'), 0, 2.07, 0); const cn = put(new T.ConeGeometry(0.3, 0.7, 8), mk('#4A2E86'), 0, 2.42, 0); cn.rotation.z = -0.12; put(new T.IcosahedronGeometry(0.045, 0), mk('#F2C94C'), 0.08, 2.5, 0.28); put(new T.IcosahedronGeometry(0.035, 0), mk('#F2C94C'), -0.1, 2.3, 0.26); }
     }
     if (C.eyes) {
@@ -3170,6 +3331,8 @@ const World = (function () {
       else if (x === 'square') { [-1, 1].forEach(s => { const cx = s * 0.11; put(G(0.17, 0.014, 0.016), fr, cx, 1.96, 0.318); put(G(0.17, 0.014, 0.016), fr, cx, 1.8, 0.318); put(G(0.014, 0.16, 0.016), fr, cx - 0.085, 1.88, 0.318); put(G(0.014, 0.16, 0.016), fr, cx + 0.085, 1.88, 0.318); glass(put(G(0.16, 0.15, 0.008), mk('#BFE3F0'), cx, 1.88, 0.318)); }); put(G(0.07, 0.014, 0.014), fr, 0, 1.91, 0.318); }
       else if (x === 'monocle') { put(tw(0.08, 0.013, 4, 12), mk('#F2C94C'), 0.11, 1.88, 0.325); put(G(0.012, 0.22, 0.012), mk('#F2C94C'), 0.2, 1.74, 0.322); }
       else if (x === 'eyepatch') { put(G(0.16, 0.14, 0.03), mk('#101018'), -0.11, 1.88, 0.318); const sd = put(G(0.025, 0.34, 0.02), mk('#101018'), -0.04, 1.97, 0.3); sd.rotation.z = -0.95; }
+      else if (x === 'readers') { [-1, 1].forEach(s => { const hm = put(tw(0.08, 0.012, 4, 12, PI), mk('#8B5A2B'), s * 0.11, 1.86, 0.318); hm.rotation.z = PI; const gl = put(new T.CylinderGeometry(0.075, 0.075, 0.01, 10), mk('#DCEBFA'), s * 0.11, 1.845, 0.316); gl.rotation.x = PI / 2; gl.scale.set(1, 1, 1); glass(gl); }); put(G(0.07, 0.012, 0.012), mk('#8B5A2B'), 0, 1.86, 0.318); }
+      else if (x === 'aviators') { const gold = mk('#F2C94C'); [-1, 1].forEach(s => { put(tw(0.095, 0.012, 4, 12), gold, s * 0.115, 1.87, 0.318); const gl = put(new T.CylinderGeometry(0.088, 0.088, 0.012, 10), mk('#5A3A1A'), s * 0.115, 1.87, 0.318); gl.rotation.x = PI / 2; gl.scale.set(1, 1.15, 1); gl.material.transparent = true; gl.material.opacity = 0.75; }); put(G(0.07, 0.014, 0.014), gold, 0, 1.9, 0.318); [-1, 1].forEach(s => put(G(0.16, 0.012, 0.012), gold, s * 0.26, 1.88, 0.2).rotation.y = s * 0.9); }
       else if (x === 'goggles') { [-1, 1].forEach(s => { put(tw(0.085, 0.022, 5, 10), fr, s * 0.115, 2.0, 0.31); const gl = put(new T.CylinderGeometry(0.075, 0.075, 0.02, 8), mk('#7FD6E8'), s * 0.115, 2.0, 0.315); gl.rotation.x = PI / 2; }); const bd = put(tw(0.31, 0.022, 5, 12), fr, 0, 2.0, 0); bd.rotation.x = PI / 2; }
     }
     if (C.cyber) {
@@ -3179,9 +3342,24 @@ const World = (function () {
       if (y === 'cyant' || kit) { [[0.13, 0.4, -0.25], [-0.1, 0.32, 0.18]].forEach(a => { put(new T.CylinderGeometry(0.014, 0.014, a[1], 5), metal, a[0], 2.12 + a[1] / 2, -0.04).rotation.z = a[2]; put(new T.IcosahedronGeometry(0.045, 0), red, a[0] + Math.sin(-a[2]) * a[1] * 0.5, 2.12 + a[1] * 0.95, -0.04); }); put(new T.CylinderGeometry(0.06, 0.07, 0.05, 6), dk, 0, 2.1, -0.04); }
       if (y === 'cyjet' || kit) { [-1, 1].forEach(sd => { put(new T.CylinderGeometry(0.09, 0.09, 0.5, 7), metal, sd * 0.11, 1.18, -(bz + 0.09), true); put(new T.ConeGeometry(0.075, 0.14, 7), org, sd * 0.11, 0.86, -(bz + 0.09), true).rotation.x = PI; }); put(G(0.34, 0.12, 0.1), dk, 0, 1.38, -(bz + 0.06), true); }
     }
+    if (C.neck) {
+      const x = C.neck, zf = bz;
+      if (x === 'lanyard') { [-1, 1].forEach(s => { const st = put(G(0.025, 0.42, 0.012), mk('#0E9A8E'), s * 0.11, 1.42, zf); st.rotation.z = s * -0.18; }); put(G(0.16, 0.12, 0.02), mk('#F4F4F0'), 0, 1.18, zf + 0.01); put(G(0.1, 0.02, 0.022), mk('#2B3A55'), 0, 1.2, zf + 0.012); put(G(0.08, 0.015, 0.022), mk('#8A97A8'), -0.02, 1.16, zf + 0.012); }
+      else if (x === 'bowtie') { put(G(0.06, 0.07, 0.04), mk('#B32635'), 0, 1.55, zf, true); [-1, 1].forEach(s => { const fl = put(G(0.13, 0.09, 0.03), mk('#D9374A'), s * 0.095, 1.55, zf, true); fl.rotation.z = s * 0.28; }); }
+      else if (x === 'scarf') { const sc = put(tw(0.3, 0.09, 6, 10), mk('#B32635'), 0, 1.56, 0.02); sc.rotation.x = PI / 2; const tl = put(G(0.14, 0.42, 0.05), mk('#B32635'), 0.17, 1.33, zf + 0.02); tl.rotation.z = 0.08; [1.5, 1.4, 1.3].forEach(y => put(G(0.142, 0.05, 0.052), mk('#F4F4F0'), 0.17, y - 0.03, zf + 0.02).rotation.z = 0.08); }
+      else if (x === 'steth') { const tb = mk('#2B2B33'); [-1, 1].forEach(s => { const t = put(tw(0.26, 0.025, 5, 10, PI * 0.8), tb, 0, 1.52, 0.1); t.rotation.set(PI / 2, 0, s > 0 ? 0.15 : PI - 0.15); }); [-1, 1].forEach(s => { const tube = put(G(0.025, 0.38, 0.025), tb, s * 0.2, 1.3, zf + 0.01); tube.rotation.z = s * 0.1; }); const bell = put(new T.CylinderGeometry(0.07, 0.07, 0.03, 10), mk('#C9CDD3'), 0.22, 1.1, zf + 0.02); bell.rotation.x = PI / 2; }
+      else if (x === 'mortar') { const gold = mk('#F2C94C'); const ch = put(tw(0.3, 0.02, 5, 12), gold, 0, 1.56, 0.02); ch.rotation.x = PI / 2; put(new T.CylinderGeometry(0.07, 0.05, 0.08, 8), gold, 0, 1.32, zf + 0.02); put(new T.CylinderGeometry(0.015, 0.015, 0.14, 5), gold, 0.03, 1.38, zf + 0.03).rotation.z = -0.6; if (gold.emissive && gold.emissive.setHex) { gold.emissive.setHex(0x8A6A00); gold.emissiveIntensity = 0.4; } }
+    }
+    if (C.coat) {
+      const x = C.coat, zf = bz;
+      if (x === 'hoodie') { const hd = mk('#3B4A7A'); const hood = put(new T.IcosahedronGeometry(0.36, 0), hd, 0, 1.62, -0.2); hood.scale.set(1.05, 0.7, 0.9); put(G(0.42, 0.16, 0.06), hd, 0, 1.0, zf, true); [-1, 1].forEach(s => put(G(0.02, 0.3, 0.03), mk('#F4F4F0'), s * 0.07, 1.4, zf + 0.01, true)); }
+      else if (x === 'goldcoat') { const gold = mk('#F2C94C'); put(G(0.03, 0.9, 0.03), gold, 0, 1.1, zf + 0.01, true); [1.42, 1.22, 1.02, 0.82].forEach(y => put(new T.IcosahedronGeometry(0.03, 0), gold, 0.07, y, zf + 0.02, true)); [-1, 1].forEach(s => { const lp = put(G(0.14, 0.26, 0.02), gold, s * 0.12, 1.42, zf + 0.005, true); lp.rotation.z = s * 0.5; }); }
+      else if (x === 'cape') { const cp = put(G(0.72, 1.05, 0.05), mk('#B32635'), 0, 1.02, -(zf + 0.03), true); cp.rotation.x = 0.1; const col = put(tw(0.33, 0.05, 5, 10), mk('#D9374A'), 0, 1.58, 0); col.rotation.x = PI / 2; put(new T.IcosahedronGeometry(0.05, 0), mk('#F2C94C'), 0, 1.56, zf + 0.01, true); }
+    }
     if (C.extra) {
       const x = C.extra;
-      if (x === 'clownnose') put(new T.IcosahedronGeometry(0.065, 0), mk('#E0262F'), 0, 1.8, 0.345);
+      if (x === 'pin') { const pn = put(new T.CylinderGeometry(0.045, 0.045, 0.02, 10), mk('#F2C94C'), -0.18, 1.4, bz + 0.005, true); pn.rotation.x = PI / 2; put(G(0.03, 0.04, 0.012), mk('#2B3A55'), -0.18, 1.4, bz + 0.02, true); }
+      else if (x === 'clownnose') put(new T.IcosahedronGeometry(0.065, 0), mk('#E0262F'), 0, 1.8, 0.345);
       else if (x === 'headphones') { const bd = put(tw(0.33, 0.03, 5, 14, PI), mk('#2B2B33'), 0, 1.87, 0); bd.scale.set(1, 0.72, 1); [-1, 1].forEach(s => { const cup = put(new T.CylinderGeometry(0.11, 0.11, 0.09, 8), mk('#E04F3A'), s * 0.335, 1.87, 0); cup.rotation.z = PI / 2; }); }
       else if (x === 'earring') { [-1, 1].forEach(s => put(new T.IcosahedronGeometry(0.035, 0), mk('#F2C94C'), s * 0.31, 1.73, 0.04)); }
       else if (x === 'bowtie') { put(G(0.06, 0.07, 0.04), mk('#B32635'), 0, 1.55, bz, true); [-1, 1].forEach(s => { const fl = put(G(0.13, 0.09, 0.03), mk('#D9374A'), s * 0.095, 1.55, bz, true); fl.rotation.z = s * 0.28; }); }
@@ -3364,6 +3542,13 @@ const World = (function () {
       if (on(3)) put(new T.BoxGeometry(0.2, 0.09, 0.13), goldM, 0, -0.7, 0.02, arm);
       if ((on(6) || o.elder) && s === 1) { put(new T.CylinderGeometry(0.025, 0.025, 1.05, 5), own('#5B3A21'), 0, -1.02, 0.06, arm); put(new T.IcosahedronGeometry(0.07, 0), goldM, 0, -0.5, 0.06, arm); }
       if (o.cosm && (o.cosm.cyber === 'cyarm' || o.cosm.cyber === 'cykit') && s === 1) { const mt = own('#9AA7B5'), dk2 = own('#2B3340'), gl = own('#2CCDBB'); if (gl.emissive && gl.emissive.setHex) { gl.emissive.setHex(0x1FB5A5); gl.emissiveIntensity = 0.9; } put(new T.BoxGeometry(0.2, 0.36, 0.21), mt, 0, -0.44, 0, arm); put(new T.BoxGeometry(0.22, 0.06, 0.23), dk2, 0, -0.25, 0, arm); put(new T.BoxGeometry(0.21, 0.04, 0.22), gl, 0, -0.62, 0, arm); [-1, 1].forEach(cs => put(new T.BoxGeometry(0.05, 0.14, 0.06), dk2, cs * 0.05, -0.76, 0.03, arm)); }
+      if (o.cosm && o.cosm.hands && s === 1) {
+        const hh = o.cosm.hands;
+        if (hh === 'mug') { put(new T.CylinderGeometry(0.08, 0.07, 0.15, 8), own('#0E9A8E'), 0, -0.72, 0.1, arm); put(new T.CylinderGeometry(0.082, 0.082, 0.04, 8), own('#F4F4F0'), 0, -0.72, 0.1, arm); const hd = put(new T.TorusGeometry(0.045, 0.014, 5, 8), own('#0E9A8E'), 0.09, -0.72, 0.1, arm); hd.rotation.y = PI / 2; put(new T.CylinderGeometry(0.065, 0.065, 0.01, 8), own('#5B3A21'), 0, -0.645, 0.1, arm); }
+        else if (hh === 'clipboard') { put(new T.BoxGeometry(0.28, 0.36, 0.03), own('#8B5A2B'), 0.02, -0.72, 0.14, arm); put(new T.BoxGeometry(0.24, 0.3, 0.02), own('#FFFFFF'), 0.02, -0.73, 0.16, arm); put(new T.BoxGeometry(0.1, 0.04, 0.05), own('#9AA7B5'), 0.02, -0.55, 0.15, arm); [-0.8, -0.72, -0.64].forEach(y => put(new T.BoxGeometry(0.16, 0.012, 0.022), own('#9AA7B5'), 0.02, y, 0.17, arm)); }
+        else if (hh === 'pillbottle') { put(new T.CylinderGeometry(0.11, 0.11, 0.34, 10), own('#F2A516'), 0.02, -0.74, 0.14, arm); put(new T.CylinderGeometry(0.12, 0.12, 0.07, 10), own('#F4F4F0'), 0.02, -0.54, 0.14, arm); put(new T.BoxGeometry(0.16, 0.14, 0.012), own('#FFFFFF'), 0.02, -0.76, 0.255, arm); }
+        else if (hh === 'wand') { const wd = put(new T.CylinderGeometry(0.014, 0.014, 0.5, 5), own('#2B2B33'), 0.03, -0.6, 0.1, arm); wd.rotation.x = 0.4; const st = own('#F2C94C'); if (st.emissive && st.emissive.setHex) { st.emissive.setHex(0xD9A000); st.emissiveIntensity = 0.9; } const star = put(new T.OctahedronGeometry(0.07, 0), st, 0.03, -0.36, 0.2, arm); P.wandStar = star; }
+      }
       if (karen && s === 1) put(new T.BoxGeometry(0.34, 0.27, 0.13), own('#8A63C9'), 0, -0.82, 0.06, arm);
       if (o.inspector && s === 1) { put(new T.BoxGeometry(0.3, 0.38, 0.04), own('#C9A06A'), 0, -0.8, 0.1, arm); put(new T.BoxGeometry(0.24, 0.3, 0.02), own('#FFFFFF'), 0, -0.8, 0.125, arm); }
     });
@@ -4104,6 +4289,7 @@ const World = (function () {
     const g = frameGroups[i], w = WALL[i]; if (!g || !w) return;
     popGroup(g); burst(new T.Vector3(w.x + (w.ry ? 0.6 : 0), w.y - 0.5, w.z + (w.ry ? 0 : 0.6)), 14, 0xF2A516, 0.9);
   };
+  api.petsInfo = function () { return pets.map(p => { const q = p.g.position, sc = api.screenOf ? api.screenOf(q.x, q.y + 0.3, q.z) : null; return { kind: p.kind, x: q.x, z: q.z, carried: !!p.carried, sx: sc && sc.x, sy: sc && sc.y }; }); };
   api.unlockPet = function (k) {
     if (k === 'fish') { if (fishG) { popGroup(fishG); burst(new T.Vector3(FISH_AT[0], 1.3, FISH_AT[1]), 12, 0x7FD6F0, 0.8); } return; }
     const p = pets.find(x => x.kind === k); if (!p) return;
@@ -4137,21 +4323,26 @@ const World = (function () {
   }
   /* ---- pets ---- */
   const pets = [];
+  const PET_BASE = { bunnyx: 'bunny', catx: 'cat', dogx: 'dog', orange: 'cat' };
   function petModel(kind) {
     const g = new T.Group(), pe = (geo, c, x, y, z) => { const m = add(g, geo, c, x, y, z); m.userData.pet = true; return m; };
     const B = (w, h, d) => new T.BoxGeometry(w, h, d), I = (r) => new T.IcosahedronGeometry(r, 0);
-    if (kind === 'bunny') {
+    const chubby = /x$/.test(kind), orange = kind === 'orange', base = PET_BASE[kind] || kind;
+    const CAT = orange ? '#F28C28' : '#9A9FB0', CAT2 = orange ? '#C96A12' : '#6F7488'; // base cat is a gray tabby, the orange cat is the special one
+    if (base === 'bunny') {
       sc(pe(I(0.22), '#F7F3EE', 0, 0.24, 0), 1, 0.9, 1.25); pe(I(0.15), '#F7F3EE', 0, 0.4, 0.24);
       rot(pe(B(0.06, 0.3, 0.05), '#F7F3EE', -0.07, 0.66, 0.2), 0.12); rot(pe(B(0.06, 0.3, 0.05), '#F7F3EE', 0.07, 0.66, 0.2), -0.12);
       pe(B(0.04, 0.2, 0.03), '#F4B6C2', -0.07, 0.66, 0.23); pe(B(0.04, 0.2, 0.03), '#F4B6C2', 0.07, 0.66, 0.23);
       pe(I(0.08), '#FFFFFF', 0, 0.28, -0.27); pe(B(0.03, 0.03, 0.03), '#1B1B24', -0.06, 0.43, 0.37); pe(B(0.03, 0.03, 0.03), '#1B1B24', 0.06, 0.43, 0.37); pe(B(0.04, 0.03, 0.03), '#F08A9C', 0, 0.38, 0.39);
-    } else if (kind === 'cat') {
-      pe(B(0.26, 0.24, 0.5), '#E0953A', 0, 0.3, 0); pe(I(0.17), '#E0953A', 0, 0.46, 0.3);
-      pe(new T.ConeGeometry(0.06, 0.13, 4), '#E0953A', -0.1, 0.63, 0.3); pe(new T.ConeGeometry(0.06, 0.13, 4), '#E0953A', 0.1, 0.63, 0.3);
-      rot(pe(B(0.05, 0.05, 0.42), '#C9792A', 0, 0.46, -0.4), 0).rotation.x = -0.7;
-      [[-0.09, 0.2], [0.09, 0.2], [-0.09, -0.2], [0.09, -0.2]].forEach(l => pe(B(0.07, 0.2, 0.07), '#C9792A', l[0], 0.1, l[1]));
-      pe(B(0.04, 0.04, 0.03), '#1B1B24', -0.07, 0.49, 0.45); pe(B(0.04, 0.04, 0.03), '#1B1B24', 0.07, 0.49, 0.45); pe(B(0.04, 0.03, 0.03), '#F08A9C', 0, 0.44, 0.47);
-      pe(B(0.27, 0.04, 0.12), '#C9792A', 0, 0.43, 0.04);
+    } else if (base === 'cat') {
+      pe(B(0.26, 0.24, 0.5), CAT, 0, 0.3, 0); pe(I(0.17), CAT, 0, 0.46, 0.3);
+      pe(new T.ConeGeometry(0.06, 0.13, 4), CAT, -0.1, 0.63, 0.3); pe(new T.ConeGeometry(0.06, 0.13, 4), CAT, 0.1, 0.63, 0.3);
+      rot(pe(B(0.05, 0.05, 0.42), CAT2, 0, 0.46, -0.4), 0).rotation.x = -0.7;
+      [[-0.09, 0.2], [0.09, 0.2], [-0.09, -0.2], [0.09, -0.2]].forEach(l => pe(B(0.07, 0.2, 0.07), CAT2, l[0], 0.1, l[1]));
+      pe(B(0.04, 0.04, 0.03), orange ? '#2E7D32' : '#1B1B24', -0.07, 0.49, 0.45); pe(B(0.04, 0.04, 0.03), orange ? '#2E7D32' : '#1B1B24', 0.07, 0.49, 0.45); pe(B(0.04, 0.03, 0.03), '#F08A9C', 0, 0.44, 0.47);
+      pe(B(0.27, 0.04, 0.12), CAT2, 0, 0.43, 0.04);
+      [-0.12, 0, 0.12].forEach(z => pe(B(0.28, 0.03, 0.05), CAT2, 0, 0.42, z)); // tabby stripes
+      if (orange) { pe(B(0.18, 0.1, 0.06), '#FFF4E0', 0, 0.3, 0.26); pe(new T.TorusGeometry(0.13, 0.025, 5, 10), '#F2C94C', 0, 0.37, 0.3).rotation.x = PI / 2; const bell = pe(I(0.035), '#F2C94C', 0, 0.3, 0.44); bell.material.emissive && bell.material.emissive.setHex && (bell.material.emissive.setHex(0xA07800), bell.material.emissiveIntensity = 0.6); }
     } else {
       pe(B(0.3, 0.3, 0.6), '#9B6A3C', 0, 0.36, 0); pe(B(0.26, 0.26, 0.26), '#9B6A3C', 0, 0.56, 0.4); pe(B(0.16, 0.14, 0.18), '#C9A06A', 0, 0.5, 0.56);
       rot(pe(B(0.07, 0.2, 0.14), '#6B4426', -0.15, 0.54, 0.36), 0.2); rot(pe(B(0.07, 0.2, 0.14), '#6B4426', 0.15, 0.54, 0.36), -0.2);
@@ -4159,6 +4350,8 @@ const World = (function () {
       rot(pe(B(0.06, 0.28, 0.06), '#6B4426', 0, 0.52, -0.36), 0.7);
       [[-0.1, 0.22], [0.1, 0.22], [-0.1, -0.22], [0.1, -0.22]].forEach(l => pe(B(0.08, 0.22, 0.08), '#6B4426', l[0], 0.11, l[1]));
     }
+    if (chubby) { g.scale.set(1.3, 1.1, 1.3); const belly = pe(I(base === 'bunny' ? 0.26 : 0.24), base === 'bunny' ? '#F7F3EE' : base === 'cat' ? CAT : '#9B6A3C', 0, base === 'bunny' ? 0.22 : 0.26, base === 'bunny' ? 0 : -0.02); belly.scale.set(1.15, 0.9, 1.25); }
+    if (orange) g.scale.set(1.2, 1.2, 1.2);
     return g;
   }
   function petTarget() {
@@ -4169,15 +4362,15 @@ const World = (function () {
   function spawnPet(kind, animate) {
     const g = petModel(kind); petG.add(g); const t = petTarget();
     g.position.set(animate ? 5 : t.x, 0, animate ? 8.6 : t.z);
-    const p = { g, kind, pet: true, r: 0.32, dy: 1.15, wp: [t], idle: 1 + Math.random() * 2, phase: Math.random() * 6, speed: kind === 'bunny' ? 1.9 : kind === 'cat' ? 1.5 : 1.7, hopH: 0.3, onStuck: pp => { pp.wp = [petTarget()]; } };
+    const p = { g, kind, pet: true, r: 0.32, dy: 1.15, wp: [t], idle: 1 + Math.random() * 2, phase: Math.random() * 6, speed: (kind === 'bunny' ? 1.9 : kind === 'cat' ? 1.5 : kind === 'orange' ? 1.6 : 1.7) * (/x$/.test(kind) ? 0.7 : 1), hopH: 0.3, onStuck: pp => { pp.wp = [petTarget()]; } };
     g.userData.P = { arms: [{ rotation: { x: 0 } }, { rotation: { x: 0 } }], legs: [], shirtM: { emissive: { setHex() { } } } };
     pets.push(p); return p;
   }
-  const PET_SAY = { bunny: ['🐰', 'Boing!'], cat: ['Meow!', '😺'], dog: ['Woof!', '🐶'] };
+  const PET_SAY = { bunny: ['🐰', 'Boing!'], cat: ['Meow!', '😺'], dog: ['Woof!', '🐶'], bunnyx: ['🐰', 'Hmph.', 'Snack?'], catx: ['Mrrp.', '😽', 'Nap time.'], dogx: ['Woof.', '🐶', 'Treat?'], orange: ['✨', 'Mrow!', '🧡', 'Zoomies!'] };
   function petReact(o) {
     if (o.fx && o.fx.type !== 'bump') return;
     o.fx = { type: 'hop', t: 0, dur: 0.8 }; o.stall = Math.max(o.stall || 0, 0.8);
-    const l = PET_SAY[o.kind]; say(o, l[Math.floor(Math.random() * l.length)], /^[^\w]*$/.test(l[0]) ? 'emo' : '');
+    const l = PET_SAY[o.kind] || PET_SAY.cat, w = l[Math.floor(Math.random() * l.length)]; say(o, w, /^[^\w]*$/.test(w) ? 'emo' : '');
   }
 
   function karenFx(c, dt) {
@@ -4248,11 +4441,16 @@ const World = (function () {
   function dismissHint() { if (hintGone) return; hintGone = true; const h = host.querySelector('.hint3d'); if (h) h.classList.add('gone'); }
   function bind() {
     // Drag to look around (mouse, touch or pen). One finger orbits, two fingers pinch to zoom. A tap still clicks.
-    const ptrs = new Map(); let drag = null, pinch = null, noClick = false;
+    const ptrs = new Map(); let drag = null, pinch = null, noClick = false, carry = null, carryCand = null;
+    // press on a pet and move: carry it around the floor; let go to set it down
+    const petOf = () => { let o = pickObj; while (o && o.parent && o.parent !== petG) o = o.parent; return o ? pets.find(p => p.g === o) : null; };
+    const floorAt = (e) => { const r = canvas.getBoundingClientRect(); ndc.x = ((e.clientX - r.left) / r.width) * 2 - 1; ndc.y = -((e.clientY - r.top) / r.height) * 2 + 1; raycaster.setFromCamera(ndc, camera); const o = raycaster.ray.origin, d = raycaster.ray.direction; if (Math.abs(d.y) < 1e-4) return null; const t = -o.y / d.y; if (t < 0) return null; return { x: clamp(o.x + d.x * t, -3.4, 8.0), z: clamp(o.z + d.z * t, 1.9, 6.0) }; };
+    const setDown = () => { if (!carry) return; const p = carry; carry = null; p.carried = false; p.g.position.y = 0; p.g.rotation.z = 0; p.wp = []; p.idle = 2 + Math.random() * 2; say(p, p.kind === 'orange' ? '✨' : '❤️', 'emo'); canvas.classList.remove('carrying'); if (B.onPetMove) B.onPetMove(p.kind); };
     canvas.addEventListener('pointerdown', e => {
       if (fpT || (e.pointerType === 'mouse' && e.button !== 0)) return;
       ptrs.set(e.pointerId, { x: e.clientX, y: e.clientY });
       try { canvas.setPointerCapture(e.pointerId); } catch (_) { /* ignore */ }
+      carryCand = null; if (ptrs.size === 1 && !labOn && !synOn) { const h = pick(e); if (h && h.pet) carryCand = petOf(); }
       if (ptrs.size === 1) drag = { sx: e.clientX, sy: e.clientY, lx: e.clientX, ly: e.clientY, on: false };
       else if (ptrs.size === 2) { const v = [...ptrs.values()]; pinch = { d: Math.hypot(v[0].x - v[1].x, v[0].y - v[1].y) || 1, g: grad }; if (drag) drag.on = true; canvas.classList.add('grabbing'); }
     });
@@ -4264,6 +4462,8 @@ const World = (function () {
         grad = clamp(pinch.g * pinch.d / d, baseRad * 0.55, baseRad * 1.3); noClick = true; dismissHint(); return;
       }
       if (!drag) return;
+      if (carry) { const f = floorAt(e); if (f) { carry.g.position.x = f.x; carry.g.position.z = f.z; } noClick = true; return; }
+      if (!drag.on && carryCand && Math.hypot(e.clientX - drag.sx, e.clientY - drag.sy) > 8) { carry = carryCand; carryCand = null; carry.carried = true; carry.wp = []; carry.fx = null; drag.on = true; canvas.classList.add('carrying'); dismissHint(); setHover(null); say(carry, '!', ''); return; }
       if (!drag.on && Math.hypot(e.clientX - drag.sx, e.clientY - drag.sy) > 8) { drag.on = true; canvas.classList.add('grabbing'); dismissHint(); setHover(null); }
       if (drag.on) {
         gth = clamp(gth - (e.clientX - drag.lx) * 0.0055, -0.9, 1.5);
@@ -4276,7 +4476,7 @@ const World = (function () {
       if (!ptrs.has(e.pointerId)) return;
       ptrs.delete(e.pointerId);
       if (ptrs.size < 2) pinch = null;
-      if (ptrs.size === 0) { if (drag && drag.on) noClick = true; drag = null; canvas.classList.remove('grabbing'); setTimeout(() => { noClick = false; }, 350); }
+      if (ptrs.size === 0) { if (carry) setDown(); carryCand = null; if (drag && drag.on) noClick = true; drag = null; canvas.classList.remove('grabbing'); setTimeout(() => { noClick = false; }, 350); }
     };
     canvas.addEventListener('pointerup', endPtr); canvas.addEventListener('pointercancel', endPtr);
     canvas.addEventListener('wheel', e => { if (fpT) return; e.preventDefault(); grad = clamp(grad + Math.sign(e.deltaY) * 1.5, baseRad * 0.55, baseRad * 1.3); dismissHint(); }, { passive: false });
@@ -4764,7 +4964,7 @@ const World = (function () {
       if (e.leaving && !e.wp.length) { custGroup.remove(e.g); extras.splice(i, 1); }
     }
     if (queue.length) { arriveT -= dt; if (arriveT <= 0) { arriveT = rushOn ? 5 + Math.random() * 4 : (15 + Math.random() * 9) * (slowOn ? 2.4 : 1); arrive(); } }
-    const all = queue.concat(leaving, extras, pets, cops.filter(c => copJob && copJob.phase === 'in'), visitor ? [visitor] : [], himH ? [himH] : []);
+    const all = queue.concat(leaving, extras, pets.filter(p => !p.carried), cops.filter(c => copJob && copJob.phase === 'in'), visitor ? [visitor] : [], himH ? [himH] : []);
     if (lineEl && queue.length !== lineN) { lineN = queue.length; lineEl.textContent = 'Line ' + lineN + '/' + maxq(); lineEl.className = 'line3d' + (lineN >= maxq() ? ' full' : lineN >= maxq() - 2 ? ' busy' : ''); }
     Crowd.separate(all, 1.15, onBump); Crowd.separate(stf, 1.0, onBump);
     Crowd.pushOut(all, 0.55); Crowd.pushOut(stf, 0.5);
@@ -4776,13 +4976,17 @@ const World = (function () {
     if (fishG) fishTick(dt);
     visitorTick(dt); himTick(dt);
     pets.forEach(pt => {
-      const w = moveTo(pt, pt.speed, dt, crowd); pt.phase += dt;
+      pt.phase += dt;
+      if (pt.carried) { pt.g.position.y = 0.55 + Math.sin(pt.phase * 6) * 0.04; pt.g.rotation.z = Math.sin(pt.phase * 3) * 0.12; return; }
+      if (pt.kind === 'orange' && Math.random() < dt * 0.35) burst(new T.Vector3(pt.g.position.x + (Math.random() - 0.5) * 0.4, 0.6 + Math.random() * 0.4, pt.g.position.z + (Math.random() - 0.5) * 0.4), 1, 0xF2C94C, 0.25);
+      const w = moveTo(pt, pt.speed, dt, crowd);
       if (!pt.fx) { pt.g.position.y = w ? Math.abs(Math.sin(pt.phase * (pt.kind === 'bunny' ? 10 : 13))) * (pt.kind === 'bunny' ? 0.16 : 0.05) : 0; pt.g.rotation.z = w ? Math.sin(pt.phase * 9) * 0.05 : 0; }
       if (!w) { pt.idle -= dt; if (pt.idle <= 0) { pt.idle = 1.5 + Math.random() * 4; pt.wp.push(petTarget()); if (Math.random() < 0.15) say(pt, '❤️', 'emo'); } }
     });
     if (pharm) {
       const P = pharm.g.userData.P, pp = pharm.g.position; pharm.phase += dt;
       if (P.spin) P.spin.forEach(m => { m.rotation.y += dt * 18; });
+      if (P.wandStar) P.wandStar.rotation.y += dt * 4; if (P.halo) P.halo.position.y = 2.28 + Math.sin(time * 2) * 0.03;
       if (buffOn) {
         const pu = 0.5 + 0.5 * Math.sin(time * 9); P.skinM.emissive.setRGB(0.34 + 0.22 * pu, 0.24 + 0.1 * pu, 0.02); buffCd -= dt;
         if (buffCd <= 0 && !pharm.fx) { buffCd = 2.6 + Math.random() * 1.6; startFx(pharm, Math.random() < 0.7 ? 'energy' : 'wave'); }
@@ -5435,7 +5639,7 @@ const World = (function () {
   function pillTick(dt) {
     if (!pillG) return;
     const ok = !labOn && !synOn && !paused && !fpT && (!B.pillOk || B.pillOk());
-    if (ok && pills.length < 2) { pillT -= dt; if (pillT <= 0) { pillT = 480 + Math.random() * 120; spawnPill(); } }
+    if (ok && pills.length < 2) { pillT -= dt; if (pillT <= 0) { pillT = (480 + Math.random() * 120) / (1 + (B.pillBoost ? B.pillBoost() : 0)); spawnPill(); } }
     for (let i = pills.length - 1; i >= 0; i--) {
       const o = pills[i], g = o.g, body = g.userData.body; o.t += dt;
       if (o.t < 0) continue; g.visible = true;
@@ -5856,6 +6060,22 @@ const World = (function () {
     ['TOP', 'Weekly drugs'], ['TP3', 'Weekly drugs \u00B7 P3'], ['CALC', 'Calculations'], ['PT3', 'PharmTox \u00B7 Exam 3 questions'], ['PT3G', 'PharmTox \u00B7 Exam 3 drug practice'], ['PT4', 'PharmTox \u00B7 Exam 4 drug practice'], ['TH3', 'Therapeutics \u00B7 Exam 3'], ['TH3F', 'Therapeutics \u00B7 IBS, constipation, diarrhea'], ['TH3C', 'Therapeutics \u00B7 Contraceptives'], ['GER', 'Therapeutics \u00B7 Geriatrics'], ['T553', 'Therapeutics III \u00B7 Syllabus topics'], ['HIM', 'Andy \u00B7 Heart failure'], ['MY', 'My studies']
   ];
   const CATNAME = {}; CATS.forEach(c => CATNAME[c[0]] = c[1]);
+  /* The Topics menu is built from this table. A new category needs a CATS entry above and a slot in one course here
+     (or a new course). Order here is the order on screen. `sched` attaches a weekly drug schedule (WKCFG key). */
+  const COURSES = [
+    { id: 'core', name: 'Core skills', tag: 'Every year', year: 'all', cats: ['BG', 'CL', 'MOA', 'AE', 'DDI', 'CN', 'AD', 'SIG', 'CALC', 'HIM'], note: 'The everyday counter questions: names, classes, mechanisms, side effects, interactions, counseling, antidotes, sig and law, calculations, and Andy’s heart failure questions.' },
+    { id: 'p443', name: 'PharmTox', code: 'PHAR 443', tag: 'P2', year: 'P2', cats: ['TOP', 'PT3', 'PT3G', 'PT4'], sched: 'p2', note: 'Weekly drug sheets plus the exam question sets.' },
+    { id: 'p451', name: 'Therapeutics', code: 'PHAR 451', tag: 'P2', year: 'P2', cats: ['TH3F', 'TH3C', 'TH3', 'GER'], note: 'Exam 3 GI and contraception topics, and geriatrics.' },
+    { id: 'p3top', name: 'Top 300 weekly drugs', short: 'Top 300', tag: 'P3', year: 'P3', cats: ['TP3'], sched: 'p3', note: 'Drug list sheets by system, one set per week.' },
+    { id: 'p553', name: 'Therapeutics III', code: 'PHAR 553', tag: 'P3', year: 'P3', cats: ['T553'], note: 'Syllabus topics: asthma, COPD, renal, diabetes, gout, migraine, RA and SLE, thyroid, liver, hepatitis, blood pressure, lipids, pain, nutrition, fluids and electrolytes.' },
+    { id: 'my', name: 'My studies', tag: 'Yours', year: 'all', cats: ['MY'], note: 'Decks you wrote or imported from Quizlet. Add and manage them on the My studies tab.' }
+  ];
+  const CHIP = { TOP: 'Weekly drugs', PT3: 'Exam 3: your exam questions', PT3G: 'Exam 3: drug-list practice', PT4: 'Exam 4: mania and psychosis drugs', TH3: 'Exam 3: IBD, ulcers, hemorrhoids and the rest', TH3F: 'Exam 3: IBS, constipation, diarrhea', TH3C: 'Exam 3: contraceptives', GER: 'Geriatrics: aging, polypharmacy, deprescribing', HIM: 'Heart failure: Andy’s questions', T553: 'Therapeutics III topics', TP3: 'Top 300 weekly drugs', MY: 'My studies' };
+  const courseCats = (c) => c.cats.filter(k => k !== 'MY' || S.decks.length);
+  const YEARS = ['P1', 'P2', 'P3'];
+  const curYear = () => YEARS.indexOf(S.set.year) >= 0 ? S.set.year : 'P2';
+  const inYear = (c, y) => c.year === 'all' || c.year === y;
+  const yearCats = (y) => { const o = []; COURSES.forEach(c => { if (inYear(c, y)) o.push.apply(o, courseCats(c)); }); return o; };
   const FLAVOR = {
     BG: ['Doc wrote the brand name, can you match it?', 'My insurance wants the generic.', 'The label on my bottle looks different.'],
     CL: ['What type of medicine is this one?', 'I want to understand what I am taking.', 'The last pharmacist called it a class, which one?'],
@@ -5905,7 +6125,7 @@ const World = (function () {
     return { cash: 0, earned: 0, rep: 50, streak: 0, best: 0, correct: 0, wrong: 0, served: 0, franchises: 0,
       pw: { hint: 0, second: 0, binder: 0 }, daily: null, recall: [], reg: {}, calcOK: 0, mastery: {}, missed: [], karenCd: 0, karenWin: 0, karenLoss: 0, sweatyCd: 0, jimWin: 0, jimLoss: 0, phoneOK: 0, phoneBad: 0, phoneMiss: 0, lastShelve: 0, retired: 0, shelveOK: 0, shelveBad: 0, priorN: 0, decks: [],
       me: { done: false, body: 'normal', gender: 'n', hair: 0, hairColor: 0, skin: 1, scrub: 0, shirt: 0, shoes: 3 }, awards: { frames: [], pets: [] },
-      set: { topics: topics, diffs: [1, 2, 3], mode: 'mixed', timer: true, focus: false, conf: true },
+      set: { topics: topics, diffs: [1, 2, 3], mode: 'mixed', timer: true, focus: false, conf: true, p2fold: true, p3fold: true },
       vial: [], cosm: [], cosmOn: {}, pillN: 0, store: { own: [], walls: 'w0', floor: 'f0', uni: '', deco: [] },
       up: { shelf: 0, tech: 0, train: 0, counsel: 0, robot: 0 } };
   }
@@ -5931,6 +6151,8 @@ const World = (function () {
         f.set = Object.assign(d, os); f.set.topics = Object.assign(defaults().set.topics, os.topics || {});
         if (os.topics && os.topics.TH3 === false) { if (os.topics.TH3F === undefined) f.set.topics.TH3F = false; if (os.topics.TH3C === undefined) f.set.topics.TH3C = false; }
         if (!Array.isArray(f.set.diffs) || !f.set.diffs.length) f.set.diffs = [1, 2, 3];
+        if (!f.set.year && (os.folder === 'P1' || os.folder === 'P3')) f.set.year = os.folder; delete f.set.folder;
+        if (os.p2fold === undefined) f.set.p2fold = true; if (os.p3fold === undefined) f.set.p3fold = true; // v120: schedules start collapsed inside the course cards
         if (!MODES.some(m => m[0] === f.set.mode)) f.set.mode = 'mixed'; // Even shuffle / Linear was removed
         if (!Array.isArray(f.decks)) f.decks = [];
       }
@@ -6166,7 +6388,7 @@ const World = (function () {
   const shopOwn = id => !!id && ((S.store || {}).own || []).indexOf(id) >= 0;
   const uniOf = () => SHOP_UNI.find(u => u[0] === (S.store || {}).uni);
   const uniBuff = () => { const u = uniOf(); return u && S.up.tech >= 1 ? u[5] : {}; };
-  const techRate = () => 0.4 * (0.5 + S.rep / 100) * franchiseMult() * (1 + 0.25 * S.up.shelf) * (1 + 0.4 * S.up.train) * (1 + (uniBuff().tech || 0));
+  const techRate = () => 0.4 * (0.5 + S.rep / 100) * franchiseMult() * (1 + 0.25 * S.up.shelf) * (1 + 0.4 * S.up.train) * (1 + (uniBuff().tech || 0) + gearBuff().tech);
   const passive = () => S.up.tech * techRate();
   /* power-ups: consumables bought in the Shop (Power-ups). Counts live in S.pw. */
   const PW_MAX = 9;
@@ -6266,21 +6488,21 @@ const World = (function () {
   function wkSchedHTML(k, title) {
     const st = S.set, c = WKCFG[k], t = todayStr(), cw = c.cur(), n = c.L.filter(w => wkOn(k, w.n)).length;
     const row = (w) => { const on = wkOn(k, w.n), started = w.from <= t, cnt = k === 'p3' ? w.ids.length : DRUGS.filter(d => d.w === w.n).length, lab = (w.t ? 'Wk ' + w.wk + ' · ' : '') + w.d;
-      return `<li class="${w.n === cw ? 'now' : started || on ? '' : 'lock'}${on ? '' : ' off'}"><button type="button" data-act="wkpick" data-v="${k}:${w.n}" aria-pressed="${on}" aria-label="${esc(lab)} ${esc(w.topic)}: ${on ? 'on' : 'off'}"><i class="p3box">${on ? '✓' : ''}</i><b>${esc(lab)}</b><span>${esc(w.topic)}</span><small>${on ? cnt + ' drugs' + (w.n === cw ? ' · this week' : started ? '' : ' · upcoming') : 'off'}</small></button></li>`; };
+      return `<li class="${w.n === cw ? 'now' : started || on ? '' : 'lock'}${on ? '' : ' off'}${shown(w) ? '' : ' upc'}"${shown(w) ? '' : ' hidden'} data-find="${esc(('week ' + w.wk + ' wk ' + w.wk + ' ' + (w.t || '') + ' ' + w.d + ' ' + w.topic + (w.n === cw ? ' this week now' : '')).toLowerCase())}"><button type="button" data-act="wkpick" data-v="${k}:${w.n}" aria-pressed="${on}" aria-label="${esc(lab)} ${esc(w.topic)}: ${on ? 'on' : 'off'}"><i class="p3box">${on ? '✓' : ''}</i><b>${esc(lab)}</b><span>${esc(w.topic)}</span><small>${on ? cnt + ' drugs' + (w.n === cw ? ' · this week' : started ? '' : ' · upcoming') : 'off'}</small></button></li>`; };
     const started = c.L.filter(w => w.from <= t), up = c.L.filter(w => w.from > t), foldUp = up.length > 3 && !st[k + 'up'];
     const shown = (w) => w.from <= t || !foldUp || wkOn(k, w.n);
     let body = '';
     const courses = [];
     c.L.forEach(w => { if (w.t && courses.indexOf(w.t) < 0) courses.push(w.t); });
     if (courses.length) courses.forEach(cr => {
-      const ws = c.L.filter(w => w.t === cr), vis = ws.filter(shown); if (!vis.length) return;
+      const ws = c.L.filter(w => w.t === cr), vis = ws.filter(shown); if (!vis.length) return; // upcoming rows are rendered hidden (class upc) so the find box can reach them
       const allOn = ws.every(w => wkOn(k, w.n));
-      body += `<div class="crshd"><b>${esc(cr)}</b><span><button type="button" class="link" data-act="wkcourse" data-v="${k}:${esc(cr)}|1">All</button> &middot; <button type="button" class="link" data-act="wkcourse" data-v="${k}:${esc(cr)}|0">None</button></span></div><ol class="p3sched">${vis.map(row).join('')}</ol>`;
+      body += `<div class="crshd"><b>${esc(cr)}</b><span><button type="button" class="link" data-act="wkcourse" data-v="${k}:${esc(cr)}|1">All</button> &middot; <button type="button" class="link" data-act="wkcourse" data-v="${k}:${esc(cr)}|0">None</button></span></div><ol class="p3sched">${ws.map(row).join('')}</ol>`;
     });
-    else body = `<ol class="p3sched">${c.L.filter(shown).map(row).join('')}</ol>`;
+    else body = `<ol class="p3sched">${c.L.map(row).join('')}</ol>`;
     const hidden = c.L.filter(w => !shown(w)).length;
     const more = up.length > 3 ? `<button type="button" class="link upmore" data-act="wkup" data-v="${k}">${st[k + 'up'] ? 'Hide' : 'Show'} upcoming weeks${hidden ? ' (' + hidden + ' more)' : ''}</button>` : '';
-    return `<div class="grp"><div class="grphd"><button type="button" class="fold" data-act="wkfold" data-v="${k}" aria-expanded="${!st[k + 'fold']}"><i>${st[k + 'fold'] ? '▸' : '▾'}</i> ${title}</button><span class="grpr"><button type="button" class="chip sm" data-act="wkpick" data-v="${k}:only" aria-pressed="${wkOnlyNow(k)}">This week only</button><button type="button" class="link" data-act="wkpick" data-v="${k}:all">All</button> &middot; <button type="button" class="link" data-act="wkpick" data-v="${k}:none">None</button></span></div>${st[k + 'fold'] ? `<p class="note">${n} of ${c.L.length} weeks on. Tap ${title} to show the schedule.</p>` : body + more + `<p class="note">${k === 'p3' ? weekNote3() : weekNote()}</p>`}<div class="chips" aria-label="Weekly question types">${WK_TYPES.map(x => `<button type="button" class="chip" data-act="wktype" data-v="${x[0]}" aria-pressed="${!(st.wkTypes && st.wkTypes[x[0]] === false)}">${x[1]}</button>`).join('')}</div></div>`;
+    return `<div class="grp"><div class="grphd"><button type="button" class="fold" data-act="wkfold" data-v="${k}" aria-expanded="${!st[k + 'fold']}"><i>${st[k + 'fold'] ? '▸' : '▾'}</i> ${title}</button><span class="grpr"><button type="button" class="chip sm" data-act="wkpick" data-v="${k}:only" aria-pressed="${wkOnlyNow(k)}">This week only</button><button type="button" class="link" data-act="wkpick" data-v="${k}:all">All</button> &middot; <button type="button" class="link" data-act="wkpick" data-v="${k}:none">None</button></span></div>${st[k + 'fold'] ? `<p class="note wkfoldnote">${n} of ${c.L.length} weeks on. Tap ${title} to show the schedule.</p>` : ''}<div class="wkbody"${st[k + 'fold'] ? ' hidden' : ''}>${body + more}<p class="note">${k === 'p3' ? weekNote3() : weekNote()}</p></div><div class="chips" aria-label="Weekly question types">${WK_TYPES.map(x => `<button type="button" class="chip" data-act="wktype" data-v="${x[0]}" aria-pressed="${!(st.wkTypes && st.wkTypes[x[0]] === false)}">${x[1]}</button>`).join('')}</div></div>`;
   }
   const wkTypeOff = (q) => !!(S.set.wkTypes && S.set.wkTypes[q.wt] === false);
   const focusOn = () => !!S.set.focus;
@@ -6341,7 +6563,7 @@ const World = (function () {
     const stage = cur.elderStage, hear = stage === 1;
     const opts = ELDER_GREET[cur.seed % ELDER_GREET.length].map((t, i) => `<button type="button" class="opt" style="grid-row:${i + 1};grid-column:1" data-elder="${i}" ${hear ? 'disabled' : ''}><kbd>${i + 1}</kbd><span>${esc(t)}</span></button>`).join('');
     return `<article class="rx elder"><div class="rx-head"><span class="rx-sym" aria-hidden="true">&#8478;</span><div class="rx-meta"><b>${esc(cur.name.toUpperCase())} \u00B7 prescription pick-up</b><span>Say hello</span></div></div>
-      <div class="rx-body"><div class="patient ${hear ? 'hear' : ''}">${avatar(cur.seed, 'idle', false, false, true)}${hear ? '<span class="cmarks" aria-hidden="true"><i>?</i><i>?</i><i>?!</i></span>' : ''}<div class="bubble"><em>${hear ? '*cups a hand to her ear*' : esc(cur.name)}</em><p>${hear ? 'WHAT?? I can\u2019t hear you!' : esc(cur.ask)}</p></div></div>
+      <div class="rx-body"><div class="patient ${hear ? 'hear' : ''}">${avatar(cur.seed, 'idle', false, false, true)}${hear ? '<span class="cmarks" aria-hidden="true"><i>?</i><i>?</i><i>?!</i></span>' : ''}<div class="bubble"><em>${hear ? '*cups a hand to her ear*' : esc(cur.name)}</em><p>${hear ? 'WHAT?? I can’t hear you!' : esc(cur.ask)}</p></div></div>
       <div class="opts" role="group" aria-label="Greeting choices">${opts}</div>
       <div class="tools"><span class="keyhint">${hear ? 'She leans in closer...' : 'Pick a greeting.'}</span></div></div></article>`;
   }
@@ -6441,12 +6663,12 @@ const World = (function () {
       S.streak++; S.best = Math.max(S.best, S.streak); S.correct++; holCorrect();
       const base = 10 * [1, 1.6, 2.4][q.d - 1];
       const shelf = 1 + 0.25 * S.up.shelf;
-      const speed = timerOn() ? 1 + 0.5 * Math.max(0, 1 - elapsed / 20) : 1;
-      const bz = buffOn() ? 3 : 1, streakN = Math.min(S.streak * bz, (5 + 3 * S.up.counsel) * bz), streak = 1 + 0.05 * streakN;
+      const speed = timerOn() ? 1 + 0.5 * Math.max(0, 1 - elapsed / (20 + gearBuff().time)) : 1;
+      const bz = buffOn() ? 3 : 1, streakN = Math.min(S.streak * bz, (5 + 3 * S.up.counsel + gearBuff().streak) * bz), streak = 1 + 0.05 * streakN;
       const lucky = Math.random() < 0.06 * S.up.robot, fr = franchiseMult();
       pay = Math.max(1, Math.round(base * shelf * speed * streak * fr * buffPay() * (lucky ? 2 : 1) * (cur.hint ? 0.5 : 1) * (cur.secUsed ? 0.5 : 1) * (cur.binder ? 0.85 : 1) * (cur.recall ? 1.5 : 1) * (cur.regular ? 1.25 : 1) * (karen ? 2 : 1) * (sweaty ? 1.5 : 1) * (rush.on ? 1.5 : 1) * (cur.lab ? 1.5 : 1)));
       chips.push(`<span class="big">+${money(pay)}</span>`, `<span>base $${base.toFixed(0)}</span>`);
-      if (blessOn()) chips.push('<span>Andy\u2019s blessing x' + BLESS_MULT.toFixed(2) + '</span>');
+      if (blessOn()) chips.push('<span>Andy’s blessing x' + BLESS_MULT.toFixed(2) + '</span>');
       if (S.up.shelf) chips.push(`<span>shelves x${shelf.toFixed(2)}</span>`);
       if (timerOn()) chips.push(`<span>speed x${speed.toFixed(2)}</span>`);
       if (streakN > 0) chips.push(`<span>streak x${streak.toFixed(2)} (${S.streak} in a row)</span>`);
@@ -6461,7 +6683,7 @@ const World = (function () {
       if (cur.regular) chips.push('<span>regular x1.25</span>');
       if (karen) chips.push('<span>Karen calmed x2</span>');
       if (sweaty) chips.push('<span>Jim relieved x1.5</span>');
-      S.cash += pay; S.earned += pay; S.rep = Math.min(100, S.rep + (karen ? 5 : sweaty ? 3 : 2));
+      S.cash += pay; S.earned += pay; S.rep = Math.min(100, S.rep + (karen ? 5 : sweaty ? 3 : 2) + gearBuff().rep);
       if (q.gen) S.calcOK++;
       if (cur.lab) { S.labOK = (S.labOK || 0) + 1; }
       if (karen) S.karenWin++;
@@ -6703,49 +6925,86 @@ const World = (function () {
     return m;
   }
   function hubTabs(active) {
-    const n = customCount();
-    return `<div class="hubtabs" role="tablist"><button type="button" role="tab" aria-selected="${active === 'set'}" data-act="tab-set">Topics</button><button type="button" role="tab" aria-selected="${active === 'studies'}" data-act="tab-studies">My studies${n ? ' (' + n + ')' : ''}</button></div>`;
-  }
-  function cabinetHTML(active) {
-    return '<div class="fcab" role="tablist" aria-label="Folders">' + ['P1', 'P2', 'P3'].map((f, i) => `<button type="button" role="tab" class="ftab ft${i + 1}" aria-selected="${active === f}" data-act="folder" data-v="${f}"><span>${f}</span></button>`).join('') + '</div>';
+    const n = customCount(), tab = (id, act, label) => `<button type="button" role="tab" aria-selected="${active === id}" data-act="${act}">${label}</button>`;
+    return `<div class="hubtabs" role="tablist">${tab('set', 'tab-set', 'Topics')}${tab('opts', 'tab-opts', 'Settings')}${tab('studies', 'tab-studies', 'My studies' + (n ? ' (' + n + ')' : ''))}</div>`;
   }
   function weekNote3() {
     const n = curWeek3(), w = WK3[n];
     if (!w) { const f = P3WEEKS[0]; return 'P3 weekly drugs start on ' + esc(f.from) + ' (' + esc(f.topic) + '). Tap a week to preview it now.'; }
     return 'Now: ' + esc(w.d) + ' \u00B7 ' + esc(w.topic) + '. Tap a week to add or remove it, including upcoming weeks.';
   }
+  const nbWrap = (title, inner) => `<div class="pane nbk ${nbClosing ? 'closing' : ''}"><div class="nbcover"><span class="nbtitle">${title}</span></div><div class="nbsheet">${inner}</div></div>`;
+  const nbFoot = () => { const n = poolQs().length; return `<p class="count">${n} question${n === 1 ? '' : 's'} match${calcOn() ? ' + endless calculations' : ''}</p>
+      <div class="btnrow"><button type="button" class="btn go nbback" data-act="back">Close notebook and return to counter</button><button type="button" class="btn" data-act="tour">Replay tour</button><button type="button" class="btn" data-act="reset-set">Reset settings</button></div>`; };
+  /* "Only this course": every topic outside the course is off (and something inside is on) */
+  const courseOnly = (c) => { const st = S.set, ins = courseCats(c); return ins.some(k => st.topics[k]) && CATS.every(x => ins.indexOf(x[0]) >= 0 || !st.topics[x[0]] || (x[0] === 'MY' && !S.decks.length)); };
+  const weekOnly = (k) => { const cat = WKCFG[k].topic; return S.set.topics[cat] && CATS.every(x => x[0] === cat || !S.set.topics[x[0]] || (x[0] === 'MY' && !S.decks.length)) && wkOnlyNow(k); };
+  const yearOnly = (y) => { const ins = yearCats(y); return ins.some(k => S.set.topics[k]) && CATS.every(x => ins.indexOf(x[0]) >= 0 || !S.set.topics[x[0]] || (x[0] === 'MY' && !S.decks.length)); };
+  function setOnly(keep) { // keep: list of cats to leave on; remembers the rest so a second tap restores them
+    const st = S.set; st.restore = {}; CATS.forEach(c => { st.restore[c[0]] = !!st.topics[c[0]]; st.topics[c[0]] = keep.indexOf(c[0]) >= 0 ? (c[0] === 'MY' ? !!S.decks.length : true) : false; });
+  }
+  function unsetOnly() { const st = S.set, rs = st.restore || {}; CATS.forEach(c => st.topics[c[0]] = rs[c[0]] !== undefined ? rs[c[0]] : true); delete st.restore; }
   function settingsHTML() {
     const st = S.set, mc = missedByCat(), ms = masteryByCat();
-    const chipOf = c => `<button type="button" class="chip tp" data-act="topic" data-v="${c[0]}" aria-pressed="${!!st.topics[c[0]]}"><span class="cn">${c[0] === 'PT3' ? 'Exam 3: your exam questions' : c[0] === 'PT3G' ? 'Exam 3: drug-list practice' : c[0] === 'PT4' ? 'Exam 4: mania and psychosis drugs' : c[0] === 'TH3' ? 'Exam 3: IBD, ulcers, hemorrhoids and the rest' : c[0] === 'TH3F' ? 'Exam 3: IBS, constipation, diarrhea' : c[0] === 'TH3C' ? 'Exam 3: contraceptives' : c[0] === 'GER' ? 'Geriatrics: aging, polypharmacy, deprescribing' : c[0] === 'T553' ? 'Relevant otherwise: Therapeutics III topics' : c[0] === 'TP3' ? 'Top 300 weekly drugs' : c[1]}${c[0] === 'TOP' && curWeek() ? ' <small class="mc wk">wk ' + curWeek() + '</small>' : ''}${mc[c[0]] ? ` <small class="mc">${mc[c[0]]} missed</small>` : ''}</span>${ms[c[0]] && ms[c[0]].n ? (() => { const pc = Math.round(100 * ms[c[0]].s / ms[c[0]].n); return `<span class="mbar" role="img" aria-label="${pc}% mastered"><i style="width:${pc}%"></i><em>${pc}%</em></span>`; })() : ''}</button>`;
-    const topics = CATS.filter(c => c[0] !== 'MY' && c[0] !== 'PT3' && c[0] !== 'PT3G' && c[0] !== 'PT4' && c[0] !== 'TH3' && c[0] !== 'TH3F' && c[0] !== 'TH3C' && c[0] !== 'GER' && c[0] !== 'TP3' && c[0] !== 'T553' || c[0] === 'MY' && S.decks.length).map(chipOf).join('');
-    const tox = CATS.filter(c => c[0] === 'PT3' || c[0] === 'PT3G' || c[0] === 'PT4').map(chipOf).join('');
-    const thx = CATS.filter(c => c[0] === 'TH3F' || c[0] === 'TH3C' || c[0] === 'GER' || c[0] === 'TH3').map(chipOf).join('');
+    const bar = (n, sn) => { if (!n) return ''; const pc = Math.round(100 * sn / n); return `<span class="mbar" role="img" aria-label="${pc}% mastered"><i style="width:${pc}%"></i><em>${pc}%</em></span>`; };
+    const chipOf = k => { const m = ms[k] || { n: 0, s: 0 }; return `<button type="button" class="chip tp" data-act="topic" data-v="${k}" aria-pressed="${!!st.topics[k]}" data-find="${esc((CHIP[k] || CATNAME[k]).toLowerCase())}"><span class="cn">${CHIP[k] || CATNAME[k]}${k === 'TOP' && curWeek() ? ' <small class="mc wk">wk ' + curWeek() + '</small>' : ''}${mc[k] ? ` <small class="mc">${mc[k]} missed</small>` : ''}</span>${bar(m.n, m.s)}</button>`; };
+    const total = CATS.filter(c => c[0] !== 'MY' || S.decks.length).length, onN = CATS.filter(c => st.topics[c[0]] && (c[0] !== 'MY' || S.decks.length)).length;
+    const card = (c) => {
+      const cats = courseCats(c); if (!cats.length) return '';
+      const on = cats.filter(k => st.topics[k]).length, open = !(st.cclose || {})[c.id];
+      let n = 0, sn = 0; cats.forEach(k => { const m = ms[k]; if (m) { n += m.n; sn += m.s; } });
+      const status = on === 0 ? 'off' : on === cats.length ? (cats.length === 1 ? 'on' : 'all ' + cats.length + ' on') : on + ' of ' + cats.length + ' on';
+      return `<details class="crs${on ? '' : ' off'}" data-crs="${c.id}"${open ? ' open' : ''}><summary><i class="caret" aria-hidden="true"></i><span class="crsn"><b>${esc(c.name)}</b><small>${c.code ? esc(c.code) + ' · ' : ''}${esc(c.tag)}</small></span><span class="crsst">${status}</span>${bar(n, sn)}</summary>
+        <div class="crsb"><div class="crsr"><span class="note">${esc(c.note)}</span><span class="grpr"><button type="button" class="link" data-act="course-all" data-v="${c.id}">All</button> &middot; <button type="button" class="link" data-act="course-none" data-v="${c.id}">None</button> &middot; <button type="button" class="link${courseOnly(c) ? ' arm' : ''}" data-act="course-only" data-v="${c.id}">${courseOnly(c) ? 'Only this (tap to undo)' : 'Only this'}</button></span></div>
+        <div class="chips">${cats.map(chipOf).join('')}</div>${c.sched ? wkSchedHTML(c.sched, c.sched === 'p3' ? 'Weekly schedule' : 'Weekly schedule') : ''}</div></details>`;
+    };
+    const yr = curYear(), inY = COURSES.filter(c => c.year === yr && courseCats(c).length).concat(COURSES.filter(c => c.year === 'all' && courseCats(c).length)), sched = inY.find(c => c.sched); // this year's courses first, shared ones (Core skills, My studies) after
+    const quick = [`<button type="button" class="chip" data-act="year-only" data-v="${yr}" aria-pressed="${yearOnly(yr)}">Only ${yr} topics</button>`]
+      .concat(sched ? [`<button type="button" class="chip" data-act="week-only" data-v="${sched.sched}" aria-pressed="${weekOnly(sched.sched)}">This week’s drugs only</button>`] : [])
+      .concat(inY.filter(c => c.id !== 'my' && c.id !== 'core').map(c => `<button type="button" class="chip" data-act="course-only" data-v="${c.id}" aria-pressed="${courseOnly(c)}">Only ${esc(c.short || c.name)}</button>`)).join('');
+    const yearTabs = '<div class="fcab" role="tablist" aria-label="Year">' + YEARS.map((f, i) => `<button type="button" role="tab" class="ftab ft${i + 1}" aria-selected="${yr === f}" data-act="year" data-v="${f}"><span>${f}</span></button>`).join('') + '</div>';
+    const empty = inY.every(c => c.year === 'all') ? `<div class="crs off"><div class="crsb"><p class="note">Nothing is filed under ${yr} yet. Core skills stay available in every year.</p></div></div>` : '';
+    const inner = `${hubTabs('set')}
+      <div class="tsum"><b>${onN} of ${total} topics on</b><span class="grpr"><button type="button" class="link" data-act="topics-all">All on</button> &middot; <button type="button" class="link" data-act="topics-none">All off</button></span></div>
+      ${yearTabs}<div class="fbody fb-${yr}" role="tabpanel" aria-label="${yr} courses">
+      <div class="grp"><b>Quick picks</b><div class="chips">${quick}</div><p class="note">One tap focuses on this year, one course, or this week’s drugs. Tap it again to bring the other topics back.</p></div>
+      <label class="find"><span class="vh">Find a topic</span><input type="search" id="tfind" placeholder="Find a topic or week in ${yr}" value="${esc(findQ)}" autocomplete="off"></label>
+      <div class="crsl">${inY.map(card).join('')}${empty}</div></div>
+      <p class="note nomatch" hidden>Nothing matches that. Try a shorter word.</p>
+      ${nbFoot()}`;
+    return nbWrap('Topics', inner);
+  }
+  function optionsHTML() {
+    const st = S.set;
     const diffs = [[1, 'Level 1 easy'], [2, 'Level 2 medium'], [3, 'Level 3 hard']].map(d => `<button type="button" class="chip" data-act="diff" data-v="${d[0]}" aria-pressed="${st.diffs.indexOf(d[0]) >= 0}">${d[1]}</button>`).join('');
     const modes = MODES.map(m => `<button type="button" class="chip" data-act="mode" data-v="${m[0]}" aria-pressed="${st.mode === m[0]}">${m[1]}${m[0] === 'review' && dueCount() ? ' (' + dueCount() + ' due)' : ''}</button>`).join('');
-    const n = poolQs().length;
-    const fold = st.folder === 'P1' || st.folder === 'P3' ? st.folder : 'P2';
-    const inFold = (f, c) => f === 'P3' ? (c[0] === 'TP3' || c[0] === 'T553') : f === 'P2' ? !(c[0] === 'TP3' || c[0] === 'T553') : false;
-    const onlyOn = (f) => { const o = CATS.filter(c => !inFold(f, c)); return f !== 'P1' && o.length > 0 && o.every(c => !st.topics[c[0]]); };
-    const fsw = (f) => `<div class="fsw${f === 'P1' ? ' dis' : ''}"><span class="fswl" id="fsw-${f}">Only ${f} topics<small>${f === 'P1' ? 'Nothing is filed here yet' : onlyOn(f) ? 'Other folders are switched off' : 'Switch off the other folders\u2019 topics'}</small></span><button type="button" class="swt" role="switch" aria-labelledby="fsw-${f}" aria-checked="${onlyOn(f)}" data-act="folder-only" data-v="${f}"${f === 'P1' ? ' disabled' : ''}><i></i></button></div>`;
-    const p2 = `${fsw('P2')}<h3>Question settings</h3><p class="sub">Changes apply to the next patient.</p>
-      <div class="grp"><b>Focus mode</b><div class="chips"><button type="button" class="chip" data-act="focus" aria-pressed="${!!st.focus}">Focus mode ${st.focus ? 'on' : 'off'}</button></div><p class="note">Hides the 3D pharmacy and turns off the timer, patient events, phone calls, Karen and Jim, so it is only questions.</p></div>
-      <div class="grp"><b>Topics <span><button type="button" class="link" data-act="topics-all">All</button> &middot; <button type="button" class="link" data-act="topics-none">None</button></span></b><div class="chips">${topics}</div>${tox ? '<div class="subgrp"><b class="subh">PharmTox</b><div class="chips">' + tox + '</div></div>' : ''}${thx ? '<div class="subgrp"><b class="subh">Therapeutics</b><div class="chips">' + thx + '</div></div>' : ''}</div>
-      <div class="grp"><b>Difficulty</b><div class="chips">${diffs}</div></div>
+    const inner = `${hubTabs('opts')}<h3>How you study</h3><p class="sub">Changes apply to the next patient.</p>
       <div class="grp"><b>Mode</b><div class="chips">${modes}</div><p class="note">${MODES.find(m => m[0] === st.mode)[2]}</p></div>
-      <div class="grp"><b>Compounding pharmacy</b><div class="chips"><button type="button" class="chip" data-act="labk" data-v="comp" aria-pressed="${(S.labK || {}).comp !== false}">Compounding math</button><button type="button" class="chip" data-act="labk" data-v="pk" aria-pressed="${(S.labK || {}).pk !== false}">Kinetics</button></div><p class="note">Used when you tap Switch to compounding in the menu. Level chips above apply there too. ${S.labN ? 'Solved at the bench: ' + S.labOK + ' of ' + S.labN + '.' : ''}</p></div>
-      ${wkSchedHTML('p2', 'Weekly drugs')}
+      <div class="grp"><b>Difficulty</b><div class="chips">${diffs}</div></div>
+      <div class="grp"><b>Focus mode</b><div class="chips"><button type="button" class="chip" data-act="focus" aria-pressed="${!!st.focus}">Focus mode ${st.focus ? 'on' : 'off'}</button></div><p class="note">Hides the 3D pharmacy and turns off the timer, patient events, phone calls, Karen and Jim, so it is only questions.</p></div>
       <div class="grp"><b>Confidence ratings</b><div class="chips"><button type="button" class="chip" data-act="conf" aria-pressed="${st.conf !== false}">Ask how sure I am ${st.conf !== false ? 'on' : 'off'}</button></div><p class="note">After you pick an answer, rate Guess, Pretty sure or Certain before the result shows. Works in Smart mix and Individual review only. Spaced review (SM-2) uses it: certain and right pushes a question far out, a guess comes back soon, certain but wrong returns first.</p></div>
       <div class="grp"><b>Speed bonus</b><div class="chips"><button type="button" class="chip" data-act="timer" aria-pressed="${st.timer}">Timer bonus ${st.timer ? 'on' : 'off'}</button></div><p class="note">Turn it off to study without time pressure. Karen still has a limit.</p></div>
-      `;
-    const p3 = `${fsw('P3')}<h3>P3 weekly drugs</h3><p class="sub">Drug list sheets by system, one set per week. Changes apply to the next patient.</p>
-      ${wkSchedHTML('p3', 'Top 300')}
-      <div class="grp"><b>Relevant otherwise</b><div class="chips">${CATS.filter(c => c[0] === 'T553').map(chipOf).join('')}</div><p class="note">Therapeutics III (PHAR 553) syllabus topics: asthma, COPD, renal, diabetes, gout, migraine, RA and SLE, thyroid, liver, hepatitis, blood pressure, lipids, pain, nutrition, fluids and electrolytes.</p></div>
-      <div class="grp"><b>Focus</b><div class="chips"><button type="button" class="chip" data-act="topics-all">Turn every topic back on</button></div><p class="note">Use the switch at the top of this folder to ask only P3 topics.</p></div>`;
-    const p1 = `${fsw('P1')}<h3>P1 folder</h3><p class="sub">Nothing is filed here yet.</p><div class="grp"><b>Empty folder</b><p class="note">P1 drug lists and exam questions will go in this folder. Your current question settings live in the P2 folder.</p></div>`;
-    return `<div class="pane nbk ${nbClosing ? 'closing' : ''}"><div class="nbcover"><span class="nbtitle">Topics</span></div><div class="nbsheet">${hubTabs('set')}${cabinetHTML(fold)}<div class="fbody fb-${fold}" role="tabpanel" aria-label="${fold} folder">${fold === 'P1' ? p1 : fold === 'P3' ? p3 : p2}</div>
-      <p class="count">${n} question${n === 1 ? '' : 's'} match${calcOn() ? ' + endless calculations' : ''}</p>
-      <div class="btnrow"><button type="button" class="btn go nbback" data-act="back">Close notebook and return to counter</button><button type="button" class="btn" data-act="tour">Replay tour</button><button type="button" class="btn" data-act="reset-set">Reset settings</button></div></div></div>`;
+      <div class="grp"><b>Compounding pharmacy</b><div class="chips"><button type="button" class="chip" data-act="labk" data-v="comp" aria-pressed="${(S.labK || {}).comp !== false}">Compounding math</button><button type="button" class="chip" data-act="labk" data-v="pk" aria-pressed="${(S.labK || {}).pk !== false}">Kinetics</button></div><p class="note">Used when you tap Switch to compounding in the menu. The level chips above apply there too. ${S.labN ? 'Solved at the bench: ' + S.labOK + ' of ' + S.labN + '.' : ''}</p></div>
+      ${nbFoot()}`;
+    return nbWrap('Settings', inner);
   }
+  /* find box: filters topic chips and schedule rows in place, no re-render */
+  let findQ = '';
+  function applyFind() {
+    const root = document.querySelector('.crsl'); if (!root) return;
+    const q = findQ.trim().toLowerCase(); let any = false;
+    root.querySelectorAll('.crs').forEach(d => {
+      let hit = 0, tot = 0;
+      d.querySelectorAll('.chip.tp, .p3sched li').forEach(el => { tot++; const t = (el.dataset.find || el.textContent).toLowerCase(); const ok = !q || t.indexOf(q) >= 0; el.hidden = !ok || (!q && el.classList.contains('upc')); if (ok) hit++; });
+      const nameHit = q && (d.querySelector('.crsn').textContent.toLowerCase().indexOf(q) >= 0);
+      if (nameHit) { d.querySelectorAll('.chip.tp, .p3sched li').forEach(el => { el.hidden = el.classList.contains('upc'); }); hit = tot; }
+      d.querySelectorAll('.wkbody').forEach(wb => { const rows = [...wb.querySelectorAll('.p3sched li')]; const rowHit = rows.some(r => !r.hidden); const k = (wb.parentElement.querySelector('.fold') || {}).dataset ? wb.parentElement.querySelector('.fold').dataset.v : ''; const folded = !!S.set[k + 'fold']; wb.hidden = q ? !rowHit : folded; const fn = wb.parentElement.querySelector('.wkfoldnote'); if (fn) fn.hidden = q ? rowHit : false; wb.querySelectorAll('.upmore').forEach(u => { u.hidden = !!q; }); });
+      d.hidden = !!q && !hit; if (q && hit) { d.open = true; any = true; } if (!q) { d.open = !(S.set.cclose || {})[d.dataset.crs]; any = true; }
+    });
+    const nm = document.querySelector('.nomatch'); if (nm) nm.hidden = any;
+  }
+  document.addEventListener('input', (e) => { if (e.target && e.target.id === 'tfind') { findQ = e.target.value; applyFind(); } });
+  document.addEventListener('toggle', (e) => { const d = e.target; if (d.dataset && d.dataset.shop) { shopOpen[d.dataset.shop] = d.open; return; } if (!d.classList || !d.classList.contains('crs') || findQ.trim()) return; S.set.cclose = S.set.cclose || {}; if (d.open) delete S.set.cclose[d.dataset.crs]; else S.set.cclose[d.dataset.crs] = true; save(); }, true);
   function lockNote(d) {
     const t = todayStr(), l = d.items.filter(q => q.from && q.from > t); if (!l.length) return '';
     const next = l.map(q => q.from).sort()[0];
@@ -6789,9 +7048,8 @@ const World = (function () {
   const ME_SHOES = [['#27384F', 'Navy shoes'], ['#F4F4F0', 'White sneakers'], ['#E04F3A', 'Red sneakers'], ['#2B2B33', 'Black shoes'], ['#F2C94C', 'Gold shoes'], ['#3FD07F', 'Green sneakers'], ['#8A63C9', 'Purple sneakers']];
   const ME_BODIES = [['slim', 'Slim'], ['normal', 'Average'], ['jacked', 'Jacked'], ['obese', 'Round']];
   const ME_GENDERS = [['f', 'Woman'], ['m', 'Man'], ['n', 'Nonbinary']];
-  const ME_HAIRS = ['Short', 'Bob', 'Long', 'Bun', 'Curly', 'Spiky', 'Bald'].concat(SHOP_HAIR.map(h => h[1]));
+  const ME_HAIRS = ['Short', 'Bob', 'Long', 'Bun', 'Curly', 'Spiky', 'Bald'];
   function meSpec() { const m = S.me; return { body: m.body, gender: m.gender, hair: m.hair, skin: ME_SKIN[m.skin], hairCol: ME_HAIR[m.hairColor], scrub: ME_SCRUB[m.scrub], shirtCol: (ME_SHIRT[m.shirt | 0] || ME_SHIRT[0])[0], shoes: (ME_SHOES[m.shoes === undefined ? 3 : m.shoes] || ME_SHOES[3])[0], acc: S.acc || 0, accOn: accOnList(), cosm: cosmSpec() }; }
-  function accOnList() { const off = S.accOff || [], out = []; for (let k = 1; k <= (S.acc || 0); k++) if (off.indexOf(k) < 0) out.push(k); return out; }
   function meSVG() {
     const m = S.me, skin = ME_SKIN[m.skin], hair = ME_HAIR[m.hairColor], scrub = ME_SCRUB[m.scrub];
     const w = ({ slim: 24, normal: 32, jacked: 46, obese: 50 }[m.body] || 32) * (m.gender === 'f' ? 0.92 : m.gender === 'm' ? 1.06 : 1);
@@ -6818,63 +7076,78 @@ const World = (function () {
     const url = World.ok && World.pharmPortrait ? World.pharmPortrait(meSpec()) : null;
     return url ? '<img class="mepv-img" alt="Preview of your pharmacist" src="' + url + '">' : meSVG();
   }
-  /* ---- character screen: one slider row per part, top to bottom ---- */
+  /* ---- character screen: one slider row per part, top to bottom. Gear comes from GEAR (gear.js). ---- */
+  const rdot = (r) => `<i class="rdot r-${r}" title="${RAR[r].n}" aria-label="${RAR[r].n}"></i>`;
+  function gearOpts(slot) { // the choices in a gear slider: None, then everything you own in that slot
+    return [{ v: '', n: 'None' }].concat(GEAR.filter(g => g.slot === slot && gearHave(g.id)).map(g => ({ v: g.id, n: g.name, r: g.r, b: buffText2(g.buff), g })));
+  }
+  function gearLocked(slot) { return GEAR.filter(g => g.slot === slot && !gearHave(g.id)); }
   function crows() {
-    const m = S.me, on = cosmSpec(), N = (arr) => arr.map((x, i) => ({ v: i, n: x[1] || x, c: x[0] && x[0][0] === '#' ? x[0] : '' }));
-    const cos = (slot, std) => [{ v: '', n: 'None' }].concat((std || []).map(c => ({ v: c[1], n: c[2] })), COSM.concat(SHOP_COS).filter(c => c[0] === slot && cosmHave(c[1])).map(c => ({ v: c[1], n: c[2] })));
-    return [
+    const m = S.me, on = S.cosmOn || {};
+    const hairOpts = ME_HAIRS.map((n, i) => ({ v: i, n })).concat(GEAR.filter(g => g.slot === 'hair' && gearHave(g.id)).map(g => ({ v: g.hv, n: g.name, r: g.r, g })));
+    const coatOpts = ME_SHIRT.map((x, i) => ({ v: i, n: x[1], c: x[0] })).concat(gearOpts('coat').slice(1));
+    const cur = (slot) => gearHave(on[slot]) && gearById(on[slot]).slot === slot ? on[slot] : '';
+    const rows = [
       { k: 'gender', t: 'Gender', cur: m.gender, o: ME_GENDERS.map(x => ({ v: x[0], n: x[1] })) },
       { k: 'body', t: 'Body type', cur: m.body, o: ME_BODIES.map(x => ({ v: x[0], n: x[1] })) },
       { k: 'skin', t: 'Skin tone', cur: m.skin, o: ME_SKIN.map((c, i) => ({ v: i, n: ME_SKIN_N[i], c })) },
-      { k: 'hair', t: 'Hair style', cur: m.hair, o: ME_HAIRS.map((n, i) => ({ v: i, n })).filter(x => x.v < 7 || shopOwn(SHOP_HAIR[x.v - 7][0])) },
+      { k: 'hair', t: 'Hair style', cur: m.hair, o: hairOpts, lock: gearLocked('hair') },
       { k: 'hairColor', t: 'Hair color', cur: m.hairColor, o: ME_HAIR.map((c, i) => ({ v: i, n: ME_HAIR_N[i], c })) },
-      { k: 'face', t: 'Facial hair', cur: on.face, o: cos('face') },
-      { k: 'eyes', t: 'Glasses', cur: on.eyes, o: cos('eyes', STD_EYES) },
-      { k: 'hat', t: 'Hat', cur: on.hat, o: cos('hat') },
-      { k: 'shirt', t: 'Shirt', cur: m.shirt | 0, o: ME_SHIRT.map((x, i) => ({ v: i, n: x[1], c: x[0] })) },
+      { k: 'face', t: 'Facial hair', cur: cur('face'), o: gearOpts('face'), lock: gearLocked('face') },
+      { k: 'eyes', t: 'Glasses', cur: cur('eyes'), o: gearOpts('eyes'), lock: gearLocked('eyes') },
+      { k: 'hat', t: 'Hat', cur: cur('hat'), o: gearOpts('hat'), lock: gearLocked('hat') },
+      { k: 'neck', t: 'Neck', cur: cur('neck'), o: gearOpts('neck'), lock: gearLocked('neck') },
+      { k: 'coat', t: 'Coat', cur: cur('coat') || (m.shirt | 0), o: coatOpts, lock: gearLocked('coat') },
       { k: 'scrub', t: 'Pants', cur: m.scrub, o: ME_SCRUB.map((c, i) => ({ v: i, n: ME_SCRUB_N[i] + ' pants', c })) },
       { k: 'shoes', t: 'Shoes', cur: m.shoes === undefined ? 3 : m.shoes, o: ME_SHOES.map((x, i) => ({ v: i, n: x[1], c: x[0] })) },
-      { k: 'extra', t: 'Extras', cur: on.extra, o: cos('extra') }
-    ].concat(SHOP_CYBER.some(c => shopOwn(c[1])) ? [{ k: 'cyber', t: 'Cyborg parts', cur: on.cyber, o: cos('cyber') }] : []);
+      { k: 'hands', t: 'In hand', cur: cur('hands'), o: gearOpts('hands'), lock: gearLocked('hands') },
+      { k: 'extra', t: 'Extras', cur: cur('extra'), o: gearOpts('extra'), lock: gearLocked('extra') },
+      { k: 'cyber', t: 'Cyborg parts', cur: cur('cyber'), o: gearOpts('cyber'), lock: gearLocked('cyber') }
+    ];
+    return rows;
   }
   function crowHTML(r) {
     const n = r.o.length, i = Math.max(0, r.o.findIndex(x => x.v === r.cur)), c = r.o[i], dis = n < 2 ? ' disabled' : '';
-    return `<div class="crow" data-k="${r.k}"><span class="clab">${r.t}</span><div class="cslide"><button type="button" class="carr" data-act="cyc" data-k="${r.k}" data-d="-1" aria-label="Previous ${r.t.toLowerCase()}"${dis}>&#8249;</button><div class="cval" role="status" aria-live="polite">${c.c ? `<i class="csw" style="background:${c.c}"></i>` : ''}<span>${esc(c.n)}</span><small>${i + 1} of ${n}</small></div><button type="button" class="carr" data-act="cyc" data-k="${r.k}" data-d="1" aria-label="Next ${r.t.toLowerCase()}"${dis}>&#8250;</button></div></div>`;
+    const lock = r.lock && r.lock.length ? `<details class="clock"><summary>${r.lock.length} more to unlock</summary><ul>${r.lock.map(g => `<li>${rdot(g.r)}<b>${esc(g.name)}</b><span>${esc(gearSrcText(g))}${g.buff && buffText2(g.buff) ? ' · ' + esc(buffText2(g.buff)) : ''}</span></li>`).join('')}</ul></details>` : '';
+    return `<div class="crow" data-k="${r.k}"><span class="clab">${r.t}</span><div class="cslide"><button type="button" class="carr" data-act="cyc" data-k="${r.k}" data-d="-1" aria-label="Previous ${r.t.toLowerCase()}"${dis}>&#8249;</button><div class="cval" role="status" aria-live="polite">${c.c ? `<i class="csw" style="background:${c.c}"></i>` : c.r ? rdot(c.r) : ''}<span>${esc(c.n)}${c.b ? `<em class="cbuff">${esc(c.b)}</em>` : ''}</span><small>${i + 1}/${n}</small></div><button type="button" class="carr" data-act="cyc" data-k="${r.k}" data-d="1" aria-label="Next ${r.t.toLowerCase()}"${dis}>&#8250;</button></div>${lock}</div>`;
   }
   function setCrow(k, v) {
-    if (['face', 'eyes', 'hat', 'extra', 'cyber'].indexOf(k) >= 0) { S.cosmOn = S.cosmOn || {}; const keep = {}; Object.keys(S.cosmOn).forEach(s => { const c = S.cosmOn[s] && cosmById(S.cosmOn[s]); if (c && c[0] !== k) keep[c[0]] = S.cosmOn[s]; }); S.cosmOn = keep; if (v) S.cosmOn[k] = v; }
-    else S.me[k] = (typeof v === 'number') ? v : v;
+    S.cosmOn = S.cosmOn || {};
+    if (k === 'coat') { if (typeof v === 'number') { S.me.shirt = v; delete S.cosmOn.coat; } else S.cosmOn.coat = v; return; }
+    if (COSM_SLOTS.indexOf(k) >= 0) { if (v) S.cosmOn[k] = v; else delete S.cosmOn[k]; return; }
+    S.me[k] = v;
   }
   /* ---- shop (a tab on the Character screen) ---- */
-  let cTab = 'me', shopCat = 'walls';
+  let cTab = 'me'; const shopOpen = { walls: true };
   const buffText = b => [b.tech ? '+' + Math.round(b.tech * 100) + '% tech tips' : '', b.pay ? '+' + Math.round(b.pay * 100) + '% pay' : ''].filter(Boolean).join(', ');
   function uniSpec() { const u = uniOf(); return u ? { shirt: u[2], scrub: u[3], cosm: { hat: u[4] || '', eyes: u[0] === 'u5' ? 'goggles' : '' } } : null; }
   function applyShop() { if (!World.ok) return; World.setStore(S.store); World.setStaffLook(uniSpec()); World.setPharmacist(meSpec()); }
-  const SHOP_CATS = [['walls', 'Wall paint'], ['floors', 'Floors'], ['uni', 'Tech uniforms'], ['deco', 'Decor'], ['hair', 'Hairstyles'], ['cyber', 'Cyborg'], ['pow', 'Power-ups']];
+  const SHOP_CATS = [['walls', 'Wall paint'], ['floors', 'Floors'], ['uni', 'Tech uniforms'], ['deco', 'Decor'], ['wear', 'Wardrobe'], ['pow', 'Power-ups']];
   function shopRows(cat) {
     const st = S.store;
     if (cat === 'walls') return SHOP_WALLS.map(w => ({ id: w[0], name: w[1], price: w[4], free: !w[4], on: st.walls === w[0], sw: [w[2], w[3]], note: '' }));
     if (cat === 'floors') return SHOP_FLOORS.map(f => ({ id: f[0], name: f[1], price: f[4], free: !f[4], on: st.floor === f[0], sw: [f[2], f[3]], note: '' }));
     if (cat === 'uni') return [{ id: '', name: 'Standard coats', price: 0, free: true, on: !st.uni, sw: ['#F4FAFA', '#27384F'], note: 'No bonus.' }].concat(SHOP_UNI.map(u => ({ id: u[0], name: u[1], price: u[6], on: st.uni === u[0], sw: [u[2], u[3]], note: buffText(u[5]) + '. ' + u[7] })));
     if (cat === 'deco') return SHOP_DECOR.map(d => ({ id: d[0], name: d[1], price: d[2], on: (st.deco || []).indexOf(d[0]) >= 0, emoji: d[4], note: d[3], toggle: true }));
-    if (cat === 'hair') return SHOP_HAIR.map((h, i) => ({ id: h[0], name: h[1], price: h[3], on: S.me.hair === 7 + i, emoji: '💇', note: 'For your pharmacist.' }));
     if (cat === 'pow') return Object.keys(PW).map(k => ({ id: k, name: PW[k].name, price: pwCost(k), emoji: PW[k].emoji, note: PW[k].note, stack: true, count: S.pw[k] || 0 }));
-    return SHOP_CYBER.map(c => ({ id: c[1], name: c[2], price: c[4], on: ((S.cosmOn || {}).cyber) === c[1], emoji: c[3], note: 'For your pharmacist.' }));
+    return GEAR.filter(g => g.src === 'shop').map(g => ({ id: g.id, name: g.name, price: g.price, on: gearOn(g.id), emoji: g.e, r: g.r, note: SLOT_NAME[g.slot] + (buffText2(g.buff) ? ' · ' + buffText2(g.buff) : '') + (g.d ? '. ' + g.d : '') }));
   }
   function shopHTML() {
-    const cash = S.cash, rows = shopRows(shopCat);
-    const cats = SHOP_CATS.map(c => `<button type="button" class="chip" data-act="shopcat" data-v="${c[0]}" aria-pressed="${shopCat === c[0]}">${c[1]}</button>`).join('');
-    const cards = rows.map(r => {
-      const own = r.stack ? false : r.free || shopOwn(r.id), sw = r.sw ? `<span class="spsw"><i style="background:${r.sw[0]}"></i><i style="background:${r.sw[1]}"></i></span>` : `<span class="spem" aria-hidden="true">${r.emoji || ''}</span>`;
-      let btn;
-      if (!own) btn = `<button type="button" class="btn go" data-act="shop-buy" data-k="${shopCat}" data-id="${r.id}"${cash < r.price || (r.stack && r.count >= PW_MAX) ? ' disabled' : ''}>${r.stack && r.count >= PW_MAX ? 'Full' : 'Buy ' + money(r.price)}</button>`;
-      else if (r.toggle) btn = `<button type="button" class="btn" data-act="shop-use" data-k="${shopCat}" data-id="${r.id}" aria-pressed="${r.on}">${r.on ? 'Remove' : 'Place'}</button>`;
-      else btn = r.on ? '<span class="spon">Equipped</span>' : `<button type="button" class="btn" data-act="shop-use" data-k="${shopCat}" data-id="${r.id}">Use</button>`;
-      return `<div class="spcard${r.on ? ' on' : ''}">${sw}<div class="sptx"><b>${esc(r.name)}${r.stack ? ' <em class="pwn">x' + r.count + '</em>' : ''}</b>${r.note ? `<small>${esc(r.note)}</small>` : ''}</div>${btn}</div>`;
+    const cash = S.cash, bf = buffText(uniBuff()), hasT = S.up.tech >= 1;
+    const secs = SHOP_CATS.map(c => {
+      const rows = shopRows(c[0]), ownN = rows.filter(r => r.stack ? r.count > 0 : r.free || shopOwn(r.id)).length;
+      const cards = rows.map(r => {
+        const own = r.stack ? false : r.free || shopOwn(r.id), sw = r.sw ? `<span class="spsw"><i style="background:${r.sw[0]}"></i><i style="background:${r.sw[1]}"></i></span>` : `<span class="spem" aria-hidden="true">${r.emoji || ''}</span>`;
+        let btn;
+        if (!own) btn = `<button type="button" class="btn go" data-act="shop-buy" data-k="${c[0]}" data-id="${r.id}"${cash < r.price || (r.stack && r.count >= PW_MAX) ? ' disabled' : ''}>${r.stack && r.count >= PW_MAX ? 'Full' : 'Buy ' + money(r.price)}</button>`;
+        else if (r.toggle) btn = `<button type="button" class="btn" data-act="shop-use" data-k="${c[0]}" data-id="${r.id}" aria-pressed="${r.on}">${r.on ? 'Remove' : 'Place'}</button>`;
+        else btn = r.on ? '<span class="spon">Equipped</span>' : `<button type="button" class="btn" data-act="shop-use" data-k="${c[0]}" data-id="${r.id}">Use</button>`;
+        return `<div class="spcard${r.on ? ' on' : ''}">${sw}<div class="sptx"><b>${r.r ? rdot(r.r) : ''}${esc(r.name)}${r.stack ? ' <em class="pwn">x' + r.count + '</em>' : ''}</b>${r.note ? `<small>${esc(r.note)}</small>` : ''}</div>${btn}</div>`;
+      }).join('');
+      const note = c[0] === 'uni' ? `<p class="note">${hasT ? (bf ? 'Your techs are earning bonuses: ' + bf + '.' : 'Pick a uniform to give your techs a bonus.') : 'Hire a Pharmacy Technician first. Uniform bonuses work once you have at least one tech.'}</p>` : c[0] === 'wear' ? '<p class="note">Bought gear lands in the matching slider on the Character tab, with its bonus.</p>' : '';
+      return `<details class="crs" data-shop="${c[0]}"${shopOpen[c[0]] ? ' open' : ''}><summary><i class="caret" aria-hidden="true"></i><span class="crsn"><b>${c[1]}</b><small>${c[0] === 'pow' ? rows.reduce((a, r) => a + r.count, 0) + ' in stock' : ownN + ' of ' + rows.length + ' owned'}</small></span></summary><div class="crsb">${note}<div class="spgrid">${cards}</div></div></details>`;
     }).join('');
-    const bf = buffText(uniBuff()), hasT = S.up.tech >= 1;
-    const note = shopCat === 'uni' ? `<p class="note">${hasT ? (bf ? 'Your techs are earning bonuses: ' + bf + '.' : 'Pick a uniform to give your techs a bonus.') : 'Hire a Pharmacy Technician first. Uniform bonuses work once you have at least one tech.'}</p>` : shopCat === 'cyber' || shopCat === 'hair' ? '<p class="note">Bought items show up in the Character tab, where you can mix and match.</p>' : '';
-    return `<div class="spcash">Cash <b>${money(cash)}</b></div><div class="chips spcats" role="group" aria-label="Shop sections">${cats}</div>${note}<div class="spgrid">${cards}</div>`;
+    return `<div class="spcash">Cash <b>${money(cash)}</b></div><div class="crsl">${secs}</div>`;
   }
   function shopBuy(kind, id) {
     if (kind === 'pow') {
@@ -6891,21 +7164,35 @@ const World = (function () {
     const st = S.store;
     if (kind === 'walls') st.walls = id; else if (kind === 'floors') st.floor = id; else if (kind === 'uni') st.uni = id;
     else if (kind === 'deco') { const i = st.deco.indexOf(id); if (i >= 0 && !quiet) st.deco.splice(i, 1); else if (i < 0) st.deco.push(id); }
-    else if (kind === 'hair') { const i = SHOP_HAIR.findIndex(h => h[0] === id); if (i >= 0) S.me.hair = 7 + i; }
-    else if (kind === 'cyber') { S.cosmOn = S.cosmOn || {}; S.cosmOn.cyber = id; }
+    else if (kind === 'wear' || kind === 'hair' || kind === 'cyber') { const g = gearById(id); if (g) { if (g.slot === 'hair') S.me.hair = g.hv; else { S.cosmOn = S.cosmOn || {}; S.cosmOn[g.slot] = id; } } }
     save(); applyShop(); if (view === 'create') renderPanel();
   }
+  function outfitHTML() {
+    const b = gearBuff(), t = buffText2(b), own = GEAR.filter(g => g.slot !== 'pet' && g.src !== 'start' && gearHave(g.id)).length, all = GEAR.filter(g => g.slot !== 'pet' && g.src !== 'start').length;
+    return `<div class="tsum outfit"><b>Outfit bonus: ${t ? esc(t) : 'none yet'}</b><span>${own}/${all} gear found</span></div>`;
+  }
+  function petsHTML() {
+    const have = (S.awards || {}).pets || [];
+    const rows = GEAR.filter(g => g.slot === 'pet').map(g => {
+      const on = have.indexOf(g.kind) >= 0, pd = PET_DEFS.find(p => p.id === g.id), prog = pd ? Math.min(pd.n, petProgress(pd)) : 0;
+      const how = on ? 'Roaming the pharmacy. Tap it to say hi, or press and drag to carry it somewhere else.' : pd ? prog + '/' + pd.n + ' topics at ' + TIER[pd.tier - 1] + ' or better (see Awards)' : gearSrcText(g);
+      return `<div class="awp${on ? ' on' : ''}"><span aria-hidden="true">${g.e}</span><div><b>${rdot(g.r)}${esc(g.name)}</b><small>${esc(g.d)}${buffText2(g.buff) ? ' Bonus: ' + esc(buffText2(g.buff)) + '.' : ''}</small><small>${esc(how)}</small>${pd && !on ? `<span class="awbar pbar"><i style="width:${Math.round(100 * prog / pd.n)}%"></i></span>` : ''}</div></div>`;
+    }).join('');
+    const fish = S.awards.pets.indexOf('fish') >= 0;
+    return `<p class="note">Pets wander the floor. Press and hold one, then drag to carry it; let go to set it down. ${fish ? 'The goldfish tank stays put.' : ''}</p><div class="awpl">${rows}</div>`;
+  }
   function createHTML() {
-    const tabs = S.me.done ? `<div class="chips ctabs" role="tablist" aria-label="Character screen"><button type="button" class="chip" role="tab" data-act="ctab" data-v="me" aria-pressed="${cTab === 'me'}">Character</button><button type="button" class="chip" role="tab" data-act="ctab" data-v="shop" aria-pressed="${cTab === 'shop'}">Shop</button></div>` : '';
-    if (S.me.done && cTab === 'shop') return `<div class="pane cpane"><h3>Pharmacy shop</h3>${tabs}${shopCat === 'hair' || shopCat === 'cyber' ? '<div class="mepv sticky">' + mePreview() + '</div>' : ''}${shopHTML()}<div class="btnrow"><button type="button" class="btn go" data-act="me-done">Done</button></div></div>`;
+    const seg = (id, label) => `<button type="button" role="tab" aria-selected="${cTab === id}" data-act="ctab" data-v="${id}">${label}</button>`;
+    const tabs = S.me.done ? `<div class="hubtabs" role="tablist" aria-label="Character screen">${seg('me', 'Wardrobe')}${seg('shop', 'Shop')}${seg('pets', 'Pets')}</div>` : '';
+    if (S.me.done && cTab === 'shop') return `<div class="pane cpane"><h3>Pharmacy shop</h3>${tabs}<div class="mepv sticky">${mePreview()}</div>${shopHTML()}<div class="btnrow"><button type="button" class="btn go" data-act="me-done">Done</button></div></div>`;
+    if (S.me.done && cTab === 'pets') return `<div class="pane cpane"><h3>Pets</h3>${tabs}${petsHTML()}<div class="btnrow"><button type="button" class="btn go" data-act="me-done">Done</button></div></div>`;
     const m = S.me, rows = crows().map(crowHTML).join('');
-    const gear = (S.acc || 0) < 1 ? '' : `<div class="grp"><b>Rank gear</b><div class="chips">${ACCS.map((a, i) => { const k = i + 1, un = k <= (S.acc || 0), onN = un && (S.accOff || []).indexOf(k) < 0; return un ? `<button type="button" class="chip" data-act="acc-tog" data-v="${k}" aria-pressed="${onN}">${a[1]} ${a[0]}</button>` : ''; }).join('')}</div></div>`;
-    const found = (S.cosm || []).length;
     return `<div class="pane cpane"><h3>Your character</h3>${tabs}
       <div class="mepv sticky">${mePreview()}</div>
+      ${m.done ? outfitHTML() : ''}
       <div class="grp"><b>Name your pharmacy</b><input id="shopname" class="field" type="text" maxlength="24" autocomplete="off" placeholder="Corner Rx" value="${esc(S.shop || '')}" aria-label="Pharmacy name"><p class="note">It goes on the sign above your shelves.</p></div>
-      <p class="note">Use the arrows on each row to flip through your options, top to bottom. ${found ? found + '/' + COSM.length + ' cosmetics found.' : 'Open capsules from the lost pills vial (top bar) to unlock facial hair, hats, glasses and more.'}</p>
-      <div class="crows">${rows}</div>${gear}
+      <p class="note">Use the arrows on each row to flip through what you own. Gear comes from capsules in the lost pills vial (top bar), the Shop tab and rank promotions, and each piece carries a small bonus for your pharmacy.</p>
+      <div class="crows">${rows}</div>
       <div class="btnrow"><button type="button" class="btn go" data-act="me-done">${m.done ? 'Done' : 'Start working'}</button></div></div>`;
   }
 
@@ -6975,16 +7262,17 @@ const World = (function () {
     showUnlock({ emoji: '\uD83D\uDCC5', title: 'Weekly drug calendar: ' + CAL_NAMES[t - 1], sub: n + (n === 1 ? ' week' : ' weeks') + ' fully mastered', target: { kind: 'cal' }, land: () => { land(); if (view === 'awards') renderPanel(); } });
   }
   /* pharmacist wardrobe: one accessory per promotion */
-  const ACCS = [['Gold chain', '\u26D3\uFE0F'], ['Sunglasses', '\uD83D\uDD76\uFE0F'], ['Brass knuckles', '\uD83D\uDC4A'], ['Gold grill', '\uD83E\uDDB7'], ['Fedora', '\uD83C\uDFA9'], ['Cane', '\uD83E\uDDAF'], ['Purple fur coat', '\uD83E\uDDE5']];
+  const RANK_GEAR = GEAR.filter(g => g.src === 'rank').sort((a, b) => a.rank - b.rank), ACCS = RANK_GEAR.map(g => [g.name, g.e]);
+  const rankEquip = (k) => { const g = RANK_GEAR[k - 1]; if (g) { S.cosmOn = S.cosmOn || {}; S.cosmOn[g.slot] = g.id; } };
   const rankIdx = () => { let i = 0; for (let k = 0; k < RANKS.length; k++) if (S.correct >= RANKS[k][0]) i = k; return i; };
   function syncRank(silent) {
     const target = Math.min(ACCS.length, rankIdx());
     let earned = S.accEarned || 0; if (target <= earned) { if ((S.acc || 0) < earned) { S.acc = earned; World.setPharmacist(meSpec()); } return; }
-    if (silent && target - earned > 1) { earned = target - 1; S.accEarned = earned; S.acc = earned; World.setPharmacist(meSpec()); }
+    if (silent && target - earned > 1) { earned = target - 1; S.accEarned = earned; S.acc = earned; for (let q = 1; q <= earned; q++) rankEquip(q); World.setPharmacist(meSpec()); }
     for (let k = earned + 1; k <= target; k++) {
       S.accEarned = k;
-      if (silent && k < target) { S.acc = k; continue; }
-      showUnlock({ emoji: ACCS[k - 1][1], title: ACCS[k - 1][0] + ' unlocked', sub: 'Promoted to ' + RANKS[k][1], target: { kind: 'pharm', id: k }, land: () => { S.acc = Math.max(S.acc || 0, k); save(); World.setPharmacist(meSpec()); if (view === 'awards') renderPanel(); } });
+      if (silent && k < target) { S.acc = k; rankEquip(k); continue; }
+      showUnlock({ emoji: ACCS[k - 1][1], title: ACCS[k - 1][0] + ' unlocked', sub: 'Promoted to ' + RANKS[k][1], target: { kind: 'pharm', id: k }, land: () => { S.acc = Math.max(S.acc || 0, k); rankEquip(k); save(); World.setPharmacist(meSpec()); if (view === 'awards' || view === 'create') renderPanel(); } });
     }
     save();
   }
@@ -7411,7 +7699,7 @@ const World = (function () {
   function renderPanel() {
     const pn = $('#qpanel'); if (!pn) return;
     pn.classList.toggle('karen', !!(cur && cur.karen && !cur.done && view === 'q'));
-    const body = view === 'create' ? createHTML() : view === 'awards' ? awardsHTML() : view === 'phone' ? phoneHTML() : view === 'fp' || view === 'him' ? '' : view === 'shift' ? shiftHTML() : view === 'daily' ? dailyHTML() : view === 'flash' ? fcHTML() : view === 'syn' ? synHTML() : view === 'ref' ? refHTML() : view === 'retire' ? retireHTML() : view === 'set' ? settingsHTML() : view === 'studies' ? studiesHTML() : (cur ? cardHTML() : '');
+    const body = view === 'create' ? createHTML() : view === 'awards' ? awardsHTML() : view === 'phone' ? phoneHTML() : view === 'fp' || view === 'him' ? '' : view === 'shift' ? shiftHTML() : view === 'daily' ? dailyHTML() : view === 'flash' ? fcHTML() : view === 'syn' ? synHTML() : view === 'ref' ? refHTML() : view === 'retire' ? retireHTML() : view === 'set' ? settingsHTML() : view === 'opts' ? optionsHTML() : view === 'studies' ? studiesHTML() : (cur ? cardHTML() : '');
     $('#counter').innerHTML = qbar() + body;
     const nb = document.querySelector('.nbk');
     if (nb) {
@@ -7419,6 +7707,7 @@ const World = (function () {
       else if (lastRendered === view) nb.classList.add('still');
     }
     flipTab = false; lastRendered = view;
+    if (view === 'set') applyFind();
     fitPanel();
     observeInset();
   }
@@ -7470,11 +7759,11 @@ const World = (function () {
   document.addEventListener('click', (e) => { const b = e.target.closest && e.target.closest('#qgrab'); if (!b) return; const p = $('#qpanel'), min = p.classList.toggle('min'); b.setAttribute('aria-expanded', String(!min)); b.firstElementChild.textContent = min ? 'Show question card' : 'Hide card to look around'; if (World.ok) updateInset(); fitPanel(); });
   document.addEventListener('keydown', (e) => { if (e.key === 'Escape') document.body.classList.remove('drawer'); });
   function backToQ() {
-    if ((view === 'studies' || view === 'set') && !nbClosing) {
+    if ((view === 'studies' || view === 'set' || view === 'opts') && !nbClosing) {
       const pane = document.querySelector('.nbk');
       if (pane) { nbClosing = true; pane.classList.add('closing'); setTimeout(() => { backToQ(); nbClosing = false; }, 320); return; }
     }
-    if ((view === 'studies' || view === 'set') && nbClosing && !document.querySelector('.nbk.closing')) return;
+    if ((view === 'studies' || view === 'set' || view === 'opts') && nbClosing && !document.querySelector('.nbk.closing')) return;
     view = 'q';
     if (dirty) { dirty = false; newCard(); return; }
     resumeTimers();
@@ -7633,7 +7922,7 @@ const World = (function () {
   let tourEl = null, tourStep = 0, tourPaused = 0;
   const TOUR = [
     { t: 'Welcome to Corner Rx', p: 'You are the pharmacist at the counter. Each patient asks one question. Pick the right answer to earn cash and reputation, and read the explanation when you miss one. Take your time at first.' },
-    { t: 'The menu', p: 'Tap the menu button in the top right.', l: [['Upgrades', 'spend your cash on the pharmacy'], ['Progress & awards', 'mastery, photos, pets and the weekly calendar'], ['Topics', 'choose topics and weekly drugs, or add your own questions'], ['Focus mode', 'just the questions, no 3D world'], ['Drug reference', 'the weekly drug lists']] },
+    { t: 'The menu', p: 'Tap the menu button in the top right.', l: [['Upgrades', 'spend your cash on the pharmacy'], ['Progress & awards', 'mastery, photos, pets and the weekly calendar'], ['Topics', 'pick courses, topics and weekly drugs; the Settings tab has mode and difficulty; add your own questions under My studies'], ['Focus mode', 'just the questions, no 3D world'], ['Drug reference', 'the weekly drug lists']] },
     { t: 'Look around', p: 'Drag to look around the pharmacy and pinch to zoom. Tap glowing spots to build upgrades. The corner button makes the game full screen, and the bar above the question card hides it so you can see the shop.' },
     { t: 'Your progress', p: 'Everything saves in this browser. To back up or move to another device, open Progress and copy your save code. Good luck out there.' }
   ];
@@ -8388,17 +8677,40 @@ const World = (function () {
     renderStats(); if (view === 'awards') renderPanel();
   }
   /* ---------------- lost pills: vial, tablet buff, capsule cosmetics ---------------- */
-  const COSM = [
-    ['face', 'mustache', 'Mustache', '🥸'], ['face', 'handlebar', 'Handlebar mustache', '🤵'], ['face', 'goatee', 'Goatee', '🧔'], ['face', 'beard', 'Full beard', '🧔‍♂️'], ['face', 'soulpatch', 'Soul patch', '😏'], ['face', 'chops', 'Mutton chops', '🤠'],
-    ['hat', 'beanie', 'Beanie', '🧶'], ['hat', 'tophat', 'Top hat', '🎩'], ['hat', 'cowboy', 'Cowboy hat', '🤠'], ['hat', 'party', 'Party hat', '🥳'], ['hat', 'crown', 'Gold crown', '👑'], ['hat', 'chef', 'Chef hat', '👨‍🍳'], ['hat', 'propeller', 'Propeller cap', '🚁'], ['hat', 'wizard', 'Wizard hat', '🧙'],
-    ['eyes', 'monocle', 'Monocle', '🧐'], ['eyes', 'eyepatch', 'Eyepatch', '🏴‍☠️'], ['extra', 'bowtie', 'Bow tie', '🎀'], ['extra', 'clownnose', 'Clown nose', '🤡'], ['extra', 'headphones', 'Headphones', '🎧'], ['extra', 'earring', 'Gold earrings', '💎'], ['eyes', 'goggles', 'Goggles', '🥽']
-  ];
-  const COSM_SLOT = { face: 'Facial hair', eyes: 'Glasses', hat: 'Hats', extra: 'Extras' };
-  const STD_EYES = [['eyes', 'round', 'Round glasses'], ['eyes', 'square', 'Square glasses']];
-  const SHOP_COS = SHOP_CYBER.map(c => [c[0], c[1], c[2], c[3]]);
-  const cosmById = id => COSM.find(c => c[1] === id) || STD_EYES.find(c => c[1] === id) || SHOP_COS.find(c => c[1] === id);
-  const cosmHave = id => (S.cosm || []).indexOf(id) >= 0 || STD_EYES.some(c => c[1] === id) || ((S.store || {}).own || []).indexOf(id) >= 0;
-  function cosmSpec() { const on = S.cosmOn || {}, o = { face: '', eyes: '', hat: '', extra: '', cyber: '' }; Object.keys(on).forEach(k => { const id = on[k], c = id && cosmHave(id) ? cosmById(id) : null; if (c) o[c[0]] = id; }); return o; }
+  /* gear helpers (the item table is GEAR in gear.js) */
+  const COSM_SLOTS = ['face', 'eyes', 'hat', 'neck', 'coat', 'hands', 'extra', 'cyber'];
+  const gearById = id => GEAR_BY[id] || null;
+  const gearHave = id => { const g = gearById(id); if (!g) return false;
+    if (g.src === 'start') return true; if (g.src === 'rank') return (S.acc || 0) >= g.rank; if (g.src === 'shop') return ((S.store || {}).own || []).indexOf(id) >= 0;
+    if (g.slot === 'pet') return ((S.awards || {}).pets || []).indexOf(g.kind) >= 0; return (S.cosm || []).indexOf(id) >= 0; };
+  const gearOn = id => { const g = gearById(id); if (!g || !gearHave(id)) return false; if (g.slot === 'pet') return true; if (g.slot === 'hair') return S.me.hair === g.hv; return ((S.cosmOn || {})[g.slot]) === id; };
+  const gearSrcText = g => g.src === 'start' ? 'Everyone starts with it' : g.src === 'shop' ? 'Shop, ' + money(g.price) : g.src === 'rank' ? 'Rank: ' + RANKS[g.rank][1] : g.src === 'award' ? 'Mastery award (see Awards)' : RAR[g.r].n + ' capsule';
+  const buffText2 = b => { b = b || {}; const o = []; if (b.pay) o.push('+' + Math.round(b.pay * 100) + '% pay'); if (b.tech) o.push('+' + Math.round(b.tech * 100) + '% tech tips'); if (b.time) o.push('+' + b.time + ' s on the timer'); if (b.rep) o.push('+' + b.rep + ' reputation per fill'); if (b.pills) o.push('+' + Math.round(b.pills * 100) + '% lost pills'); if (b.streak) o.push('+' + b.streak + ' streak cap'); return o.join(', '); };
+  /* total bonus from everything equipped plus every pet you own */
+  function gearBuff() {
+    const t = { pay: 0, tech: 0, time: 0, rep: 0, pills: 0, streak: 0 };
+    GEAR.forEach(g => { if (gearOn(g.id)) Object.keys(g.buff || {}).forEach(k => { t[k] += g.buff[k]; }); });
+    return t;
+  }
+  /* what the 3D pharmacist wears: rank gear travels as accOn (world.js draws it by rank number), the rest as cosm by slot */
+  function cosmSpec() { const on = S.cosmOn || {}, o = {}; COSM_SLOTS.forEach(k => { o[k] = ''; }); Object.keys(on).forEach(k => { const id = on[k], g = id && gearHave(id) ? gearById(id) : null; if (g && g.slot === k && g.src !== 'rank' && g.slot !== 'pet' && g.slot !== 'hair') o[g.slot] = id; }); return o; }
+  function accOnList() { const out = []; GEAR.forEach(g => { if (g.src === 'rank' && gearOn(g.id)) out.push(g.rank); }); return out; }
+  /* older saves: rank gear used to be always on (minus S.accOff); put each unlocked piece into its slot once */
+  function gearMigrate() {
+    if (S.gearV >= 1) return; S.gearV = 1; S.cosmOn = S.cosmOn || {}; const off = S.accOff || [];
+    GEAR.forEach(g => { if (g.src === 'rank' && (S.acc || 0) >= g.rank && off.indexOf(g.rank) < 0 && !S.cosmOn[g.slot]) S.cosmOn[g.slot] = g.id; });
+    if (S.cosmOn.extra === 'bowtie') { if (!S.cosmOn.neck) S.cosmOn.neck = 'bowtie'; delete S.cosmOn.extra; } // bow tie moved to the neck slot
+    delete S.accOff;
+  }
+  /* capsule rarity: rolled when the pill is picked up, so the vial can show it */
+  function rollRarity(boost) { let r = Math.random() * 100; const keys = ['legendary', 'epic', 'rare', 'common']; for (const k of keys) { const w = RAR[k].w * (k === 'common' ? 1 : 1 + (boost || 0)); if (r < w) return k; r -= w; } return 'common'; }
+  const capsulePool = (r) => GEAR.filter(g => g.src === 'capsule' && g.r === r && !gearHave(g.id));
+  function capsulePick(r) { const order = { common: ['common', 'rare', 'epic', 'legendary'], rare: ['rare', 'common', 'epic', 'legendary'], epic: ['epic', 'rare', 'legendary', 'common'], legendary: ['legendary', 'epic', 'rare', 'common'] }[r] || ['common']; for (const k of order) { const pool = capsulePool(k); if (pool.length) return pick(pool); } return null; }
+  function gearGrant(g, equip) {
+    if (g.slot === 'pet') { S.awards.pets = S.awards.pets || []; if (S.awards.pets.indexOf(g.kind) < 0) S.awards.pets.push(g.kind); try { World.setAwards(worldAwards()); World.unlockPet(g.kind); } catch (e) { /* ignore */ } return; }
+    S.cosm = S.cosm || []; if (S.cosm.indexOf(g.id) < 0) S.cosm.push(g.id);
+    if (equip) { S.cosmOn = S.cosmOn || {}; if (g.slot === 'hair') S.me.hair = g.hv; else S.cosmOn[g.slot] = g.id; }
+  }
   const PNAME = { '#F4F4F0': 'white', '#F2A516': 'orange', '#E04F3A': 'red', '#4C7BD9': 'blue', '#2FAE66': 'green', '#F29BC1': 'pink', '#8A63C9': 'purple', '#7FD6E8': 'sky blue', '#F6E27A': 'yellow' };
   const PSHAPE = { disc: 'round tablet', oval: 'oval tablet', caplet: 'caplet tablet', sq: 'square tablet', two: 'two-tone capsule', band: 'banded capsule', gel: 'softgel capsule' };
   function pillName(p) { const c = PNAME[p.c] || 'colorful'; return (p.k === 'c' && p.s !== 'gel' && p.c2 && p.c2 !== p.c ? c + ' and ' + (PNAME[p.c2] || 'white') + ' ' : c + ' ') + (PSHAPE[p.s] || (p.k === 't' ? 'tablet' : 'capsule')); }
@@ -8421,14 +8733,14 @@ const World = (function () {
   }
   const pillOk = () => !focusOn() && !labOn() && !learning() && view === 'q' && !document.querySelector('.vdlg');
   function onPill(sp) {
-    S.vial = S.vial || []; S.vial.push({ k: sp.k, c: sp.c, c2: sp.c2 || '', s: sp.s }); if (S.vial.length > 24) S.vial.shift();
+    S.vial = S.vial || []; const ent = { k: sp.k, c: sp.c, c2: sp.c2 || '', s: sp.s }; if (sp.k === 'c') ent.r = sp.r || rollRarity(); S.vial.push(ent); if (S.vial.length > 24) S.vial.shift();
     S.pillN = (S.pillN || 0) + 1; save(); vialSync(); SFX.play('ok');
-    toast('Added to the lost pills vial: ' + pillName(sp) + '.');
+    toast('Added to the lost pills vial: ' + pillName(sp) + (sp.k === 'c' && ent.r !== 'common' ? ' (it shimmers, a ' + RAR[ent.r].n.toLowerCase() + ' capsule).' : '.'));
   }
   /* tablet buff */
   const BUFF_MS = 90000; let buffUntil = 0, buffSlips = 0, buffTimer = null, buffEl = null;
   const buffOn = () => Date.now() < buffUntil;
-  const buffPay = () => (buffOn() ? 2 : 1) * blessMult() * (1 + (uniBuff().pay || 0));
+  const buffPay = () => (buffOn() ? 2 : 1) * blessMult() * (1 + (uniBuff().pay || 0) + gearBuff().pay);
   function buffKeep() { if (buffOn() && buffSlips > 0) { buffSlips--; return true; } return false; }
   function buffTick() {
     const left = buffUntil - Date.now();
@@ -8476,40 +8788,42 @@ const World = (function () {
   function vdraw() {
     if (!vdlg) return; const v = S.vial || [], sel = v[vSel];
     vdlg.innerHTML = '<div class="tourcard vcard" role="dialog" aria-modal="true" aria-labelledby="vtitle"><h3 id="vtitle">Lost pills vial</h3>' +
-      (v.length ? '<p>Pills that popped out of bottles around the pharmacy. Pick one to take.</p><div class="vgrid">' + v.map((p, i) => '<button type="button" class="vpill" data-i="' + i + '" aria-pressed="' + (i === vSel) + '" aria-label="' + esc(pillName(p)) + '">' + pillSvg(p, 40) + '</button>').join('') + '</div>' : '<p>Empty. Watch the shelves and other spots around the pharmacy for pills that pop out, then tap them to collect.</p>') +
-      (sel ? '<p class="vdesc"><b>' + esc(pillName(sel)) + '.</b> ' + (sel.k === 't' ? 'Tablets are rare and strong. For 90 seconds the screen warps and your pharmacist feels sharp: money ×2, streak bonus ×3, and two free slips that keep your streak.' : 'Capsules pop open to reveal a cosmetic: facial hair, a hat, or an accessory.') + '</p>' : '') +
+      (v.length ? '<p>Pills that popped out of bottles around the pharmacy. Pick one to take.</p><div class="vgrid">' + v.map((p, i) => '<button type="button" class="vpill' + (p.k === 'c' && p.r && p.r !== 'common' ? ' rar-' + p.r : '') + '" data-i="' + i + '" aria-pressed="' + (i === vSel) + '" aria-label="' + esc(pillName(p)) + (p.r && p.r !== 'common' ? ', ' + RAR[p.r].n.toLowerCase() : '') + '">' + pillSvg(p, 40) + '</button>').join('') + '</div>' : '<p>Empty. Watch the shelves and other spots around the pharmacy for pills that pop out, then tap them to collect.</p>') +
+      (sel ? '<p class="vdesc"><b>' + esc(pillName(sel)) + '.</b> ' + (sel.k === 't' ? 'Tablets are rare and strong. For 90 seconds the screen warps and your pharmacist feels sharp: money ×2, streak bonus ×3, and two free slips that keep your streak.' : (sel.r && sel.r !== 'common' ? 'This one shimmers: a <b>' + RAR[sel.r].n.toLowerCase() + '</b> capsule. ' : '') + 'Capsules pop open to reveal gear for your pharmacist (hats, glasses, coats, things to hold) or, if you are lucky, a new pet. Rarer capsules hold rarer gear with bigger bonuses.') + '</p>' : '') +
       '<div class="tourbtns">' + (sel ? '<button type="button" class="btn go" data-take>Take it</button>' : '') + '<button type="button" class="btn" data-close>Close</button></div></div>';
   }
   /* capsule reveal */
   function capsuleOpen(p) {
-    const left = COSM.filter(c => !cosmHave(c[1])), res = left.length ? pick(left) : null;
+    const tier = p.r || rollRarity(), res = capsulePick(tier), rr = res ? res.r : tier;
     vOpenAt = Date.now(); vBack = document.activeElement;
-    const el = document.createElement('div'); el.className = 'tour vdlg capdlg'; document.body.appendChild(el); vdlg = el;
+    const el = document.createElement('div'); el.className = 'tour vdlg capdlg rar-' + rr; document.body.appendChild(el); vdlg = el;
     document.addEventListener('keydown', vdlgKey, true);
     const c1 = p.c, c2 = p.c2 || p.c, st = 'stroke="#1d2b2e" stroke-width="2.4"';
-    el.innerHTML = '<div class="tourcard vcard" role="dialog" aria-modal="true" aria-labelledby="ctitle"><h3 id="ctitle">The capsule is opening...</h3><div class="capstage"><svg viewBox="0 0 120 60" class="capbig" aria-hidden="true"><g class="chalf l"><path d="M60 14H30a16 16 0 0 0 0 32h30z" fill="' + c1 + '" ' + st + '/></g><g class="chalf r"><path d="M60 14h30a16 16 0 0 1 0 32H60z" fill="' + c2 + '" ' + st + '/></g></svg><div class="reel" id="creel" aria-hidden="true">?</div></div><p class="rname" id="cname" aria-live="polite"></p><div id="cprev"></div><div class="tourbtns"><button type="button" class="btn go" data-close disabled id="cdone">Nice</button></div></div>';
+    el.innerHTML = '<div class="tourcard vcard" role="dialog" aria-modal="true" aria-labelledby="ctitle"><div class="rarband">' + RAR[rr].n + ' capsule</div><h3 id="ctitle">The capsule is opening...</h3><div class="capstage"><svg viewBox="0 0 120 60" class="capbig" aria-hidden="true"><g class="chalf l"><path d="M60 14H30a16 16 0 0 0 0 32h30z" fill="' + c1 + '" ' + st + '/></g><g class="chalf r"><path d="M60 14h30a16 16 0 0 1 0 32H60z" fill="' + c2 + '" ' + st + '/></g></svg><div class="reel" id="creel" aria-hidden="true"></div></div><p class="rname" id="cname">&nbsp;</p><div id="cprev" class="capprevwrap"></div><div class="tourbtns"><button type="button" class="btn go" id="cdone" data-close disabled>Nice</button></div></div>';
     el.addEventListener('click', ev => { const t = ev.target.closest('button'); if (t && t.dataset.close !== undefined && !t.disabled) vdlgClose(); });
     const reel = el.querySelector('#creel'), nm = el.querySelector('#cname'), title = el.querySelector('#ctitle'), done = el.querySelector('#cdone');
     const reduce = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
-    const icons = {}; COSM.forEach(c => { icons[c[1]] = World.ok && World.cosmIcon ? World.cosmIcon(c[0], c[1]) : null; });
-    const showIt = (it) => { const u = icons[it[1]]; reel.innerHTML = u ? '<img alt="" src="' + u + '">' : it[3]; };
+    const spin = GEAR.filter(g => g.src === 'capsule'), icons = {};
+    spin.forEach(g => { icons[g.id] = g.slot !== 'pet' && World.ok && World.cosmIcon ? World.cosmIcon(g.slot, g.id) : null; });
+    const showIt = (g) => { const u = icons[g.id]; reel.innerHTML = u ? '<img alt="" src="' + u + '">' : '<span class="capemo">' + g.e + '</span>'; reel.className = 'reel rar-' + g.r + (reel.classList.contains('land') ? ' land' : ''); };
     let ticks = reduce ? 4 : 22, i = 0, last = -1; const t0 = reduce ? 200 : 900;
     setTimeout(() => { el.querySelector('.capstage').classList.add('open'); SFX.play('unlock'); step(); }, t0);
     function step() {
       if (!vdlg || vdlg !== el) return;
-      i++; let k; do { k = Math.floor(Math.random() * COSM.length); } while (k === last && COSM.length > 1); last = k;
-      const fin = i >= ticks; const it = fin ? (res || COSM[k]) : COSM[k];
+      i++; let k; do { k = Math.floor(Math.random() * spin.length); } while (k === last && spin.length > 1); last = k;
+      const fin = i >= ticks; const it = fin ? (res || spin[k]) : spin[k];
       showIt(it); reel.classList.toggle('land', fin);
       if (!fin) { setTimeout(step, 70 + Math.pow(i / ticks, 2.4) * 380); return; }
       let msg = '';
       if (res) {
-        S.cosm = (S.cosm || []).concat([res[1]]); S.cosmOn = S.cosmOn || {}; S.cosmOn[res[0]] = res[1];
-        msg = 'New ' + COSM_SLOT[res[0]].toLowerCase().replace(/s$/, '') + ': ' + res[2] + '! It is on your pharmacist now (change it any time in Character). ' + S.cosm.length + '/' + COSM.length + ' found.';
-        if (S.cosm.length === COSM.length) { S.cash += 1000; S.earned += 1000; pwAdd('hint', 3); msg += ' Every cosmetic found: +' + money(1000) + ' and 3 hint pills!'; }
-      } else { const b = Math.round(250 * franchiseMult()); S.cash += b; S.earned += b; msg = 'You found every cosmetic already, so the capsule held ' + money(b) + ' instead.'; }
+        gearGrant(res, true);
+        const bt = buffText2(res.buff), found = GEAR.filter(g => g.src === 'capsule' && gearHave(g.id)).length, all = GEAR.filter(g => g.src === 'capsule').length;
+        msg = (res.slot === 'pet' ? res.name + ' joins the pharmacy! Find it on the floor. Drag it anywhere you like.' : 'New ' + SLOT_NAME[res.slot].toLowerCase() + ': ' + res.name + '. It is on your pharmacist now (change it any time in Character).') + (bt ? ' Bonus: ' + bt + '.' : '') + ' ' + found + '/' + all + ' capsule finds.';
+        if (found === all) { S.cash += 1000; S.earned += 1000; pwAdd('hint', 3); msg += ' Every capsule item found: +' + money(1000) + ' and 3 hint pills!'; }
+      } else { const b = Math.round({ common: 250, rare: 600, epic: 1500, legendary: 4000 }[tier] * franchiseMult()); S.cash += b; S.earned += b; msg = 'You already found everything a capsule can hold, so this one held ' + money(b) + ' instead.'; }
       save(); try { World.setPharmacist(meSpec()); } catch (e) { /* ignore */ }
-      title.textContent = res ? 'Unlocked: ' + res[2] : 'Cash capsule'; nm.textContent = msg; done.disabled = false; done.focus(); SFX.play('streak'); renderStats();
-      if (res && World.ok && World.pharmPortrait) { const u = World.pharmPortrait(meSpec()); if (u) el.querySelector('#cprev').innerHTML = '<img class="mepv-img capprev" alt="Your pharmacist wearing the new item" src="' + u + '">'; }
+      title.textContent = res ? (rr === 'legendary' ? 'Legendary! ' : rr === 'epic' ? 'Epic find: ' : rr === 'rare' ? 'Rare find: ' : 'Unlocked: ') + res.name : 'Cash capsule'; nm.textContent = msg; done.disabled = false; done.focus(); SFX.play(rr === 'legendary' || rr === 'epic' ? 'streak' : 'unlock'); renderStats();
+      if (res && res.slot !== 'pet' && World.ok && World.pharmPortrait) { const u = World.pharmPortrait(meSpec()); if (u) el.querySelector('#cprev').innerHTML = '<img class="mepv-img capprev" alt="Your pharmacist wearing the new item" src="' + u + '">'; }
       if (view === 'create') renderPanel();
     }
   }
@@ -8724,7 +9038,7 @@ const World = (function () {
       <div class="btnrow"><button type="button" class="btn go" data-act="back">Back to the pharmacy</button></div></div>`;
   }
 
-  const GAME_VERSION = 119;
+  const GAME_VERSION = 122;
   const b64u = (u8) => { let s = ''; for (let i = 0; i < u8.length; i += 0x8000) s += String.fromCharCode.apply(null, u8.subarray(i, i + 0x8000)); return btoa(s).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); };
   const unb64u = (t) => { const s = atob(t.replace(/-/g, '+').replace(/_/g, '/')), u = new Uint8Array(s.length); for (let i = 0; i < s.length; i++) u[i] = s.charCodeAt(i); return u; };
   const chk = (t) => { let h = 2166136261; for (let i = 0; i < t.length; i++) { h ^= t.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36); };
@@ -8757,7 +9071,7 @@ const World = (function () {
     }
     const raw = ta.value.trim(); if (!raw) { say('Paste a save code above first.', true); return; }
     let s; try { s = await readCode(raw); } catch (e) { say('That code is not valid. Copy the whole thing, including the RX at the start.', true); armedLoad = false; return; }
-    if (!armedLoad) { armedLoad = true; say('Valid code. Loading replaces this device\u2019s progress. Tap Load code again to confirm.'); setTimeout(() => { armedLoad = false; }, 8000); return; }
+    if (!armedLoad) { armedLoad = true; say('Valid code. Loading replaces this device’s progress. Tap Load code again to confirm.'); setTimeout(() => { armedLoad = false; }, 8000); return; }
     armedLoad = false; clearTimeout(saveTimer);
     window.__rxLoading = true;
     try { localStorage.setItem(SAVE_KEY, JSON.stringify(s)); say('Loaded. Restarting\u2026'); setTimeout(() => location.reload(), 300); } catch (e) { say('This browser would not store the save.', true); }
@@ -8779,18 +9093,16 @@ const World = (function () {
     switch (a) {
       case 'settings': openView(view === 'set' ? 'q' : 'set'); if (view === 'q') { resumeTimers(); renderPanel(); } return;
       case 'studies': openView(view === 'studies' ? 'q' : 'studies'); if (view === 'q') { resumeTimers(); renderPanel(); } return;
-      case 'acc-tog': { readShop(); const k = +v; S.accOff = S.accOff || []; const i = S.accOff.indexOf(k); if (i >= 0) S.accOff.splice(i, 1); else S.accOff.push(k); save(); World.setPharmacist(meSpec()); renderPanel(); return; }
       case 'vial': openVial(); return;
       case 'cyc': { readShop(); const k = t.dataset.k, d = +t.dataset.d, r = crows().find(x => x.k === k); if (!r || r.o.length < 2) return; const i = Math.max(0, r.o.findIndex(x => x.v === r.cur)), nx = r.o[(i + d + r.o.length) % r.o.length]; setCrow(k, nx.v); save(); World.setPharmacist(meSpec());
         const row = document.querySelector('.crow[data-k="' + k + '"]'), nr = crows().find(x => x.k === k); if (row && nr) { row.outerHTML = crowHTML(nr); const nb = document.querySelector('.crow[data-k="' + k + '"] [data-d="' + d + '"]'); if (nb) nb.focus(); } const pv = document.querySelector('.mepv'); if (pv) pv.innerHTML = mePreview(); return; }
       case 'create': openView(view === 'create' ? 'q' : 'create'); if (view === 'q') { resumeTimers(); renderPanel(); } return;
       case 'awards': openView(view === 'awards' ? 'q' : 'awards'); if (view === 'q') { resumeTimers(); renderPanel(); } return;
       case 'me': { readShop(); const k = t.dataset.k, v = t.dataset.v; S.me[k] = (k === 'hair' || k === 'hairColor' || k === 'skin' || k === 'scrub') ? +v : v; save(); World.setPharmacist(meSpec()); renderPanel(); return; }
-      case 'ctab': readShop(); cTab = v === 'shop' ? 'shop' : 'me'; renderPanel(); return;
-      case 'shopcat': shopCat = v; renderPanel(); return;
+      case 'ctab': readShop(); cTab = v === 'shop' || v === 'pets' ? v : 'me'; renderPanel(); return;
       case 'shop-buy': shopBuy(t.dataset.k, t.dataset.id); if (view === 'create') renderPanel(); return;
       case 'shop-use': shopUse(t.dataset.k, t.dataset.id); return;
-      case 'pwshop': cTab = 'shop'; shopCat = 'pow'; openView('create'); return;
+      case 'pwshop': cTab = 'shop'; Object.keys(shopOpen).forEach(k => { shopOpen[k] = false; }); shopOpen.pow = true; openView('create'); return;
       case 'me-done': readShop(); S.me.done = true; save(); syncBrand(); backToQ(); maybeTour(); return;
       case 'back': if (view === 'syn') synExit(); if (view === 'shift') return shiftNext(false); readDraft(); const wasC = view === 'create' && !S.me.done; if (view === 'create') readShop(); if (wasC) { S.me.done = true; save(); } backToQ(); if (wasC) maybeTour(); return;
       case 'phone': return openPhone();
@@ -8807,6 +9119,7 @@ const World = (function () {
       case 'dev-recall': { const q = BANK.find(x => !x.ms && x.k !== lastKey); if (!q) return; S.recall = S.recall || []; if (!S.recall.some(r => r.k === q.k)) S.recall.push({ k: q.k, seed: 4321, body: 'obese', name: 'Rosa', due: 0, tries: 0, at: Date.now() - 2 * 864e5 }); forceSp = { recall: q.k, seed: 4321, body: 'obese' }; if (view === 'q') newCard(); return; }
       case 'dev-regular': { const w = WEEKS[0]; S.reg = S.reg || {}; if (!S.reg[w.n]) { S.reg[w.n] = { n: w.n, name: 'Big Mike', seed: 7000 + w.n * 137, body: 'jacked', visits: 0, ok: 0, at: Date.now() }; if (World.ok && World.setMastery) World.setMastery(masteryList()); } forceSp = { regular: w.n, seed: S.reg[w.n].seed, body: 'jacked' }; if (view === 'q') newCard(); return; }
       case 'dev-pill': { const ok = World.ok && World.devPill(); toast(ok ? 'A pill popped out. Tap it.' : 'Could not spawn one.'); return; }
+      case 'dev-legcap': { S.vial = S.vial || []; S.vial.push({ k: 'c', c: '#F2A516', c2: '#F4F4F0', s: 'two', r: 'legendary' }); save(); vialSync(); toast('A legendary capsule is in the vial.'); return; }
       case 'dev-bottle': learnOff(); fp.cool = 0; return startBottles();
       case 'dev-shelve': learnOff(); return startShelve(false);
       case 'dev-prior': learnOff(); return startPrior();
@@ -8869,20 +9182,17 @@ const World = (function () {
       case 'focus': st.focus = !st.focus; applyFocus(); toast(st.focus ? 'Focus mode on. No timer, events or 3D world.' : 'Focus mode off. The pharmacy is back.'); break;
       case 'tab-set': flipTab = true; openView('set'); return;
       case 'tab-studies': flipTab = true; openView('studies'); return;
+      case 'tab-opts': flipTab = true; openView('opts'); return;
+      case 'course-all': { const c = COURSES.find(x => x.id === v); if (c) courseCats(c).forEach(k => st.topics[k] = true); break; }
+      case 'course-none': { const c = COURSES.find(x => x.id === v); if (c) courseCats(c).forEach(k => st.topics[k] = false); break; }
+      case 'course-only': { const c = COURSES.find(x => x.id === v); if (!c) break; if (courseOnly(c)) { unsetOnly(); toast('The other topics are back on.'); } else { setOnly(courseCats(c)); toast('Only ' + c.name + ' topics are on.'); } break; }
+      case 'week-only': { const k = WKCFG[v] ? v : 'p2', cat = WKCFG[k].topic; if (weekOnly(k)) { unsetOnly(); wkPick(k, '', 'only'); toast('The other topics and weeks are back on.'); } else { if (!WKCFG[k].cur()) { toast('No week has started yet.'); return; } setOnly([cat]); if (!wkOnlyNow(k)) wkPick(k, '', 'only'); toast('Only this week’s drugs are on.'); } break; }
+      case 'year': st.year = YEARS.indexOf(v) >= 0 ? v : 'P2'; findQ = ''; break;
+      case 'year-only': { if (yearOnly(v)) { unsetOnly(); toast('The other years are back on.'); } else { if (!COURSES.some(c => c.year === v && courseCats(c).length)) { toast(v + ' has no courses filed yet.'); return; } setOnly(yearCats(v)); toast('Only ' + v + ' topics are on.'); } break; }
       case 'wkpick': { const [k, x] = v.split(':'); const a = x === 'all' || x === 'none' || x === 'only' ? x : 'toggle'; if (wkPick(k, a === 'toggle' ? x : '', a) === false) return; break; }
       case 'wkcourse': { const i = v.indexOf(':'); wkPick(v.slice(0, i), v.slice(i + 1), 'course'); break; }
       case 'wkfold': st[v + 'fold'] = !st[v + 'fold']; break;
       case 'wkup': st[v + 'up'] = !st[v + 'up']; break;
-      case 'folder': st.folder = v === 'P1' || v === 'P3' ? v : 'P2'; break;
-      case 'p3-only': CATS.forEach(c => st.topics[c[0]] = c[0] === 'TP3' || c[0] === 'T553'); break;
-      case 'folder-only': {
-        if (v === 'P1') { toast('P1 has no topics yet.'); break; }
-        const inF = c => v === 'P3' ? (c[0] === 'TP3' || c[0] === 'T553') : !(c[0] === 'TP3' || c[0] === 'T553');
-        const outs = CATS.filter(c => !inF(c)), isOn = outs.every(c => !st.topics[c[0]]);
-        if (isOn) { const rs = st.restore || {}; outs.forEach(c => st.topics[c[0]] = rs[c[0]] !== false); delete st.restore; toast('Other folders are back on.'); }
-        else { st.restore = {}; outs.forEach(c => { st.restore[c[0]] = !!st.topics[c[0]]; st.topics[c[0]] = false; }); toast('Only ' + v + ' topics are on.'); }
-        break;
-      }
       case 'wktype': { st.wkTypes = st.wkTypes || {}; const on = WK_TYPES.filter(x => st.wkTypes[x[0]] !== false).length; if (st.wkTypes[v] !== false && on <= 1) { toast('Keep at least one kind of weekly question on.'); return; } st.wkTypes[v] = st.wkTypes[v] === false; break; }
       case 'reset-set': S.set = defaults().set; break;
       case 'preview': readDraft(); $('#studyprev').innerHTML = previewHTML(parseStudy(draft.text, 'My notes')); return;
@@ -8984,8 +9294,8 @@ const World = (function () {
   setInterval(() => { if (window.__rxLoading) return; try { localStorage.setItem(SAVE_KEY, JSON.stringify(S)); } catch (e) { /* ignore */ } }, 5000);
 
   { const sc = $('#savecard'); if (sc) sc.innerHTML = saveBoxHTML(); }
-  World.init({ host: $('#stage'), getS: () => S, specialRoll: specialRoll, tagInfo: tagInfo, onBuy: buyUp, onNotes: () => openView('studies'), notesInfo: customCount, karenRoll: karenRoll, sweatyRoll: sweatyRoll, elderRoll: elderRoll, eventRoll: eventRoll, onVisitor: visitClick, onVisitorArrive: visitArrive, capsuleOk: capsuleOk, onCapsule: onCapsule, onBrain: synEnter, onSynSite: onSynSite, onEvt: onEvt, pillOk: pillOk, onPill: onPill, onPhone: openPhone, onPolice: policeCome, himOk: himOk, onHimSpawn: onHimSpawn, onHimAngel: himAngelOk, onHimLand: himLand, onHimBless: onHimBless, onFp: fpClick, sign: () => shopName() + '|' + tierName() + ' #' + (S.franchises + 1) });
-  window.__rxDbg = () => ({ sr: srUpdate, nc: newCard, sp: specialRoll, fp: fp, S: S, view: view, rush: rush, phoneR: phone.ringing, TOPQ: TOPQ, pool: poolQs, cur: cur, synQ: () => (typeof SYN !== 'undefined' ? SYN.q : null), synTap: id => onSynSite(id), offer: k => offerEvt(k, 'test'), onEvt: onEvt, holiday: () => holNow(), holN: () => holCount(), renderStats: renderStats, passive: passive, techRate: techRate, buyUp: buyUp, openVial: openVial, tabletTake: tabletTake, capsuleOpen: capsuleOpen, buffOn: buffOn, COSM: COSM });
+  World.init({ host: $('#stage'), getS: () => S, specialRoll: specialRoll, tagInfo: tagInfo, onBuy: buyUp, onNotes: () => openView('studies'), notesInfo: customCount, karenRoll: karenRoll, sweatyRoll: sweatyRoll, elderRoll: elderRoll, eventRoll: eventRoll, onVisitor: visitClick, onVisitorArrive: visitArrive, capsuleOk: capsuleOk, onCapsule: onCapsule, onBrain: synEnter, onSynSite: onSynSite, onEvt: onEvt, pillOk: pillOk, onPill: onPill, pillBoost: () => gearBuff().pills, onPhone: openPhone, onPolice: policeCome, himOk: himOk, onHimSpawn: onHimSpawn, onHimAngel: himAngelOk, onHimLand: himLand, onHimBless: onHimBless, onFp: fpClick, sign: () => shopName() + '|' + tierName() + ' #' + (S.franchises + 1) });
+  window.__rxDbg = () => ({ sr: srUpdate, nc: newCard, sp: specialRoll, fp: fp, S: S, view: view, rush: rush, phoneR: phone.ringing, TOPQ: TOPQ, pool: poolQs, cur: cur, synQ: () => (typeof SYN !== 'undefined' ? SYN.q : null), synTap: id => onSynSite(id), offer: k => offerEvt(k, 'test'), onEvt: onEvt, holiday: () => holNow(), holN: () => holCount(), renderStats: renderStats, passive: passive, techRate: techRate, buyUp: buyUp, openVial: openVial, tabletTake: tabletTake, capsuleOpen: capsuleOpen, buffOn: buffOn, GEAR: GEAR, gearBuff: gearBuff, gearHave: gearHave });
   if (!World.ok) $('#stage').classList.add('flat');
   else { document.body.classList.add('fx'); World.setPharmacist(meSpec()); World.setStore(S.store); World.setStaffLook(uniSpec()); World.setAwards(S.awards); World.setCalendar(Math.min(4, S.awards.calW || 0), false, S.awards.calW || 0); }
   applyFocus(); syncBrand(); sfxLabel();
@@ -8994,13 +9304,13 @@ const World = (function () {
     const menu = $('#menu'), close = menu && menu.querySelector('.menuclose');
     if (menu && close) {
       const hr = document.createElement('hr'); menu.insertBefore(hr, close);
-      [['dev-pill', 'Test: pop a pill'], ['dev-elder', 'Test: elder patient next'], ['dev-next', 'Test: skip to next patient'], ['dev-recall', 'Test: recall patient'], ['dev-regular', 'Test: regular patient'], ['dev-bottle', 'Test: bottle check'], ['dev-shelve', 'Test: restock'], ['dev-prior', 'Test: prior auth'], ['dev-rush', 'Test: rush hour'], ['dev-insp', 'Test: health inspector next'], ['dev-driver', 'Test: delivery next'], ['dev-sky', 'Test: sky capsule'], ['dev-him-walk', 'Test: Andy walks in next'], ['dev-him-asc', 'Test: Andy ascension'], ['dev-him-angel', 'Test: Andy angel flyover'], ['dev-him-smash', 'Test: Andy smash (skip click)'], ['dev-plant', 'Test: plant capsule'], ['dev-fast', 'Test: skip slow start']].forEach(b => {
+      [['dev-pill', 'Test: pop a pill'], ['dev-legcap', 'Test: legendary capsule in vial'], ['dev-elder', 'Test: elder patient next'], ['dev-next', 'Test: skip to next patient'], ['dev-recall', 'Test: recall patient'], ['dev-regular', 'Test: regular patient'], ['dev-bottle', 'Test: bottle check'], ['dev-shelve', 'Test: restock'], ['dev-prior', 'Test: prior auth'], ['dev-rush', 'Test: rush hour'], ['dev-insp', 'Test: health inspector next'], ['dev-driver', 'Test: delivery next'], ['dev-sky', 'Test: sky capsule'], ['dev-him-walk', 'Test: Andy walks in next'], ['dev-him-asc', 'Test: Andy ascension'], ['dev-him-angel', 'Test: Andy angel flyover'], ['dev-him-smash', 'Test: Andy smash (skip click)'], ['dev-plant', 'Test: plant capsule'], ['dev-fast', 'Test: skip slow start']].forEach(b => {
         const el = document.createElement('button'); el.type = 'button'; el.dataset.act = b[0]; el.innerHTML = '<i aria-hidden="true">\u2699</i><span>' + b[1] + '</span>'; menu.insertBefore(el, close);
       });
     }
   }
   if (S.libRefund) { const r = S.libRefund; delete S.libRefund; toast('The Reference Library is retired. Refunded ' + money(r) + '. Hint pills and more power-ups are in the Shop.'); save(); }
-  checkAwards(true); dailyBadge(); if (World.ok && World.setMastery) World.setMastery(masteryList()); checkRegulars();
+  gearMigrate(); checkAwards(true); dailyBadge(); if (World.ok && World.setMastery) World.setMastery(masteryList()); checkRegulars();
   if (blessOn()) blessStart(false);
   if (S.lab && World.ok && World.setLab) World.setLab(true);
   syncLab();
