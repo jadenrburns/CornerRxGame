@@ -1216,6 +1216,24 @@ table.board tbody tr:nth-child(-n+3) td:first-child { font-weight: 800; color: v
 .petri.bug.used { animation: none; }
 @keyframes micwander { 0%, 100% { transform: translate(0, 0) rotate(0); } 25% { transform: translate(5px, -3px) rotate(1.8deg); } 50% { transform: translate(-3px, 2px) rotate(-1.2deg); } 75% { transform: translate(3px, 3px) rotate(1deg); } }
 @keyframes micleg { from { transform: rotate(-14deg); } to { transform: rotate(14deg); } }
+.mictop { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin: 0 0 8px; position: sticky; top: 0; z-index: 3; background: var(--surface); padding: 2px 0 4px; }
+.mback { min-height: 36px; padding: 6px 14px; }
+.xbtn { width: 40px; height: 40px; border-radius: 50%; border: 2px solid #8E1F1F; background: #D62F2F; color: #fff; font: 800 18px/1 var(--f-body); cursor: pointer; flex: none; }
+.xbtn:hover { background: #E24A4A; }
+.board { display: flex; gap: 10px; align-items: flex-start; margin: 6px 0; }
+.board.row { flex-wrap: wrap; }
+.bcol { flex: 1 1 0; min-width: 0; display: flex; flex-direction: column; gap: 10px; }
+.board.row .bcol { flex: 1 1 110px; }
+.bx { border: 2px solid var(--ink); border-radius: 6px; background: var(--surface); overflow: hidden; }
+.bxt { display: flex; gap: 6px; align-items: center; padding: 4px 6px; font: 800 11.5px/1.15 var(--f-body); border-bottom: 2px solid var(--ink); background: var(--surface2); }
+.bxg { display: grid; grid-template-columns: 1fr; }
+.bxg.two { grid-template-columns: 1fr 1fr; }
+.bxh { padding: 2px 6px; font: 800 11px/1.2 var(--f-body); border-bottom: 1.5px solid var(--line); }
+.bxg.two .bxh + .bxh, .bxg.two .bcell:nth-child(even) { border-left: 1.5px solid var(--line); }
+.bcell { min-height: 58px; padding: 4px; border: 0; background: transparent; display: flex; flex-direction: column; align-items: flex-start; gap: 2px; text-align: left; cursor: pointer; color: var(--ink); }
+.bcell i { font: 700 10.5px/1.15 var(--f-body); font-style: normal; background: var(--teal-soft); border-radius: 4px; padding: 1px 5px; }
+.bcell.over, .bcell:hover:not(:disabled) { background: var(--teal-soft); outline: 2px solid var(--teal); outline-offset: -2px; }
+.bcell.off { background: repeating-linear-gradient(45deg, var(--surface2), var(--surface2) 6px, transparent 6px, transparent 12px); cursor: default; }
 </style>
 
 <div class="shell">

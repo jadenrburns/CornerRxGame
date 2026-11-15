@@ -839,7 +839,7 @@
   }
   function qbar() {
     if (view === 'phone') return '<div class="qbar"><span class="qcall">&#128222; On the phone</span></div>';
-    if (World.ok) return view === 'q' ? '' : '<div class="qbar slim"><button type="button" class="btn go" data-act="back">Back to counter</button></div>';
+    if (World.ok) return (view === 'q' || view === 'mic') ? '' : '<div class="qbar slim"><button type="button" class="btn go" data-act="back">Back to counter</button></div>';
     const n = customCount();
     return `<div class="qbar"><button type="button" class="qset ${view === 'set' ? 'on' : ''}" data-act="settings" aria-label="Question settings: ${esc(summary())}">${ICON_GEAR}<span>${esc(summary())}</span></button>
       <button type="button" class="${view === 'studies' ? 'on' : ''}" data-act="studies">${ICON_BOOK}<span>My studies${n ? ' (' + n + ')' : ''}</span></button>
@@ -1982,7 +1982,7 @@
   /* ---- save code: the whole save as one long code, to move progress between devices or keep a backup ---- */
 /*@EXT@*/
 /*@MIC@*/
-  const GAME_VERSION = 131;
+  const GAME_VERSION = 132;
   const b64u = (u8) => { let s = ''; for (let i = 0; i < u8.length; i += 0x8000) s += String.fromCharCode.apply(null, u8.subarray(i, i + 0x8000)); return btoa(s).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); };
   const unb64u = (t) => { const s = atob(t.replace(/-/g, '+').replace(/_/g, '/')), u = new Uint8Array(s.length); for (let i = 0; i < s.length; i++) u[i] = s.charCodeAt(i); return u; };
   const chk = (t) => { let h = 2166136261; for (let i = 0; i < t.length; i++) { h ^= t.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36); };

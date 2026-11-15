@@ -168,11 +168,29 @@ const World = (function () {
     const hd = new T.Group(); hd.position.y = 1.85 * (1 - headS); hd.scale.set(headS, headS, headS); up.add(hd); P.head = hd; P.up = up; P.him = !!o.him;
     let par = up;
     const put = (geo, m, x, y, z, parent) => { const o = new T.Mesh(geo, m); o.position.set(x, y, z); o.castShadow = true; Object.assign(o.userData, tag); (parent || par).add(o); return o; };
-    const tor = put(jacked ? new T.CylinderGeometry(0.46, 0.15, 0.95, 12) : new T.CylinderGeometry(tr[0], tr[1], 0.95, 12), P.shirtM, 0, 1.12, 0);
+    const tor = put(jacked ? new T.CylinderGeometry(0.46, 0.15, 0.95, 14) : new T.CylinderGeometry(tr[0], tr[1], 0.95, 14), P.shirtM, 0, 1.12, 0);
     if (slim) tor.scale.set(o.him ? 0.6 : 0.8, 1, o.him ? 0.6 : 0.8);
     if (jacked) tor.scale.set(2.0, 1.12, 1.5);
     if (obese) { tor.scale.set(1.8, 1, 1.75); const belly = put(new T.IcosahedronGeometry(0.62, 0), P.shirtM, 0, 0.95, 0.3); belly.scale.set(1.25, 1, 1.05); }
     if (o.coat) put(new T.BoxGeometry(0.2, 0.62, 0.03), own(o.scrub), 0, 1.22, Math.max(tr[0], tr[1]) * tor.scale.z + 0.005);
+    // separate lab coat (pharmacist and technicians): open front over a colored shirt, collar, lapels, pockets, pen and leaf badge
+    const labCoat = (o.coat || isStaff) && !(o.cosm && o.cosm.coat) && !o.him && !o.inspector && !o.driver && !o.cap && !o.elder;
+    if (labCoat) {
+      tor.material = own(o.coat ? '#23A99B' : '#2B7FA8');
+      const cm2 = own(shirt); cm2.side = T.DoubleSide; const hi = own('#FFFFFF'), r0 = tr[0] + 0.05, r1 = tr[1] + 0.13, top = 1.6, hem = 0.52, hh = top - hem;
+      const shell = put(new T.CylinderGeometry(r0, r1, hh, 14, 1, true, 0.3, PI * 2 - 0.6), cm2, 0, (top + hem) / 2, 0); shell.scale.copy(tor.scale);
+      const rAt = (y) => r0 + (r1 - r0) * (top - y) / hh;
+      const onC = (y, x) => { const r = rAt(y); return [x, y, Math.sqrt(Math.max(0.01, r * r - x * x)) * tor.scale.z + 0.012, Math.asin(Math.max(-0.95, Math.min(0.95, x / r)))]; };
+      [-1, 1].forEach(sd => {
+        const c = onC(1.6, sd * 0.1); const col = put(new T.BoxGeometry(0.13, 0.1, 0.04), hi, c[0], 1.62, c[2] - 0.02); col.rotation.z = -sd * 0.55; col.rotation.y = sd * 0.35;
+        const l = onC(1.4, sd * 0.125); const lap = put(new T.BoxGeometry(0.085, 0.42, 0.03), hi, l[0], 1.4, l[2]); lap.rotation.z = sd * 0.16; lap.rotation.y = -sd * l[3];
+        const pk = onC(0.8, sd * 0.25); const pc = put(new T.BoxGeometry(0.15, 0.14, 0.03), hi, pk[0], 0.8, pk[2] + 0.004); pc.rotation.y = -sd * pk[3];
+        const fl = put(new T.BoxGeometry(0.15, 0.025, 0.04), cm2, pk[0], 0.875, pk[2] + 0.012); fl.rotation.y = -sd * pk[3];
+      });
+      const bp = onC(1.3, 0.2); const bpk = put(new T.BoxGeometry(0.11, 0.11, 0.03), hi, bp[0], 1.3, bp[2] + 0.004); bpk.rotation.y = -bp[3];
+      [['#2E9E5B', 0.17], ['#2B5FB5', 0.2], ['#C0392B', 0.23]].forEach(pn => { const pe = onC(1.4, pn[1]); const pen = put(new T.BoxGeometry(0.014, 0.08, 0.014), own(pn[0]), pe[0], 1.37, pe[2] + 0.004); pen.rotation.y = -pe[3]; });
+      const lf = onC(1.42, -0.15); const leaf = put(new T.OctahedronGeometry(0.03, 0), own('#2E9E5B'), lf[0], 1.42, lf[2] + 0.012); leaf.scale.set(1, 1.3, 0.4); leaf.rotation.z = 0.5;
+    }
     if (varied && !isStaff && !o.coat) {
       const rt = jacked ? 0.46 : tr[0], rb = jacked ? 0.15 : tr[1], sz = tor.scale.z, fz = (y) => (rb + (rt - rb) * (y - 0.645) / 0.95) * sz + 0.012, cl = Math.floor(rnd(8) * 6);
       if (cl === 1) { const bc = own('#F4FAFA'); [0.85, 1.07, 1.29].forEach(y => put(new T.BoxGeometry(0.44, 0.07, 0.03), bc, 0, y, fz(y))); }
@@ -322,14 +340,22 @@ const World = (function () {
         { const lc = put(new T.CylinderGeometry(legW * 0.55, legW * 0.5, legL / 2, 9), pants, 0, -legL / 4, 0, sh); lc.scale.z = 1.15; }
         put(new T.BoxGeometry(legW + 0.06, 0.1, legW + 0.22), own(o.shoes), 0, -legL / 2 + 0.05, 0.07, sh);
       } else {
-        { const lc = put(new T.CylinderGeometry(legW * 0.62, legW * 0.5, legL, 9), pants, 0, -legL / 2, 0, leg); lc.scale.z = 1.15; }
-        if (o.shoes) put(new T.BoxGeometry(legW + 0.06, 0.1, legW + 0.22), own(o.shoes), 0, -legL + 0.05, 0.07, leg);
+        { const th = put(new T.CylinderGeometry(legW * 0.66, legW * 0.54, legL * 0.5, 12), pants, 0, -legL / 4, 0, leg); th.scale.z = 1.15; put(new T.IcosahedronGeometry(legW * 0.56, 1), pants, 0, -legL / 2, 0.01, leg);
+          const cf = put(new T.CylinderGeometry(legW * 0.54, legW * 0.4, legL * 0.5, 12), pants, 0, -legL * 0.75, 0, leg); cf.scale.z = 1.1; put(new T.IcosahedronGeometry(legW * 0.5, 1), pants, 0, -legL * 0.58, -0.015, leg).scale.set(1, 1.5, 0.9); }
+        { const sm = own(o.shoes || '#2A2A34'), sh = put(new T.IcosahedronGeometry(0.1, 1), sm, 0, -legL + 0.05, 0.07, leg); sh.scale.set(legW * 6, 0.55, 2.3); }
       }
       P.legs.push(leg);
       const arm = new T.Group(); arm.position.set(s * (jacked ? 0.86 : obese ? 0.78 : slim ? (o.him ? 0.37 : 0.38) : 0.46), 1.5, 0); up.add(arm);
       if (jacked) arm.scale.set(2.3, 1.15, 2.3); else if (obese) arm.scale.set(1.6, 1, 1.6); else if (slim) arm.scale.set(0.8, 1, 0.8);
-      { const ac = put(new T.CylinderGeometry(0.086, 0.07, 0.62, 9), jacked ? P.skinM : P.shirtM, 0, -0.3, 0, arm); ac.scale.z = 1.05; put(new T.IcosahedronGeometry(0.09, 1), jacked ? P.skinM : P.shirtM, 0, 0.0, 0, arm); }
-      put(new T.IcosahedronGeometry(0.09, 1), P.skinM, 0, -0.66, 0, arm); P.arms.push(arm);
+      { const am = jacked ? P.skinM : P.shirtM; const ua = put(new T.CylinderGeometry(0.094, 0.076, 0.33, 12), am, 0, -0.165, 0, arm); ua.scale.z = 1.05; put(new T.IcosahedronGeometry(0.08, 1), am, 0, -0.33, 0, arm);
+        const fa = put(new T.CylinderGeometry(0.078, 0.058, 0.3, 12), am, 0, -0.48, 0, arm); fa.scale.z = 1.05; put(new T.IcosahedronGeometry(0.092, 1), am, 0, 0.0, 0, arm);
+        if (labCoat) put(new T.CylinderGeometry(0.066, 0.066, 0.05, 12), own('#FFFFFF'), 0, -0.625, 0, arm); }
+      { const hd2 = put(new T.IcosahedronGeometry(0.072, 1), P.skinM, 0, -0.69, 0.005, arm); hd2.scale.set(1, 1.15, 0.9); put(new T.IcosahedronGeometry(0.03, 0), P.skinM, -s * 0.06, -0.66, 0.05, arm); } P.arms.push(arm);
+      if (o.coat && s === -1) { const cb = own('#7A4A27'); put(new T.BoxGeometry(0.27, 0.35, 0.03), cb, 0.0, -0.55, 0.13, arm); put(new T.BoxGeometry(0.23, 0.3, 0.02), own('#FFFFFF'), 0, -0.56, 0.148, arm); put(new T.BoxGeometry(0.1, 0.04, 0.05), own('#B9C4CC'), 0, -0.38, 0.15, arm); const cr = own('#D8C9A6'); put(new T.BoxGeometry(0.1, 0.03, 0.02), cr, 0, -0.56, 0.162, arm); put(new T.BoxGeometry(0.03, 0.1, 0.02), cr, 0, -0.56, 0.162, arm); }
+      if (o.coat && s === 1 && !(o.cosm && o.cosm.hands)) {
+        const gl = own('#CFEFF5'); gl.transparent = true; gl.opacity = 0.45; const liq = own('#38E0D0'); if (liq.emissive && liq.emissive.setHex) { liq.emissive.setHex(0x14B8A6); liq.emissiveIntensity = 0.8; }
+        put(new T.CylinderGeometry(0.03, 0.1, 0.2, 10), gl, 0, -0.8, 0.12, arm); put(new T.CylinderGeometry(0.026, 0.088, 0.13, 10), liq, 0, -0.835, 0.12, arm); put(new T.CylinderGeometry(0.032, 0.032, 0.09, 8), gl, 0, -0.65, 0.12, arm); put(new T.CylinderGeometry(0.042, 0.036, 0.04, 8), own('#8B5A2B'), 0, -0.585, 0.12, arm);
+      }
       if (o.him) put(new T.BoxGeometry(0.17, 0.07, 0.18), own('#24508F'), 0, -0.585, 0, arm);
       if (on(3)) put(new T.BoxGeometry(0.2, 0.09, 0.13), goldM, 0, -0.7, 0.02, arm);
       if ((on(6) || o.elder) && s === 1) { put(new T.CylinderGeometry(0.025, 0.025, 1.05, 5), own('#5B3A21'), 0, -1.02, 0.06, arm); put(new T.IcosahedronGeometry(0.07, 0), goldM, 0, -0.5, 0.06, arm); }
