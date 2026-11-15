@@ -169,10 +169,15 @@ const World = (function () {
     const hd = new T.Group(); hd.position.y = 1.85 * (1 - headS); hd.scale.set(headS, headS, headS); up.add(hd); P.head = hd; P.up = up; P.him = !!o.him;
     let par = up;
     const put = (geo, m, x, y, z, parent) => { const o = new T.Mesh(geo, m); o.position.set(x, y, z); o.castShadow = true; Object.assign(o.userData, tag); (parent || par).add(o); return o; };
+    /* Blender character parts replace the code-built body for plain customers (normal build, no coat, no costume); hair styles other than the first keep the code-built hair */
+    const GCb = (varied && !isStaff && !o.coat && !jacked && !obese && !slim && !o.openHead && !o.him) ? glbChar() : null, GC = GCb ? { parts: GCb.parts, sm: null } : null;
+    const gmat = (n) => n === 'Shirt' ? P.shirtM : n === 'Skin' ? P.skinM : n === 'Hair' ? hairM : n === 'Pants' ? pants : (GC.sm || (GC.sm = own(o.shoes || '#2A2A34')));
+    const gadd = (name, parent, usePos) => { const pt = GC && GC.parts[name]; if (!pt) return; pt.prims.forEach(pr => { if (name === 'Hair_1' && style !== 0) return; put(pr.geo, gmat(pr.mat), usePos ? pt.t[0] : 0, usePos ? pt.t[1] : 0, usePos ? pt.t[2] : 0, parent); }); };
     const tor = put(jacked ? new T.CylinderGeometry(0.46, 0.15, 0.95, 14) : new T.CylinderGeometry(tr[0], tr[1], 0.95, 14), P.shirtM, 0, 1.12, 0);
     if (slim) tor.scale.set(o.him ? 0.6 : 0.8, 1, o.him ? 0.6 : 0.8);
     if (jacked) tor.scale.set(2.0, 1.12, 1.5);
     if (obese) { tor.scale.set(1.8, 1, 1.75); const belly = put(new T.IcosahedronGeometry(0.62, 0), P.shirtM, 0, 0.95, 0.3); belly.scale.set(1.25, 1, 1.05); }
+    if (GC) { tor.visible = false; gadd('Torso', up, true); }
     if (o.coat) put(new T.BoxGeometry(0.2, 0.62, 0.03), own(o.scrub), 0, 1.22, Math.max(tr[0], tr[1]) * tor.scale.z + 0.005);
     // separate lab coat (pharmacist and technicians): open front over a colored shirt, collar, lapels, pockets, pen and leaf badge
     const labCoat = (o.coat || isStaff) && !(o.cosm && o.cosm.coat) && !o.him && !o.inspector && !o.driver && !o.cap && !o.elder;
@@ -215,6 +220,7 @@ const World = (function () {
     { const sk = P.skinM;
       [-1, 1].forEach(s => { const ear = put(new T.IcosahedronGeometry(0.07, 1), sk, s * 0.318, 1.85, 0.0); ear.scale.set(0.45, 1, 0.8); const cb = put(new T.IcosahedronGeometry(0.055, 0), sk, s * 0.17, 1.8, 0.27); cb.scale.set(1, 0.8, 0.7); });
       const ch = put(new T.IcosahedronGeometry(0.085, 1), sk, 0, 1.6, 0.215); ch.scale.set(1.25, 0.75, 0.9); }
+    if (GC) { hd.children.forEach(c => { c.visible = false; }); gadd('Head', hd, true); gadd('Hair_1', hd, true); }
     if (style === 3) { put(new T.SphereGeometry(0.37, 10, 6, 0, PI * 2, 0, PI / 2), hairM, 0, 1.9, 0); put(new T.BoxGeometry(0.14, 0.55, 0.42), hairM, -0.31, 1.68, -0.02); put(new T.BoxGeometry(0.14, 0.55, 0.42), hairM, 0.31, 1.68, -0.02); put(new T.BoxGeometry(0.64, 0.5, 0.14), hairM, 0, 1.7, -0.28); }
     else if (style === 4) { put(new T.SphereGeometry(0.34, 10, 6, 0, PI * 2, 0, PI / 2), hairM, 0, 1.9, 0); [[-0.2, 0.25], [0, 0.32], [0.2, 0.25], [0.1, 0.18]].forEach((q, i) => { const sp = put(new T.ConeGeometry(0.08, 0.3, 4), hairM, q[0], 2.2 + (i % 2) * 0.03, 0.05 - i * 0.05); sp.rotation.z = -q[0] * 2.4; }); }
     else if (style === 5) { put(new T.SphereGeometry(0.35, 10, 6, 0, PI * 2, 0, PI / 2), hairM, 0, 1.9, 0); put(new T.BoxGeometry(0.7, 0.95, 0.16), hairM, 0, 1.45, -0.28); put(new T.BoxGeometry(0.14, 0.7, 0.32), hairM, -0.34, 1.58, -0.06); put(new T.BoxGeometry(0.14, 0.7, 0.32), hairM, 0.34, 1.58, -0.06); }
@@ -227,11 +233,11 @@ const World = (function () {
     else if (style === 13) { put(new T.SphereGeometry(0.35, 10, 6, 0, PI * 2, 0, PI / 2), hairM, 0, 1.9, 0); [-1, 1].forEach(sd => put(new T.IcosahedronGeometry(0.17, 0), hairM, sd * 0.27, 2.2, -0.04)); }
     else if (style === 8) { /* bald */ }
     else if (style === 2) put(new T.CylinderGeometry(0.34, 0.34, 0.14, 6), hairM, 0, 2.08, 0);
-    else {
+    else if (!(GC && style === 0)) {
       put(new T.SphereGeometry(0.35, 10, 6, 0, PI * 2, 0, PI / 2), hairM, 0, 1.9, 0);
       if (style === 1) put(new T.IcosahedronGeometry(0.15, 0), hairM, 0, 2.28, -0.12);
     }
-    if (!karen && !sweaty) { const wh = own('#FFFFFF'); put(new T.BoxGeometry(0.105, 0.085, 0.03), wh, -0.11, 1.88, 0.283); put(new T.BoxGeometry(0.105, 0.085, 0.03), wh, 0.11, 1.88, 0.283); }
+    if (!karen && !sweaty) { const wh = own('#FFFFFF'); put(new T.BoxGeometry(0.105, 0.085, 0.03), wh, -0.11, 1.88, GC ? 0.315 : 0.283); put(new T.BoxGeometry(0.105, 0.085, 0.03), wh, 0.11, 1.88, GC ? 0.315 : 0.283); }
     if (costume) {
       if (costume === 'witch') { put(new T.CylinderGeometry(0.52, 0.52, 0.04, 9), own('#1F1B2E'), 0, 2.06, 0); const wc = put(new T.ConeGeometry(0.27, 0.72, 7), own('#1F1B2E'), 0, 2.42, 0); wc.rotation.z = 0.12; put(new T.CylinderGeometry(0.285, 0.3, 0.08, 7), own('#7B3FA0'), 0, 2.12, 0); put(new T.BoxGeometry(0.1, 0.09, 0.03), own('#F2C94C'), 0, 2.12, 0.29); put(new T.ConeGeometry(0.06, 0.16, 4), skin ? own('#6FA051') : dark, 0, 1.78, 0.37).rotation.x = PI / 2; }
       else if (costume === 'vampire') { put(new T.BoxGeometry(0.1, 0.12, 0.04), own('#FFFFFF'), -0.06, 1.675, 0.31); put(new T.BoxGeometry(0.1, 0.12, 0.04), own('#FFFFFF'), 0.06, 1.675, 0.31); put(new T.BoxGeometry(0.6, 0.12, 0.06), own('#1C1826'), 0, 2.06, 0.22); }
@@ -240,7 +246,7 @@ const World = (function () {
       else if (costume === 'antlers') { const br = own('#8A5A2B'); [-1, 1].forEach(s => { const a = put(new T.BoxGeometry(0.05, 0.36, 0.05), br, s * 0.2, 2.2, 0); a.rotation.z = -s * 0.35; const b = put(new T.BoxGeometry(0.05, 0.2, 0.05), br, s * 0.3, 2.28, 0); b.rotation.z = s * 0.6; }); put(new T.IcosahedronGeometry(0.06, 0), own('#E04F3A'), 0, 1.82, 0.35); }
       else if (costume === 'scarf') { const sf = put(new T.TorusGeometry(0.27, 0.075, 5, 8), own(rnd(12) < 0.5 ? '#D8283A' : '#3E8E41'), 0, 1.58, 0); sf.rotation.x = PI / 2; put(new T.BoxGeometry(0.12, 0.4, 0.05), own('#D8283A'), 0.15, 1.35, 0.3, up); }
     }
-    P.dark = dark; P.eyes = [put(new T.BoxGeometry(0.06, 0.065, 0.04), dark, -0.11, 1.88, 0.295), put(new T.BoxGeometry(0.06, 0.065, 0.04), dark, 0.11, 1.88, 0.295)];
+    P.dark = dark; P.eyes = [put(new T.BoxGeometry(0.06, 0.065, 0.04), dark, -0.11, 1.88, GC ? 0.327 : 0.295), put(new T.BoxGeometry(0.06, 0.065, 0.04), dark, 0.11, 1.88, GC ? 0.327 : 0.295)];
     {
       const DSK = { '#F2C9A5': '#D9A883', '#E0A97E': '#C48A60', '#C48A5E': '#A8704A', '#8D5A3B': '#74472C', '#F6D7BD': '#DDB596', '#6F4429': '#59351F' }, noseM = own(DSK[skin] || skin);
       put(new T.BoxGeometry(0.055, 0.1, 0.07), noseM, 0, 1.835, 0.322); put(new T.IcosahedronGeometry(0.047, 1), noseM, 0, 1.775, 0.34);
@@ -345,13 +351,14 @@ const World = (function () {
           const ch = legL * 0.5 - 0.09, cf = put(new T.CylinderGeometry(legW * 0.54, legW * 0.4, ch, 12), pants, 0, -legL * 0.5 - ch / 2, 0, leg); cf.scale.z = 1.1; put(new T.IcosahedronGeometry(legW * 0.5, 1), pants, 0, -legL * 0.58, -0.015, leg).scale.set(1, 1.5, 0.9); }
         { const sm = own(o.shoes || '#2A2A34'), sh = put(new T.IcosahedronGeometry(0.1, 1), sm, 0, -legL + 0.06, 0.07, leg); sh.scale.set(legW * 6.4, 0.9, 2.4); }
       }
+      if (GC) { leg.children.forEach(c => { c.visible = false; }); gadd(s < 0 ? 'Leg_R' : 'Leg_L', leg, false); }
       P.legs.push(leg);
       const arm = new T.Group(); arm.position.set(s * (jacked ? 0.86 : obese ? 0.78 : slim ? (o.him ? 0.37 : 0.38) : 0.46), 1.5, 0); up.add(arm);
       if (jacked) arm.scale.set(2.3, 1.15, 2.3); else if (obese) arm.scale.set(1.6, 1, 1.6); else if (slim) arm.scale.set(0.8, 1, 0.8);
       { const am = jacked ? P.skinM : P.shirtM; const ua = put(new T.CylinderGeometry(0.094, 0.076, 0.33, 12), am, 0, -0.165, 0, arm); ua.scale.z = 1.05; put(new T.IcosahedronGeometry(0.08, 1), am, 0, -0.33, 0, arm);
         const fa = put(new T.CylinderGeometry(0.078, 0.058, 0.3, 12), am, 0, -0.48, 0, arm); fa.scale.z = 1.05; put(new T.IcosahedronGeometry(0.092, 1), am, 0, 0.0, 0, arm);
         if (labCoat) put(new T.CylinderGeometry(0.066, 0.066, 0.05, 12), own('#FFFFFF'), 0, -0.625, 0, arm); }
-      { const hd2 = put(new T.IcosahedronGeometry(0.072, 1), P.skinM, 0, -0.69, 0.005, arm); hd2.scale.set(1, 1.15, 0.9); put(new T.IcosahedronGeometry(0.03, 0), P.skinM, -s * 0.06, -0.66, 0.05, arm); } P.arms.push(arm);
+      { const hd2 = put(new T.IcosahedronGeometry(0.072, 1), P.skinM, 0, -0.69, 0.005, arm); hd2.scale.set(1, 1.15, 0.9); put(new T.IcosahedronGeometry(0.03, 0), P.skinM, -s * 0.06, -0.66, 0.05, arm); } if (GC) { arm.children.forEach(c => { c.visible = false; }); gadd(s < 0 ? 'Arm_R' : 'Arm_L', arm, false); } P.arms.push(arm);
       if (o.coat && s === -1) { const cb = own('#7A4A27'); put(new T.BoxGeometry(0.27, 0.35, 0.03), cb, 0.0, -0.55, 0.13, arm); put(new T.BoxGeometry(0.23, 0.3, 0.02), own('#FFFFFF'), 0, -0.56, 0.148, arm); put(new T.BoxGeometry(0.1, 0.04, 0.05), own('#B9C4CC'), 0, -0.38, 0.15, arm); const cr = own('#D8C9A6'); put(new T.BoxGeometry(0.1, 0.03, 0.02), cr, 0, -0.56, 0.162, arm); put(new T.BoxGeometry(0.03, 0.1, 0.02), cr, 0, -0.56, 0.162, arm); }
       if (o.coat && s === 1 && !(o.cosm && o.cosm.hands)) {
         const gl = own('#CFEFF5'); gl.transparent = true; gl.opacity = 0.45; const liq = own('#38E0D0'); if (liq.emissive && liq.emissive.setHex) { liq.emissive.setHex(0x14B8A6); liq.emissiveIntensity = 0.8; }
@@ -2178,17 +2185,26 @@ const World = (function () {
   const MICSPEC_KINDS = { cns: 'brain', ear: 'ear', upper: 'upper', mouth: 'mouth', lower: 'lungs', heart: 'heart', intra: 'liver', gi: 'gut', uti: 'urinary', skin: 'skin', bone: 'femur' };
   /* tiny .glb reader (three r128 has no loader): first mesh primitive, positions and indices only; cached per model name */
   const glbCache = {}, micBeat = [];
+  function glbOpen(name) {
+    const bin = atob(RXMODELS[name]), u8 = new Uint8Array(bin.length); for (let i = 0; i < bin.length; i++) u8[i] = bin.charCodeAt(i);
+    const dv = new DataView(u8.buffer), jl = dv.getUint32(12, true), j = JSON.parse(new TextDecoder().decode(u8.subarray(20, 20 + jl))), off = 20 + jl + 8;
+    const rd = (ai, Cls) => { const a = j.accessors[ai], bv = j.bufferViews[a.bufferView], n = a.count * (a.type === 'VEC3' ? 3 : 1), s = off + (bv.byteOffset || 0) + (a.byteOffset || 0); return new Cls(u8.buffer.slice(s, s + n * Cls.BYTES_PER_ELEMENT)); };
+    const geoOf = (prim) => { const g = new T.BufferGeometry(); g.setAttribute('position', new T.BufferAttribute(rd(prim.attributes.POSITION, Float32Array), 3)); g.setIndex(new T.BufferAttribute(rd(prim.indices, j.accessors[prim.indices].componentType === 5125 ? Uint32Array : Uint16Array), 1)); g.computeVertexNormals(); return g; };
+    return { j, geoOf };
+  }
+  /* tiny .glb reader (three r128 has no loader): first mesh primitive, positions and indices only; cached per model name */
   function glbGeo(name) {
     if (glbCache[name]) return glbCache[name];
+    try { const o = glbOpen(name); return (glbCache[name] = o.geoOf(o.j.meshes[0].primitives[0])); } catch (e) { return null; }
+  }
+  /* the Blender character: named parts (Torso, Head, Hair_1, Arm_L, Arm_R, Leg_L, Leg_R) whose primitives use materials Shirt, Skin, Hair, Pants, Shoes (the game recolors by name). Returns { parts: { name: { t: [x,y,z], prims: [{ geo, mat }] } } } or null */
+  function glbChar() {
+    if (glbCache.__char !== undefined) return glbCache.__char;
+    let res = null;
     try {
-      const bin = atob(RXMODELS[name]), u8 = new Uint8Array(bin.length); for (let i = 0; i < bin.length; i++) u8[i] = bin.charCodeAt(i);
-      const dv = new DataView(u8.buffer), jl = dv.getUint32(12, true), j = JSON.parse(new TextDecoder().decode(u8.subarray(20, 20 + jl)));
-      const off = 20 + jl + 8, prim = j.meshes[0].primitives[0];
-      const rd = (ai, Cls) => { const a = j.accessors[ai], bv = j.bufferViews[a.bufferView], n = a.count * (a.type === 'VEC3' ? 3 : 1); return new Cls(u8.buffer.slice(off + (bv.byteOffset || 0) + (a.byteOffset || 0), off + (bv.byteOffset || 0) + (a.byteOffset || 0) + n * Cls.BYTES_PER_ELEMENT)); };
-      const pos = rd(prim.attributes.POSITION, Float32Array), idx = rd(prim.indices, j.accessors[prim.indices].componentType === 5125 ? Uint32Array : Uint16Array);
-      const g = new T.BufferGeometry(); g.setAttribute('position', new T.BufferAttribute(pos, 3)); g.setIndex(new T.BufferAttribute(idx, 1)); g.computeVertexNormals();
-      return (glbCache[name] = g);
-    } catch (e) { return null; }
+      if (RXMODELS.character) { const o = glbOpen('character'), parts = {}; o.j.nodes.forEach(n => { if (n.mesh === undefined) return; parts[n.name] = { t: n.translation || [0, 0, 0], prims: o.j.meshes[n.mesh].primitives.map(p => ({ geo: o.geoOf(p), mat: o.j.materials[p.material].name })) }; }); if (parts.Torso && parts.Head && parts.Arm_L && parts.Leg_L) res = { parts }; }
+    } catch (e) { res = null; }
+    return (glbCache.__char = res);
   }
   function micOrganBuild(kind, parent, site, list) {
     const cache = {}, MT = (c) => cache[c] || (cache[c] = new T.MeshStandardMaterial({ color: new T.Color(c), flatShading: true, roughness: 0.55, side: T.DoubleSide, emissive: new T.Color(0x000000) }));
