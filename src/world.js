@@ -365,27 +365,68 @@ const World = (function () {
   let binG = null, binBugs = [], binGlow = null, binInfested = false;
   function buildBin() {
     binG = new T.Group(); binG.position.set(8.7, 0, -2.4); binG.rotation.y = -0.35; binG.userData.bin = true; scene.add(binG);
-    cy(binG, 0.52, 0.42, 1.15, 8, '#5C7377', 0, 0.58, 0);
-    for (let i = 0; i < 3; i++) { const r = cy(binG, 0.535 - i * 0.004, 0.52, 0.06, 8, '#3F5457', 0, 0.28 + i * 0.3, 0); r.scale.set(1, 1, 1); }
-    cy(binG, 0.58, 0.58, 0.1, 8, '#3F5457', 0, 1.2, 0);
-    bx(binG, 0.34, 0.07, 0.24, '#8D9FA2', 0.02, 1.27, 0.05); bx(binG, 0.26, 0.2, 0.2, '#E9E1CE', -0.12, 1.34, -0.02).rotation.z = 0.4;
-    const h = bx(binG, 0.5, 0.08, 0.08, '#3F5457', 0, 1.0, 0.6); h.rotation.y = 0; bx(binG, 0.08, 0.22, 0.08, '#3F5457', -0.26, 0.96, 0.56); bx(binG, 0.08, 0.22, 0.08, '#3F5457', 0.26, 0.96, 0.56);
-    binGlow = new T.Mesh(new T.CylinderGeometry(1.7, 1.7, 0.02, 14), new T.MeshBasicMaterial({ color: 0x7ED321, transparent: true, opacity: 0.0, depthWrite: false })); binGlow.position.y = 0.04; binGlow.userData.bin = true; binG.add(binGlow);
-    const cols = ['#8BE04A', '#B26BE0', '#E8D44A', '#4AD6B8', '#F08A4B'];
-    for (let i = 0; i < 26; i++) {
-      const m = new T.Mesh(i % 3 === 0 ? new T.IcosahedronGeometry(0.075 + (i % 4) * 0.012, 0) : new T.OctahedronGeometry(0.06 + (i % 5) * 0.01, 0), new T.MeshStandardMaterial({ color: cols[i % cols.length], flatShading: true, roughness: 0.6, emissive: new T.Color(cols[i % cols.length]), emissiveIntensity: 0.35 }));
-      m.visible = false; m.userData.bin = true; m.userData.bug = { a: Math.random() * PI * 2, sp: (0.4 + Math.random() * 0.9) * (i % 2 ? 1 : -1), r: 0.62 + Math.random() * 0.9, up: Math.random(), ph: Math.random() * 6 }; binG.add(m); binBugs.push(m);
+    // a plain 12-sided tapered bin, open at the top, with a thick rim and thin vertical slats near the bottom
+    const R0 = 0.46, R1 = 0.62, H = 1.3, wallM = mat('#A8AFAD', null, { side: T.DoubleSide });
+    const body = new T.Mesh(new T.CylinderGeometry(R1, R0, H, 12, 1, true), wallM); body.position.y = H / 2; body.castShadow = true; body.receiveShadow = true; binG.add(body);
+    const inner = new T.Mesh(new T.CylinderGeometry(R1 - 0.035, R0 - 0.035, H - 0.02, 12, 1, true), mat('#6E7775', null, { side: T.BackSide })); inner.position.y = H / 2; binG.add(inner);
+    cy(binG, R0 - 0.03, R0 - 0.03, 0.05, 12, '#4F5755', 0, 0.06, 0);
+    const lip = new T.Mesh(new T.CylinderGeometry(R1 + 0.035, R1 + 0.02, 0.09, 12, 1, true), mat('#C9CFCD', null, { side: T.DoubleSide })); lip.position.y = H - 0.02; binG.add(lip);
+    const top = new T.Mesh(new T.RingGeometry(R1 - 0.04, R1 + 0.035, 12), mat('#D6DBDA', null, { side: T.DoubleSide })); top.rotation.x = -PI / 2; top.position.y = H + 0.025; binG.add(top);
+    const foot = new T.Mesh(new T.CylinderGeometry(R0 + 0.03, R0 + 0.035, 0.1, 12, 1, true), mat('#C0C6C4', null, { side: T.DoubleSide })); foot.position.y = 0.05; binG.add(foot);
+    for (let i = 0; i < 12; i++) {
+      const a = (i + 0.5) / 12 * PI * 2, sl = new T.Group(); sl.rotation.y = -a + PI / 2; binG.add(sl);
+      const ap = (R0 + (R1 - R0) * (0.58 / H)) * Math.cos(PI / 12) + 0.006, b = bx(sl, 0.035, 0.74, 0.02, '#8F9795', 0, 0.58, ap); b.rotation.x = -Math.atan((R1 - R0) / H); b.castShadow = false;
+    }
+    bx(binG, 0.3, 0.06, 0.22, '#E9E1CE', 0.02, 1.0, 0.05).rotation.z = 0.2; bx(binG, 0.22, 0.2, 0.2, '#D7CDB4', -0.12, 1.12, -0.02).rotation.z = 0.4; bx(binG, 0.16, 0.14, 0.16, '#E9E1CE', 0.14, 1.1, -0.1).rotation.y = 0.6;
+    binGlow = new T.Mesh(new T.CylinderGeometry(1.9, 1.9, 0.02, 16), new T.MeshBasicMaterial({ color: 0x7ED321, transparent: true, opacity: 0.0, depthWrite: false })); binGlow.position.y = 0.04; binGlow.userData.bin = true; binG.add(binGlow);
+    // bacteria: little cartoon rods and cocci with legs and eyes that walk on the floor and up and down the wall
+    const cols = ['#8BE04A', '#B26BE0', '#E8C23A', '#38C9B0', '#F0804B'];
+    for (let i = 0; i < 14; i++) {
+      const col = cols[i % cols.length], g = new T.Group(), rod = i % 3 !== 2, body2 = mat(col, null, { emissive: new T.Color(col), emissiveIntensity: 0.22 });
+      const bd = new T.Mesh(new T.IcosahedronGeometry(0.1, 1), body2); bd.scale.set(0.8, 0.8, rod ? 2.1 : 1.0); bd.position.y = 0.09; g.add(bd);
+      if (!rod) { const b2 = new T.Mesh(new T.IcosahedronGeometry(0.1, 1), body2); b2.scale.set(0.8, 0.8, 1); b2.position.set(0, 0.09, -0.17); g.add(b2); }
+      const eyeM = mat('#FFFFFF'), pupM = mat('#18202A');
+      [-1, 1].forEach(s => { const e = new T.Mesh(new T.IcosahedronGeometry(0.035, 0), eyeM); e.position.set(s * 0.05, 0.13, rod ? 0.17 : 0.07); g.add(e); const p2 = new T.Mesh(new T.IcosahedronGeometry(0.018, 0), pupM); p2.position.set(s * 0.05, 0.13, rod ? 0.2 : 0.1); g.add(p2); });
+      const legs = [];
+      for (let k = 0; k < 3; k++) [-1, 1].forEach(s => { const lg = new T.Group(); lg.position.set(s * 0.07, 0.07, (rod ? 0.1 : 0.04) - k * (rod ? 0.1 : 0.07)); const seg = new T.Mesh(new T.BoxGeometry(0.1, 0.018, 0.018), mat(col)); seg.position.x = s * 0.05; lg.add(seg); g.add(lg); legs.push({ g: lg, s, k }); });
+      const tail = new T.Mesh(new T.BoxGeometry(0.02, 0.02, 0.2), mat(col)); tail.position.set(0, 0.09, rod ? -0.3 : -0.33); g.add(tail);
+      g.visible = false; g.userData.bin = true; g.traverse(o => { o.userData.bin = true; });
+      g.scale.set(1.25, 1.25, 1.25); g.userData.bug = { mode: i % 2 ? 'wall' : 'floor', a: Math.random() * PI * 2, r: 0.85 + Math.random() * 0.7, y: 0.25 + Math.random() * 0.8, sp: 0.16 + Math.random() * 0.14, dir: Math.random() < 0.5 ? 1 : -1, ph: Math.random() * 6, turn: 0, legs, tail, vy: Math.random() < 0.5 ? 1 : -1 };
+      binG.add(g); binBugs.push(g);
     }
   }
   api.setBin = function (on) { binInfested = !!on; binBugs.forEach(m => { m.visible = binInfested; }); if (binGlow) binGlow.material.opacity = 0; };
   api.binOn = () => binInfested;
+  const binV = { p: null, o: null, n: null, d: null, x: null };
   function animBin(dt) {
     if (!binG || !binInfested) return;
+    const R0 = 0.46, R1 = 0.62, H = 1.3;
     binBugs.forEach(m => {
-      const u = m.userData.bug; u.a += u.sp * dt; u.ph += dt * 6;
-      if (u.up < 0.45) { const hy = 0.25 + (Math.sin(u.ph * 0.35 + u.a) * 0.5 + 0.5) * 0.95; m.position.set(Math.cos(u.a) * 0.52, hy, Math.sin(u.a) * 0.52); }
-      else m.position.set(Math.cos(u.a) * u.r, 0.07, Math.sin(u.a) * u.r);
-      m.rotation.set(u.ph, u.a * 2, 0); m.position.y += Math.abs(Math.sin(u.ph)) * 0.04;
+      const u = m.userData.bug; u.ph += dt * u.sp * 26;
+      let px, py, pz, nx = 0, ny = 1, nz = 0, dx, dy, dz;
+      if (u.mode === 'floor') {
+        u.turn += (Math.random() - 0.5) * dt * 2.2; u.turn *= 0.97; u.a += u.dir * (u.sp / u.r) * dt * (1 + 0.3 * Math.sin(u.ph * 0.15)); u.r += (Math.sin(time * 0.3 + u.ph * 0.02) * 0.08 + u.turn * 0.1) * dt;
+        u.r = clamp(u.r, 0.78, 1.7);
+        px = Math.cos(u.a) * u.r; pz = Math.sin(u.a) * u.r; py = 0.03;
+        dx = -Math.sin(u.a) * u.dir; dz = Math.cos(u.a) * u.dir; dy = 0;
+        if (Math.random() < dt * 0.06 && u.r < 0.95) { u.mode = 'wall'; u.y = 0.1; u.vy = 1; }
+      } else {
+        u.y += u.vy * u.sp * dt; u.a += u.dir * Math.sin(u.ph * 0.2) * 0.04 * dt;
+        const rr = R0 + (R1 - R0) * (u.y / H) + 0.035;
+        if (u.y > H - 0.05) u.vy = -1; if (u.y < 0.12 && u.vy < 0) { if (Math.random() < 0.5) { u.mode = 'floor'; u.r = 0.82; } else u.vy = 1; }
+        px = Math.cos(u.a) * rr; pz = Math.sin(u.a) * rr; py = u.y;
+        nx = Math.cos(u.a); ny = 0.12; nz = Math.sin(u.a); const nl = Math.hypot(nx, ny, nz); nx /= nl; ny /= nl; nz /= nl;
+        dx = 0; dy = u.vy; dz = 0; const dn = dx * nx + dy * ny + dz * nz; dx -= dn * nx; dy -= dn * ny; dz -= dn * nz;
+        if (u.y > H - 0.05 && u.vy > 0) { u.vy = -1; }
+      }
+      m.position.set(px, py, pz);
+      const dl = Math.hypot(dx, dy, dz) || 1; dx /= dl; dy /= dl; dz /= dl;
+      // orientation: local +y is the surface normal, local +z the direction of travel
+      const rx = ny * dz - nz * dy, ry = nz * dx - nx * dz, rz = nx * dy - ny * dx;
+      if (!binV.m) binV.m = new T.Matrix4();
+      binV.m.makeBasis(new T.Vector3(rx, ry, rz), new T.Vector3(nx, ny, nz), new T.Vector3(dx, dy, dz)); m.quaternion.setFromRotationMatrix(binV.m);
+      u.legs.forEach(l => { l.g.rotation.y = Math.sin(u.ph + l.k * 1.4 + (l.s > 0 ? 0 : PI)) * 0.55; l.g.rotation.z = l.s * (0.25 + Math.abs(Math.sin(u.ph + l.k)) * 0.35); });
+      u.tail.rotation.y = Math.sin(u.ph * 1.3) * 0.5; m.children[0].scale.y = 0.8 + Math.sin(u.ph * 2) * 0.04;
     });
     if (binGlow) binGlow.material.opacity = 0.12 + (Math.sin(time * 3) * 0.5 + 0.5) * 0.14;
   }
@@ -825,11 +866,11 @@ const World = (function () {
   /* ---- effects ---- */
   const puffs = [], drops = [], extras = [];
   function emitPuff(x, y, z) {
-    if (synOn || labOn) return;
+    if (synOn || labOn || micOn) return;
     for (const p of puffs) { if (p.life > 0) continue; p.life = 0.9; p.m.visible = true; p.m.position.set(x, y, z); p.m.scale.set(1, 1, 1); p.m.material.opacity = 0.9; p.vx = (Math.random() - 0.5) * 0.8; p.vz = (Math.random() - 0.5) * 0.8; return; }
   }
   function emitDrop(x, y, z) {
-    if (synOn || labOn) return;
+    if (synOn || labOn || micOn) return;
     for (const d of drops) { if (d.life > 0) continue; d.life = 1.1; d.m.visible = true; d.m.position.set(x, y, z); d.m.scale.set(1, 1, 1); d.m.material.opacity = 0.95; d.vy = 0.5 + Math.random(); d.vx = (Math.random() - 0.5) * 1.6; d.vz = Math.random() * 0.8; return; }
   }
   function sweatyFx(c, dt) {
@@ -1230,8 +1271,8 @@ const World = (function () {
     const r = canvas.getBoundingClientRect();
     ndc.x = ((e.clientX - r.left) / r.width) * 2 - 1; ndc.y = -((e.clientY - r.top) / r.height) * 2 + 1;
     raycaster.setFromCamera(ndc, camera);
-    const hits = raycaster.intersectObjects(synOn ? synItems.filter(g => g.visible) : labOn ? labItems : [].concat(CLICK.map(i => ug[i]), [staffGroup, custGroup, petG, pharmG], phoneG ? [phoneG] : [], binG ? [binG] : [], capG ? [capG] : [], pillG ? [pillG] : [], brainG ? [brainG] : [], evtG ? [evtG] : []), true);
-    for (const h of hits) { let o = h.object; while (o) { if (o.userData && (o.userData.up || o.userData.cust || o.userData.pet || o.userData.pharm || o.userData.vis || o.userData.cap || o.userData.himA || o.userData.pill || o.userData.lab || o.userData.site || o.userData.brain || o.userData.evt || o.userData.bin)) { pickObj = h.object; return o.userData; } o = o.parent; } }
+    const hits = raycaster.intersectObjects(synOn ? synItems.filter(g => g.visible) : micOn ? micItems.filter(g => g.visible) : labOn ? labItems : [].concat(CLICK.map(i => ug[i]), [staffGroup, custGroup, petG, pharmG], phoneG ? [phoneG] : [], binG ? [binG] : [], capG ? [capG] : [], pillG ? [pillG] : [], brainG ? [brainG] : [], evtG ? [evtG] : []), true);
+    for (const h of hits) { let o = h.object; while (o) { if (o.userData && (o.userData.up || o.userData.cust || o.userData.pet || o.userData.pharm || o.userData.vis || o.userData.cap || o.userData.himA || o.userData.pill || o.userData.lab || o.userData.site || o.userData.brain || o.userData.evt || o.userData.bin || o.userData.micSite || o.userData.micDish)) { pickObj = h.object; return o.userData; } o = o.parent; } }
     return null;
   }
   function setHover(up) {
@@ -1254,7 +1295,7 @@ const World = (function () {
       if (fpT || (e.pointerType === 'mouse' && e.button !== 0)) return;
       ptrs.set(e.pointerId, { x: e.clientX, y: e.clientY });
       try { canvas.setPointerCapture(e.pointerId); } catch (_) { /* ignore */ }
-      carryCand = null; if (ptrs.size === 1 && !labOn && !synOn) { const h = pick(e); if (h && h.pet) carryCand = petOf(); }
+      carryCand = null; if (ptrs.size === 1 && !labOn && !synOn && !micOn) { const h = pick(e); if (h && h.pet) carryCand = petOf(); }
       if (ptrs.size === 1) drag = { sx: e.clientX, sy: e.clientY, lx: e.clientX, ly: e.clientY, on: false };
       else if (ptrs.size === 2) { const v = [...ptrs.values()]; pinch = { d: Math.hypot(v[0].x - v[1].x, v[0].y - v[1].y) || 1, g: grad }; if (drag) drag.on = true; canvas.classList.add('grabbing'); }
     });
@@ -1288,14 +1329,16 @@ const World = (function () {
       if (e.pointerType !== 'mouse' || (drag && drag.on)) return;
       if (fpT) { setFpHover(fpPick(e)); return; }
       const h = pick(e); setHover(h && h.up ? h.up : null);
-      if (!hovered) canvas.style.cursor = h && (h.cust || h.pet || h.pharm || h.vis || h.cap || h.himA || h.lab || h.site || h.brain || h.evt || h.bin) ? 'pointer' : 'default';
+      if (!hovered) canvas.style.cursor = h && (h.cust || h.pet || h.pharm || h.vis || h.cap || h.himA || h.lab || h.site || h.brain || h.evt || h.bin || h.micSite || h.micDish) ? 'pointer' : 'default';
       if (synOn) synHover = h && h.site ? h.site : null;
+      if (micOn) micHoverId = h && h.micSite ? h.micSite : null;
     });
     canvas.addEventListener('click', e => {
       if (noClick) { noClick = false; return; }
       if (fpT) { const id = fpPick(e); if (id && B.onFp) B.onFp(id); return; }
       const h = pick(e); dismissHint();
       if (synOn) { if (h && h.site && B.onSynSite) B.onSynSite(h.site); return; }
+      if (micOn) { if (h && h.micSite && B.onMicSite) B.onMicSite(h.micSite); else if (h && h.micDish && B.onMicDish) B.onMicDish(h.micDish); return; }
       if (h && h.bin) { if (B.onBin) B.onBin(); return; }
       if (h && h.brain) { if (B.onBrain) B.onBrain(); return; }
       if (h && h.evt) { if (B.onEvt) B.onEvt(h.evt); return; }
@@ -1714,6 +1757,7 @@ const World = (function () {
     raf = requestAnimationFrame(frame);
     const dt = Math.min(0.05, (now - last) / 1000 || 0.016); last = now; time += dt;
     if (labOn) labTick(dt);
+    if (micOn) micTick(dt);
     if (synOn) synTick(dt);
     // customers
     const crowd = queue.concat(leaving, extras, pets, cops, visitor ? [visitor] : []), stf = pharm ? staff.concat([pharm]) : staff;
@@ -1742,7 +1786,7 @@ const World = (function () {
     cops.forEach(c => { if (copJob && copJob.phase === 'in') { const w = moveTo(c, c.speed, dt, crowd); c.phase += dt; walkAnim(c.g, c.phase, w, dt); } });
     ragStep(dt); copStep(dt);
     // staff
-    staffGroup.visible = !labOn && !synOn && !(fpT || fpK > 0.25);
+    staffGroup.visible = !labOn && !synOn && !micOn && !(fpT || fpK > 0.25);
     capTick(dt); pillTick(dt); brainTick(dt); evtTick(dt); holTick(dt);
     staff.forEach(s => {
       if (fpT || fpK > 0) return;
@@ -1862,6 +1906,7 @@ const World = (function () {
     const c = new T.Color(col), dark = (c.r + c.g + c.b) / 3 < 0.35;
     hemi.intensity = dark ? 0.5 : 0.85; sun.intensity = dark ? 0.55 : 0.8;
     if (synOn) { scene.background = new T.Color(SYN_BG); hemi.intensity = 0.95; sun.intensity = 0.6; }
+    else if (micOn) { scene.background = new T.Color(dark ? '#16282F' : '#DDEBF0'); hemi.intensity = dark ? 0.9 : 1.1; sun.intensity = 0.75; }
     else if (labOn) { scene.background = new T.Color(dark ? '#16282F' : '#E7F0F3'); hemi.intensity = dark ? 0.9 : 1.1; sun.intensity = 0.7; }
     else if (hol && HOLBG[hol]) { scene.background = new T.Color(HOLBG[hol][dark ? 1 : 0]); try { if (hol === 'halloween') { hemi.color.setHex(0xFFB26B); sun.color.setHex(0xFF9540); hemi.intensity = dark ? 0.7 : 0.95; } else { hemi.color.setHex(0xEAF3FF); sun.color.setHex(0xFFF2DD); } } catch (e) { /* stub */ } }
     if (!(hol && !synOn && !labOn)) { try { hemi.color.setHex(0xffffff); sun.color.setHex(0xffffff); } catch (e) { /* stub */ } }
@@ -2076,6 +2121,117 @@ const World = (function () {
     scene.children.forEach(c => { if (c !== labG && c !== synG && c !== hemi && c !== sun && c.visible && !(c.userData && c.userData.fx)) { c.visible = false; if (labHid.indexOf(c) < 0) labHid.push(c); } });
     if (labPerson && labPerson.userData.busy <= 0) { labPerson.rotation.y = Math.sin(labT * 0.4) * 0.12; labPerson.position.y = Math.sin(labT * 1.6) * 0.01; }
   }
+  /* ---- microbe lab: a separate room with a low-poly man (brain and leg bone popping out) and labeled petri dishes ---- */
+  let micV = null, micG = null, micOn = false, micHid = [], micSaved = null, micManG = null, micPinMap = {}, micDishMap = {}, micSel = null, micHoverId = null, micHot = null, micLabEl = null, micBench = null, micTt = 0;
+  const micItems = [];
+  const MICPOS = { cns: [0, 2.42, 0.02], ear: [0.37, 1.86, 0.02], mouth: [0, 1.68, 0.42], upper: [0, 1.5, 0.3], lower: [-0.17, 1.38, 0.44], heart: [0.17, 1.2, 0.44], intra: [-0.16, 0.96, 0.43], gi: [0.17, 0.84, 0.43], uti: [-0.11, 0.72, 0.4], sti: [0.12, 0.72, 0.4], skin: [0.62, 1.05, 0.12], bone: [0.43, 0.5, 0.42] };
+  function micText(txt, w, h, bg, fg) {
+    const cv = document.createElement('canvas'); cv.width = w; cv.height = h; const c = cv.getContext('2d');
+    if (c) { c.fillStyle = bg; const r = h / 2; c.beginPath(); c.moveTo(r, 4); c.lineTo(w - r, 4); c.arc(w - r, h / 2, h / 2 - 4, -PI / 2, PI / 2); c.lineTo(r, h - 4); c.arc(r, h / 2, h / 2 - 4, PI / 2, PI * 1.5); c.fill(); c.lineWidth = 5; c.strokeStyle = '#10292C'; c.stroke(); c.fillStyle = fg; c.textAlign = 'center'; c.textBaseline = 'middle'; let fs = h * 0.5; c.font = '800 ' + fs + 'px sans-serif'; while (c.measureText(txt).width > w - h && fs > 16) { fs -= 2; c.font = '800 ' + fs + 'px sans-serif'; } c.fillText(txt, w / 2, h / 2 + 2); }
+    return new T.CanvasTexture(cv);
+  }
+  function buildMic() {
+    micG = new T.Group(); micG.visible = false; scene.add(micG); const g = micG;
+    bx(g, 30, 0.7, 20, '#BFCACE', 0, -0.35, -1);
+    for (let i = 0; i < 13; i++) for (let j = 0; j < 8; j++) bx(g, 1.98, 0.06, 1.98, (i + j) % 2 ? '#FFFFFF' : '#E4EEF1', -12 + i * 2, 0.03, -8 + j * 2);
+    bx(g, 30, 8, 0.4, '#EAF4F6', 0, 4, -8.4); bx(g, 30, 1.4, 0.05, '#C9DDE3', 0, 0.7, -8.18); bx(g, 30, 0.1, 0.07, '#5FB3CE', 0, 1.45, -8.15);
+    // back bench with a few lab props
+    bx(g, 11, 1.2, 1.3, '#0A6F66', 0, 0.6, -7.2); bx(g, 11.4, 0.14, 1.6, '#F4F9F9', 0, 1.27, -7.2);
+    for (let i = 0; i < 5; i++) { const tx = -3.6 + i * 1.8; cy(g, 0.14, 0.14, 0.6, 8, ['#8BE04A', '#B26BE0', '#E8C23A', '#38C9B0', '#F0804B'][i], tx, 1.64, -7.1, null, { transparent: true, opacity: 0.8 }); cy(g, 0.17, 0.17, 0.06, 8, '#6B7F85', tx, 1.97, -7.1); }
+    const mc = bx(g, 0.5, 0.9, 0.5, '#2A3B4D', 4.1, 1.8, -7.1); cy(g, 0.12, 0.12, 0.5, 8, '#2A3B4D', 4.1, 2.4, -7.1).rotation.x = 0.4; cy(g, 0.3, 0.3, 0.06, 10, '#6B7F85', 4.1, 1.38, -7.1);
+    const sg = new T.Mesh(new T.PlaneGeometry(5.6, 1.1), new T.MeshBasicMaterial({ map: micText('MICROBE LAB', 640, 126, '#F4F9F9', '#07514B') })); sg.position.set(0, 6.6, -8.15); g.add(sg);
+    micBench = new T.Group(); micBench.visible = false; g.add(micBench); bx(micBench, 11, 0.5, 7.4, '#1E5C68', 0, 0.25, 0.0); bx(micBench, 11.2, 0.08, 7.6, '#2E8294', 0, 0.54, 0.0);
+    // the man: the same low-poly people as the patients, bald so the brain shows, brain and shin bone popping out
+    micManG = new T.Group(); micManG.position.set(0, 0, -1.2); micManG.scale.set(2.4, 2.4, 2.4); g.add(micManG);
+    const man = person(5, false, false, false, undefined, { skin: '#F2C9A5', hair: '#6B4A2E', shirt: '#2BB5A5', hairStyle: 8, gender: 'm', scrub: '#3F5F8C', tag: { micMan: true } }); micManG.add(man); micManG.userData.micMan = true;
+    const P = man.userData.P, hd = P && P.head;
+    const brain = new T.Group(); brain.position.set(0, 2.1, 0.02);
+    const bm = mat('#F08DB0'), bm2 = mat('#D96B97');
+    [-1, 1].forEach(s => { const h = new T.Mesh(new T.IcosahedronGeometry(0.21, 1), s < 0 ? bm : bm2); h.position.set(s * 0.1, 0.03, 0); h.scale.set(0.92, 0.78, 1.18); brain.add(h); });
+    const cb = new T.Mesh(new T.IcosahedronGeometry(0.12, 0), bm2); cb.position.set(0, -0.08, -0.17); brain.add(cb); const st = new T.Mesh(new T.CylinderGeometry(0.04, 0.05, 0.16, 5), bm); st.position.set(0, -0.14, -0.03); brain.add(st);
+    brain.rotation.x = -0.18; brain.rotation.z = 0.1; (hd || man).add(brain); brain.userData.micSite = 'cns'; brain.traverse(o => { o.userData.micSite = 'cns'; });
+    const bone = new T.Group(); bone.position.set(0.17, 0.28, 0.1); micManG.add(bone);
+    const wm = mat('#C4463B'); const wound = new T.Mesh(new T.IcosahedronGeometry(0.1, 0), wm); wound.scale.set(1.2, 1.0, 0.5); wound.position.set(0, 0, 0.16); bone.add(wound);
+    const shaft = new T.Group(); shaft.rotation.x = 0.55; shaft.rotation.z = -0.95; shaft.position.set(0, 0, 0.14); bone.add(shaft);
+    const bmat = mat('#F2EEE0'), kmat = mat('#E6E0CC');
+    const sh = new T.Mesh(new T.CylinderGeometry(0.045, 0.05, 0.62, 6), bmat); sh.position.y = 0.3; shaft.add(sh);
+    [[-0.05, 0.64], [0.05, 0.62]].forEach(k => { const kn = new T.Mesh(new T.IcosahedronGeometry(0.075, 0), kmat); kn.position.set(k[0], k[1], 0); shaft.add(kn); });
+    bone.userData.micSite = 'bone'; bone.traverse(o => { o.userData.micSite = 'bone'; });
+    // site markers, always drawn on top, with a bigger invisible touch target
+    Object.keys(MICPOS).forEach(id => {
+      const p = MICPOS[id], pg = new T.Group(); pg.position.set(p[0], p[1], p[2]); micManG.add(pg);
+      const dot = new T.Mesh(new T.IcosahedronGeometry(0.055, 1), new T.MeshBasicMaterial({ color: 0xF1A20E, depthTest: false, transparent: true })); dot.renderOrder = 20; pg.add(dot);
+      const ring = new T.Mesh(new T.TorusGeometry(0.088, 0.013, 5, 14), new T.MeshBasicMaterial({ color: 0xFFFFFF, depthTest: false, transparent: true })); ring.renderOrder = 21; ring.visible = false; pg.add(ring);
+      const hit = new T.Mesh(new T.SphereGeometry(0.2, 6, 5), new T.MeshBasicMaterial({ visible: false })); pg.add(hit);
+      pg.traverse(o => { o.userData.micSite = id; }); micPinMap[id] = { g: pg, dot, ring, st: 0, ster: false, name: id };
+    });
+    micItems.push(micManG);
+  }
+  function micDishMake(id, label, x, z) {
+    const g = new T.Group(); g.position.set(x, 0.56, z); micBench.add(g);
+    const glass = new T.Mesh(new T.CylinderGeometry(1.1, 1.05, 0.26, 12), new T.MeshStandardMaterial({ color: 0xF2FAFD, flatShading: true, transparent: true, opacity: 0.85, roughness: 0.3 })); glass.position.y = 0.1; g.add(glass);
+    const agar = new T.Mesh(new T.CylinderGeometry(0.97, 0.97, 0.2, 12), new T.MeshStandardMaterial({ color: 0xF6C94E, flatShading: true, roughness: 0.7, emissive: new T.Color(0x000000) })); agar.position.y = 0.13; g.add(agar); const rim = new T.Mesh(new T.TorusGeometry(1.08, 0.05, 5, 16), new T.MeshStandardMaterial({ color: 0xFFFFFF, flatShading: true })); rim.rotation.x = PI / 2; rim.position.y = 0.26; g.add(rim);
+    const ring = new T.Mesh(new T.TorusGeometry(1.25, 0.07, 5, 18), new T.MeshBasicMaterial({ color: 0x0E9A8E, transparent: true, opacity: 0.95, depthTest: false })); ring.rotation.x = PI / 2; ring.position.y = 0.3; ring.visible = false; ring.renderOrder = 18; g.add(ring);
+    const lab = new T.Mesh(new T.PlaneGeometry(2.5, 0.62), new T.MeshBasicMaterial({ map: micText(label, 512, 124, '#FFFFFF', '#10292C'), transparent: true })); lab.position.set(0, 0.85, 1.4); lab.rotation.x = -0.95; g.add(lab);
+    const hit = new T.Mesh(new T.CylinderGeometry(1.15, 1.15, 1.6, 8), new T.MeshBasicMaterial({ visible: false })); hit.position.y = 0.5; g.add(hit);
+    g.traverse(o => { o.userData.micDish = id; }); micItems.push(g);
+    return { id, label, g, agar, ring, n: 0, flash: 0, flashOk: true };
+  }
+  api.setMic = function (on) {
+    if (!api.ok || !scene) return false;
+    on = !!on; if (on === micOn) return on;
+    if (on) {
+      if (!micG) buildMic();
+      micHid = []; scene.children.forEach(c => { if (c !== micG && c !== hemi && c !== sun && c.visible && !(c.userData && c.userData.fx)) { c.visible = false; micHid.push(c); } });
+      micG.visible = true; micOn = true; micSaved = { TX, TY, TZ, gth, gph, grad }; gth = 0; gph = 1.3; grad = baseRad * 0.56; micAim();
+      if (!micLabEl) { micLabEl = document.createElement('div'); micLabEl.className = 'miclab'; micLabEl.style.display = 'none'; host.appendChild(micLabEl); }
+    } else {
+      micOn = false; micHid.forEach(c => { c.visible = true; }); micHid = []; if (micG) micG.visible = false;
+      if (micSaved) { TX = micSaved.TX; TY = micSaved.TY; TZ = micSaved.TZ; gth = micSaved.gth; gph = micSaved.gph; grad = micSaved.grad; micSaved = null; }
+      if (micLabEl) micLabEl.style.display = 'none';
+    }
+    document.body.classList.toggle('mic', on); applyTheme(); return on;
+  };
+  api.micOn = () => micOn;
+  function micAim() { TX = 0; TY = 2.75; TZ = -1.1; }
+  /* markers: [{id, st (0 to 2 stars), ster, name}]; the man is shown for the body map, the dishes for sorting rounds */
+  api.micPins = function (list) { if (!micG) return; (list || []).forEach(p => { const m = micPinMap[p.id]; if (!m) return; m.st = p.st || 0; m.ster = !!p.ster; m.name = p.name || p.id; m.ring.visible = m.ster; m.dot.material.color.setHex(m.st >= 2 ? 0x0E9A8E : m.st === 1 ? 0x8ED9BC : 0xF1A20E); }); };
+  api.micSelect = function (id) { micSel = id || null; };
+  let micManWant = true;
+  api.micMan = function (v) { micManWant = !!v; micItemsFix(); };
+  function micClearDishes() { Object.keys(micDishMap).forEach(id => { const d = micDishMap[id], i = micItems.indexOf(d.g); if (i >= 0) micItems.splice(i, 1); micBench.remove(d.g); }); micDishMap = {}; micHot = null; }
+  api.micDishes = function (list) {
+    if (!micG) return; micClearDishes(); list = list || []; if (!list.length) { micItemsFix(); return; }
+    const n = list.length, cols = n > 3 ? 3 : n, rows = Math.ceil(n / cols);
+    list.forEach((d, i) => { const r = Math.floor(i / cols), inRow = r === rows - 1 ? n - r * cols : cols, c = i - r * cols; const x = (c - (inRow - 1) / 2) * 3.2, z = rows === 1 ? 0.2 : (-1.5 + r * 3.0); micDishMap[d.id] = micDishMake(d.id, d.label, x, z); });
+    micItemsFix();
+  };
+  function micItemsFix() { if (!micManG) return; const has = Object.keys(micDishMap).length > 0; micManG.visible = micManWant && !has; micBench.visible = has; if (micOn) { if (has) { gph = 0.9; TY = 0.5; TZ = 0.1; } else { gph = 1.3; TY = 2.75; TZ = -1.1; } } }
+  api.micDishAt = function (cx, cy) {
+    if (!micOn) return null; const r = canvas.getBoundingClientRect(); if (cx < r.left || cx > r.right || cy < r.top || cy > r.bottom) return null;
+    ndc.x = ((cx - r.left) / r.width) * 2 - 1; ndc.y = -((cy - r.top) / r.height) * 2 + 1; raycaster.setFromCamera(ndc, camera);
+    const hits = raycaster.intersectObjects(micItems.filter(g => g.visible && g !== micManG), true);
+    for (const h of hits) { let o = h.object; while (o) { if (o.userData && o.userData.micDish) return o.userData.micDish; o = o.parent; } }
+    return null;
+  };
+  api.micDishHot = function (id) { micHot = id || null; };
+  api.micDishFill = function (id, ok) {
+    const d = micDishMap[id]; if (!d) return;
+    d.flash = 0.7; d.flashOk = !!ok;
+    if (ok) { d.n++; const cols = ['#8BE04A', '#B26BE0', '#E8C23A', '#38C9B0', '#F0804B']; for (let k = 0; k < 3; k++) { const a = Math.random() * PI * 2, rr = Math.random() * 0.55, c = new T.Mesh(new T.IcosahedronGeometry(0.13 + Math.random() * 0.06, 0), mat(cols[(d.n + k) % 5], null, { emissive: new T.Color(cols[(d.n + k) % 5]), emissiveIntensity: 0.25 })); c.position.set(Math.cos(a) * rr, 0.26, Math.sin(a) * rr); c.scale.y = 0.6; d.g.add(c); } }
+  };
+  api.devCam = function (x, y, z, th, ph, rad) { TX = x; TY = y; TZ = z; gth = th; gph = ph; grad = rad; };
+  function micTick(dt) {
+    micTt += dt;
+    scene.children.forEach(c => { if (c !== micG && c !== hemi && c !== sun && c.visible && !(c.userData && c.userData.fx)) { c.visible = false; if (micHid.indexOf(c) < 0) micHid.push(c); } });
+    Object.keys(micPinMap).forEach(id => { const m = micPinMap[id], on = id === micSel, hv = id === micHoverId, s = (on ? 1.5 + Math.sin(micTt * 6) * 0.15 : hv ? 1.3 : 1) * (m.ster ? 1 : 1); m.g.scale.set(s, s, s); if (on) m.dot.material.color.setHex(0xE04F3A); });
+    Object.keys(micDishMap).forEach(id => { const d = micDishMap[id]; d.ring.visible = micHot === id; d.g.scale.y = 1; if (d.flash > 0) { d.flash -= dt; const k = Math.max(0, d.flash) / 0.7; d.agar.material.emissive.setRGB(d.flashOk ? 0.1 * k : 0.55 * k, d.flashOk ? 0.5 * k : 0.05 * k, d.flashOk ? 0.1 * k : 0.05 * k); } });
+    if (micLabEl) {
+      const id = micHoverId || micSel, m = id && micPinMap[id];
+      if (m && micManG.visible) { if (!micV) micV = new T.Vector3(); const v = micV; m.g.getWorldPosition(v); v.y += 0.28; v.project(camera); const r = canvas.getBoundingClientRect(), hr = host.getBoundingClientRect(); micLabEl.textContent = m.name; micLabEl.style.display = 'block'; micLabEl.style.transform = 'translate(' + Math.round((v.x * 0.5 + 0.5) * r.width + r.left - hr.left) + 'px,' + Math.round((-v.y * 0.5 + 0.5) * r.height + r.top - hr.top) + 'px) translate(-50%,-100%)'; }
+      else micLabEl.style.display = 'none';
+    }
+  }
   api.setLab = function (on) {
     if (!api.ok || !scene) return false;
     on = !!on; if (on === labOn) return on;
@@ -2110,7 +2266,7 @@ const World = (function () {
   }
   function capTick(dt) {
     if (!capG) return;
-    const ok = !labOn && !synOn && !paused && !fpT && (!B.capsuleOk || B.capsuleOk());
+    const ok = !labOn && !synOn && !micOn && !paused && !fpT && (!B.capsuleOk || B.capsuleOk());
     if (!capObj) {
       if (!ok) return;
       capT -= dt; plantT -= dt;
@@ -2379,7 +2535,7 @@ const World = (function () {
   function himTick(dt) {
     if (himAsc) ascTick(dt);
     if (himA) angelTick(dt);
-    else if (!himH && !himAsc && B.himOk && B.himOk() && !labOn && !synOn && !paused && !fpT) { himT -= dt; if (himT <= 0) { himT = 600; spawnAngel(); } }
+    else if (!himH && !himAsc && B.himOk && B.himOk() && !labOn && !synOn && !micOn && !paused && !fpT) { himT -= dt; if (himT <= 0) { himT = 600; spawnAngel(); } }
     if (himH) heroTick(dt);
     if (!himH && !himAsc) hcam.want = 0;
     // someone else is talking: pull the camera back out until they are done
@@ -2444,7 +2600,7 @@ const World = (function () {
   function pillRemove(o) { pillG.remove(o.g); const i = pills.indexOf(o); if (i >= 0) pills.splice(i, 1); }
   function pillTick(dt) {
     if (!pillG) return;
-    const ok = !labOn && !synOn && !paused && !fpT && (!B.pillOk || B.pillOk());
+    const ok = !labOn && !synOn && !micOn && !paused && !fpT && (!B.pillOk || B.pillOk());
     if (ok && pills.length < 2) { pillT -= dt; if (pillT <= 0) { pillT = (480 + Math.random() * 120) / (1 + (B.pillBoost ? B.pillBoost() : 0)); spawnPill(); } }
     for (let i = pills.length - 1; i >= 0; i--) {
       const o = pills[i], g = o.g, body = g.userData.body; o.t += dt;
@@ -2742,7 +2898,7 @@ const World = (function () {
   }
   function evtTick(dt) {
     Object.keys(evtO).forEach(k => {
-      const e = evtO[k], show = !labOn && !synOn;
+      const e = evtO[k], show = !labOn && !synOn && !micOn;
       e.t += dt; e.g.visible = show; e.tag.hidden = !show;
       if (!show) return;
       // due: bounce and wiggle so it is easy to spot; otherwise sit calmly on the table
@@ -2804,7 +2960,7 @@ const World = (function () {
   function holShow() { holItems.forEach((g, i) => { g.visible = i < holN; }); }
   function holTick(dt) {
     if (!holG) return;
-    holG.visible = !labOn && !synOn;
+    holG.visible = !labOn && !synOn && !micOn;
     holAnim.forEach(f => f(dt));
     holFlakes.forEach(f => { const p = f.m.position; p.y -= f.v * dt; p.x += Math.sin(time * 0.8 + f.s) * 0.4 * dt; if (p.y < 0) { p.y = 11; p.x = -12 + Math.random() * 24; } });
   }

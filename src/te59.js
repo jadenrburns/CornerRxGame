@@ -25,11 +25,11 @@ const { chromium } = require('playwright');
   // man svg + menu
   await p.evaluate(() => document.querySelector('#menu [data-act="mic"]').click());
   await p.waitForTimeout(100);
-  let r = await p.evaluate(() => ({ view: window.__rxDbg().view, man: !!document.querySelector('.micman'), pins: document.querySelectorAll('.mpin').length }));
-  console.log('menu', JSON.stringify(r)); if (r.view !== 'mic' || !r.man || r.pins < 12) fail.push('menu ' + JSON.stringify(r));
+  let r = await p.evaluate(() => ({ view: window.__rxDbg().view, solo: !!document.querySelector('.micbody.solo'), man: !!document.querySelector('.micman'), pins: document.querySelectorAll('.mpin').length, lab: window.__rxDbg().micDbg().inLab, ok: World.ok }));
+  console.log('menu', JSON.stringify(r)); if (r.view !== 'mic' || (r.ok ? (!r.solo || !r.lab) : (!r.man || r.pins < 12))) fail.push('menu ' + JSON.stringify(r));
   const clickSel = (sel, txt) => p.evaluate(([s, t]) => { const els = [...document.querySelectorAll(s)]; const el = t ? els.find(e => e.textContent.indexOf(t) >= 0) : els[0]; if (!el) return false; el.dispatchEvent(new MouseEvent('click', { bubbles: true })); return true; }, [sel, txt]);
   // drag mode with tap, tap on the CNS site, one wrong dish first
-  await p.evaluate(() => { document.querySelector('.mpin[data-v="cns"]').click(); });
+  await p.evaluate(() => { window.__rxDbg().micDbg().sel('cns'); });
   await clickSel('[data-act="mic-go"][data-v="cns"]');
   await p.waitForTimeout(80);
   const cns = await p.evaluate(() => { const g = MICSETS[0].groups.find(x => x.id === 'cns'); return { items: g.items.map(micNorm), slots: document.querySelectorAll('.mslot').length, dishes: [...document.querySelectorAll('.petri')].map(e => ({ id: +e.dataset.chip, k: micNorm(e.querySelector('span').textContent) })) }; });
@@ -82,13 +82,26 @@ const { chromium } = require('playwright');
   await p.evaluate(() => { const d = window.__rxDbg(); delete d.S.mic; });
   await clickSel('#menu [data-act="mic"]'); await p.waitForTimeout(80);
   if (!(await p.evaluate(() => !!document.querySelector('.micpane')))) fail.push('menu without S.mic');
+  // sort rounds (labeled dishes): every drug has a valid dish; wrong drops are misses; all right earns a star
+  await clickSel('[data-act="mic-menu"]'); await clickSel('[data-act="mic-mode"][data-v="drag"]');
+  for (const sid of ['sort-iv', 'sort-po', 'sort-all', 'sort-pk']) {
+    const info = await p.evaluate(sid => { const d = window.__rxDbg().micDbg(); d.startSort(sid); const R = d.R; const wrongDish = R.dishes.find(x => R.chips[0].valid.indexOf(x.id) < 0); return { n: R.chips.length, noValid: R.chips.filter(c => !c.valid.length).length, dishes: R.dishes.length, wrong: wrongDish && wrongDish.id }; }, sid);
+    if (info.noValid || info.n < 6) fail.push('sort chips ' + sid + ' ' + JSON.stringify(info));
+    if (info.wrong) { await p.evaluate(w => { const d = window.__rxDbg().micDbg(); d.drop(0, w); }, info.wrong); const mm = await p.evaluate(() => window.__rxDbg().micDbg().R.mist); if (mm !== 1) fail.push('sort miss ' + sid); }
+    await p.evaluate(() => { const d = window.__rxDbg().micDbg(); d.R.chips.forEach(c => { if (!c.used) d.drop(c.id, c.valid[0]); }); });
+    const res = await p.evaluate(sid => ({ done: !!document.querySelector('.result'), st: window.__rxDbg().S.mic.st[sid] }), sid);
+    if (!res.done) fail.push('sort not finished ' + sid); if (res.st && res.st.d) fail.push('sort star with a miss ' + sid);
+    await p.evaluate(sid => { const d = window.__rxDbg().micDbg(); d.startSort(sid); d.R.chips.forEach(c => d.drop(c.id, c.valid[0])); }, sid);
+    const res2 = await p.evaluate(sid => window.__rxDbg().S.mic.st[sid], sid); console.log('sort', sid, JSON.stringify(res2)); if (!res2 || !res2.d) fail.push('sort star ' + sid);
+  }
+  await clickSel('[data-act="mic-menu"]');
   // every group starts in both modes
   await clickSel('[data-act="back"]'); await clickSel('#menu [data-act="mic"]');
   const ids = await p.evaluate(() => MICSETS.reduce((a, s) => a.concat(s.groups.map(g => [s.id, g.id, g.items.length])), []));
   for (const mode of ['drag', 'fill']) {
     await clickSel('[data-act="mic-menu"]'); await clickSel('[data-act="mic-mode"][data-v="' + mode + '"]');
     for (const [sid, gid, cnt] of ids) {
-      await clickSel('[data-act="mic-menu"]'); await clickSel('[data-act="mic-set"][data-v="' + sid + '"]'); if (sid === 'body') await p.evaluate(g => { const pin = document.querySelector('.mpin[data-v="' + g + '"]'); if (pin) pin.click(); }, gid); await clickSel('[data-act="mic-go"][data-v="' + gid + '"]');
+      await clickSel('[data-act="mic-menu"]'); await clickSel('[data-act="mic-set"][data-v="' + sid + '"]'); if (sid === 'body') await p.evaluate(g => { window.__rxDbg().micDbg().sel(g); }, gid); await clickSel('[data-act="mic-go"][data-v="' + gid + '"]');
       const got = await p.evaluate(m => m === 'drag' ? [document.querySelectorAll('.mslot').length, document.querySelectorAll('.petri').length] : [document.querySelectorAll('.mfill input').length, 0], mode);
       if (got[0] !== cnt) fail.push(mode + ' ' + gid + ' count ' + got[0] + '/' + cnt);
       if (mode === 'drag' && got[1] < cnt) fail.push('dishes ' + gid);

@@ -832,7 +832,7 @@ body.fx.focus .qpanel.min #counter { display: block; }
 .rx.evt .rx-sym { color: var(--amber); }
 
 /* compounding pharmacy */
-body.lab .evtTag, body.lab .tags, body.lab .line3d, body.lab .bub3d, body.lab .rush3d, body.lab .phonebtn, body.lab .hint3d, body.lab #restockhud, body.lab .qbar .restock, body.lab #menu [data-act="shelve"], body.lab #menu [data-act="dev-elder"], body.lab #menu [data-act="dev-next"], body.lab #menu [data-act="dev-bottle"], body.lab #menu [data-act="dev-shelve"], body.lab #menu [data-act="dev-prior"], body.lab #menu [data-act="dev-rush"], body.lab #menu [data-act="dev-insp"], body.lab #menu [data-act="dev-driver"] { display: none !important; }
+body.lab .evtTag, body.mic .evtTag, body.mic .tags, body.mic .line3d, body.mic .bub3d, body.mic .rush3d, body.mic .phonebtn, body.mic .hint3d, body.mic #restockhud, body.mic .qbar .restock, body.lab .tags, body.lab .line3d, body.lab .bub3d, body.lab .rush3d, body.lab .phonebtn, body.lab .hint3d, body.lab #restockhud, body.lab .qbar .restock, body.lab #menu [data-act="shelve"], body.lab #menu [data-act="dev-elder"], body.lab #menu [data-act="dev-next"], body.lab #menu [data-act="dev-bottle"], body.lab #menu [data-act="dev-shelve"], body.lab #menu [data-act="dev-prior"], body.lab #menu [data-act="dev-rush"], body.lab #menu [data-act="dev-insp"], body.lab #menu [data-act="dev-driver"] { display: none !important; }
 .capdots { display: flex; gap: 8px; margin: 6px 0; }
 .capdot { width: 38px; height: 38px; border-radius: 50%; display: grid; place-items: center; border: 2px dashed var(--ink); font-size: 18px; opacity: .55; }
 .capdot.on { border-style: solid; opacity: 1; background: var(--surface); }
@@ -1205,6 +1205,11 @@ table.board tbody tr:nth-child(-n+3) td:first-child { font-weight: 800; color: v
 .micans { margin: 0; font-style: normal; }
 .result .pay { display: flex; gap: 10px; flex-wrap: wrap; align-items: baseline; font-size: 13px; }
 .result .pay .big { font: 800 22px var(--f-display); }
+.miclab { position: absolute; left: 0; top: 0; z-index: 5; pointer-events: none; padding: 5px 11px; border-radius: 999px; border: 2px solid var(--ink); background: var(--surface); color: var(--ink); font: 800 13px/1.1 var(--f-display); white-space: nowrap; box-shadow: 0 3px 0 rgba(0,0,0,.2); }
+.micbody.solo { grid-template-columns: 1fr; }
+.micdishes { display: flex; flex-wrap: wrap; gap: 6px; }
+.micdishes span { padding: 4px 10px; border-radius: 999px; border: 1.5px solid var(--line); background: var(--surface2); font: 700 12px/1 var(--f-body); }
+.micdishes span.hot { border-color: var(--teal); background: var(--teal-soft); }
 </style>
 
 <div class="shell">
