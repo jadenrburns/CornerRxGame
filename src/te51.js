@@ -1,0 +1,11 @@
+const {chromium}=require('playwright');
+(async()=>{const b=await chromium.launch();const p=await b.newPage({viewport:{width:420,height:900}});const errs=[];p.on('pageerror',e=>errs.push(e.message));
+await p.route('**/three.min.js',r=>r.fulfill({path:'three-stub2.js',contentType:'text/javascript'}));
+await p.addInitScript(()=>{if(!localStorage.getItem('cornerRx.v1'))localStorage.setItem('cornerRx.v1',JSON.stringify({me:{done:true,name:'T',look:{}},served:40,correct:25,tutDone:true,playSec:999}))});
+await p.goto('file://'+process.cwd()+'/corner-rx.html?noconf=1');await p.waitForTimeout(900);
+await p.evaluate(()=>document.querySelectorAll('.tour').forEach(e=>e.remove()));
+const n=await p.evaluate(()=>BANK.filter(q=>q.c==='GER').length);console.log('GER questions',n);
+const bad=await p.evaluate(()=>BANK.filter(q=>q.c==='GER'&&(!q.s||q.w.length!==3||q.w.indexOf(q.a)>=0||/—/.test(q.q+q.a+q.w.join('')+q.e))).map(q=>q.q.slice(0,50)));console.log('bad',JSON.stringify(bad));
+const t=await p.evaluate(()=>{const d=window.__rxDbg();return JSON.stringify({GER:d.S.set.topics.GER})});console.log('topic default',t);
+const sample=await p.evaluate(()=>{const q=BANK.find(x=>x.c==='GER');return q.s+' | '+q.t});console.log('sample',sample);
+console.log('errs',JSON.stringify(errs));await b.close();})();

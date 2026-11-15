@@ -2,7 +2,7 @@ const {chromium}=require('playwright');
 (async()=>{const b=await chromium.launch();const p=await b.newPage({viewport:{width:1000,height:900}});const errs=[];p.on('pageerror',e=>errs.push(e.message));
 await p.route('**/three.min.js',r=>r.fulfill({path:'three-stub2.js',contentType:'text/javascript'}));
 await p.addInitScript(()=>{if(!localStorage.getItem('cornerRx.v1'))localStorage.setItem('cornerRx.v1',JSON.stringify({cash:3000,me:{done:true,name:'T',look:{}},served:30,correct:25,tutDone:true,playSec:999,set:{ahead:true,ahead3:true},up:{shelf:0,tech:2,train:0,counsel:0,library:0,robot:0}}))});
-await p.goto('file://'+process.cwd()+'/corner-rx.html');await p.waitForTimeout(900);
+await p.goto('file://'+process.cwd()+'/corner-rx.html?noconf=1');await p.waitForTimeout(900);
 await p.evaluate(()=>document.querySelectorAll('.tour').forEach(e=>e.remove()));
 const click=sel=>p.evaluate(s=>{const e=document.querySelector(s);if(e&&!e.disabled)e.click();return !!e&&!e.disabled},sel);
 const D=()=>p.evaluate(()=>{const d=window.__rxDbg();return {store:d.S.store,cash:d.S.cash,rate:d.techRate(),hair:d.S.me.hair,cyber:(d.S.cosmOn||{}).cyber}});

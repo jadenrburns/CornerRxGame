@@ -1142,6 +1142,18 @@ table.board tbody tr:nth-child(-n+3) td:first-child { font-weight: 800; color: v
 .joincard { width: min(420px, 100%); display: grid; gap: 12px; padding: 20px; border-radius: 18px; background: var(--surface); border: 1px solid var(--line); box-shadow: var(--shadow); color: var(--ink); }
 .joincard h3 { margin: 0; font: 800 20px/1.15 var(--f-display); }
 .joincard p { margin: 0; font-size: 13.5px; color: var(--muted); }
+.molbox { display: grid; justify-items: center; gap: 6px; margin: 8px 0 2px; }
+.molsvg { width: 100%; height: auto; background: var(--surface2); border: 1px solid var(--line); border-radius: 12px; touch-action: manipulation; }
+.molsvg .bonds line { stroke: var(--ink); stroke-width: 2; stroke-linecap: round; }
+.molsvg .lbls text { font: 700 14px/1 var(--f-body, system-ui); fill: var(--ink); paint-order: stroke; stroke: var(--surface2); stroke-width: 4px; }
+.molsvg .site circle { fill: transparent; stroke: var(--teal); stroke-width: 1.6; stroke-dasharray: 3 3; cursor: pointer; opacity: .75; }
+.molsvg .site:hover circle, .molsvg .site:focus circle { fill: var(--teal-soft); opacity: 1; outline: none; }
+.molsvg .site.pick circle { fill: var(--amber-soft); stroke: var(--amber); stroke-dasharray: none; stroke-width: 3; opacity: 1; }
+.molsvg .site.ok circle { fill: var(--teal-soft); stroke: var(--teal); stroke-dasharray: none; stroke-width: 3.5; opacity: 1; cursor: default; }
+.molsvg .site.bad circle { fill: var(--coral-soft); stroke: var(--coral); stroke-dasharray: none; stroke-width: 3; opacity: 1; cursor: default; }
+.molsvg .site circle { transition: fill .12s; }
+.molnote { margin: 0; font-size: 13px; color: var(--muted); text-align: center; }
+.molnote b { color: var(--ink); }
 </style>
 
 <div class="shell">
@@ -1869,6 +1881,291 @@ function cycSVG(h, userPts, reveal, ok) {
 }
 
 if (typeof module !== 'undefined') module.exports = { CYC, cycVal, cycScore };
+/* Skeletal structures for the "tap the metabolism site" questions (Exam 3, PHAR 421).
+   Tiny builder: atoms with coordinates, bonds, regular rings, fused rings, substituents. MOLS[id]() returns
+   {atoms, bonds, sites:{id:{x,y,r,t}}}; molSVG(id, state) draws it. Drawn by hand to match the lecture slides. */
+const MOLS = (function () {
+  const L = 30, D = Math.PI / 180;
+  function MB() {
+    const M = { at: [], bd: {}, sites: {}, names: {} };
+    M.atom = (x, y, l) => { M.at.push([x, y, l || '']); return M.at.length - 1; };
+    M.bond = (i, j, o, ref) => { M.bd[Math.min(i, j) + '-' + Math.max(i, j)] = { i, j, o: o || 1, ref: ref || null }; };
+    M.out = (i, ang, l, o, len) => { const p = M.at[i], k = M.atom(p[0] + (len || L) * Math.cos(ang * D), p[1] + (len || L) * Math.sin(ang * D), l); M.bond(i, k, o || 1); return k; };
+    M.cen = (ids) => { let x = 0, y = 0; ids.forEach(i => { x += M.at[i][0]; y += M.at[i][1]; }); return [x / ids.length, y / ids.length]; };
+    M.away = (i, ids) => { const c = M.cen(ids), p = M.at[i]; return Math.atan2(p[1] - c[1], p[0] - c[0]) / D; };
+    M.ring = (ids) => { for (let k = 0; k < ids.length; k++) { const a = ids[k], b = ids[(k + 1) % ids.length], key = Math.min(a, b) + '-' + Math.max(a, b); if (!M.bd[key]) M.bond(a, b, 1); } };
+    M.arom = (ids, start) => { const c = M.cen(ids); [0, 2, 4].forEach(k => { const a = ids[(start + k) % ids.length], b = ids[(start + k + 1) % ids.length]; M.bond(a, b, 2, c); }); };
+    M.poly = (n, cx, cy, rot) => { const R = L / (2 * Math.sin(Math.PI / n)), ids = []; for (let k = 0; k < n; k++) ids.push(M.atom(cx + R * Math.cos((rot + 360 / n * k) * D), cy + R * Math.sin((rot + 360 / n * k) * D))); M.ring(ids); return ids; };
+    M.fuse = (i, j, n, from) => {
+      const p = M.at[i], q = M.at[j], mx = (p[0] + q[0]) / 2, my = (p[1] + q[1]) / 2, dx = q[0] - p[0], dy = q[1] - p[1], s = Math.hypot(dx, dy);
+      let nx = -dy / s, ny = dx / s; if ((from[0] - mx) * nx + (from[1] - my) * ny > 0) { nx = -nx; ny = -ny; }
+      const a = s / (2 * Math.tan(Math.PI / n)), R = s / (2 * Math.sin(Math.PI / n)), cx = mx + nx * a, cy = my + ny * a;
+      const tp = Math.atan2(p[1] - cy, p[0] - cx), tq = Math.atan2(q[1] - cy, q[0] - cx); let d = tq - tp;
+      while (d > Math.PI) d -= 2 * Math.PI; while (d <= -Math.PI) d += 2 * Math.PI;
+      const sg = d > 0 ? 1 : -1, ids = [i];
+      for (let k = 1; k <= n - 2; k++) ids.push(M.atom(cx + R * Math.cos(tp - sg * k * 2 * Math.PI / n), cy + R * Math.sin(tp - sg * k * 2 * Math.PI / n)));
+      ids.push(j); M.ring(ids); return ids;
+    };
+    /* a phenyl hung on atom i in direction ang: returns the 6 ring ids, [0] is the attached carbon, [3] is para */
+    M.phenyl = (i, ang) => {
+      const p = M.at[i], cx = p[0] + 2 * L * Math.cos(ang * D), cy = p[1] + 2 * L * Math.sin(ang * D), ids = M.poly(6, cx, cy, ang + 180);
+      M.bond(i, ids[0], 1); M.arom(ids, 1); return ids;
+    };
+    M.site = (id, i, t, r) => { const p = Array.isArray(i) ? i : M.at[i]; M.sites[id] = { x: p[0], y: p[1], r: r || 17, t }; };
+    M.mid = (i, j) => [(M.at[i][0] + M.at[j][0]) / 2, (M.at[i][1] + M.at[j][1]) / 2];
+    return M;
+  }
+  /* zigzag chain from atom i: first angle, alternate +/- 60 degrees; labels list, returns ids */
+  function chain(M, i, first, labels, orders) { const ids = []; let a = first, cur = i; labels.forEach((l, k) => { cur = M.out(cur, a, l, orders && orders[k]); ids.push(cur); a = (k % 2 === 0) ? a - 60 : a + 60; }); return ids; }
+
+  /* benzodiazepine core shared by clonazepam and 7-amino-clonazepam. 7-ring order: C9a, N1, C2, C3, N4, C5, C5a */
+  function clon(nitroLabel) {
+    const M = MB(), b = M.poly(6, 0, 0, 0); M.arom(b, 0);
+    const r7 = M.fuse(b[1], b[0], 7, M.cen(b)); const [c9a, n1, c2, c3, n4, c5, c5a] = r7;
+    M.at[n1][2] = 'NH'; M.at[n4][2] = 'N'; M.bond(n4, c5, 2); M.out(c2, M.away(c2, r7), 'O', 2);
+    const ph = M.phenyl(c5, M.away(c5, r7)); M.out(ph[1], M.away(ph[1], ph), 'Cl');
+    const nit = M.out(b[4], M.away(b[4], b), nitroLabel);
+    M.site('nitro', nit, nitroLabel === 'NO₂' ? 'nitro group' : 'amino group'); M.site('lactam', c2, 'lactam C=O'); M.site('chlorophenyl', M.cen(ph), 'chlorophenyl ring', 22); M.site('c3', c3, 'C3 CH₂'); M.site('ring', M.cen(b), 'benzo ring', 20);
+    return M;
+  }
+  /* 1,5-benzodiazepine-2,4-dione. 7-ring order: C9a, N1, C2, C3, C4, N5, C5a */
+  function clob(nMethyl) {
+    const M = MB(), b = M.poly(6, 0, 0, 0); M.arom(b, 0);
+    const r7 = M.fuse(b[1], b[0], 7, M.cen(b)); const [c9a, n1, c2, c3, c4, n5, c5a] = r7;
+    M.at[n1][2] = 'N'; M.at[n5][2] = 'N'; M.out(c2, M.away(c2, r7), 'O', 2); M.out(c4, M.away(c4, r7), 'O', 2);
+    let me = null; if (nMethyl) me = M.out(n1, M.away(n1, r7), 'CH₃'); else M.at[n1][2] = 'NH';
+    const ph = M.phenyl(n5, M.away(n5, r7)); const cl = M.out(b[4], M.away(b[4], b), 'Cl');
+    if (me !== null) M.site('nme', me, 'N-methyl'); else M.site('nh', n1, 'N–H');
+    M.site('para', ph[3], 'para position of the N-phenyl ring'); M.site('co2', c2, 'C2 carbonyl'); M.site('c3', c3, 'C3 CH₂'); M.site('cl', cl, 'chloro-benzo ring', 17); M.site('c4', c4, 'C4 carbonyl');
+    return M;
+  }
+  /* hydantoin core: C5 at the top, phenyls up and out */
+  function hyd(withPhos) {
+    const M = MB(), h = M.poly(5, 0, 0, -90); const [c5, c4, n3, c2, n1] = h;
+    M.at[n3][2] = withPhos ? 'N' : 'NH'; M.at[n1][2] = 'NH'; M.out(c4, M.away(c4, h) - 10, 'O', 2); M.out(c2, 90, 'O', 2);
+    const pa = M.phenyl(c5, -145), pb = M.phenyl(c5, -35);
+    M.site('para1', pa[3], 'para position of one phenyl ring'); M.site('para2', pb[3], 'para position of the other phenyl ring'); M.site('imide', c4, 'hydantoin C=O'); M.site('nh', n1, 'ring N–H');
+    if (withPhos) {
+      const c = M.out(n3, 25, 'CH₂'), o = M.out(c, -35, 'O'), p = M.out(o, 25, 'P');
+      M.out(p, -90, 'O', 2); M.out(p, 25, 'OH'); M.out(p, 90, 'OH');
+      M.site('ester', M.mid(o, p), 'phosphate ester O–P bond', 20); M.site('nch2o', M.mid(n3, c), 'N–CH₂ carbon', 14);
+      M.sites.ester.x += 4;
+    }
+    return M;
+  }
+  /* dibenzazepine core. v0 = N5 at the bottom, v3,v4 = C10,C11 on top. */
+  function cbz(kind) {
+    const M = MB(), v = M.poly(7, 0, 0, 90), [n, a1, a2, c10, c11, a5, a6] = v;
+    M.at[n][2] = 'N'; const c = M.cen(v);
+    const lf = M.fuse(a1, a2, 6, c), rt = M.fuse(a6, a5, 6, c); M.arom(lf, lf.length - 1); M.arom(rt, rt.length - 1);
+    const cc = M.out(n, 90, ''), amC = cc; M.out(amC, 150, 'O', 2); M.out(amC, 30, 'NH₂');
+    if (kind === 'cbz') M.bond(c10, c11, 2);
+    if (kind === 'epox') { const m = M.mid(c10, c11), o = M.atom(m[0], m[1] - 24, 'O'); M.bond(c10, o, 1); M.bond(c11, o, 1); M.site('epox', [m[0], m[1] - 10], 'epoxide', 19); }
+    if (kind === 'oxc') { M.out(c10, M.away(c10, v), 'O', 2); }
+    if (kind === 'cbz') M.site('alkene', M.mid(c10, c11), '10,11 double bond', 19);
+    if (kind === 'oxc') { M.site('keto', c10, '10-keto group', 18); M.site('ch2', c11, '11-CH₂', 15); }
+    M.site('amide', amC, 'carboxamide', 19); M.site('ringL', M.cen(lf), 'left benzo ring', 22); M.site('ringR', M.cen(rt), 'right benzo ring', 22);
+    return M;
+  }
+  /* tolterodine family: phenol ring with CH3 (or CH2OH), CH(Ph)CH2CH2N(iPr)2 */
+  function tol(kind) {
+    const M = MB(), a = M.poly(6, 0, 0, 0); M.arom(a, 0);
+    const ang = M.away(a[0], a), ch = M.out(a[0], ang, ''), ph = M.phenyl(ch, ang - 60);
+    const oh = M.out(a[1], M.away(a[1], a), kind === 'feso' ? 'O' : 'OH'), me = M.out(a[4], M.away(a[4], a), kind === 'feso' ? 'CH₂OH' : 'CH₃');
+    let est = null; if (kind === 'feso') { est = M.out(oh, 120, ''); M.out(est, 60, 'O', 2); const ib = M.out(est, 180, ''); M.out(ib, 120, ''); M.out(ib, 240, ''); }
+    const c2 = M.out(ch, ang + 60, ''), c3 = M.out(c2, ang - 0, ''), n = M.out(c3, ang + 60, 'N');
+    const i1 = M.out(n, ang + 20, ''), i2 = M.out(n, ang + 100, ''); M.out(i1, ang - 40, ''); M.out(i1, ang + 70, ''); M.out(i2, ang + 150, ''); M.out(i2, ang + 40, '');
+    M.site('methyl', me, kind === 'feso' ? 'hydroxymethyl group' : 'ring methyl group', 17); M.site('iprop', i1, 'N-isopropyl group', 17); M.site('phenyl', M.cen(ph), 'unsubstituted phenyl ring', 22);
+    if (kind === 'feso') M.site('ester', est, 'isobutyrate ester', 19); else M.site('phenol', oh, 'phenol OH', 15);
+    M.site('amine', n, 'tertiary amine N', 14);
+    return M;
+  }
+  const defs = {
+    clonazepam: () => clon('NO₂'), aminoclon: () => clon('NH₂'), clobazam: () => clob(true), norclob: () => clob(false),
+    phenytoin: () => hyd(false), fosphen: () => hyd(true), cbz: () => cbz('cbz'), cbzep: () => cbz('epox'), oxc: () => cbz('oxc'),
+    tolterodine: () => tol('tol'), fesoterodine: () => tol('feso'),
+    ethosux: () => {
+      const M = MB(), h = M.poly(5, 0, 0, -90), [n1, c2, c3, c4, c5] = h; M.at[n1][2] = 'NH'; M.out(c2, M.away(c2, h) - 10, 'O', 2); M.out(c5, M.away(c5, h) + 10, 'O', 2);
+      const me = M.out(c3, 10, 'CH₃'), e1 = M.out(c3, 100, ''), e2 = M.out(e1, 40, '');
+      M.site('ethylA', e1, 'ethyl CH₂ (next to the ring)', 16); M.site('ethylW', e2, 'ethyl CH₃ (end of the chain)', 16); M.site('ringCH2', c4, 'ring CH₂', 16); M.site('methyl', me, 'methyl on the ring', 16); M.site('imide', c2, 'imide C=O', 16);
+      return M;
+    },
+    lamotrigine: () => {
+      const M = MB(), t = M.poly(6, 0, 0, 0), [c6, n1, n2, c3, n4, c5] = t; M.arom(t, 1);
+      M.at[n1][2] = 'N'; M.at[n2][2] = 'N'; M.at[n4][2] = 'N';
+      const a3 = M.out(c3, 180, 'NH₂'), a5 = M.out(c5, -60, 'NH₂'); const ph = M.phenyl(c6, 0); M.out(ph[1], M.away(ph[1], ph), 'Cl'); M.out(ph[2], M.away(ph[2], ph), 'Cl');
+      M.site('n2', n2, 'triazine N2', 15); M.site('n1', n1, 'triazine N1', 15); M.site('am3', a3, '3-amino group', 17); M.site('am5', a5, '5-amino group', 17); M.site('aryl', M.cen(ph), 'dichlorophenyl ring', 22);
+      return M;
+    },
+    valproate: () => {
+      const M = MB(), c2 = M.atom(0, 0, ''), c1 = M.out(c2, -90, ''); M.out(c1, -150, 'O', 2); const oh = M.out(c1, -30, 'OH');
+      const L1 = chain(M, c2, 150, ['', '', ''].map((x, k) => ''), null), R1 = chain(M, c2, 30, ['', '', ''], null);
+      M.site('acid', c1, 'carboxylic acid', 20); M.site('c3', L1[0], 'C3 (first chain carbon)', 14); M.site('c3b', R1[0], 'C3 (first chain carbon, other propyl)', 14);
+      M.site('c4', L1[1], 'C4', 14); M.site('c5', L1[2], 'C5 (chain end)', 14);
+      return M;
+    },
+    acetylcholine: () => {
+      const M = MB(), n = M.atom(0, 0, 'N⁺'); M.out(n, -90, ''); M.out(n, 90, ''); M.out(n, 180, '');
+      const c1 = M.out(n, 30, ''), c2 = M.out(c1, -30, ''), o = M.out(c2, 30, 'O'), cc = M.out(o, -30, ''); M.out(cc, -90, 'O', 2); const me = M.out(cc, 30, '');
+      M.site('ester', M.mid(o, cc), 'ester C–O bond', 20); M.site('quat', n, 'quaternary N⁺', 20); M.site('eth', M.mid(c1, c2), 'ethylene CH₂CH₂', 18); M.site('acetyl', me, 'acetyl CH₃', 16);
+      return M;
+    },
+    succinylcholine: () => {
+      const M = MB(), n = M.atom(0, 0, 'N⁺'); M.out(n, -90, ''); M.out(n, 90, ''); M.out(n, 180, '');
+      const c1 = M.out(n, 30, ''), c2 = M.out(c1, -30, ''), o = M.out(c2, 30, 'O'), cc = M.out(o, -30, ''); M.out(cc, -90, 'O', 2);
+      const s1 = M.out(cc, 30, ''), s2 = M.out(s1, -30, ''), cd = M.out(s2, 30, ''); M.out(cd, 90, 'O', 2);
+      const o2 = M.out(cd, -30, 'O'), d1 = M.out(o2, 30, ''), d2 = M.out(d1, -30, ''), n2 = M.out(d2, 30, 'N⁺'); M.out(n2, -90, ''); M.out(n2, 90, ''); M.out(n2, 0, '');
+      M.site('ester1', M.mid(o, cc), 'first ester C–O bond', 18); M.site('ester2', M.mid(cd, o2), 'second ester C–O bond', 18); M.site('mid', M.mid(s1, s2), 'central CH₂CH₂', 16); M.site('quat1', n, 'N⁺(CH₃)₃ end', 18); M.site('quat2', n2, 'N⁺(CH₃)₃ end (right)', 18);
+      return M;
+    },
+    parathion: () => {
+      const M = MB(), b = M.poly(6, 0, 0, 0); M.arom(b, 0);
+      const no = M.out(b[0], 0, 'NO₂'), o = M.out(b[3], 180, 'O'), p = M.out(o, 180 + 30 - 30, 'P'); const s = M.out(p, -90, 'S', 2); const e1 = M.out(p, 150, 'O'), e2 = M.out(p, 90, 'O'); const x1 = M.out(e1, 210, ''); M.out(x1, 150, ''); const x2 = M.out(e2, 150, ''); M.out(x2, 210, '');
+      M.site('ps', p, 'P=S group', 16); M.site('nitro', no, 'nitro group', 19); M.site('poaryl', M.mid(o, p), 'P–O–aryl bond', 14); M.site('oet', e2, 'ethoxy group', 13);
+      return M;
+    }
+  };
+  return defs;
+})();
+
+/* draw one molecule. st = { picked, correct, done } ; clickable sites get data-site */
+function molSVG(id, st) {
+  st = st || {}; const M = MOLS[id](), pad = 26;
+  let x0 = 1e9, y0 = 1e9, x1 = -1e9, y1 = -1e9; M.at.forEach(p => { x0 = Math.min(x0, p[0]); y0 = Math.min(y0, p[1]); x1 = Math.max(x1, p[0]); y1 = Math.max(y1, p[1]); });
+  Object.keys(M.sites).forEach(k => { const s = M.sites[k]; x0 = Math.min(x0, s.x - s.r); y0 = Math.min(y0, s.y - s.r); x1 = Math.max(x1, s.x + s.r); y1 = Math.max(y1, s.y + s.r); });
+  x0 -= pad; y0 -= pad; x1 += pad; y1 += pad; const w = x1 - x0, h = y1 - y0;
+  const lab = i => M.at[i][2], cut = (p, q, i) => { if (!lab(i)) return p; const d = Math.hypot(q[0] - p[0], q[1] - p[1]) || 1, k = 9 / d; return [p[0] + (q[0] - p[0]) * k, p[1] + (q[1] - p[1]) * k]; };
+  let g = '';
+  Object.keys(M.bd).forEach(k => {
+    const b = M.bd[k], P = M.at[b.i], Q = M.at[b.j], p = cut(P, Q, b.i), q = cut(Q, P, b.j), dx = q[0] - p[0], dy = q[1] - p[1], s = Math.hypot(dx, dy) || 1, nx = -dy / s, ny = dx / s;
+    const ln = (a, c) => `<line x1="${a[0].toFixed(1)}" y1="${a[1].toFixed(1)}" x2="${c[0].toFixed(1)}" y2="${c[1].toFixed(1)}"/>`;
+    if (b.o === 1) g += ln(p, q);
+    else if (b.ref) { const sg = ((b.ref[0] - (p[0] + q[0]) / 2) * nx + (b.ref[1] - (p[1] + q[1]) / 2) * ny) > 0 ? 1 : -1, o = 4.2 * sg, sh = 0.14; g += ln(p, q) + ln([p[0] + nx * o + dx * sh, p[1] + ny * o + dy * sh], [q[0] + nx * o - dx * sh, q[1] + ny * o - dy * sh]); }
+    else g += ln([p[0] + nx * 2.5, p[1] + ny * 2.5], [q[0] + nx * 2.5, q[1] + ny * 2.5]) + ln([p[0] - nx * 2.5, p[1] - ny * 2.5], [q[0] - nx * 2.5, q[1] - ny * 2.5]);
+  });
+  let t = ''; M.at.forEach(p => { if (p[2]) t += `<text x="${p[0].toFixed(1)}" y="${(p[1] + 5).toFixed(1)}" text-anchor="middle">${p[2]}</text>`; });
+  const hit = st.correct instanceof Array ? st.correct : [st.correct];
+  let s = ''; Object.keys(M.sites).forEach(k => {
+    const z = M.sites[k]; let c = 'site';
+    if (st.done) { if (hit.indexOf(k) >= 0) c += ' ok'; else if (st.picked === k) c += ' bad'; } else if (st.picked === k) c += ' pick';
+    s += `<g class="${c}" data-site="${k}" ${st.done ? '' : 'tabindex="0" role="button"'} aria-label="${z.t}"><circle cx="${z.x.toFixed(1)}" cy="${z.y.toFixed(1)}" r="${z.r}"/><title>${z.t}</title></g>`;
+  });
+  return `<svg class="molsvg" viewBox="${x0.toFixed(0)} ${y0.toFixed(0)} ${w.toFixed(0)} ${h.toFixed(0)}" style="max-width:${Math.min(430, Math.round(w * 1.25))}px" role="group" aria-label="Structure"><g class="bonds">${g}</g><g class="lbls">${t}</g>${s}</svg>`;
+}
+/* PHAR 421 Medicinal Chemistry I, Exam 3: antiseizure drugs, cholinergic drugs, and tap-the-site metabolism questions.
+   Sources: PHAR421_Antiseizure_drugs_2026_2.pptx ("ASD deck") and PHAR421_Cholinergic_Lecture_2026.pptx ("CHO deck").
+   Categories: ASD, CHO, MET3 (click questions: q.meta = { mol, site } where site is an id or a list of ids from mol.js). */
+const AQ = (t, d, q, a, w, e, s) => Q("ASD", d, q, a, w, e, t, s);
+const CQ = (t, d, q, a, w, e, s) => Q("CHO", d, q, a, w, e, t, s);
+const MQ = (t, d, mol, site, q, a, w, e, s) => { Q("MET3", d, q, a, w, e, t, s); BANK[BANK.length - 1].meta = { mol, site }; };
+const ASDS = (n) => "Antiseizure lecture, slide " + n, CHOS = (n) => "Cholinergic lecture, slide " + n;
+
+/* ---------- Antiseizure drugs: big concepts ---------- */
+AQ("Epilepsy basics", 1, "In the ILAE 2025 seizure classification, which term replaces \"focal impaired awareness seizure\"?", "Focal impaired consciousness seizure", ["Complex partial seizure", "Focal nonmotor seizure", "Focal-to-bilateral tonic-clonic seizure"], "The 2025 update swaps awareness for consciousness (preserved or impaired). \"Complex partial\" is the old pre-2017 term, and motor versus nonmotor is replaced by observable versus nonobservable features.", ASDS(11));
+AQ("Epilepsy basics", 2, "In the ILAE 2015 definition of convulsive status epilepticus, when does treatment start (t1) and when does long-term damage become likely (t2)?", "t1 = 5 min, t2 = 30 min", ["t1 = 10 min, t2 = over 60 min", "t1 = 30 min, t2 = 60 min", "t1 = 1 min, t2 = 5 min"], "t1 is when the seizure is unlikely to stop alone, so treatment starts. t2 is when neuronal injury becomes likely. 10 and 60 minutes are the values for focal status with impaired consciousness.", ASDS(13));
+AQ("Epilepsy basics", 1, "A patient has two seizures in 24 hours and returns to baseline in between. What is this called, and how does it differ from status epilepticus?", "A seizure cluster; the patient recovers between seizures", ["Status epilepticus; the seizures last under 5 minutes", "A cluster; it is its own seizure type in ILAE 2025", "A cluster; it is always treated with IV drugs in hospital"], "A cluster is 2 or more seizures in 24 hours with recovery in between. Status is one prolonged seizure or repeated seizures without recovery. Clusters are often treated at home with rescue benzodiazepines (rectal or nasal diazepam, nasal midazolam).", ASDS(15));
+AQ("Non-drug options", 2, "Which device is a closed-loop system that detects abnormal electrical activity at the seizure focus and then stimulates?", "Responsive neurostimulator (RNS)", ["Vagus nerve stimulator (VNS)", "Deep brain stimulation of the anterior thalamic nuclei", "All three are closed-loop"], "RNS detects the abnormal pattern and then stimulates. VNS is continuous open-loop stimulation of the left vagus nerve, and thalamic DBS is bilateral open-loop stimulation.", ASDS(20));
+AQ("Non-drug options", 2, "A ketogenic diet is the first-line treatment for which condition?", "GLUT1 deficiency syndrome", ["Childhood absence epilepsy", "Mesial temporal lobe epilepsy", "Juvenile myoclonic epilepsy"], "When glucose cannot enter the brain well, ketone bodies serve as the fuel. It is also first-line for pyruvate dehydrogenase deficiency.", ASDS(22));
+AQ("Non-drug options", 2, "Which is the most commonly performed epilepsy surgery?", "Anterior temporal lobe resection for mesial temporal lobe epilepsy", ["Corpus callosotomy", "Hemispherectomy for severe one-sided hemispheric disease", "Extratemporal cortical resection of a neocortical focus outside the temporal lobe"], "Temporal lobe resection is the most common and most successful procedure. Corpus callosotomy is palliative, mainly for drop attacks.", ASDS(24));
+AQ("Mechanisms", 1, "Which antiseizure drug's activity is linked to binding the synaptic vesicle protein SV2A?", "Levetiracetam", ["Lacosamide", "Perampanel", "Ethosuximide"], "Levetiracetam (and brivaracetam) bind SV2A. Lacosamide enhances slow inactivation of Na+ channels, perampanel is a non-competitive AMPA antagonist, and ethosuximide blocks T-type Ca2+ channels.", ASDS(34));
+AQ("Mechanisms", 1, "A 7-year-old has typical absence seizures only. Which drug is first-line?", "Ethosuximide", ["Carbamazepine", "Phenytoin", "Gabapentin"], "Ethosuximide blocks T-type Ca2+ channels that drive thalamocortical bursts. Carbamazepine and phenytoin can worsen absence seizures, and gabapentin does not work for them.", ASDS(36));
+AQ("Epilepsy basics", 2, "In a focal seizure, what does the loss of surround inhibition allow?", "The discharge to spread beyond the focus", ["The seizure to start in a single neuron", "The seizure to stop on its own", "A switch to a generalized absence seizure"], "GABA-mediated surround inhibition normally contains the discharge. When it fails, firing spreads to nearby and distant regions. Na+ channel blockers and GABA enhancers limit that spread.", ASDS(38));
+AQ("Interactions", 3, "A child with Lennox-Gastaut syndrome on clobazam becomes very sedated after cannabidiol is added. What is the best explanation?", "Cannabidiol raises N-desmethylclobazam exposure about 3-fold", ["Cannabidiol induces CYP3A4 and lowers clobazam", "Cannabidiol displaces clobazam from albumin", "Cannabidiol is a direct GABA-A agonist"], "The cannabidiol label reports about 3-fold higher N-desmethylclobazam Cmax and AUC, while clobazam itself is unchanged. N-desmethylclobazam is cleared mainly by CYP2C19 and has a half-life of 71 to 82 hours, so a clobazam dose reduction may be needed.", ASDS(53));
+AQ("Mechanisms", 2, "How do barbiturates differ from benzodiazepines at the GABA-A receptor?", "Barbiturates prolong channel opening and can open it directly at high doses", ["Barbiturates increase opening frequency and benzodiazepines increase open time", "Both bind the same alpha/gamma site", "Benzodiazepines open the channel directly without GABA"], "Benzodiazepines bind the alpha/gamma interface and increase opening frequency, but need GABA. Barbiturates bind transmembrane sites, prolong opening, and at high concentrations open the channel directly, which makes overdose more dangerous. Flumazenil reverses benzodiazepines only.", ASDS(55));
+AQ("Boxed warnings", 1, "Which boxed warning applies to vigabatrin?", "Permanent vision loss (REMS program)", ["Hepatic failure with a required liver monitoring program", "Aplastic anemia", "Serious skin rash, including Stevens-Johnson syndrome"], "Vigabatrin irreversibly inhibits GABA transaminase and can cause permanent bilateral visual field loss, so periodic vision testing is required. Hepatic failure and aplastic anemia are felbamate's boxed warnings.", ASDS(57));
+AQ("Boxed warnings", 2, "Which sodium-channel antiseizure drug caused Na+ below 125 mmol/L in about 2.5% of trial patients and carries an HLA-B*1502 SJS/TEN warning?", "Oxcarbazepine", ["Lacosamide", "Lamotrigine", "Phenytoin"], "Hyponatremia occurs mostly in the first 3 months. Eslicarbazepine also causes hyponatremia. Lamotrigine and phenytoin share the HLA-B*15:02 link but not this signal, and lacosamide's concern is PR prolongation and AV block.", ASDS(81));
+AQ("Pharmacokinetics", 2, "A patient's phenytoin dose goes from 300 to 400 mg/day and the level jumps from 8 to 25 mg/L. Why?", "Saturable CYP2C9 metabolism (Michaelis-Menten kinetics)", ["Autoinduction of CYP3A4 that gradually speeds up phenytoin clearance", "Reduced oral absorption at higher doses", "Increased protein binding at higher doses"], "CYP2C9 has a low Km (about 4 mg/L), below the therapeutic range of 10 to 20 mg/L. Near saturation, elimination is close to zero-order, so small dose changes cause large level changes. Raise doses in 25 to 50 mg steps and monitor levels.", ASDS(83));
+AQ("Interactions", 2, "A patient stable on carbamazepine starts clarithromycin and develops ataxia and diplopia. What is the mechanism?", "Clarithromycin inhibits CYP3A4 and raises carbamazepine levels", ["Clarithromycin induces CYP3A4 and speeds up carbamazepine clearance", "Clarithromycin displaces carbamazepine from albumin", "Clarithromycin inhibits epoxide hydrolase"], "Carbamazepine is a CYP3A4 substrate. Other CYP3A4 inhibitors that cause toxicity include erythromycin, azoles, diltiazem, verapamil and grapefruit. Carbamazepine also induces its own metabolism over 3 to 5 weeks (autoinduction).", ASDS(85));
+AQ("Pharmacokinetics", 2, "Gabapentin bioavailability falls from about 60% at 900 mg/day to about 27% at 4800 mg/day. Why?", "Saturable L-amino acid transport during absorption", ["CYP3A4 autoinduction that speeds up gabapentin clearance", "Extensive first-pass glucuronidation", "Increased plasma protein binding at high doses"], "Gabapentin uses the L-amino acid transporter, which saturates. It is not metabolized, is cleared unchanged by the kidney (half-life 5 to 7 hours), and is under 3% protein bound. Pregabalin is absorbed linearly.", ASDS(93));
+AQ("Mechanisms", 2, "Why does ethosuximide work for absence seizures but not for focal or tonic-clonic seizures?", "It blocks T-type Ca2+ currents that drive thalamocortical bursts", ["It enhances GABA-A receptors in the cortex", "It blocks Na+ channels in cortical neurons", "It binds the alpha2-delta subunit of Ca2+ channels"], "Absence seizures come from a 3-Hz thalamocortical oscillation. Hyperpolarization de-inactivates T-type channels and rebound bursts excite the cortex. Ethosuximide does not stop focal spread, and used alone in mixed epilepsy it may increase tonic-clonic seizures.", ASDS(95));
+AQ("Mechanisms", 2, "Which statement about gabapentin and pregabalin is correct?", "Pregabalin is absorbed linearly, with bioavailability of 90% or more", ["Both are extensively metabolized in the liver by CYP3A4 and CYP2D6 before elimination", "Both bind GABA-A receptors", "Pregabalin is not a controlled substance"], "Both bind the alpha2-delta subunit of high-voltage-activated Ca2+ channels and are cleared unchanged by the kidneys, so doses are adjusted in renal impairment. Pregabalin is Schedule V. Both can cause respiratory depression with opioids.", ASDS(97));
+AQ("Contraindications", 2, "Valproate is contraindicated in which patient?", "A patient with POLG-related mitochondrial disease", ["A child with absence seizures who has already failed ethosuximide", "An adult with myoclonic seizures", "A patient also taking lamotrigine"], "Valproate contraindications include POLG mitochondrial disorders, hepatic disease, urea cycle disorders, and migraine prophylaxis in pregnancy. Absence and myoclonic seizures are uses. With lamotrigine it is a dosing issue, not a contraindication.", ASDS(112));
+AQ("Boxed warnings", 3, "Felbamate's aplastic anemia and hepatic failure are linked to which reactive metabolite?", "Atropaldehyde (2-phenylpropenal)", ["Carbamazepine-10,11-epoxide", "4-ene-valproate formed by CYP oxidation of valproate", "N-desmethylclobazam"], "Felbamate is a dicarbamate. One carbamate is hydrolyzed, the alcohol is oxidized to an aldehyde, and that aldehyde eliminates to atropaldehyde, an alpha,beta-unsaturated aldehyde that forms protein adducts. 4-ene-valproate is tied to valproate liver toxicity.", ASDS(114));
+AQ("Adverse effects", 2, "Which property do topiramate and zonisamide share?", "Both weakly inhibit carbonic anhydrase, causing acidosis and kidney stones", ["Both act only as AMPA receptor antagonists and have no other known mechanism", "Both are strong CYP3A4 inducers", "Both are contraindicated in porphyria"], "Topiramate has a sulfamate group and zonisamide a sulfonamide group. Weak carbonic anhydrase inhibition also causes oligohidrosis in children. Zonisamide is contraindicated in sulfonamide allergy, and combining the two adds to the acidosis and stone risk.", ASDS(116));
+AQ("Pharmacogenomics", 3, "A CYP2C9 poor metabolizer (activity score 0) needs phenytoin. What does CPIC recommend?", "A typical loading dose, then a starting maintenance dose at least 50% lower, adjusted by drug levels", ["Avoid phenytoin entirely", "Use a typical loading dose, then double the starting maintenance dose and then adjust it by drug levels", "Standard dosing, because CYP2C9 does not matter"], "CPIC 2020 recommends at least 50% lower for a poor metabolizer and at least 25% lower for an intermediate metabolizer (activity score 1.0). Avoiding phenytoin is the advice for HLA-B*15:02-positive patients who have never taken it.", ASDS(124));
+AQ("Boxed warnings", 2, "Which antiseizure drug has a boxed warning for serious psychiatric and behavioral reactions, including homicidal ideation?", "Perampanel", ["Levetiracetam", "Lamotrigine", "Vigabatrin"], "Perampanel is an AMPA antagonist. Levetiracetam has behavioral warnings but no boxed warning, lamotrigine's boxed warning is rash, and vigabatrin's is permanent vision loss.", ASDS(126));
+AQ("Pharmacogenomics", 2, "Which statement about HLA-B*15:02 testing before carbamazepine is correct?", "Test patients with at-risk ancestry and avoid the drug if positive", ["Test every patient regardless of ancestry", "A positive test means SJS/TEN will happen", "Test patients who have taken it for over 3 months without a reaction"], "At-risk groups include Han Chinese, Thai and Malaysian ancestry. Many carriers never react, and a negative test does not remove all risk. Testing is not useful after more than 3 months of use without a reaction.", ASDS(128));
+
+AQ("Lamotrigine", 2, "A patient on valproate is about to start lamotrigine. What is the key dosing step, and why?", "Use about half the usual lamotrigine dose, because valproate slows its glucuronidation and raises rash risk", ["Use double the usual lamotrigine dose, because valproate induces its glucuronidation and shortens its half-life", "Use the usual dose, because the two drugs do not interact", "Avoid the pair, because valproate is contraindicated with lamotrigine"], "Valproate inhibits glucuronidation, so lamotrigine half-life rises from about 24 to 30 hours to about 60 hours and rash risk is higher. It is a dosing issue, not a contraindication.", ASDS(78));
+AQ("Lamotrigine", 2, "A patient takes lamotrigine with carbamazepine. How does that change lamotrigine?", "Half-life drops to about 13 hours, so levels are lower", ["Half-life rises to about 60 hours", "Half-life is unchanged, because lamotrigine is not metabolized", "Bioavailability falls below 50%"], "Inducers of glucuronidation (phenytoin, carbamazepine, phenobarbital, primidone) shorten the half-life to about 13 hours. Lamotrigine is metabolized mainly by UGT1A4 and is almost completely absorbed.", ASDS(78));
+AQ("Lamotrigine", 3, "A woman on lamotrigine starts an estrogen-containing contraceptive. What happens to her lamotrigine level?", "It falls by about half, and may rise in the pill-free week", ["It doubles, so she needs a lower dose", "It is unchanged, because contraceptives do not affect UGT", "It rises only if she also takes valproate"], "Estrogen-containing contraceptives lower lamotrigine levels (about 50%), so dose adjustment is needed. Levels may rise during the pill-free week.", ASDS(78));
+AQ("Lamotrigine", 2, "Which seizure type may lamotrigine make worse in some patients?", "Myoclonic seizures", ["Typical absence seizures", "Focal seizures", "Tonic-clonic seizures"], "Lamotrigine is broad spectrum, but it can worsen myoclonic seizures in some patients. Its boxed warning is for serious rash, including SJS.", ASDS(78));
+AQ("Valproate", 2, "A patient stable on valproate is given a carbapenem. What happens?", "Valproate levels fall sharply, so the combination should be avoided", ["Valproate levels rise sharply, so the dose should be lowered right away", "Free valproate rises because of albumin displacement", "Nothing; carbapenems do not affect valproate"], "Carbapenems lower valproate levels a lot. Enzyme inducers and estrogen-containing contraceptives also lower valproate levels.", ASDS(100));
+AQ("Valproate", 2, "A patient on valproate has topiramate added and becomes confused and sleepy. Which problem should be checked?", "Hyperammonemia", ["Hyponatremia", "Hypokalemia", "Hypoglycemia"], "Valproate with topiramate raises the risk of hyperammonemia. Topiramate alone is associated with metabolic acidosis, not an ammonia problem.", ASDS(100));
+AQ("Valproate", 3, "Why can a normal total phenytoin level mislead in a patient who also takes valproate?", "Valproate displaces phenytoin from albumin and inhibits its metabolism, so the free level is higher", ["Valproate induces phenytoin metabolism and lowers free phenytoin, so the total level reads falsely low", "Valproate raises the phenytoin dose needed for the same effect", "Valproate converts phenytoin to an inactive epoxide"], "Valproate is about 90% protein bound and binding is saturable. It also inhibits CYP2C9, UGTs and epoxide hydrolase. Monitor free phenytoin.", ASDS(100));
+AQ("Valproate", 2, "Valproate raises which carbamazepine metabolite and causes toxicity, and by what step?", "Carbamazepine-10,11-epoxide, by inhibiting epoxide hydrolase", ["Carbamazepine-10,11-diol, by inhibiting CYP3A4", "Carbamazepine-10,11-epoxide, by inducing CYP3A4", "10-hydroxycarbazepine, by inhibiting aldo-keto reductase"], "Epoxide hydrolase converts the active epoxide to the inactive trans-diol. Blocking it leaves more epoxide behind.", ASDS(100));
+AQ("Valproate", 3, "Which valproate metabolite formed by CYP-mediated oxidation is linked to its liver toxicity?", "The 4-ene metabolite", ["Valproate glucuronide", "3-hydroxyvalproic acid", "5-hydroxyvalproic acid"], "Valproate is cleared by glucuronidation (30 to 50%), beta-oxidation (20 to 40%) and CYP oxidation (about 10%). The CYP route forms the hepatotoxic 4-ene metabolite.", ASDS(100));
+AQ("Topiramate", 2, "Which acid-base disturbance does topiramate cause, and why?", "Hyperchloremic non-anion-gap metabolic acidosis, from carbonic anhydrase inhibition", ["Anion-gap metabolic acidosis from lactate buildup after impaired mitochondrial oxidative metabolism", "Metabolic alkalosis, from bicarbonate retention", "Respiratory acidosis, from reduced breathing"], "The sulfamate group weakly inhibits carbonic anhydrase (CA II and IV). That causes acidosis and kidney stones, so avoid other carbonic anhydrase inhibitors and the ketogenic diet, and keep the patient hydrated.", ASDS(105));
+AQ("Topiramate", 2, "A patient on topiramate develops sudden blurred vision and eye pain within the first month. What is the concern and the action?", "Acute myopia with secondary angle-closure glaucoma; stop the drug", ["Optic neuritis; continue and add steroids", "Cataracts; reduce the dose", "Retinal detachment; add an eye drop and continue"], "Acute myopia and secondary angle-closure glaucoma usually appear within the first month, and the drug is stopped.", ASDS(105));
+AQ("Topiramate", 1, "Topiramate is approved for migraine. How is it used?", "To prevent migraine headaches (age 12 and up), not to treat an acute attack", ["To treat an acute migraine attack", "Only for cluster headache", "Only in adults over 18"], "Topiramate prevents migraine in patients 12 and older. It is also used for focal and primary generalized tonic-clonic seizures and Lennox-Gastaut syndrome.", ASDS(105));
+AQ("Topiramate", 2, "Topiramate's chemistry is best described as which of these?", "A sulfamate-substituted monosaccharide derived from D-fructose", ["A primary sulfonamide on a benzisoxazole ring with a methylene linker", "A dicarbamate of 2-phenyl-1,3-propanediol", "A tricyclic dibenzazepine carboxamide"], "The sulfamate group is behind carbonic anhydrase inhibition. Zonisamide is the sulfonamide, felbamate is the dicarbamate, and carbamazepine is the dibenzazepine.", ASDS(105));
+AQ("Benzodiazepines", 2, "Which benzodiazepine is used for absence seizures after succinimides, and for Lennox-Gastaut, akinetic and myoclonic seizures?", "Clonazepam", ["Clobazam", "Midazolam", "Lorazepam"], "Clonazepam has a half-life of 30 to 40 hours. Clobazam is for Lennox-Gastaut (age 2 and up), and midazolam and lorazepam are mainly for status epilepticus.", ASDS(42));
+AQ("Benzodiazepines", 2, "Why does clobazam have such long-lasting effects?", "Clobazam has a half-life of 36 to 42 hours and its active N-desmethyl metabolite lasts 71 to 82 hours", ["Clobazam is a prodrug with a half-life of 6 hours", "It is stored in fat and released slowly with no active metabolite", "It irreversibly binds the GABA-A receptor"], "The N-desmethyl metabolite is cleared mainly by CYP2C19. Tolerance limits benzodiazepines mostly to acute or rescue use.", ASDS(42));
+AQ("Barbiturates", 2, "Which seizure type may barbiturates actually make worse?", "Absence seizures", ["Focal seizures", "Tonic-clonic seizures", "Neonatal seizures"], "Barbiturates may exacerbate absence seizures. Phenobarbital is used for focal and tonic-clonic seizures, status epilepticus (after benzodiazepines), and neonatal seizures.", ASDS(43));
+AQ("Barbiturates", 2, "Which effect of phenobarbital explains many drug interactions?", "It induces CYP and UGT enzymes", ["It inhibits CYP2C9 and UGT", "It inhibits epoxide hydrolase", "It displaces drugs from albumin only"], "Phenobarbital is long-acting (half-life 80 to 120 hours) and a CYP and UGT inducer, so it lowers levels of drugs such as lamotrigine and valproate.", ASDS(44));
+AQ("Barbiturates", 2, "Primidone is converted to which active metabolites?", "Phenobarbital and phenylethylmalonamide (PEMA)", ["Phenytoin and PEMA", "Pentobarbital and phenobarbital", "Carbamazepine epoxide and PEMA"], "Primidone is active itself and also forms phenobarbital and PEMA. It is contraindicated in porphyria and phenobarbital hypersensitivity.", ASDS(44));
+AQ("Carbamazepine", 2, "What does carbamazepine do to its own metabolism over the first weeks of therapy?", "It induces its own metabolism (autoinduction) over 3 to 5 weeks", ["It inhibits its own metabolism, so levels rise", "Nothing; its metabolism is not CYP-dependent", "It slows its own renal excretion"], "Autoinduction is a carbamazepine feature, not a phenytoin one. Doses are often titrated up as induction develops.", ASDS(85));
+AQ("Oxcarbazepine", 2, "Oxcarbazepine's activity depends on which step?", "Hepatic reduction of the 10-keto group to the active 10-hydroxy metabolite (MHD)", ["CYP3A4 epoxidation to an active epoxide", "Hydrolysis of an acetate ester", "Phosphatase removal of a phosphate"], "Arylketone reductase makes MHD (licarbazepine). Eslicarbazepine acetate is different: it is hydrolyzed to eslicarbazepine. The epoxide route belongs to carbamazepine.", ASDS(75));
+AQ("Pharmacokinetics", 2, "Ethosuximide is cleared mainly by what route?", "Hepatic hydroxylation (mainly CYP3A4) followed by glucuronidation", ["Unchanged renal excretion", "Hydrolysis by plasma esterases", "Glutathione conjugation"], "Ethosuximide has several hydroxylation routes. The major one is hydroxylation of the ethyl group next to the ring.", ASDS(89));
+AQ("Pharmacogenomics", 2, "What is the CPIC advice for a CYP2C9 intermediate metabolizer (activity score 1.0) starting phenytoin?", "Lower the starting maintenance dose by at least 25%", ["Avoid phenytoin", "No change", "Raise the dose by 25%"], "Poor metabolizers get at least 50% lower. Dose changes follow drug levels because phenytoin kinetics are saturable.", ASDS(124));
+AQ("Mechanisms", 2, "Vigabatrin's mechanism is which of these?", "Irreversible inhibition of GABA transaminase", ["Blocking SV2A", "Blocking the alpha2-delta subunit", "Enhancing slow inactivation of Na+ channels"], "Raising GABA levels by blocking its breakdown is the mechanism. The drug is stopped if there is no benefit within 3 months (focal) or 2 to 4 weeks (infantile spasms).", ASDS(57));
+AQ("Boxed warnings", 2, "Which antiseizure drug carries boxed warnings for both aplastic anemia and hepatic failure?", "Felbamate", ["Vigabatrin", "Lamotrigine", "Perampanel"], "Both are felbamate warnings. Vigabatrin's boxed warning is vision loss, lamotrigine's is rash, and perampanel's is psychiatric reactions.", ASDS(57));
+
+/* ---------- Cholinergic drugs: big concepts ---------- */
+CQ("Receptors", 1, "Which description of the muscle (NM) nicotinic receptor is correct?", "A pentameric ligand-gated channel, (alpha1)2 beta1 delta epsilon", ["A Gq-coupled GPCR with seven transmembrane helices on the muscle end plate", "A Gi-coupled GPCR", "The same receptor found in autonomic ganglia"], "M receptors are GPCRs, and the NN receptor is the ganglionic and CNS nicotinic receptor.", CHOS(18));
+CQ("Receptors", 2, "Which muscarinic receptors couple to Gq/11, and which couple to Gi/o?", "M1, M3 and M5 use Gq/11; M2 and M4 use Gi/o", ["M1, M2 and M3 use Gq/11; M4 and M5 use Gi/o", "M2, M3 and M5 use Gq/11; M1 and M4 use Gi/o", "All five use Gq/11"], "Gq/11 raises IP3, DAG and Ca2+. Gi/o lowers cAMP and opens GIRK channels.", CHOS(18));
+CQ("ACh life cycle", 2, "Which step limits the rate of ACh synthesis in the nerve terminal?", "Na+-dependent choline uptake by the high-affinity choline transporter (CHT)", ["Acetylation of choline by choline acetyltransferase", "Loading ACh into synaptic vesicles by the vesicular ACh transporter (VAChT) using a proton gradient", "Breakdown of ACh by AChE"], "CHT uptake is rate-limiting. ChAT then acetylates choline using acetyl-CoA.", CHOS(18));
+CQ("ACh life cycle", 1, "How is ACh's action ended at the neuromuscular junction?", "AChE hydrolyzes it to choline and acetate in about 1 ms, and choline is taken back up", ["Intact ACh is taken back up into the nerve", "ACh simply diffuses out of the cleft into the bloodstream, where the liver then clears it within minutes", "MAO oxidizes it"], "Choline, not ACh, is recycled into the nerve terminal.", CHOS(18));
+CQ("ACh life cycle", 2, "Which of these happens when ACh binds NM receptors at the neuromuscular junction?", "A cation channel opens (Na+ in, K+ out) and produces an end-plate potential", ["Gq signaling raises IP3 inside the muscle", "A K+ channel opens and hyperpolarizes the end plate, which makes the muscle relax", "The channel pumps Ca2+ out of the cell"], "When the end-plate potential reaches threshold, a muscle action potential spreads and the DHPR voltage sensor gates RyR1 to release Ca2+ from the SR.", CHOS(14));
+CQ("Agonists", 2, "Why is bethanechol longer-acting and more muscarinic-selective than ACh?", "Its carbamate resists cholinesterase, and the beta-methyl group lowers nicotinic activity", ["It is a tertiary amine that crosses into the CNS", "It is hydrolyzed by cholinesterase even faster than ACh, so it acts only for a few seconds and must be given IV", "It binds only M2 receptors"], "That makes it oral and useful for urinary retention, with muscarinic effects.", CHOS(28));
+CQ("Agonists", 1, "A patient has dry mouth from head and neck radiation. Which drugs stimulate salivary secretion?", "Cevimeline and oral pilocarpine", ["Oxybutynin and tolterodine", "Cevimeline and atropine", "Pilocarpine and glycopyrrolate"], "Cevimeline is an M1/M3-preferring agonist. Oxybutynin would worsen dry mouth.", CHOS(28));
+CQ("Agonists", 2, "How does varenicline help with smoking cessation?", "It is an alpha4beta2 partial agonist that eases craving and blocks the reward of nicotine", ["It is a full alpha4beta2 antagonist that blocks all receptor activity and so prevents any nicotine reward", "It is a muscarinic M1 agonist", "It is an NM receptor agonist"], "It relieves craving and withdrawal while blocking the reward from smoked nicotine. It is a full agonist at alpha7.", CHOS(28));
+CQ("Agonists", 3, "Why is xanomeline combined with trospium?", "Trospium is a quaternary antagonist that stays peripheral and blunts xanomeline's GI and secretory effects", ["Trospium boosts xanomeline's entry into the brain by inhibiting P-glycoprotein at the blood-brain barrier", "Trospium is an AChE inhibitor", "Trospium blocks only central M1 receptors"], "Xanomeline acts centrally while trospium cannot cross the blood-brain barrier.", CHOS(28));
+CQ("Cholinesterase inhibitors", 2, "Why does physostigmine reach the CNS while neostigmine does not?", "Neostigmine is a quaternary ammonium with a permanent charge, and physostigmine is a tertiary amine", ["Neostigmine is a lipophilic tertiary amine and physostigmine is a charged quaternary ammonium compound", "Physostigmine is an organophosphate", "Neostigmine is highly lipophilic"], "Quaternary ammonium compounds do not cross the blood-brain barrier.", CHOS(41));
+CQ("Cholinesterase inhibitors", 3, "Which order of enzyme recovery time is correct for an acetylated, carbamoylated and phosphorylated cholinesterase?", "Acetylated: microseconds; carbamoylated: about 15 to 30 minutes; phosphorylated: hours to days", ["Acetylated: 15 to 30 minutes; carbamoylated: microseconds; phosphorylated: hours to days, permanently after aging", "All three recover within seconds", "Acetylated: hours; carbamoylated: days; phosphorylated: microseconds"], "After aging the phosphorylated enzyme is permanently blocked.", CHOS(41));
+CQ("Organophosphates", 2, "What does aging mean in organophosphate poisoning, and why does it matter?", "Loss of an alkyl group makes the enzyme resistant to oxime reactivation", ["The pesticide degrades in the environment and loses potency", "Atropine stops working after a few hours", "Plasma cholinesterase levels rise over time"], "Pralidoxime reactivates the enzyme only before aging. Atropine treats the muscarinic signs, and a benzodiazepine controls seizures. Soman ages in minutes, many pesticides in hours.", CHOS(37));
+CQ("Cholinesterase inhibitors", 2, "How does rivastigmine work, and why is a patch used?", "It carbamoylates AChE and BuChE, and the patch lowers GI adverse effects", ["It phosphorylates AChE permanently, and the patch avoids first-pass", "It blocks M1 receptors, and the patch improves absorption", "It is an NMDA antagonist, and the patch lowers dizziness"], "It is approved for mild to severe Alzheimer's and Parkinson's disease dementia.", CHOS(41));
+CQ("Organophosphates", 3, "Parathion and malathion are thiophosphates (P=S). Why are they described as prodrugs?", "CYP enzymes replace the sulfur with oxygen to form the active oxon (P=O)", ["Esterases remove the sulfur to form the active drug", "Glucuronidation of the sulfur forms the active toxin", "Reduction of the P=S group makes it a stronger inhibitor"], "Malathion is also quickly detoxified by mammalian carboxylesterases, which explains its selective toxicity for insects.", CHOS(37));
+CQ("Antimuscarinics", 2, "Why does a quaternary antimuscarinic such as trospium cause few CNS effects?", "Its permanent charge limits absorption and blocks entry into the CNS", ["It is highly selective for M3 receptors only and has no activity at M1 or M2", "It is rapidly metabolized to an inactive form", "It acts as an M2 agonist"], "Quaternary ammonium compounds are poorly absorbed and cannot cross the blood-brain barrier. They are not subtype-selective.", CHOS(58));
+CQ("Antimuscarinics", 3, "How can a long-acting antimuscarinic work for 24 hours at M3 yet spare the M2 autoreceptor?", "Kinetic selectivity: long residence time at M3 and M1, fast dissociation from M2", ["It binds only M3 receptors and has no affinity for M2, so the autoreceptor is never touched", "It is an irreversible antagonist of M3", "It is rapidly metabolized at M2"], "Fast dissociation from M2 spares the inhibitory autoreceptor.", CHOS(58));
+CQ("Antimuscarinics", 2, "An older adult is on an antimuscarinic for overactive bladder and has memory problems. What is a sensible approach?", "Share the decision about cognitive risk and consider a beta-3 agonist such as mirabegron or vibegron", ["Increase the antimuscarinic dose to cover the bladder symptoms, and reassess cognition at the next yearly visit", "Switch to oxybutynin because it has the lowest CNS risk", "Add an anticholinesterase to protect memory"], "Beta-3 agonists have no anticholinergic effect. Oxybutynin is tertiary and lipophilic, with high CNS risk, and trospium is quaternary with very low CNS risk.", CHOS(58));
+CQ("Antimuscarinics", 2, "Which drug reverses both central and peripheral antimuscarinic toxicity?", "Physostigmine", ["Neostigmine", "Glycopyrrolate", "Pralidoxime"], "Physostigmine is a tertiary AChE inhibitor that crosses the blood-brain barrier. Neostigmine does not enter the CNS.", CHOS(58));
+CQ("Antimuscarinics", 2, "Why is atropine added to diphenoxylate in Lomotil?", "A low dose gives unpleasant anticholinergic effects that discourage abuse of diphenoxylate", ["It boosts the antidiarrheal effect of diphenoxylate by slowing GI transit through muscarinic block", "It stops diphenoxylate crossing into the CNS", "It prevents opioid constipation"], "The atropine dose is subtherapeutic for antidiarrheal use.", CHOS(52));
+CQ("Antimuscarinics", 1, "Which drug reduces GI smooth-muscle spasm instead of mimicking cholinergic effects?", "Dicyclomine", ["Bethanechol", "Neostigmine", "Pilocarpine"], "Dicyclomine is an antispasmodic. Bethanechol, neostigmine and pilocarpine are cholinomimetic, so they increase GI activity or secretions.", CHOS(88));
+CQ("NMBs", 2, "Why is tubocurarine inactive orally but lethal when given IV?", "Its permanent charge blocks gut absorption, but IV dosing reaches the neuromuscular junction directly", ["It is destroyed by gastric acid and by first-pass liver metabolism, but is stable in the blood when injected", "It is a prodrug that needs IV hydrolysis", "It is a depolarizing blocker that only works IV"], "It is a competitive antagonist at the muscle nicotinic receptor. Ganglionic block and histamine release are side effects, not the main mechanism.", CHOS(77));
+CQ("NMBs", 2, "What does depolarizing block with succinylcholine look like, and what do AChE inhibitors do to it?", "Fasciculations then flaccid paralysis, and AChE inhibitors prolong it", ["Immediate flaccid paralysis with no fasciculations, and AChE inhibitors reverse it", "Spastic paralysis, and AChE inhibitors reverse it", "Tremor then spasm, unaffected by AChE inhibitors"], "Succinylcholine first acts like ACh (depolarizing) and then blocks the receptor. Neostigmine raises ACh and increases depolarization.", CHOS(77));
+CQ("NMBs", 2, "Where are the two ACh binding sites on the adult muscle nAChR?", "At the alpha-delta and alpha-epsilon interfaces", ["At the alpha-beta and beta-delta interfaces", "Inside the channel pore", "On the beta subunit only"], "In the fetal receptor the sites are alpha-delta and alpha-gamma. They are about 50 angstroms apart.", CHOS(77));
+CQ("NMBs", 2, "Which neuromuscular blocker is eliminated mainly by Hofmann elimination, independent of liver and kidney?", "Cisatracurium", ["Pancuronium", "Vecuronium", "Rocuronium"], "Cisatracurium degrades chemically at physiological pH and temperature, which helps in hepatic or renal failure. Atracurium's metabolite laudanosine can cause CNS excitation at high levels.", CHOS(77));
+CQ("NMBs", 3, "Before extubation, what does the 2023 ASA guideline recommend confirming?", "A train-of-four ratio of at least 0.9 by quantitative monitoring", ["A train-of-four count of at least 2 measured at the adductor pollicis", "A sustained 5-second head lift", "A train-of-four ratio of at least 0.4"], "Clinical tests and visual fade are not sensitive. Visual fade cannot be detected reliably once the ratio is above 0.4.", CHOS(80));
+CQ("NMBs", 3, "Sugammadex will NOT reverse blockade from which drug?", "Cisatracurium", ["Rocuronium", "Vecuronium", "Both rocuronium and vecuronium"], "Sugammadex binds aminosteroids only. Benzylisoquinoliniums such as cisatracurium are reversed with neostigmine.", CHOS(80));
+CQ("NMBs", 3, "A woman on oral contraceptives receives sugammadex. What should she be told?", "Counts like a missed pill; use back-up contraception for 7 days", ["No change, because it does not bind hormones", "Stop her contraceptive for 7 days so the sugammadex can clear from the body", "It doubles hormone levels, so reduce the dose"], "Sugammadex can bind progestogen.", CHOS(80));
+CQ("NMBs", 2, "Why is neostigmine given with glycopyrrolate to reverse a nondepolarizing block?", "Neostigmine raises ACh at muscarinic sites too, and quaternary glycopyrrolate blocks those effects outside the CNS", ["Glycopyrrolate speeds up neostigmine's nicotinic effect at the neuromuscular junction so the block reverses sooner", "Glycopyrrolate inactivates neostigmine in the periphery", "Neostigmine alone has no muscarinic effects"], "Neostigmine increases ACh at muscarinic sites too, causing bradycardia and secretions.", CHOS(80));
+CQ("NMBs", 3, "Which statement about succinylcholine's breakdown is correct?", "Plasma cholinesterase hydrolyzes it, and atypical BCHE variants cause prolonged apnea", ["AChE in the cleft handles all of it", "Hepatic CYP3A4 is the main route", "It is excreted unchanged in urine"], "The primary metabolite is succinylmonocholine, hydrolyzed more slowly to succinic acid and choline. The dibucaine number identifies atypical BCHE.", CHOS(65));
+CQ("NMBs", 2, "What is the boxed warning for succinylcholine?", "Hyperkalemic rhabdomyolysis, with arrhythmias and cardiac arrest, in children with an undiagnosed myopathy", ["Severe hypotension from histamine release", "Pulmonary fibrosis", "Aplastic anemia"], "Reserve pediatric use for emergency airway. Malignant hyperthermia is another trigger, treated with dantrolene.", CHOS(66));
+CQ("Presynaptic drugs", 3, "How does botulinum toxin A block ACh release?", "Its light chain is a zinc protease that cleaves SNAP-25", ["It blocks voltage-gated Ca2+ channels directly", "It inhibits choline uptake by CHT", "It blocks AChE"], "Cleaving SNAP-25 stops exocytosis of ACh.", CHOS(88));
+CQ("Presynaptic drugs", 3, "How does a presynaptic K+ channel blocker increase ACh release?", "It prolongs the presynaptic action potential, so more Ca2+ enters through the remaining channels", ["It opens Ca2+ channels directly", "It increases choline uptake", "It blocks AChE in the cleft"], "A longer action potential keeps Ca2+ channels open longer.", CHOS(88));
+CQ("Cholinesterase inhibitors", 2, "Which drug is the first-line oral AChE inhibitor for myasthenia gravis?", "Pyridostigmine", ["Edrophonium", "Physostigmine", "Pralidoxime"], "Edrophonium was only diagnostic and is discontinued in the US.", CHOS(88));
+
+/* ---------- Metabolism: tap the site, then pick the change ---------- */
+MQ("Clonazepam", 2, "clonazepam", "nitro", "Clonazepam is cleared by the liver. On the lecture's metabolism slide, which group is changed first? Tap that site on the structure, then choose the change.", "The nitro group is reduced to an amine (7-aminoclonazepam) by CYP3A4/5", ["The lactam ring is opened by esterase hydrolysis to an inactive amino acid", "The para position of the chlorophenyl ring is hydroxylated by CYP2C9", "The C3 carbon is hydroxylated by CYP3A4"], "The 7-nitro group is reduced by CYP3A4/5 to the 7-amino metabolite, which is then acetylated by NAT2 to the acetamide. Clonazepam is long-acting (1 to 3 days).", ASDS(48));
+MQ("Clonazepam", 3, "aminoclon", "nitro", "7-Aminoclonazepam is the next metabolite on the slide. Tap the group that changes next, then choose the change.", "The amine is acetylated by N-acetyltransferase (NAT2) to an acetamide", ["The amine is oxidized back to the nitro group by CYP3A4, restoring the parent drug", "The amine is replaced by a hydroxyl group by monoamine oxidase", "The amine is methylated by COMT"], "NAT2 converts the 7-amino group to the 7-acetamido metabolite.", ASDS(48));
+MQ("Clobazam", 2, "clobazam", "nme", "Clobazam is converted to an active metabolite by CYP3A4. Tap the site CYP3A4 attacks, then choose the change.", "N-demethylation to N-desmethylclobazam (norclobazam)", ["Hydroxylation of the phenyl ring to an inactive phenol", "Hydrolysis of an imide C=O to a carboxylic acid", "Reduction of a C=O to an alcohol"], "CYP3A4 removes the N-methyl group. Norclobazam is active, has a half-life of 71 to 82 hours, and is then cleared mainly by CYP2C19.", ASDS(49));
+MQ("Clobazam", 3, "norclob", "para", "Norclobazam is cleared mainly by CYP2C19. Tap the site CYP2C19 attacks on the slide, then choose the change.", "Hydroxylation at the para position of the N-phenyl ring", ["N-methylation back to clobazam by a methyltransferase", "Hydroxylation of the chlorinated benzo ring by CYP3A4", "Reduction of a ring C=O to an alcohol by a ketoreductase"], "CYP2C19 para-hydroxylates the N-phenyl ring. Slow CYP2C19 activity (or an inhibitor) lets norclobazam build up, which is the problem with cannabidiol.", ASDS(49));
+MQ("Phenytoin", 2, "phenytoin", ["para1", "para2"], "Phenytoin is cleared by saturable metabolism. Tap the site of the main oxidation, then choose the change.", "A phenyl ring is hydroxylated at the para position (4-hydroxyphenyl) by CYP2C9, with minor CYP2C19", ["The hydantoin ring is opened by CYP1A2 to an open-chain urea, which is then excreted in the urine without any further metabolism", "The ring C=O is reduced to an alcohol by aldo-keto reductase", "The ring N–H is methylated by a methyltransferase"], "The para-hydroxyphenyl metabolite is inactive and is glucuronidated for excretion. Because CYP2C9 saturates near the therapeutic range, small dose increases cause large level changes.", ASDS(68));
+MQ("Fosphenytoin", 2, "fosphen", "ester", "Fosphenytoin is a prodrug. Tap the bond that is cleaved to release phenytoin, then choose the change.", "The phosphate ester is hydrolyzed by phosphatases, releasing phenytoin, phosphate and formaldehyde", ["A phenyl ring is hydroxylated by CYP2C9 first, and only then is the phosphate lost by a second enzyme", "The N-CH₂-O group is reduced by carbonyl reductase", "The ring N–H is glucuronidated by UGT"], "Phosphatases convert fosphenytoin to phenytoin with a half-life of 8 to 15 minutes. Formaldehyde and phosphate are released.", ASDS(70));
+MQ("Carbamazepine", 2, "cbz", "alkene", "Carbamazepine's major metabolic route makes an active metabolite that contributes to toxicity. Tap the site, then choose the change.", "The 10,11 double bond is epoxidized by CYP3A4 and CYP2C8 to the active 10,11-epoxide", ["The carboxamide is hydrolyzed to a free amine by amidases, followed by loss of CO2 and ammonia", "A benzo ring is hydroxylated at C2 as the major route", "The 10,11 double bond is reduced to a saturated bridge"], "Carbamazepine-10,11-epoxide is active. The 2-hydroxy route is minor and leads to an iminoquinone. UGT glucuronides are also formed.", ASDS(74));
+MQ("Carbamazepine", 3, "cbzep", "epox", "Carbamazepine-10,11-epoxide is cleared by a second enzyme. Tap the site that enzyme acts on, then choose the change.", "Epoxide hydrolase opens the epoxide to the inactive trans-10,11-diol", ["CYP3A4 oxidizes the epoxide to a 10-keto compound", "A reductase opens the epoxide to the active 10-hydroxy compound", "Esterases cleave the epoxide to a hydroxy-ketone"], "Valproate inhibits epoxide hydrolase, which raises the epoxide level and causes toxicity.", ASDS(74));
+MQ("Oxcarbazepine", 2, "oxc", "keto", "Oxcarbazepine is a prodrug for its active metabolite. Tap the site that is changed in the liver, then choose the change.", "The 10-keto group is reduced by arylketone reductase to the active 10-hydroxy metabolite (MHD)", ["The 10-keto group is oxidized to a carboxylic acid by CYP3A4, which opens the seven-membered ring", "The 10,11 position is epoxidized by CYP3A4", "The carboxamide is hydrolyzed to an inactive amine"], "MHD (licarbazepine) is then glucuronidated. Oxcarbazepine has no 10,11 double bond, so the epoxide route of carbamazepine does not apply.", ASDS(75));
+MQ("Ethosuximide", 3, "ethosux", "ethylA", "Hydroxylation of ethosuximide has several routes. Tap the site of the major one (about 40 to 60%), then choose the change.", "The ethyl CH₂ next to the ring is hydroxylated (omega-1), mainly by CYP3A4, then glucuronidated", ["The terminal ethyl CH₃ is hydroxylated (omega) by CYP3A4 as the major route, with ring hydroxylation minor", "The ring CH₂ is hydroxylated as the major route", "The imide ring is hydrolyzed by amidases as the major route"], "Terminal hydroxylation is only about 2 to 3%, ring (3-position) hydroxylation about 7 to 8%, and the ring methyl is trace.", ASDS(89));
+MQ("Lamotrigine", 2, "lamotrigine", "n2", "Most of lamotrigine is cleared by one conjugation (75 to 90%). Tap the site that is conjugated, then choose the change.", "Glucuronidation at triazine N2 by UGT1A4", ["Acetylation of the 5-amino group by NAT2", "Hydroxylation of the dichlorophenyl ring by CYP2C9", "N-oxide formation on the triazine by CYP3A4"], "The N2-glucuronide is the main metabolite. Valproate inhibits glucuronidation (half-life about 60 hours), and inducers shorten it (about 13 hours).", ASDS(78));
+MQ("Valproate", 2, "valproate", "acid", "About 30 to 50% of valproate is cleared by conjugation. Tap the site that is conjugated, then choose the change.", "The carboxylic acid is glucuronidated by UGT to an acyl glucuronide", ["The acid is reduced to an alcohol by aldehyde reductase", "The acid is converted to a methyl ester by a methyltransferase", "The acid is hydroxylated directly by CYP2C9 as the main route"], "Glucuronidation (30 to 50%) is excreted in urine. Valproate also inhibits UGTs, which is why it raises lamotrigine.", ASDS(100));
+MQ("Valproate", 3, "valproate", ["c3", "c3b"], "Beta-oxidation (20 to 40% of valproate) happens in the mitochondria. Tap the carbon where it makes a hydroxyl group, then choose the change.", "C3 (beta to the acid) is hydroxylated to 3-hydroxyvalproic acid", ["The carboxylic acid carbon is hydroxylated", "The terminal CH₃ (C5) is oxidized to a carboxylic acid", "C2 loses a propyl group"], "3-Hydroxyvalproic acid is a beta-oxidation product, shown on the slide beside 5-hydroxyvalproic acid and valproate glucuronide.", ASDS(100));
+MQ("Acetylcholine", 1, "acetylcholine", "ester", "ACh is destroyed within about 1 ms at the neuromuscular junction. Tap the site that is cleaved, then choose the change.", "The ester is hydrolyzed by acetylcholinesterase to choline and acetate", ["The N-methyl groups are removed by CYP2D6", "The quaternary N is reduced to a tertiary amine", "The ethylene chain is oxidized by MAO"], "Choline (not ACh) is taken back up into the nerve terminal.", CHOS(18));
+MQ("Succinylcholine", 2, "succinylcholine", ["ester1", "ester2"], "Succinylcholine is two ACh molecules joined end to end. Tap a site where plasma cholinesterase cuts it, then choose the change.", "An ester is hydrolyzed by plasma cholinesterase (BChE) to succinylmonocholine, then slowly to succinate and choline", ["Both quaternary N-methyl groups are removed by hepatic CYP3A4, giving an inactive tertiary diamine that the kidneys excrete within an hour", "The central CH₂CH₂ is hydroxylated by CYP2D6", "It breaks down by Hofmann elimination at physiological pH"], "Succinylmonocholine has little blocking activity. Hofmann elimination is how cisatracurium is cleared.", CHOS(65));
+MQ("Tolterodine", 3, "tolterodine", "methyl", "Tolterodine is converted to an active metabolite by CYP2D6. Tap the site CYP2D6 oxidizes, then choose the change.", "The ring methyl is hydroxylated to a hydroxymethyl group, giving the active 5-HMT", ["An N-isopropyl group is removed by CYP3A4", "The phenol OH is glucuronidated by UGT", "The unsubstituted phenyl ring is hydroxylated at the para position"], "5-HMT is the same active metabolite that fesoterodine forms. It is further oxidized to an inactive carboxylic acid.", CHOS(54));
+MQ("Tolterodine", 3, "tolterodine", "iprop", "In CYP2D6 poor metabolizers tolterodine is cleared by CYP3A4. Tap the site CYP3A4 attacks, then choose the change.", "An N-isopropyl group is removed (N-dealkylation)", ["The ring methyl is hydroxylated to the active 5-HMT", "The phenol is oxidized to a quinone", "The tertiary amine is hydrolyzed"], "N-dealkylation is the CYP3A4 route. The CYP2D6 route is hydroxylation of the ring methyl.", CHOS(54));
+MQ("Fesoterodine", 3, "fesoterodine", "ester", "Fesoterodine is an inactive prodrug. Tap the site where it is activated, then choose the change.", "The isobutyrate ester is hydrolyzed by nonspecific esterases, releasing the active 5-HMT", ["An N-isopropyl group is removed by CYP3A4, and that step is required to activate the prodrug", "The hydroxymethyl is oxidized to a carboxylic acid by CYP2D6", "The ester is glucuronidated by UGT to the active form"], "No CYP step is needed for activation, which is the advantage over tolterodine in poor CYP2D6 metabolizers.", CHOS(54));
+MQ("Parathion", 3, "parathion", "ps", "Parathion is a thiophosphate that must be activated to inhibit AChE. Tap the group that CYP changes, then choose the change.", "CYP desulfuration replaces P=S with P=O, giving the active oxon (paraoxon)", ["The nitro group is reduced to an amine, which inhibits AChE", "An ethoxy group is hydrolyzed by carboxylesterase", "The P–O–aryl bond is cleaved by AChE"], "P=S compounds are prodrugs. The oxon phosphorylates the active-site serine of AChE.", CHOS(37));
 /* Therapeutics Exam 3: IBS, constipation, diarrhea, IBD, peptic ulcer disease, hemorrhoids and GI tests (from the lecture slides and class questions) */
 /* Three categories: TH3F = IBS, constipation and diarrhea; TH3C = contraceptives (th3c.js); TH3 = everything else */
 const T = (t, d, q, a, w, e, s) => Q(/^(Diarrhea|Constipation|IBS|Opioid-induced)/.test(t) ? "TH3F" : "TH3", d, q, a, w, e, t, s);
@@ -6112,7 +6409,7 @@ const World = (function () {
   const CATS = [
     ['BG', 'Brand / Generic'], ['CL', 'Drug classes'], ['MOA', 'Mechanisms'], ['AE', 'Adverse effects'],
     ['DDI', 'Interactions'], ['CN', 'Counseling'], ['AD', 'Antidotes'], ['SIG', 'Sig & law'],
-    ['TOP', 'Weekly drugs'], ['TP3', 'Weekly drugs \u00B7 P3'], ['CALC', 'Calculations'], ['PT3', 'PharmTox \u00B7 Exam 3 questions'], ['PT3G', 'PharmTox \u00B7 Exam 3 drug practice'], ['PT4', 'PharmTox \u00B7 Exam 4 drug practice'], ['TH3', 'Therapeutics \u00B7 Exam 3'], ['TH3F', 'Therapeutics \u00B7 IBS, constipation, diarrhea'], ['TH3C', 'Therapeutics \u00B7 Contraceptives'], ['GER', 'Therapeutics \u00B7 Geriatrics'], ['T553', 'Therapeutics III \u00B7 Syllabus topics'], ['HIM', 'Andy \u00B7 Heart failure'], ['MY', 'My studies']
+    ['TOP', 'Weekly drugs'], ['TP3', 'Weekly drugs \u00B7 P3'], ['CALC', 'Calculations'], ['PT3', 'PharmTox \u00B7 Exam 3 questions'], ['PT3G', 'PharmTox \u00B7 Exam 3 drug practice'], ['PT4', 'PharmTox \u00B7 Exam 4 drug practice'], ['TH3', 'Therapeutics \u00B7 Exam 3'], ['ASD', 'Med Chem \u00B7 Exam 3 antiseizure drugs'], ['CHO', 'Med Chem \u00B7 Exam 3 cholinergic drugs'], ['MET3', 'Med Chem \u00B7 Exam 3 metabolism (tap the site)'], ['TH3F', 'Therapeutics \u00B7 IBS, constipation, diarrhea'], ['TH3C', 'Therapeutics \u00B7 Contraceptives'], ['GER', 'Therapeutics \u00B7 Geriatrics'], ['T553', 'Therapeutics III \u00B7 Syllabus topics'], ['HIM', 'Andy \u00B7 Heart failure'], ['MY', 'My studies']
   ];
   const CATNAME = {}; CATS.forEach(c => CATNAME[c[0]] = c[1]);
   /* The Topics menu is built from this table. A new category needs a CATS entry above and a slot in one course here
@@ -6121,17 +6418,21 @@ const World = (function () {
     { id: 'core', name: 'Core skills', tag: 'Every year', year: 'all', cats: ['BG', 'CL', 'MOA', 'AE', 'DDI', 'CN', 'AD', 'SIG', 'CALC', 'HIM'], note: 'The everyday counter questions: names, classes, mechanisms, side effects, interactions, counseling, antidotes, sig and law, calculations, and Andy’s heart failure questions.' },
     { id: 'p443', name: 'PharmTox', code: 'PHAR 443', tag: 'P2', year: 'P2', cats: ['TOP', 'PT3', 'PT3G', 'PT4'], sched: 'p2', note: 'Weekly drug sheets plus the exam question sets.' },
     { id: 'p451', name: 'Therapeutics', code: 'PHAR 451', tag: 'P2', year: 'P2', cats: ['TH3F', 'TH3C', 'TH3', 'GER'], note: 'Exam 3 GI and contraception topics, and geriatrics.' },
+    { id: 'p421', name: 'Medicinal Chemistry', code: 'PHAR 421', tag: 'P2', year: 'P2', cats: ['ASD', 'CHO', 'MET3'], note: 'Exam 3: antiseizure and cholinergic drugs, plus tap-the-site metabolism questions.' },
     { id: 'p3top', name: 'Top 300 weekly drugs', short: 'Top 300', tag: 'P3', year: 'P3', cats: ['TP3'], sched: 'p3', note: 'Drug list sheets by system, one set per week.' },
     { id: 'p553', name: 'Therapeutics III', code: 'PHAR 553', tag: 'P3', year: 'P3', cats: ['T553'], note: 'Syllabus topics: asthma, COPD, renal, diabetes, gout, migraine, RA and SLE, thyroid, liver, hepatitis, blood pressure, lipids, pain, nutrition, fluids and electrolytes.' },
     { id: 'my', name: 'My studies', tag: 'Yours', year: 'all', cats: ['MY'], note: 'Decks you wrote or imported from Quizlet. Add and manage them on the My studies tab.' }
   ];
-  const CHIP = { TOP: 'Weekly drugs', PT3: 'Exam 3: your exam questions', PT3G: 'Exam 3: drug-list practice', PT4: 'Exam 4: mania and psychosis drugs', TH3: 'Exam 3: IBD, ulcers, hemorrhoids and the rest', TH3F: 'Exam 3: IBS, constipation, diarrhea', TH3C: 'Exam 3: contraceptives', GER: 'Geriatrics: aging, polypharmacy, deprescribing', HIM: 'Heart failure: Andy’s questions', T553: 'Therapeutics III topics', TP3: 'Top 300 weekly drugs', MY: 'My studies' };
+  const CHIP = { ASD: 'Exam 3: antiseizure drugs', CHO: 'Exam 3: cholinergic drugs', MET3: 'Exam 3: metabolism (tap the site)', TOP: 'Weekly drugs', PT3: 'Exam 3: your exam questions', PT3G: 'Exam 3: drug-list practice', PT4: 'Exam 4: mania and psychosis drugs', TH3: 'Exam 3: IBD, ulcers, hemorrhoids and the rest', TH3F: 'Exam 3: IBS, constipation, diarrhea', TH3C: 'Exam 3: contraceptives', GER: 'Geriatrics: aging, polypharmacy, deprescribing', HIM: 'Heart failure: Andy’s questions', T553: 'Therapeutics III topics', TP3: 'Top 300 weekly drugs', MY: 'My studies' };
   const courseCats = (c) => c.cats.filter(k => k !== 'MY' || S.decks.length);
   const YEARS = ['P1', 'P2', 'P3'];
   const curYear = () => YEARS.indexOf(S.set.year) >= 0 ? S.set.year : 'P2';
   const inYear = (c, y) => c.year === 'all' || c.year === y;
   const yearCats = (y) => { const o = []; COURSES.forEach(c => { if (inYear(c, y)) o.push.apply(o, courseCats(c)); }); return o; };
   const FLAVOR = {
+    ASD: ['My neurologist changed my seizure medicine, can you explain it?', 'I want to understand how my seizure drug is handled by the body.', 'Quick question about my antiseizure prescription.'],
+    CHO: ['My doctor said this one acts on acetylcholine. What does that mean?', 'Can you explain how this nerve and muscle drug works?', 'I keep hearing about cholinergic drugs. Help?'],
+    MET3: ['Can you show me where my medicine is broken down?', 'I was told my liver changes this drug. Where on the molecule?', 'Show me what the liver does to it.'],
     BG: ['Doc wrote the brand name, can you match it?', 'My insurance wants the generic.', 'The label on my bottle looks different.'],
     CL: ['What type of medicine is this one?', 'I want to understand what I am taking.', 'The last pharmacist called it a class, which one?'],
     MOA: ['How does this actually work in the body?', 'My doctor said it blocks something, what?', 'Quick one about how it works.'],
@@ -6686,11 +6987,12 @@ const World = (function () {
     World.karenLoss(u.id);
     return { lost: u, from, to: from - 1 };
   }
-  const confNeeded = () => S.set.conf !== false && srOn() && cur && cur.q && !askedToday(cur.q.k) && cur && cur.q && !cur.q.gen && !cur.q.draw && !cur.karen && !cur.sweaty && !cur.elder && !cur.lab && !cur.caller && !cur.evt && !cur.visit;
+  const confNeeded = () => S.set.conf !== false && srOn() && cur && cur.q && !askedToday(cur.q.k) && cur && cur.q && !cur.q.gen && !cur.q.draw && !cur.q.meta && !cur.karen && !cur.sweaty && !cur.elder && !cur.lab && !cur.caller && !cur.evt && !cur.visit;
   function answer(idx, conf) {
     if (!cur || cur.empty || cur.done || view !== 'q') return;
     if (cur.elder && cur.elderStage < 2) { if (idx >= 0 && idx < 2 && cur.elderStage === 0) elderPick(); return; }
     const q = cur.q; let o = cur.opts[idx], msOk = null;
+    if (q.meta && idx >= 0 && !cur.site && !cur.done) { toast('Tap the site on the structure first.'); return; }
     if (conf === undefined && confNeeded()) {
       const okPick = idx === -2 ? Object.keys(cur.sel).length > 0 : !!(o && !o.gone && !isBlocked(idx));
       if (okPick) { cur.pend = idx; cur.tPick = cur.tPick || Date.now(); renderPanel(); const f = document.querySelector('.confbtn[data-conf="sure"]'); if (f) f.focus({ preventScroll: true }); }
@@ -6710,7 +7012,7 @@ const World = (function () {
       if (q.ms) cur.sel = {}; else o.gone = true;
       SFX.play('bad'); toast('Second chance used. Try again.'); save(); renderPanel(); return;
     }
-    const ok = msOk !== null ? msOk : idx >= 0 && o.ok, elapsed = ((cur.tPick || Date.now()) - cur.t0) / 1000, karen = cur.karen, sweaty = cur.sweaty;
+    const siteOk = !q.meta || (idx >= 0 && [].concat(q.meta.site).indexOf(cur.site) >= 0), ok = (msOk !== null ? msOk : idx >= 0 && o.ok) && siteOk, elapsed = ((cur.tPick || Date.now()) - cur.t0) / 1000, karen = cur.karen, sweaty = cur.sweaty;
     cur.done = true; cur.picked = idx; cur.ok = ok; S.served++;
     const unseen = !q.gen && !(S.mastery[q.k] && S.mastery[q.k].seen);
     let pay = 0; const chips = []; let head = '', extra = '';
@@ -6796,6 +7098,7 @@ const World = (function () {
     save();
     checkAwards();
     if (cur.lab) { S.labN = (S.labN || 0) + 1; save(); } else if (cur.visit) { if (cur.hero) World.himReact(ok); else World.visitorReact(ok); } else World.react(ok, pay);
+    if (q.meta) { const ms = MOLS[q.meta.mol]().sites, want = [].concat(q.meta.site)[0]; if (!siteOk) extra += '<p class="why"><b>Site:</b> ' + (cur.site && ms[cur.site] ? 'You tapped the ' + esc(ms[cur.site].t) + '. ' : '') + 'The change happens at the ' + esc(ms[want].t) + ' (shown in green).</p>'; }
     if (q.draw && cur.dscore) extra += '<p class="why"><b>Your drawing:</b> ' + esc(cur.dscore.reason) + '</p>';
     const correctText = q.ms ? cur.opts.filter(o2 => o2.ok).map(o2 => o2.t).join(' · ') : cur.opts.find(o2 => o2.ok).t;
     cur.resHTML = `<div class="result ${ok ? 'good' : 'fail'}" id="result"><h3>${esc(head)}</h3>
@@ -6981,17 +7284,24 @@ const World = (function () {
       ${isK ? `<div class="ktimer" role="timer" aria-label="Time before Karen leaves"><div class="timer"><i id="timerbar"></i></div><b id="tcount">${KAREN_SEC}</b><small>sec</small></div>` : ''}
       <div class="rx-body">
         <div class="patient">${avatar(cur.seed, cur.done ? (cur.ok ? 'ok' : 'bad') : 'idle', cur.karen, cur.sweaty, cur.elder, cur.name === 'Andy')}<div class="bubble"><em>${esc(cur.flavor)}</em><p>${esc(q.q)}</p></div></div>
-        ${q.draw ? `<div class="drawbox">${drawHTML()}</div>${jimHTML()}` : `<div class="opts" role="group" aria-label="Answer choices">${opts}${jimHTML()}</div>`}${q.ms && !cur.done && cur.pend === undefined ? `<div class="msbar"><span>Select all that apply (${Object.keys(cur.sel).length} picked)</span><button type="button" class="btn go" id="msgo" ${Object.keys(cur.sel).length ? '' : 'disabled'}>Submit answer</button></div>` : ''}${labToolsHTML()}
+        ${molHTML()}${q.draw ? `<div class="drawbox">${drawHTML()}</div>${jimHTML()}` : `<div class="opts" role="group" aria-label="Answer choices">${opts}${jimHTML()}</div>`}${q.ms && !cur.done && cur.pend === undefined ? `<div class="msbar"><span>Select all that apply (${Object.keys(cur.sel).length} picked)</span><button type="button" class="btn go" id="msgo" ${Object.keys(cur.sel).length ? '' : 'disabled'}>Submit answer</button></div>` : ''}${labToolsHTML()}
         ${cur.pend !== undefined && !cur.done ? confBar() : ''}
         ${cur.binder ? `<div class="binderbox" role="note"><b>\uD83D\uDCD8 Reference binder</b><span>${binderNote(q)}</span></div>` : ''}
         <div class="tools pwtools"><button type="button" class="btn" id="hintbtn" ${S.pw.hint < 1 || cur.hint || cur.done || q.draw ? 'disabled' : ''}>\uD83D\uDC8A Hint pill (${S.pw.hint})</button>
-          <button type="button" class="btn" id="secbtn" aria-pressed="${!!cur.secArmed}" ${(S.pw.second < 1 && !cur.secArmed) || cur.secUsed || cur.done || q.draw ? 'disabled' : ''}>\uD83D\uDD01 Second chance (${S.pw.second})${cur.secArmed ? ' ready' : ''}</button>
+          <button type="button" class="btn" id="secbtn" aria-pressed="${!!cur.secArmed}" ${(S.pw.second < 1 && !cur.secArmed) || cur.secUsed || cur.done || q.draw || q.meta ? 'disabled' : ''}>\uD83D\uDD01 Second chance (${S.pw.second})${cur.secArmed ? ' ready' : ''}</button>
           <button type="button" class="btn" id="bindbtn" ${S.pw.binder < 1 || cur.binder || cur.done || q.draw ? 'disabled' : ''}>\uD83D\uDCD8 Binder (${S.pw.binder})</button>
           ${S.pw.hint + S.pw.second + S.pw.binder < 1 && !cur.done ? '<button type="button" class="mini" data-act="pwshop">Get power-ups</button>' : ''}
           <span class="keyhint">${isK ? 'Karen leaves in ' + KAREN_SEC + ' s. A wrong answer costs an upgrade.' : cur.lab ? 'Lab bench: no timer. Pays x1.5.' : timerOn() ? 'Speed bonus fades over 20 s' : focusOn() ? 'Focus mode: no timer' : 'Timer bonus is off'}</span></div>
       </div>${(cur.resHTML || '').replace('<!--FLAG-->', () => cur.q && cur.done ? flagLink(cur.q, cur.flagPick) : '')}</article>`;
   }
   /* ---- draw-the-hormone-line question (cycle.js) ---- */
+  function molHTML() {
+    const q = cur && cur.q; if (!q || !q.meta) return '';
+    const st = { picked: cur.site, correct: q.meta.site, done: cur.done };
+    const hit = cur.done && [].concat(q.meta.site).indexOf(cur.site) >= 0;
+    const note = cur.done ? (hit ? '<b>Right site.</b>' : 'The green circle is where it happens.') : cur.site ? 'Site picked. Now choose the change below.' : 'Step 1: tap the site on the structure. Step 2: choose the change.';
+    return '<div class="molbox">' + molSVG(q.meta.mol, st) + '<p class="molnote" aria-live="polite">' + note + '</p></div>';
+  }
   function drawHTML() {
     const q = cur.q, pts = cur.dpts || [], n = pts.length;
     const msg = cur.done ? (cur.dscore ? esc(cur.dscore.reason) : '') : 'Press and drag across the graph from day 1 to day 28. Draw the line for <b>' + esc(CYC[q.draw].name) + '</b>.';
@@ -7594,7 +7904,7 @@ const World = (function () {
     TOPQ.forEach(q => { if (isTop(q) && S.set.topics[q.c] !== false && q.from <= t && !q.ms) live.push(q); });
     let pool = live;
     const dated = live.filter(q => q.from); if (dated.length) { const latest = dated.map(q => q.from).sort().pop(); pool = live.filter(q => q.from === latest); if (pool.length < 2) pool = dated; }
-    if (pool.length < 2) pool = pool.concat(BANK);
+    if (pool.length < 2) pool = pool.concat(BANK.filter(q => !q.meta && !q.draw));
     const picks = []; shuffle(pool.slice()).forEach(q => { if (picks.length < 2 && picks.every(p => p.k !== q.k)) picks.push(q); });
     return picks.map(q => ({ q: q, opts: shuffle([q.a, ...q.w].map((x, i) => ({ t: x, ok: i === 0 }))) }));
   }
@@ -9168,7 +9478,7 @@ const World = (function () {
       <div class="btnrow"><button type="button" class="btn go" data-act="back">Back to the pharmacy</button></div></div>`;
   }
 
-  const GAME_VERSION = 126;
+  const GAME_VERSION = 127;
   const b64u = (u8) => { let s = ''; for (let i = 0; i < u8.length; i += 0x8000) s += String.fromCharCode.apply(null, u8.subarray(i, i + 0x8000)); return btoa(s).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); };
   const unb64u = (t) => { const s = atob(t.replace(/-/g, '+').replace(/_/g, '/')), u = new Uint8Array(s.length); for (let i = 0; i < s.length; i++) u[i] = s.charCodeAt(i); return u; };
   const chk = (t) => { let h = 2166136261; for (let i = 0; i < t.length; i++) { h ^= t.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36); };
@@ -9353,6 +9663,9 @@ const World = (function () {
     }
     dirty = true; save(); renderPanel();
   }
+  function siteTap(id) { if (!cur || !cur.q || !cur.q.meta || cur.done || view !== 'q') return; cur.site = id; renderPanel(); }
+  document.addEventListener('click', (e) => { const sg = e.target.closest && e.target.closest('.molsvg .site[data-site]'); if (sg) siteTap(sg.getAttribute('data-site')); });
+  document.addEventListener('keydown', (e) => { if ((e.key === 'Enter' || e.key === ' ') && e.target.closest && e.target.closest('.molsvg .site[data-site]')) { e.preventDefault(); siteTap(e.target.closest('.site').getAttribute('data-site')); } });
   document.addEventListener('click', (e) => {
     const t = e.target.closest('button'); if (!t) return;
     if (t.dataset.elder !== undefined) return elderPick();

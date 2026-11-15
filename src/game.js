@@ -6,10 +6,30 @@
   const CATS = [
     ['BG', 'Brand / Generic'], ['CL', 'Drug classes'], ['MOA', 'Mechanisms'], ['AE', 'Adverse effects'],
     ['DDI', 'Interactions'], ['CN', 'Counseling'], ['AD', 'Antidotes'], ['SIG', 'Sig & law'],
-    ['TOP', 'Weekly drugs'], ['TP3', 'Weekly drugs \u00B7 P3'], ['CALC', 'Calculations'], ['PT3', 'PharmTox \u00B7 Exam 3 questions'], ['PT3G', 'PharmTox \u00B7 Exam 3 drug practice'], ['PT4', 'PharmTox \u00B7 Exam 4 drug practice'], ['TH3', 'Therapeutics \u00B7 Exam 3'], ['T553', 'Therapeutics III \u00B7 Syllabus topics'], ['HIM', 'Himothy \u00B7 Heart failure'], ['MY', 'My studies']
+    ['TOP', 'Weekly drugs'], ['TP3', 'Weekly drugs \u00B7 P3'], ['CALC', 'Calculations'], ['PT3', 'PharmTox \u00B7 Exam 3 questions'], ['PT3G', 'PharmTox \u00B7 Exam 3 drug practice'], ['PT4', 'PharmTox \u00B7 Exam 4 drug practice'], ['TH3', 'Therapeutics \u00B7 Exam 3'], ['ASD', 'Med Chem \u00B7 Exam 3 antiseizure drugs'], ['CHO', 'Med Chem \u00B7 Exam 3 cholinergic drugs'], ['MET3', 'Med Chem \u00B7 Exam 3 metabolism (tap the site)'], ['TH3F', 'Therapeutics \u00B7 IBS, constipation, diarrhea'], ['TH3C', 'Therapeutics \u00B7 Contraceptives'], ['GER', 'Therapeutics \u00B7 Geriatrics'], ['T553', 'Therapeutics III \u00B7 Syllabus topics'], ['HIM', 'Andy \u00B7 Heart failure'], ['MY', 'My studies']
   ];
   const CATNAME = {}; CATS.forEach(c => CATNAME[c[0]] = c[1]);
+  /* The Topics menu is built from this table. A new category needs a CATS entry above and a slot in one course here
+     (or a new course). Order here is the order on screen. `sched` attaches a weekly drug schedule (WKCFG key). */
+  const COURSES = [
+    { id: 'core', name: 'Core skills', tag: 'Every year', year: 'all', cats: ['BG', 'CL', 'MOA', 'AE', 'DDI', 'CN', 'AD', 'SIG', 'CALC', 'HIM'], note: 'The everyday counter questions: names, classes, mechanisms, side effects, interactions, counseling, antidotes, sig and law, calculations, and Andy’s heart failure questions.' },
+    { id: 'p443', name: 'PharmTox', code: 'PHAR 443', tag: 'P2', year: 'P2', cats: ['TOP', 'PT3', 'PT3G', 'PT4'], sched: 'p2', note: 'Weekly drug sheets plus the exam question sets.' },
+    { id: 'p451', name: 'Therapeutics', code: 'PHAR 451', tag: 'P2', year: 'P2', cats: ['TH3F', 'TH3C', 'TH3', 'GER'], note: 'Exam 3 GI and contraception topics, and geriatrics.' },
+    { id: 'p421', name: 'Medicinal Chemistry', code: 'PHAR 421', tag: 'P2', year: 'P2', cats: ['ASD', 'CHO', 'MET3'], note: 'Exam 3: antiseizure and cholinergic drugs, plus tap-the-site metabolism questions.' },
+    { id: 'p3top', name: 'Top 300 weekly drugs', short: 'Top 300', tag: 'P3', year: 'P3', cats: ['TP3'], sched: 'p3', note: 'Drug list sheets by system, one set per week.' },
+    { id: 'p553', name: 'Therapeutics III', code: 'PHAR 553', tag: 'P3', year: 'P3', cats: ['T553'], note: 'Syllabus topics: asthma, COPD, renal, diabetes, gout, migraine, RA and SLE, thyroid, liver, hepatitis, blood pressure, lipids, pain, nutrition, fluids and electrolytes.' },
+    { id: 'my', name: 'My studies', tag: 'Yours', year: 'all', cats: ['MY'], note: 'Decks you wrote or imported from Quizlet. Add and manage them on the My studies tab.' }
+  ];
+  const CHIP = { ASD: 'Exam 3: antiseizure drugs', CHO: 'Exam 3: cholinergic drugs', MET3: 'Exam 3: metabolism (tap the site)', TOP: 'Weekly drugs', PT3: 'Exam 3: your exam questions', PT3G: 'Exam 3: drug-list practice', PT4: 'Exam 4: mania and psychosis drugs', TH3: 'Exam 3: IBD, ulcers, hemorrhoids and the rest', TH3F: 'Exam 3: IBS, constipation, diarrhea', TH3C: 'Exam 3: contraceptives', GER: 'Geriatrics: aging, polypharmacy, deprescribing', HIM: 'Heart failure: Andy’s questions', T553: 'Therapeutics III topics', TP3: 'Top 300 weekly drugs', MY: 'My studies' };
+  const courseCats = (c) => c.cats.filter(k => k !== 'MY' || S.decks.length);
+  const YEARS = ['P1', 'P2', 'P3'];
+  const curYear = () => YEARS.indexOf(S.set.year) >= 0 ? S.set.year : 'P2';
+  const inYear = (c, y) => c.year === 'all' || c.year === y;
+  const yearCats = (y) => { const o = []; COURSES.forEach(c => { if (inYear(c, y)) o.push.apply(o, courseCats(c)); }); return o; };
   const FLAVOR = {
+    ASD: ['My neurologist changed my seizure medicine, can you explain it?', 'I want to understand how my seizure drug is handled by the body.', 'Quick question about my antiseizure prescription.'],
+    CHO: ['My doctor said this one acts on acetylcholine. What does that mean?', 'Can you explain how this nerve and muscle drug works?', 'I keep hearing about cholinergic drugs. Help?'],
+    MET3: ['Can you show me where my medicine is broken down?', 'I was told my liver changes this drug. Where on the molecule?', 'Show me what the liver does to it.'],
     BG: ['Doc wrote the brand name, can you match it?', 'My insurance wants the generic.', 'The label on my bottle looks different.'],
     CL: ['What type of medicine is this one?', 'I want to understand what I am taking.', 'The last pharmacist called it a class, which one?'],
     MOA: ['How does this actually work in the body?', 'My doctor said it blocks something, what?', 'Quick one about how it works.'],
@@ -23,16 +43,20 @@
     TP3: ['P3 drug list: this one is on the sheet.', 'Quiz week! Do you know this one?', 'Straight off the Top 300 sheet.'],
     T553: ['My doctor changed my plan, can you explain?', 'Quick therapy question before I go.', 'Is this the right treatment for me?'],
     HIM: ['*high knees* Quick heart failure question!', 'Is my ejection fraction a problem?', 'Which pills do I take for my heart?'],
+    TH3C: ['I have a question about birth control.', 'My doctor mentioned contraception, can you explain?', 'Quick question about my pill.'],
+    GER: ['My mom takes a lot of pills now, can you check them?', 'My grandfather has been confused lately, is it his medicine?', 'Quick question about medicines for older adults.'],
+    TH3F: ['My stomach has been off for days.', 'Is this bowel problem normal?', 'Which one should I take for my gut?'],
+    TH3: ['Quick gut and stomach question.', 'My doctor mentioned this, can you explain?', 'Is this the right treatment for me?'],
     MY: ['A question from your own notes.', 'Straight from your study sheet.', 'This one is on your exam list.']
   };
   const KAREN_LINES = ['I WANT TO SPEAK TO YOUR MANAGER!', 'This is UNACCEPTABLE. Answer me right now!', 'I have been coming here for twenty years!', 'Do you even know what you are doing?!'];
   const NAMES = ['Marcus', 'Priya', 'Mrs. Alvarez', 'Devon', 'Mei', 'Mr. Okafor', 'Sofia', 'Grandpa Joe', 'Hannah', 'Luis', 'Dr. Patel', 'Aisha', 'Tom', 'Nadia', 'Ben', 'Ms. Lindqvist'];
   const RANKS = [[0, 'Pharmacy Intern'], [20, 'Pharmacy Technician'], [60, 'Staff Pharmacist'], [130, 'Clinical Pharmacist'], [250, 'Residency Preceptor'], [450, 'Chief of Pharmacy'], [700, 'Director of Pharmacy'], [1000, 'Pharmacy Legend']];
   const MODES = [
-    ['mixed', 'Smart mix', 'Built for faster mastery: new and missed questions come up most, a miss returns within 3 cards, a first-try hit counts double, and mastered ones fade out.'],
-    ['missed', 'Review misses', 'Only questions on your Review Shelf.'],
-    ['new', 'New only', 'Only questions you have never answered.'],
-    ['even', 'Even shuffle', 'Every question has the same chance.']
+    ['mixed', 'Smart mix', 'Recommended. After each answer you rate how sure you were, and the game schedules reviews with the SM-2 spaced repetition method. New and missed questions come up most, a miss returns within 3 cards, questions you were certain about but missed return first, and mastered ones fade out.'],
+    ['review', 'Individual review', 'Your daily review. Only questions whose review date has arrived, from every topic you have studied, with the same confidence rating. Skip it on days you are focusing on something else and it just waits.'],
+    ['missed', 'Review misses', 'Only questions on your Review Shelf. No confidence rating or review scheduling.'],
+    ['new', 'New only', 'Only questions you have never answered. No confidence rating or review scheduling.']
   ];
   const UPS = [
     { id: 'shelf', short: 'Shelves', name: 'Stocked Shelves', max: 20, cost: l => Math.round(40 * Math.pow(1.55, l)), desc: l => `Each sale pays +25% more. Now +${l * 25}%.` },
@@ -54,11 +78,12 @@
     return { cash: 0, earned: 0, rep: 50, streak: 0, best: 0, correct: 0, wrong: 0, served: 0, franchises: 0,
       pw: { hint: 0, second: 0, binder: 0 }, daily: null, recall: [], reg: {}, calcOK: 0, mastery: {}, missed: [], karenCd: 0, karenWin: 0, karenLoss: 0, sweatyCd: 0, jimWin: 0, jimLoss: 0, phoneOK: 0, phoneBad: 0, phoneMiss: 0, lastShelve: 0, retired: 0, shelveOK: 0, shelveBad: 0, priorN: 0, decks: [],
       me: { done: false, body: 'normal', gender: 'n', hair: 0, hairColor: 0, skin: 1, scrub: 0, shirt: 0, shoes: 3 }, awards: { frames: [], pets: [] },
-      set: { topics: topics, diffs: [1, 2, 3], mode: 'mixed', timer: true, focus: false },
+      set: { topics: topics, diffs: [1, 2, 3], mode: 'mixed', timer: true, focus: false, conf: true, p2fold: true, p3fold: true },
       vial: [], cosm: [], cosmOn: {}, pillN: 0, store: { own: [], walls: 'w0', floor: 'f0', uni: '', deco: [] },
       up: { shelf: 0, tech: 0, train: 0, counsel: 0, robot: 0 } };
   }
   let S = load();
+  if (/[?&]noconf=1/.test(location.search)) S.set.conf = false; // tests: skip the confidence prompt
   if (S.playSec === undefined) S.playSec = S.served > 0 ? 300 : 0; // people who already play skip the slow start
   if (S.tutDone === undefined && S.served > 0) S.tutDone = true;
   function load() {
@@ -77,7 +102,11 @@
         f.awards = { frames: ((o.awards || {}).frames || []).slice(), pets: ((o.awards || {}).pets || []).slice(), calW: (o.awards || {}).calW || 0, wkDone: (o.awards || {}).wkDone ? o.awards.wkDone.slice() : null };
         const d = defaults().set, os = o.set || {};
         f.set = Object.assign(d, os); f.set.topics = Object.assign(defaults().set.topics, os.topics || {});
+        if (os.topics && os.topics.TH3 === false) { if (os.topics.TH3F === undefined) f.set.topics.TH3F = false; if (os.topics.TH3C === undefined) f.set.topics.TH3C = false; }
         if (!Array.isArray(f.set.diffs) || !f.set.diffs.length) f.set.diffs = [1, 2, 3];
+        if (!f.set.year && (os.folder === 'P1' || os.folder === 'P3')) f.set.year = os.folder; delete f.set.folder;
+        if (os.p2fold === undefined) f.set.p2fold = true; if (os.p3fold === undefined) f.set.p3fold = true; // v120: schedules start collapsed inside the course cards
+        if (!MODES.some(m => m[0] === f.set.mode)) f.set.mode = 'mixed'; // Even shuffle / Linear was removed
         if (!Array.isArray(f.decks)) f.decks = [];
       }
     } catch (e) { /* storage unavailable */ }
@@ -312,7 +341,7 @@
   const shopOwn = id => !!id && ((S.store || {}).own || []).indexOf(id) >= 0;
   const uniOf = () => SHOP_UNI.find(u => u[0] === (S.store || {}).uni);
   const uniBuff = () => { const u = uniOf(); return u && S.up.tech >= 1 ? u[5] : {}; };
-  const techRate = () => 0.4 * (0.5 + S.rep / 100) * franchiseMult() * (1 + 0.25 * S.up.shelf) * (1 + 0.4 * S.up.train) * (1 + (uniBuff().tech || 0));
+  const techRate = () => 0.4 * (0.5 + S.rep / 100) * franchiseMult() * (1 + 0.25 * S.up.shelf) * (1 + 0.4 * S.up.train) * (1 + (uniBuff().tech || 0) + gearBuff().tech);
   const passive = () => S.up.tech * techRate();
   /* power-ups: consumables bought in the Shop (Power-ups). Counts live in S.pw. */
   const PW_MAX = 9;
@@ -361,12 +390,13 @@
 
   /* ---- question selection ---- */
   let cur = null, lastKey = null, view = 'q', dirty = false, armed = null, armedDeck = null, sweatyOwed = false;
-  const draft = { name: '', text: '', from: '' };
+  const draft = { name: '', text: '', from: '' }, qz = { name: '', url: '', text: '', dir: 'td' };
   let studyMsg = '';
 
   const todayStr = () => { const d = new Date(); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); };
   function eligible(q) {
     const st = S.set;
+    if (st.mode === 'review') return !(q.from && q.from > todayStr()) && srDue(S.mastery[q.k]);
     if (q.c === 'TP3') { if (!p3On(q.wk)) return false; } else if (q.c === 'TOP') { if (!p2On(q.wk)) return false; } else if (q.from && q.from > todayStr()) return false;
     if (isTop(q) && wkTypeOff(q)) return false;
     if (!st.topics[q.c] || st.diffs.indexOf(q.d) < 0) return false;
@@ -411,28 +441,28 @@
   function wkSchedHTML(k, title) {
     const st = S.set, c = WKCFG[k], t = todayStr(), cw = c.cur(), n = c.L.filter(w => wkOn(k, w.n)).length;
     const row = (w) => { const on = wkOn(k, w.n), started = w.from <= t, cnt = k === 'p3' ? w.ids.length : DRUGS.filter(d => d.w === w.n).length, lab = (w.t ? 'Wk ' + w.wk + ' · ' : '') + w.d;
-      return `<li class="${w.n === cw ? 'now' : started || on ? '' : 'lock'}${on ? '' : ' off'}"><button type="button" data-act="wkpick" data-v="${k}:${w.n}" aria-pressed="${on}" aria-label="${esc(lab)} ${esc(w.topic)}: ${on ? 'on' : 'off'}"><i class="p3box">${on ? '✓' : ''}</i><b>${esc(lab)}</b><span>${esc(w.topic)}</span><small>${on ? cnt + ' drugs' + (w.n === cw ? ' · this week' : started ? '' : ' · upcoming') : 'off'}</small></button></li>`; };
+      return `<li class="${w.n === cw ? 'now' : started || on ? '' : 'lock'}${on ? '' : ' off'}${shown(w) ? '' : ' upc'}"${shown(w) ? '' : ' hidden'} data-find="${esc(('week ' + w.wk + ' wk ' + w.wk + ' ' + (w.t || '') + ' ' + w.d + ' ' + w.topic + (w.n === cw ? ' this week now' : '')).toLowerCase())}"><button type="button" data-act="wkpick" data-v="${k}:${w.n}" aria-pressed="${on}" aria-label="${esc(lab)} ${esc(w.topic)}: ${on ? 'on' : 'off'}"><i class="p3box">${on ? '✓' : ''}</i><b>${esc(lab)}</b><span>${esc(w.topic)}</span><small>${on ? cnt + ' drugs' + (w.n === cw ? ' · this week' : started ? '' : ' · upcoming') : 'off'}</small></button></li>`; };
     const started = c.L.filter(w => w.from <= t), up = c.L.filter(w => w.from > t), foldUp = up.length > 3 && !st[k + 'up'];
     const shown = (w) => w.from <= t || !foldUp || wkOn(k, w.n);
     let body = '';
     const courses = [];
     c.L.forEach(w => { if (w.t && courses.indexOf(w.t) < 0) courses.push(w.t); });
     if (courses.length) courses.forEach(cr => {
-      const ws = c.L.filter(w => w.t === cr), vis = ws.filter(shown); if (!vis.length) return;
+      const ws = c.L.filter(w => w.t === cr), vis = ws.filter(shown); if (!vis.length) return; // upcoming rows are rendered hidden (class upc) so the find box can reach them
       const allOn = ws.every(w => wkOn(k, w.n));
-      body += `<div class="crshd"><b>${esc(cr)}</b><span><button type="button" class="link" data-act="wkcourse" data-v="${k}:${esc(cr)}|1">All</button> &middot; <button type="button" class="link" data-act="wkcourse" data-v="${k}:${esc(cr)}|0">None</button></span></div><ol class="p3sched">${vis.map(row).join('')}</ol>`;
+      body += `<div class="crshd"><b>${esc(cr)}</b><span><button type="button" class="link" data-act="wkcourse" data-v="${k}:${esc(cr)}|1">All</button> &middot; <button type="button" class="link" data-act="wkcourse" data-v="${k}:${esc(cr)}|0">None</button></span></div><ol class="p3sched">${ws.map(row).join('')}</ol>`;
     });
-    else body = `<ol class="p3sched">${c.L.filter(shown).map(row).join('')}</ol>`;
+    else body = `<ol class="p3sched">${c.L.map(row).join('')}</ol>`;
     const hidden = c.L.filter(w => !shown(w)).length;
     const more = up.length > 3 ? `<button type="button" class="link upmore" data-act="wkup" data-v="${k}">${st[k + 'up'] ? 'Hide' : 'Show'} upcoming weeks${hidden ? ' (' + hidden + ' more)' : ''}</button>` : '';
-    return `<div class="grp"><div class="grphd"><button type="button" class="fold" data-act="wkfold" data-v="${k}" aria-expanded="${!st[k + 'fold']}"><i>${st[k + 'fold'] ? '▸' : '▾'}</i> ${title}</button><span class="grpr"><button type="button" class="chip sm" data-act="wkpick" data-v="${k}:only" aria-pressed="${wkOnlyNow(k)}">This week only</button><button type="button" class="link" data-act="wkpick" data-v="${k}:all">All</button> &middot; <button type="button" class="link" data-act="wkpick" data-v="${k}:none">None</button></span></div>${st[k + 'fold'] ? `<p class="note">${n} of ${c.L.length} weeks on. Tap ${title} to show the schedule.</p>` : body + more + `<p class="note">${k === 'p3' ? weekNote3() : weekNote()}</p>`}<div class="chips" aria-label="Weekly question types">${WK_TYPES.map(x => `<button type="button" class="chip" data-act="wktype" data-v="${x[0]}" aria-pressed="${!(st.wkTypes && st.wkTypes[x[0]] === false)}">${x[1]}</button>`).join('')}</div></div>`;
+    return `<div class="grp"><div class="grphd"><button type="button" class="fold" data-act="wkfold" data-v="${k}" aria-expanded="${!st[k + 'fold']}"><i>${st[k + 'fold'] ? '▸' : '▾'}</i> ${title}</button><span class="grpr"><button type="button" class="chip sm" data-act="wkpick" data-v="${k}:only" aria-pressed="${wkOnlyNow(k)}">This week only</button><button type="button" class="link" data-act="wkpick" data-v="${k}:all">All</button> &middot; <button type="button" class="link" data-act="wkpick" data-v="${k}:none">None</button></span></div>${st[k + 'fold'] ? `<p class="note wkfoldnote">${n} of ${c.L.length} weeks on. Tap ${title} to show the schedule.</p>` : ''}<div class="wkbody"${st[k + 'fold'] ? ' hidden' : ''}>${body + more}<p class="note">${k === 'p3' ? weekNote3() : weekNote()}</p></div><div class="chips" aria-label="Weekly question types">${WK_TYPES.map(x => `<button type="button" class="chip" data-act="wktype" data-v="${x[0]}" aria-pressed="${!(st.wkTypes && st.wkTypes[x[0]] === false)}">${x[1]}</button>`).join('')}</div></div>`;
   }
   const wkTypeOff = (q) => !!(S.set.wkTypes && S.set.wkTypes[q.wt] === false);
   const focusOn = () => !!S.set.focus;
   const labOn = () => !!S.lab;
   const LEARN_SEC = 300, learning = () => (S.playSec || 0) < LEARN_SEC; // the first five minutes: slower line, no surprise events
   const timerOn = () => S.set.timer && !S.set.focus && !labOn();
-  const calcOn = () => S.set.topics.CALC && S.set.mode !== 'missed';
+  const calcOn = () => S.set.topics.CALC && S.set.mode !== 'missed' && S.set.mode !== 'review';
   const retry = [];
   function chooseQ(karen) {
     let qs = poolQs();
@@ -445,7 +475,7 @@
     }
     const items = qs.map(q => {
       let w = 1;
-      if (S.set.mode === 'mixed') { const m = S.mastery[q.k], box = m ? m.box : -1; w = box < 0 ? 4 : [10, 5, 0.8, 0.15][box]; }
+      if (S.set.mode === 'mixed') { const m = S.mastery[q.k], box = m ? m.box : -1; w = box < 0 ? 4 : [10, 5, 0.8, 0.15][box]; if (m && m.cw) w *= 1.6; }
       if (isTop(q)) w *= q.wk === wkNow(q) ? 3 : q.from > todayStr() ? 1.5 : 0.7;
       return [q, w];
     });
@@ -486,7 +516,7 @@
     const stage = cur.elderStage, hear = stage === 1;
     const opts = ELDER_GREET[cur.seed % ELDER_GREET.length].map((t, i) => `<button type="button" class="opt" style="grid-row:${i + 1};grid-column:1" data-elder="${i}" ${hear ? 'disabled' : ''}><kbd>${i + 1}</kbd><span>${esc(t)}</span></button>`).join('');
     return `<article class="rx elder"><div class="rx-head"><span class="rx-sym" aria-hidden="true">&#8478;</span><div class="rx-meta"><b>${esc(cur.name.toUpperCase())} \u00B7 prescription pick-up</b><span>Say hello</span></div></div>
-      <div class="rx-body"><div class="patient ${hear ? 'hear' : ''}">${avatar(cur.seed, 'idle', false, false, true)}${hear ? '<span class="cmarks" aria-hidden="true"><i>?</i><i>?</i><i>?!</i></span>' : ''}<div class="bubble"><em>${hear ? '*cups a hand to her ear*' : esc(cur.name)}</em><p>${hear ? 'WHAT?? I can\u2019t hear you!' : esc(cur.ask)}</p></div></div>
+      <div class="rx-body"><div class="patient ${hear ? 'hear' : ''}">${avatar(cur.seed, 'idle', false, false, true)}${hear ? '<span class="cmarks" aria-hidden="true"><i>?</i><i>?</i><i>?!</i></span>' : ''}<div class="bubble"><em>${hear ? '*cups a hand to her ear*' : esc(cur.name)}</em><p>${hear ? 'WHAT?? I can’t hear you!' : esc(cur.ask)}</p></div></div>
       <div class="opts" role="group" aria-label="Greeting choices">${opts}</div>
       <div class="tools"><span class="keyhint">${hear ? 'She leans in closer...' : 'Pick a greeting.'}</span></div></div></article>`;
   }
@@ -532,11 +562,11 @@
     const himDev = forceHim; forceHim = false;
     if (!q) { cur = { empty: true, seed: info.seed, karen: false }; renderPanel(); return; }
     const himWalk = q.c === 'HIM' && !evt && !karen && !sweaty && !elder && !calm && World.ok && !!World.himArrive && (!S.himDone || himDev);
-    const opts = q.ms ? shuffle(q.as.map(t => ({ t, ok: true })).concat(q.w.map(t => ({ t, ok: false })))) : shuffle([q.a, ...q.w].map((t, i) => ({ t, ok: i === 0 })));
+    const opts = q.draw ? [{ t: q.a, ok: true }, { t: 'Your line did not match the real curve closely enough', ok: false }] : q.ms ? shuffle(q.as.map(t => ({ t, ok: true })).concat(q.w.map(t => ({ t, ok: false })))) : shuffle([q.a, ...q.w].map((t, i) => ({ t, ok: i === 0 })));
     cur = { q, sel: {}, wasMissed: S.missed.indexOf(q.k) >= 0, opts, t0: Date.now(), done: false, hint: false, karen, sweaty, elder, elderStage: elder ? 0 : 2, ask: pick(ELDER_ASK), caller: !!info.caller && !calm, name: karen ? 'Karen' : sweaty ? 'Jittery Jim' : elder ? pick(info.seed % 2 === 0 ? ELDER_F : ELDER_M) : evt && EV_NAME[evt] ? pick(EV_NAME[evt]) : pick(NAMES), flavor: info.caller ? pick(CALLER_LINES) : evt ? pick(EV_FLAVOR[evt]) : karen ? pick(KAREN_LINES) : sweaty ? pick(JIM_LINES) : pick(FLAVOR[q.c] || FLAVOR.MY), seed: info.seed, num: S.served + 1, picked: -1, ok: false, resHTML: '', interrupt: null, evt: evt, insp: evt === 'inspector' ? { n: 1, of: 3, ok: 0, used: [q.k] } : null, review: reviewDue(S.mastery[q.k]), body: info.body || 'normal' };
     if (info.recall) delete spOut['r' + info.recall]; if (info.regular) delete spOut['g' + info.regular];
     if (sp) spApply(sp);
-    if (q.c === 'HIM') { cur.name = 'Himothy'; if (himWalk) World.himArrive(); }
+    if (q.c === 'HIM') { cur.name = 'Andy'; if (himWalk) World.himArrive(); }
     if (evt === 'inspector') SFX.play('siren'); else if (evt === 'driver') SFX.play('thud'); else if (S.served > 0) SFX.play('bell');
     if (sweatyOwed && calm) sweatyOwed = false;
     if (sweatyOwed) { sweatyOwed = false; cur.interrupt = { t0: Date.now(), dur: 7000, a: Math.floor(Math.random() * 3), dismissed: false, line: pick(JIM_BREAK) }; World.interrupt(true); }
@@ -554,10 +584,17 @@
     World.karenLoss(u.id);
     return { lost: u, from, to: from - 1 };
   }
-  function answer(idx) {
+  const confNeeded = () => S.set.conf !== false && srOn() && cur && cur.q && !askedToday(cur.q.k) && cur && cur.q && !cur.q.gen && !cur.q.draw && !cur.q.meta && !cur.karen && !cur.sweaty && !cur.elder && !cur.lab && !cur.caller && !cur.evt && !cur.visit;
+  function answer(idx, conf) {
     if (!cur || cur.empty || cur.done || view !== 'q') return;
     if (cur.elder && cur.elderStage < 2) { if (idx >= 0 && idx < 2 && cur.elderStage === 0) elderPick(); return; }
     const q = cur.q; let o = cur.opts[idx], msOk = null;
+    if (q.meta && idx >= 0 && !cur.site && !cur.done) { toast('Tap the site on the structure first.'); return; }
+    if (conf === undefined && confNeeded()) {
+      const okPick = idx === -2 ? Object.keys(cur.sel).length > 0 : !!(o && !o.gone && !isBlocked(idx));
+      if (okPick) { cur.pend = idx; cur.tPick = cur.tPick || Date.now(); renderPanel(); const f = document.querySelector('.confbtn[data-conf="sure"]'); if (f) f.focus({ preventScroll: true }); }
+      return;
+    }
     if (q.ms && idx === -2) {
       const chosen = cur.opts.map((x, i) => i).filter(i => cur.sel[i]);
       if (!chosen.length) return;
@@ -568,24 +605,24 @@
     else if (q.ms && idx >= 0) return;
     endInterrupt();
     if (cur.secArmed && !cur.secUsed && idx >= 0 && S.pw.second > 0 && !(msOk !== null ? msOk : o.ok)) {
-      cur.secUsed = true; cur.secArmed = false; S.pw.second--;
+      cur.secUsed = true; cur.secArmed = false; cur.pend = undefined; cur.tPick = 0; S.pw.second--;
       if (q.ms) cur.sel = {}; else o.gone = true;
       SFX.play('bad'); toast('Second chance used. Try again.'); save(); renderPanel(); return;
     }
-    const ok = msOk !== null ? msOk : idx >= 0 && o.ok, elapsed = (Date.now() - cur.t0) / 1000, karen = cur.karen, sweaty = cur.sweaty;
+    const siteOk = !q.meta || (idx >= 0 && [].concat(q.meta.site).indexOf(cur.site) >= 0), ok = (msOk !== null ? msOk : idx >= 0 && o.ok) && siteOk, elapsed = ((cur.tPick || Date.now()) - cur.t0) / 1000, karen = cur.karen, sweaty = cur.sweaty;
     cur.done = true; cur.picked = idx; cur.ok = ok; S.served++;
     const unseen = !q.gen && !(S.mastery[q.k] && S.mastery[q.k].seen);
     let pay = 0; const chips = []; let head = '', extra = '';
     if (ok) {
-      S.streak++; S.best = Math.max(S.best, S.streak); S.correct++; holCorrect();
+      S.streak++; S.best = Math.max(S.best, S.streak); S.correct++; holCorrect(); boardPushSoon();
       const base = 10 * [1, 1.6, 2.4][q.d - 1];
       const shelf = 1 + 0.25 * S.up.shelf;
-      const speed = timerOn() ? 1 + 0.5 * Math.max(0, 1 - elapsed / 20) : 1;
-      const bz = buffOn() ? 3 : 1, streakN = Math.min(S.streak * bz, (5 + 3 * S.up.counsel) * bz), streak = 1 + 0.05 * streakN;
+      const speed = timerOn() ? 1 + 0.5 * Math.max(0, 1 - elapsed / (20 + gearBuff().time)) : 1;
+      const bz = buffOn() ? 3 : 1, streakN = Math.min(S.streak * bz, (5 + 3 * S.up.counsel + gearBuff().streak) * bz), streak = 1 + 0.05 * streakN;
       const lucky = Math.random() < 0.06 * S.up.robot, fr = franchiseMult();
       pay = Math.max(1, Math.round(base * shelf * speed * streak * fr * buffPay() * (lucky ? 2 : 1) * (cur.hint ? 0.5 : 1) * (cur.secUsed ? 0.5 : 1) * (cur.binder ? 0.85 : 1) * (cur.recall ? 1.5 : 1) * (cur.regular ? 1.25 : 1) * (karen ? 2 : 1) * (sweaty ? 1.5 : 1) * (rush.on ? 1.5 : 1) * (cur.lab ? 1.5 : 1)));
       chips.push(`<span class="big">+${money(pay)}</span>`, `<span>base $${base.toFixed(0)}</span>`);
-      if (blessOn()) chips.push('<span>Himothy\u2019s blessing x' + BLESS_MULT.toFixed(2) + '</span>');
+      if (blessOn()) chips.push('<span>Andy’s blessing x' + BLESS_MULT.toFixed(2) + '</span>');
       if (S.up.shelf) chips.push(`<span>shelves x${shelf.toFixed(2)}</span>`);
       if (timerOn()) chips.push(`<span>speed x${speed.toFixed(2)}</span>`);
       if (streakN > 0) chips.push(`<span>streak x${streak.toFixed(2)} (${S.streak} in a row)</span>`);
@@ -600,7 +637,7 @@
       if (cur.regular) chips.push('<span>regular x1.25</span>');
       if (karen) chips.push('<span>Karen calmed x2</span>');
       if (sweaty) chips.push('<span>Jim relieved x1.5</span>');
-      S.cash += pay; S.earned += pay; S.rep = Math.min(100, S.rep + (karen ? 5 : sweaty ? 3 : 2));
+      S.cash += pay; S.earned += pay; S.rep = Math.min(100, S.rep + (karen ? 5 : sweaty ? 3 : 2) + gearBuff().rep);
       if (q.gen) S.calcOK++;
       if (cur.lab) { S.labOK = (S.labOK || 0) + 1; }
       if (karen) S.karenWin++;
@@ -625,13 +662,20 @@
     if (cur.evt) { if (cur.insp) { cur.insp.ok += ok ? 1 : 0; if (cur.insp.n >= cur.insp.of) extra += inspVerdict(); } else extra += evAfter(ok); }
     if (cur.elder) extra += ok ? elderGift() : '<p class="gift sad">She pats your hand anyway and shuffles off. No upgrade this time.</p>';
     if (!q.gen) {
-      const m = S.mastery[q.k] || { box: 0, seen: 0, ok: 0 };
+      const m = srSeed(S.mastery[q.k] || { box: 0, seen: 0, ok: 0 });
       const mok = ok && !cur.secUsed;
       const wasDue = reviewDue(m);
       m.seen++;
       const wasNew = m.seen === 1;
-      if (mok) { m.ok++; m.lapse = 0; m.box = Math.min(3, m.box + (wasNew ? 2 : 1)); } else slip(m);
-      if (mok) { if (wasDue) { m.iv = Math.min(IV.length - 1, (m.iv || 0) + 1); chips.push('<span>memory check passed, next in ' + IV[m.iv] + ' d</span>'); } if (!m.t || wasDue || m.box < 2) { m.t = Date.now(); if (m.iv === undefined) m.iv = 0; } } else { m.iv = 0; m.t = Date.now(); }
+      const cf = cur.secUsed ? 'sure' : conf;
+      let inc = wasNew ? 2 : 1;
+      if (cf === 'guess') { m.gr = (m.gr || 0) + 1; if (m.gr >= 2) m.gr = 0; else inc = wasNew ? 1 : 0; } else m.gr = 0;
+      if (mok) { m.ok++; m.lapse = 0; m.box = Math.min(3, m.box + inc); } else slip(m);
+      if (srOn()) srUpdate(m, mok, cf);
+      if (mok && wasDue) chips.push('<span>memory check passed</span>');
+      if (mok && m.box >= 2 && srOn()) chips.push('<span>next review in ' + fmtDays(m.d) + '</span>');
+      if (srOn() && cf === 'certain' && !mok) chips.push('<span>you were certain, so this returns first</span>');
+      else if (srOn() && cf === 'guess' && mok) chips.push('<span>lucky guess? it will be back soon</span>');
       if (S.set.mode === 'mixed') {
         const ri = retry.findIndex(r => r.k === q.k); if (ri >= 0) retry.splice(ri, 1);
         if (!mok) retry.push({ k: q.k, due: S.served + 3 });
@@ -651,11 +695,13 @@
     save();
     checkAwards();
     if (cur.lab) { S.labN = (S.labN || 0) + 1; save(); } else if (cur.visit) { if (cur.hero) World.himReact(ok); else World.visitorReact(ok); } else World.react(ok, pay);
+    if (q.meta) { const ms = MOLS[q.meta.mol]().sites, want = [].concat(q.meta.site)[0]; if (!siteOk) extra += '<p class="why"><b>Site:</b> ' + (cur.site && ms[cur.site] ? 'You tapped the ' + esc(ms[cur.site].t) + '. ' : '') + 'The change happens at the ' + esc(ms[want].t) + ' (shown in green).</p>'; }
+    if (q.draw && cur.dscore) extra += '<p class="why"><b>Your drawing:</b> ' + esc(cur.dscore.reason) + '</p>';
     const correctText = q.ms ? cur.opts.filter(o2 => o2.ok).map(o2 => o2.t).join(' · ') : cur.opts.find(o2 => o2.ok).t;
     cur.resHTML = `<div class="result ${ok ? 'good' : 'fail'}" id="result"><h3>${esc(head)}</h3>
       ${ok ? '' : q.ms ? msMiss() : `<p><b>Answer:</b> ${esc(correctText)}</p>`}${!ok && idx >= 0 && !q.ms && whyNot(o.t) ? '<p class="whynot"><b>Why not \u201C' + esc(o.t) + '\u201D?</b> ' + whyNot(o.t) + '</p>' : ''}${extra}
       <div class="pay">${chips.join('')}</div>${explHTML(q)}
-      <div><button class="btn go" id="nextbtn" type="button">${cur.lab ? 'Next order' : 'Next patient'}</button> ${flagLink(q, q.ms ? cur.opts.filter((x, i) => cur.sel[i]).map(x => x.t).join(' | ') : (o ? o.t : ''))}</div></div>`;
+      <div><button class="btn go" id="nextbtn" type="button">${cur.lab ? 'Next order' : 'Next patient'}</button> <!--FLAG--></div></div>`; cur.flagPick = q.ms ? cur.opts.filter((x, i) => cur.sel[i]).map(x => x.t).join(' | ') : (o ? o.t : '');
     renderPanel(); renderStats(); renderStore(); renderUpgrades(); renderMastery(); renderReview(); renderFranchise();
     if (ok) { const b = document.querySelector('.opt[data-i="' + idx + '"]'); if (b) pop(b, '+' + money(pay)); }
     const nb = $('#nextbtn'); if (nb) { nb.focus({ preventScroll: true }); nb.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); }
@@ -670,11 +716,76 @@
       '**Category**: ' + (q.c || '') + (q.t ? ' / ' + q.t : '') + (q.wk ? ' (week ' + q.wk + ')' : ''), '**Game version**: ' + GAME_VERSION, '', '**What is wrong or unclear?**', '', ''].join('\n');
     return 'https://github.com/' + FLAG_REPO + '/issues/new?labels=' + encodeURIComponent('question-feedback') + '&title=' + encodeURIComponent(title) + '&body=' + encodeURIComponent(body);
   }
+  const FLAG_REASONS = [['wrong', 'The marked answer is wrong'], ['two', 'More than one answer is correct'], ['unclear', 'The wording is unclear'], ['typo', 'Typo or formatting'], ['outdated', 'Outdated or not in our lecture'], ['other', 'Something else']];
   function flagLink(q, picked) {
-    const done = (S.flagged || []).indexOf(q.k) >= 0;
-    return '<a class="flaglink" data-flagk="' + esc(q.k || '') + '" href="' + esc(flagURL(q, picked)) + '" target="_blank" rel="noopener noreferrer">' + (done ? 'Flagged \u2713 (open again)' : 'Flag this question') + '</a>';
+    const done = (S.flagged || []).indexOf(q.k) >= 0; cur.flagPicked = picked || '';
+    if (!Net.on()) return '<a class="flaglink" data-flagk="' + esc(q.k || '') + '" href="' + esc(flagURL(q, picked)) + '" target="_blank" rel="noopener noreferrer">' + (done ? 'Flagged ✓ (open again)' : 'Flag this question') + '</a>';
+    if (cur.flagSent) return '<span class="flagdone">Flagged ✓ Thanks, it goes straight to the question list.</span>';
+    return `<button type="button" class="link flaglink" data-act="flag-open" aria-expanded="${!!cur.flagOpen}">${done ? 'Flagged before. Flag again' : 'Flag this question'}</button>` + (cur.flagOpen ? `<form class="flagform" data-act="flag-send"><b>What is wrong with it?</b>${FLAG_REASONS.map((r, i) => `<label><input type="radio" name="freason" value="${r[0]}"${i === 0 ? ' checked' : ''}> ${r[1]}</label>`).join('')}<textarea name="fnote" maxlength="600" rows="3" placeholder="What would you change? (optional)"></textarea><div class="btnrow"><button type="submit" class="btn go">Send flag</button><button type="button" class="btn" data-act="flag-open">Cancel</button></div><small class="note">No account needed. Your nickname goes with it if you set one on the Leaderboard.</small></form>` : '');
   }
-  document.addEventListener('click', (e) => { const a = e.target.closest && e.target.closest('.flaglink'); if (!a) return; const k = a.dataset.flagk; if (k) { S.flagged = S.flagged || []; if (S.flagged.indexOf(k) < 0) { S.flagged.push(k); save(); } a.textContent = 'Flagged \u2713 (open again)'; } });
+  document.addEventListener('click', (e) => { const a = e.target.closest && e.target.closest('a.flaglink'); if (!a) return; const k = a.dataset.flagk; if (k) { S.flagged = S.flagged || []; if (S.flagged.indexOf(k) < 0) { S.flagged.push(k); save(); } a.textContent = 'Flagged ✓ (open again)'; } });
+  document.addEventListener('submit', (e) => {
+    const f = e.target.closest && e.target.closest('form.flagform'); if (!f) return; e.preventDefault();
+    const q = cur && cur.q; if (!q) return; const reason = (f.querySelector('input[name=freason]:checked') || {}).value || 'other', note = (f.querySelector('textarea[name=fnote]').value || '').trim().slice(0, 600);
+    const row = { qk: q.k || '', cat: q.c || '', topic: (q.t || '') + (q.wk ? ' (week ' + q.wk + ')' : ''), q: String(q.q || '').slice(0, 800), a: String(q.ms ? (q.as || []).join(' | ') : q.a || '').slice(0, 400), picked: String(cur.flagPicked || '').slice(0, 400), reason, note, pid: playerId(), nick: S.nick || '', v: GAME_VERSION };
+    const btn = f.querySelector('button[type=submit]'); btn.disabled = true; btn.textContent = 'Sending…';
+    Net.rpc('submit_flag', { p: row }).then(ok => { if (!ok) throw new Error('too many flags, try later'); S.flagged = S.flagged || []; if (S.flagged.indexOf(q.k) < 0) S.flagged.push(q.k); cur.flagSent = true; cur.flagOpen = false; save(); toast('Flag sent. Thank you.'); renderPanel(); })
+      .catch(err => { btn.disabled = false; btn.textContent = 'Send flag'; toast('Could not send the flag (' + (err.message || 'offline') + '). Try again in a moment.'); });
+  });
+  const playerId = () => { if (!S.pid) { S.pid = Net.uuid(); save(); } return S.pid; };
+  const playerTok = () => { if (!S.tok) { S.tok = Net.uuid() + Net.uuid(); save(); } return S.tok; };
+  /* ---- leaderboard (opt in, nickname only) ---- */
+  let boardRows = null, boardErr = '', boardT = null, pushT = null, boardBusy = false;
+  function boardPush() {
+    if (!Net.on() || !S.boardOn || !S.nick) return Promise.resolve();
+    return Net.rpc('push_score', { p_pid: playerId(), p_tok: playerTok(), p_name: S.nick, p_earned: Math.round(S.earned || 0), p_v: GAME_VERSION }).catch(() => { /* quiet */ });
+  }
+  function boardPushSoon() { if (!Net.on() || !S.boardOn) return; clearTimeout(pushT); pushT = setTimeout(boardPush, 45000); }
+  function boardLoad() {
+    if (!Net.on() || boardBusy) return; boardBusy = true;
+    Net.rpc('get_board', {}).then(rows => { boardRows = rows || []; boardErr = ''; }).catch(err => { boardErr = err.message || 'offline'; }).finally(() => { boardBusy = false; if (view === 'board') renderPanel(); });
+  }
+  function boardHTML() {
+    const me = playerId();
+    const nameBox = `<div class="grp"><b>Your nickname</b><div class="namerow"><input id="nickbox" class="field" type="text" maxlength="24" autocomplete="off" placeholder="e.g. RxRanger" value="${esc(S.nick || '')}" aria-label="Nickname"><button type="button" class="btn go" data-act="board-join">${S.boardOn ? 'Update' : 'Join the board'}</button>${S.boardOn ? '<button type="button" class="btn" data-act="board-leave">Leave</button>' : ''}</div><p class="note">${S.boardOn ? 'You are on the board as ' + esc(S.nick) + '. Only your nickname and your total money made are shared.' : 'Opt in with a nickname. No account, no email. You can leave any time.'}</p></div>`;
+    if (!Net.on()) return `<div class="pane"><h3>Leaderboard</h3><p class="sub">Not connected yet.</p><p class="note">The online leaderboard switches on once the game has a database configured (see net.js). Until then your progress stays in this browser.</p><div class="btnrow"><button type="button" class="btn go" data-act="back">Back to counter</button></div></div>`;
+    const rows = boardRows, sorted = rows ? rows.slice().sort((a, b) => b.earned - a.earned) : null;
+    const tbl = !rows ? '<p class="note">Loading…</p>' : !rows.length ? '<p class="note">Nobody is on the board yet. Be the first.</p>' : `<div class="boardwrap"><table class="board"><thead><tr><th>#</th><th>Pharmacist</th><th class="num">Total money made</th></tr></thead><tbody>${sorted.map((r, i) => `<tr${r.pid === me ? ' class="me"' : ''}><td>${i + 1}</td><td>${esc(r.name)}</td><td class="num">${money(r.earned)}</td></tr>`).join('')}</tbody></table></div>`;
+    return `<div class="pane boardpane"><h3>Leaderboard</h3><p class="sub">Ranked by total money made, all time. Spending it or retiring never lowers your total. Refreshes every 30 seconds.</p>${nameBox}${boardErr ? '<p class="note">Could not reach the board: ' + esc(boardErr) + '</p>' : ''}${tbl}<div class="btnrow"><button type="button" class="btn go" data-act="back">Back to counter</button><button type="button" class="btn" data-act="board-refresh">Refresh</button></div></div>`;
+  }
+  /* ---- flags page: live list for the question author (?flags=1 or the dev menu) ---- */
+  let flagRows = null, flagErr = '', flagT = null, flagSeen = 0, flagShowDone = false, flagBusy = false;
+  const adminKey = () => { try { return localStorage.getItem('rx.adminKey') || ''; } catch (e) { return ''; } };
+  function flagsLoad(quiet) {
+    if (!Net.on() || flagBusy) return; flagBusy = true;
+    if (!adminKey()) { flagBusy = false; flagErr = 'Save your admin key below to load the flag list.'; if (view === 'flags') renderPanel(); return; }
+    Net.rpc('admin_flags', { k: adminKey() }).then(rows => {
+      rows = rows || []; const maxId = rows.reduce((m, r) => Math.max(m, r.id), 0);
+      if (flagRows && maxId > flagSeen && quiet) { const n = rows.filter(r => r.id > flagSeen).length; toast(n + ' new flag' + (n === 1 ? '' : 's') + ' just came in.'); SFX.play('ok'); }
+      flagRows = rows; flagErr = ''; if (!quiet || !flagSeen) flagSeen = maxId; flagNewMax = maxId;
+    }).catch(err => { flagErr = err.message || 'offline'; }).finally(() => { flagBusy = false; if (view === 'flags') renderPanel(); });
+  }
+  let flagNewMax = 0;
+  function flagsHTML() {
+    if (!Net.on()) return `<div class="pane"><h3>Question flags</h3><p class="note">Not connected: fill in RX_NET in net.js first.</p><div class="btnrow"><button type="button" class="btn go" data-act="back">Back</button></div></div>`;
+    const rows = (flagRows || []).filter(r => flagShowDone || !r.resolved), open = (flagRows || []).filter(r => !r.resolved).length;
+    const when = (t) => { const d = new Date(t), m = Math.round((Date.now() - d) / 60000); return m < 1 ? 'just now' : m < 60 ? m + ' min ago' : m < 1440 ? Math.round(m / 60) + ' h ago' : d.toLocaleDateString(); };
+    const reasonN = (r) => (FLAG_REASONS.find(x => x[0] === r) || ['', r])[1];
+    const list = !flagRows ? '<p class="note">Loading…</p>' : !rows.length ? '<p class="note">' + (flagShowDone ? 'No flags yet.' : 'No open flags. Nice.') + '</p>' : rows.map(r => {
+      const issue = flagURL({ q: r.q, a: r.a, c: r.cat, t: r.topic, k: r.qk }, r.picked);
+      return `<article class="flagcard${r.resolved ? ' done' : ''}${r.id > flagSeen ? ' new' : ''}"><header><b>${esc(reasonN(r.reason))}</b><span>${esc(r.cat || '')}${r.topic ? ' · ' + esc(r.topic) : ''} · v${r.v || '?'} · ${when(r.created_at)}${r.nick ? ' · ' + esc(r.nick) : ''}</span></header><p class="fq">${esc(r.q || '')}</p><p><b>Marked:</b> ${esc(r.a || '')}${r.picked ? ' <b>Picked:</b> ' + esc(r.picked) : ''}</p>${r.note ? '<p class="fnote">“' + esc(r.note) + '”</p>' : ''}<div class="btnrow"><button type="button" class="btn${r.resolved ? '' : ' go'}" data-act="flag-resolve" data-v="${r.id}" data-done="${r.resolved ? '0' : '1'}">${r.resolved ? 'Reopen' : 'Resolve'}</button><a class="btn" href="${esc(issue)}" target="_blank" rel="noopener noreferrer">Open as GitHub issue</a></div></article>`;
+    }).join('');
+    return `<div class="pane flagspane"><h3>Question flags <small>${open} open</small></h3><p class="sub">Live: checks for new flags every 8 seconds while this page is open.</p>
+      <div class="grp"><b>Admin key</b><div class="namerow"><input id="adminkey" class="field" type="password" autocomplete="off" placeholder="the key you put in the admin table" value="${esc(adminKey())}" aria-label="Admin key"><button type="button" class="btn" data-act="flag-key">Save key</button></div><p class="note">Needed only to resolve or reopen flags. Stored in this browser.</p></div>
+      <div class="btnrow"><button type="button" class="chip" data-act="flag-showdone" aria-pressed="${flagShowDone}">Show resolved</button><button type="button" class="btn" data-act="flag-refresh">Refresh now</button></div>
+      ${flagErr ? '<p class="note">Could not load flags: ' + esc(flagErr) + '</p>' : ''}<div class="flaglist">${list}</div>
+      <div class="btnrow"><button type="button" class="btn go" data-act="back">Back to counter</button></div></div>`;
+  }
+  function viewTimers() {
+    clearInterval(boardT); clearInterval(flagT); boardT = flagT = null;
+    if (view === 'board' && Net.on()) { boardLoad(); boardT = setInterval(boardLoad, 30000); }
+    if (view === 'flags' && Net.on()) { flagsLoad(false); flagT = setInterval(() => flagsLoad(true), 8000); }
+  }
   function pop(btn, text) {
     const rx = $('.rx'); if (!rx) return;
     const a = btn.getBoundingClientRect(), b = rx.getBoundingClientRect();
@@ -687,6 +798,7 @@
     if (!cur || cur.empty || cur.done || view !== 'q' || !cur.q.ms) return;
     const o = cur.opts[i]; if (!o || o.gone || isBlocked(i)) return;
     if (cur.sel[i]) delete cur.sel[i]; else cur.sel[i] = true;
+    cur.pend = undefined;
     renderPanel(); const b = document.querySelector('.opt[data-i="' + i + '"]'); if (b) b.focus({ preventScroll: true });
   }
   function msMiss() {
@@ -742,6 +854,7 @@
     return `<div class="jim" style="grid-row:${j.a + 1} / span 2" role="alert">${avatar(7771, 'idle', false, true)}<div><p>${esc(j.line)}</p><div class="jbar"><i id="jimbar"></i></div></div><button type="button" class="mini" id="jimgo" data-act="jim-go" hidden>Not yet, Jim</button></div>`;
   }
   function cardHTML() {
+    if (cur.empty && S.set.mode === 'review') { const nx = nextDueText(); return `<div class="empty-q"><h3>Nothing due for review</h3><p>${nx ? 'Your next review is due in ' + nx + '.' : 'Answer questions in Smart mix and they will start coming back here on a schedule.'}</p><div class="btnrow"><button class="btn go" type="button" data-act="mode-go" data-v="mixed">Back to Smart mix</button><button class="btn" type="button" data-act="settings">Open settings</button></div></div>`; }
     if (cur.empty) return `<div class="empty-q"><h3>No questions match your settings</h3><p>Loosen the topics, level or mode, or add your own studies.</p><div class="btnrow"><button class="btn go" type="button" data-act="settings">Open settings</button><button class="btn" type="button" data-act="studies">Add my studies</button></div></div>`;
     if (cur.elder && cur.elderStage < 2) return elderHTML();
     const q = cur.q, pad = String(cur.num).padStart(5, '0'), keys = ['1', '2', '3', '4', '5', '6'];
@@ -753,7 +866,7 @@
         if (cur.done) { if (o.ok && on) c = 'ok'; else if (o.ok) c = 'ok miss'; else if (on) c = 'bad'; } else if (on) c = 'sel';
         return `<button type="button" class="opt ms ${c}" style="grid-row:${i + 1};grid-column:1" data-i="${i}" aria-pressed="${on}" ${o.gone || cur.done || isBlocked(i) ? 'disabled' : ''}><kbd>${on ? (cur.done && !o.ok ? '\u2715' : '\u2713') : keys[i]}</kbd><span>${esc(o.t)}${cur.done && o.ok && !on ? ' <em class="mtag">missed</em>' : ''}</span></button>`;
       }
-      if (cur.done) { if (o.ok) c = 'ok'; else if (i === cur.picked) c = 'bad'; }
+      if (cur.done) { if (o.ok) c = 'ok'; else if (i === cur.picked) c = 'bad'; } else if (cur.pend === i) c = 'sel';
       return `<button type="button" class="opt ${c}" style="grid-row:${i + 1};grid-column:1" data-i="${i}" ${o.gone || cur.done || isBlocked(i) ? 'disabled' : ''}><kbd>${keys[i]}</kbd><span>${esc(o.t)}</span></button>`;
     }).join('');
     const label = cur.lab ? (cur.lab === 'pk' ? 'KINETICS CONSULT \u00B7 show your work' : 'COMPOUNDING ORDER \u00B7 show your work') : cur.elder ? cur.name.toUpperCase() + ' \u00B7 free upgrade if right' : cur.evt ? (cur.evt === 'inspector' ? 'HEALTH INSPECTOR \u00B7 question ' + cur.insp.n + ' of ' + cur.insp.of + ' \u00B7 need 2' : EV_LABEL[cur.evt]) : cur.caller ? 'KAREN · "I tried to call"' : cur.karen ? 'KAREN · wants the manager' : cur.sweaty ? 'JITTERY JIM · sweating buckets' : CATNAME[q.c] + (q.t ? ' · ' + q.t : '');
@@ -767,15 +880,56 @@
         ${showTimer ? '<div class="timer" aria-hidden="true"><i id="timerbar"></i></div>' : ''}</div>
       ${isK ? `<div class="ktimer" role="timer" aria-label="Time before Karen leaves"><div class="timer"><i id="timerbar"></i></div><b id="tcount">${KAREN_SEC}</b><small>sec</small></div>` : ''}
       <div class="rx-body">
-        <div class="patient">${avatar(cur.seed, cur.done ? (cur.ok ? 'ok' : 'bad') : 'idle', cur.karen, cur.sweaty, cur.elder, cur.name === 'Himothy')}<div class="bubble"><em>${esc(cur.flavor)}</em><p>${esc(q.q)}</p></div></div>
-        <div class="opts" role="group" aria-label="Answer choices">${opts}${jimHTML()}</div>${q.ms && !cur.done ? `<div class="msbar"><span>Select all that apply (${Object.keys(cur.sel).length} picked)</span><button type="button" class="btn go" id="msgo" ${Object.keys(cur.sel).length ? '' : 'disabled'}>Submit answer</button></div>` : ''}${labToolsHTML()}
+        <div class="patient">${avatar(cur.seed, cur.done ? (cur.ok ? 'ok' : 'bad') : 'idle', cur.karen, cur.sweaty, cur.elder, cur.name === 'Andy')}<div class="bubble"><em>${esc(cur.flavor)}</em><p>${esc(q.q)}</p></div></div>
+        ${molHTML()}${q.draw ? `<div class="drawbox">${drawHTML()}</div>${jimHTML()}` : `<div class="opts" role="group" aria-label="Answer choices">${opts}${jimHTML()}</div>`}${q.ms && !cur.done && cur.pend === undefined ? `<div class="msbar"><span>Select all that apply (${Object.keys(cur.sel).length} picked)</span><button type="button" class="btn go" id="msgo" ${Object.keys(cur.sel).length ? '' : 'disabled'}>Submit answer</button></div>` : ''}${labToolsHTML()}
+        ${cur.pend !== undefined && !cur.done ? confBar() : ''}
         ${cur.binder ? `<div class="binderbox" role="note"><b>\uD83D\uDCD8 Reference binder</b><span>${binderNote(q)}</span></div>` : ''}
-        <div class="tools pwtools"><button type="button" class="btn" id="hintbtn" ${S.pw.hint < 1 || cur.hint || cur.done ? 'disabled' : ''}>\uD83D\uDC8A Hint pill (${S.pw.hint})</button>
-          <button type="button" class="btn" id="secbtn" aria-pressed="${!!cur.secArmed}" ${(S.pw.second < 1 && !cur.secArmed) || cur.secUsed || cur.done ? 'disabled' : ''}>\uD83D\uDD01 Second chance (${S.pw.second})${cur.secArmed ? ' ready' : ''}</button>
-          <button type="button" class="btn" id="bindbtn" ${S.pw.binder < 1 || cur.binder || cur.done ? 'disabled' : ''}>\uD83D\uDCD8 Binder (${S.pw.binder})</button>
+        <div class="tools pwtools"><button type="button" class="btn" id="hintbtn" ${S.pw.hint < 1 || cur.hint || cur.done || q.draw ? 'disabled' : ''}>\uD83D\uDC8A Hint pill (${S.pw.hint})</button>
+          <button type="button" class="btn" id="secbtn" aria-pressed="${!!cur.secArmed}" ${(S.pw.second < 1 && !cur.secArmed) || cur.secUsed || cur.done || q.draw || q.meta ? 'disabled' : ''}>\uD83D\uDD01 Second chance (${S.pw.second})${cur.secArmed ? ' ready' : ''}</button>
+          <button type="button" class="btn" id="bindbtn" ${S.pw.binder < 1 || cur.binder || cur.done || q.draw ? 'disabled' : ''}>\uD83D\uDCD8 Binder (${S.pw.binder})</button>
           ${S.pw.hint + S.pw.second + S.pw.binder < 1 && !cur.done ? '<button type="button" class="mini" data-act="pwshop">Get power-ups</button>' : ''}
           <span class="keyhint">${isK ? 'Karen leaves in ' + KAREN_SEC + ' s. A wrong answer costs an upgrade.' : cur.lab ? 'Lab bench: no timer. Pays x1.5.' : timerOn() ? 'Speed bonus fades over 20 s' : focusOn() ? 'Focus mode: no timer' : 'Timer bonus is off'}</span></div>
-      </div>${cur.resHTML || ''}</article>`;
+      </div>${(cur.resHTML || '').replace('<!--FLAG-->', () => cur.q && cur.done ? flagLink(cur.q, cur.flagPick) : '')}</article>`;
+  }
+  /* ---- draw-the-hormone-line question (cycle.js) ---- */
+  function molHTML() {
+    const q = cur && cur.q; if (!q || !q.meta) return '';
+    const st = { picked: cur.site, correct: q.meta.site, done: cur.done };
+    const hit = cur.done && [].concat(q.meta.site).indexOf(cur.site) >= 0;
+    const note = cur.done ? (hit ? '<b>Right site.</b>' : 'The green circle is where it happens.') : cur.site ? 'Site picked. Now choose the change below.' : 'Step 1: tap the site on the structure. Step 2: choose the change.';
+    return '<div class="molbox">' + molSVG(q.meta.mol, st) + '<p class="molnote" aria-live="polite">' + note + '</p></div>';
+  }
+  function drawHTML() {
+    const q = cur.q, pts = cur.dpts || [], n = pts.length;
+    const msg = cur.done ? (cur.dscore ? esc(cur.dscore.reason) : '') : 'Press and drag across the graph from day 1 to day 28. Draw the line for <b>' + esc(CYC[q.draw].name) + '</b>.';
+    return cycSVG(q.draw, pts, cur.done, cur.ok) + `<p class="drawnote" aria-live="polite">${msg}</p>` + (cur.done ? `<p class="drawkey"><i class="k1"></i> your line <i class="k2" style="--c:${CYC[q.draw].col}"></i> the real ${esc(CYC[q.draw].name)} curve</p>` : `<div class="btnrow"><button type="button" class="btn" id="drawclr" ${n ? '' : 'disabled'}>Clear</button><button type="button" class="btn go" id="drawgo" ${n >= 8 ? '' : 'disabled'}>Submit drawing</button></div>`);
+  }
+  function drawPt(e) {
+    const svg = $('#cycsvg'); if (!svg) return null;
+    const r = svg.getBoundingClientRect(), vx = (e.clientX - r.left) / r.width * 360, vy = (e.clientY - r.top) / r.height * 222;
+    const x = Math.max(CYC_X0, Math.min(CYC_X1, vx)), y = Math.max(CYC_Y0, Math.min(CYC_Y1, vy));
+    return [1 + (x - CYC_X0) / (CYC_X1 - CYC_X0) * 27, (CYC_Y1 - y) / (CYC_Y1 - CYC_Y0)];
+  }
+  function drawSync() {
+    const pl = $('#cycuser'); if (pl && cur && cur.dpts) pl.setAttribute('points', cur.dpts.map(p => cycX(p[0]).toFixed(1) + ',' + cycY(p[1]).toFixed(1)).join(' '));
+    const go = $('#drawgo'), cl = $('#drawclr'); if (go) go.disabled = !(cur.dpts && cur.dpts.length >= 8); if (cl) cl.disabled = !(cur.dpts && cur.dpts.length);
+  }
+  document.addEventListener('pointerdown', (e) => {
+    const s = e.target.closest && e.target.closest('#cycsvg'); if (!s || !cur || !cur.q || !cur.q.draw || cur.done) return;
+    e.preventDefault(); cur.dstroke = true; cur.tPick = cur.tPick || 0; try { s.setPointerCapture(e.pointerId); } catch (x) { /* ignore */ }
+    const p = drawPt(e); if (p) { (cur.dpts = cur.dpts || []).push(p); drawSync(); }
+  });
+  document.addEventListener('pointermove', (e) => { if (!cur || !cur.dstroke || !cur.q || !cur.q.draw || cur.done) return; const p = drawPt(e); if (p) { cur.dpts.push(p); drawSync(); } });
+  const drawEnd = () => { if (cur) cur.dstroke = false; };
+  document.addEventListener('pointerup', drawEnd); document.addEventListener('pointercancel', drawEnd);
+  function drawSubmit() {
+    if (!cur || !cur.q || !cur.q.draw || cur.done) return;
+    cur.dscore = cycScore(cur.q.draw, cur.dpts || []);
+    if (cur.dscore.reason && !cur.dscore.ok && /^(Draw a line|Draw the line all|A flat)/.test(cur.dscore.reason)) { const n = $('.drawnote'); if (n) n.textContent = cur.dscore.reason; cur.dscore = null; return; }
+    cur.tPick = Date.now(); answer(cur.dscore.ok ? 0 : 1);
+  }
+  function confBar() {
+    return '<div class="confbar" role="group" aria-label="How sure are you?"><b>How sure are you?</b><div class="confbtns"><button type="button" class="btn confbtn" data-conf="guess"><kbd>1</kbd> Guess</button><button type="button" class="btn confbtn" data-conf="sure"><kbd>2</kbd> Pretty sure</button><button type="button" class="btn confbtn" data-conf="certain"><kbd>3</kbd> Certain</button></div><small>Pick your answer first, then rate it. The result shows after.</small></div>';
   }
   function explHTML(q) {
     if (!q.rows) return '<p class="why"><b>' + (q.lab ? 'Worked solution:' : 'Why:') + '</b> ' + esc(q.e) + '</p>' + (q.s ? '<p class="srcline"><b>Study source:</b> ' + esc(q.s) + '</p>' : '');
@@ -798,48 +952,86 @@
     return m;
   }
   function hubTabs(active) {
-    const n = customCount();
-    return `<div class="hubtabs" role="tablist"><button type="button" role="tab" aria-selected="${active === 'set'}" data-act="tab-set">Topics</button><button type="button" role="tab" aria-selected="${active === 'studies'}" data-act="tab-studies">My studies${n ? ' (' + n + ')' : ''}</button></div>`;
-  }
-  function cabinetHTML(active) {
-    return '<div class="fcab" role="tablist" aria-label="Folders">' + ['P1', 'P2', 'P3'].map((f, i) => `<button type="button" role="tab" class="ftab ft${i + 1}" aria-selected="${active === f}" data-act="folder" data-v="${f}"><span>${f}</span></button>`).join('') + '</div>';
+    const n = customCount(), tab = (id, act, label) => `<button type="button" role="tab" aria-selected="${active === id}" data-act="${act}">${label}</button>`;
+    return `<div class="hubtabs" role="tablist">${tab('set', 'tab-set', 'Topics')}${tab('opts', 'tab-opts', 'Settings')}${tab('studies', 'tab-studies', 'My studies' + (n ? ' (' + n + ')' : ''))}</div>`;
   }
   function weekNote3() {
     const n = curWeek3(), w = WK3[n];
     if (!w) { const f = P3WEEKS[0]; return 'P3 weekly drugs start on ' + esc(f.from) + ' (' + esc(f.topic) + '). Tap a week to preview it now.'; }
     return 'Now: ' + esc(w.d) + ' \u00B7 ' + esc(w.topic) + '. Tap a week to add or remove it, including upcoming weeks.';
   }
+  const nbWrap = (title, inner) => `<div class="pane nbk ${nbClosing ? 'closing' : ''}"><div class="nbcover"><span class="nbtitle">${title}</span></div><div class="nbsheet">${inner}</div></div>`;
+  const nbFoot = () => { const n = poolQs().length; return `<p class="count">${n} question${n === 1 ? '' : 's'} match${calcOn() ? ' + endless calculations' : ''}</p>
+      <div class="btnrow"><button type="button" class="btn go nbback" data-act="back">Close notebook and return to counter</button><button type="button" class="btn" data-act="tour">Replay tour</button><button type="button" class="btn" data-act="reset-set">Reset settings</button></div>`; };
+  /* "Only this course": every topic outside the course is off (and something inside is on) */
+  const courseOnly = (c) => { const st = S.set, ins = courseCats(c); return ins.some(k => st.topics[k]) && CATS.every(x => ins.indexOf(x[0]) >= 0 || !st.topics[x[0]] || (x[0] === 'MY' && !S.decks.length)); };
+  const weekOnly = (k) => { const cat = WKCFG[k].topic; return S.set.topics[cat] && CATS.every(x => x[0] === cat || !S.set.topics[x[0]] || (x[0] === 'MY' && !S.decks.length)) && wkOnlyNow(k); };
+  const yearOnly = (y) => { const ins = yearCats(y); return ins.some(k => S.set.topics[k]) && CATS.every(x => ins.indexOf(x[0]) >= 0 || !S.set.topics[x[0]] || (x[0] === 'MY' && !S.decks.length)); };
+  function setOnly(keep) { // keep: list of cats to leave on; remembers the rest so a second tap restores them
+    const st = S.set; st.restore = {}; CATS.forEach(c => { st.restore[c[0]] = !!st.topics[c[0]]; st.topics[c[0]] = keep.indexOf(c[0]) >= 0 ? (c[0] === 'MY' ? !!S.decks.length : true) : false; });
+  }
+  function unsetOnly() { const st = S.set, rs = st.restore || {}; CATS.forEach(c => st.topics[c[0]] = rs[c[0]] !== undefined ? rs[c[0]] : true); delete st.restore; }
   function settingsHTML() {
     const st = S.set, mc = missedByCat(), ms = masteryByCat();
-    const chipOf = c => `<button type="button" class="chip tp" data-act="topic" data-v="${c[0]}" aria-pressed="${!!st.topics[c[0]]}"><span class="cn">${c[0] === 'PT3' ? 'Exam 3: your exam questions' : c[0] === 'PT3G' ? 'Exam 3: drug-list practice' : c[0] === 'PT4' ? 'Exam 4: mania and psychosis drugs' : c[0] === 'TH3' ? 'Exam 3: diarrhea, constipation, IBS' : c[0] === 'T553' ? 'Relevant otherwise: Therapeutics III topics' : c[0] === 'TP3' ? 'Top 300 weekly drugs' : c[1]}${c[0] === 'TOP' && curWeek() ? ' <small class="mc wk">wk ' + curWeek() + '</small>' : ''}${mc[c[0]] ? ` <small class="mc">${mc[c[0]]} missed</small>` : ''}</span>${ms[c[0]] && ms[c[0]].n ? (() => { const pc = Math.round(100 * ms[c[0]].s / ms[c[0]].n); return `<span class="mbar" role="img" aria-label="${pc}% mastered"><i style="width:${pc}%"></i><em>${pc}%</em></span>`; })() : ''}</button>`;
-    const topics = CATS.filter(c => c[0] !== 'MY' && c[0] !== 'PT3' && c[0] !== 'PT3G' && c[0] !== 'PT4' && c[0] !== 'TH3' && c[0] !== 'TP3' && c[0] !== 'T553' || c[0] === 'MY' && S.decks.length).map(chipOf).join('');
-    const tox = CATS.filter(c => c[0] === 'PT3' || c[0] === 'PT3G' || c[0] === 'PT4').map(chipOf).join('');
-    const thx = CATS.filter(c => c[0] === 'TH3').map(chipOf).join('');
-    const diffs = [[1, 'Level 1 easy'], [2, 'Level 2 medium'], [3, 'Level 3 hard']].map(d => `<button type="button" class="chip" data-act="diff" data-v="${d[0]}" aria-pressed="${st.diffs.indexOf(d[0]) >= 0}">${d[1]}</button>`).join('');
-    const modes = MODES.map(m => `<button type="button" class="chip" data-act="mode" data-v="${m[0]}" aria-pressed="${st.mode === m[0]}">${m[1]}</button>`).join('');
-    const n = poolQs().length;
-    const fold = st.folder === 'P1' || st.folder === 'P3' ? st.folder : 'P2';
-    const inFold = (f, c) => f === 'P3' ? (c[0] === 'TP3' || c[0] === 'T553') : f === 'P2' ? !(c[0] === 'TP3' || c[0] === 'T553') : false;
-    const onlyOn = (f) => { const o = CATS.filter(c => !inFold(f, c)); return f !== 'P1' && o.length > 0 && o.every(c => !st.topics[c[0]]); };
-    const fsw = (f) => `<div class="fsw${f === 'P1' ? ' dis' : ''}"><span class="fswl" id="fsw-${f}">Only ${f} topics<small>${f === 'P1' ? 'Nothing is filed here yet' : onlyOn(f) ? 'Other folders are switched off' : 'Switch off the other folders\u2019 topics'}</small></span><button type="button" class="swt" role="switch" aria-labelledby="fsw-${f}" aria-checked="${onlyOn(f)}" data-act="folder-only" data-v="${f}"${f === 'P1' ? ' disabled' : ''}><i></i></button></div>`;
-    const p2 = `${fsw('P2')}<h3>Question settings</h3><p class="sub">Changes apply to the next patient.</p>
-      <div class="grp"><b>Focus mode</b><div class="chips"><button type="button" class="chip" data-act="focus" aria-pressed="${!!st.focus}">Focus mode ${st.focus ? 'on' : 'off'}</button></div><p class="note">Hides the 3D pharmacy and turns off the timer, patient events, phone calls, Karen and Jim, so it is only questions.</p></div>
-      <div class="grp"><b>Topics <span><button type="button" class="link" data-act="topics-all">All</button> &middot; <button type="button" class="link" data-act="topics-none">None</button></span></b><div class="chips">${topics}</div>${tox ? '<div class="subgrp"><b class="subh">PharmTox</b><div class="chips">' + tox + '</div></div>' : ''}${thx ? '<div class="subgrp"><b class="subh">Therapeutics</b><div class="chips">' + thx + '</div></div>' : ''}</div>
-      <div class="grp"><b>Difficulty</b><div class="chips">${diffs}</div></div>
-      <div class="grp"><b>Mode</b><div class="chips">${modes}</div><p class="note">${MODES.find(m => m[0] === st.mode)[2]}</p></div>
-      <div class="grp"><b>Compounding pharmacy</b><div class="chips"><button type="button" class="chip" data-act="labk" data-v="comp" aria-pressed="${(S.labK || {}).comp !== false}">Compounding math</button><button type="button" class="chip" data-act="labk" data-v="pk" aria-pressed="${(S.labK || {}).pk !== false}">Kinetics</button></div><p class="note">Used when you tap Switch to compounding in the menu. Level chips above apply there too. ${S.labN ? 'Solved at the bench: ' + S.labOK + ' of ' + S.labN + '.' : ''}</p></div>
-      ${wkSchedHTML('p2', 'Weekly drugs')}
-      <div class="grp"><b>Speed bonus</b><div class="chips"><button type="button" class="chip" data-act="timer" aria-pressed="${st.timer}">Timer bonus ${st.timer ? 'on' : 'off'}</button></div><p class="note">Turn it off to study without time pressure. Karen still has a limit.</p></div>
-      `;
-    const p3 = `${fsw('P3')}<h3>P3 weekly drugs</h3><p class="sub">Drug list sheets by system, one set per week. Changes apply to the next patient.</p>
-      ${wkSchedHTML('p3', 'Top 300')}
-      <div class="grp"><b>Relevant otherwise</b><div class="chips">${CATS.filter(c => c[0] === 'T553').map(chipOf).join('')}</div><p class="note">Therapeutics III (PHAR 553) syllabus topics: asthma, COPD, renal, diabetes, gout, migraine, RA and SLE, thyroid, liver, hepatitis, blood pressure, lipids, pain, nutrition, fluids and electrolytes.</p></div>
-      <div class="grp"><b>Focus</b><div class="chips"><button type="button" class="chip" data-act="topics-all">Turn every topic back on</button></div><p class="note">Use the switch at the top of this folder to ask only P3 topics.</p></div>`;
-    const p1 = `${fsw('P1')}<h3>P1 folder</h3><p class="sub">Nothing is filed here yet.</p><div class="grp"><b>Empty folder</b><p class="note">P1 drug lists and exam questions will go in this folder. Your current question settings live in the P2 folder.</p></div>`;
-    return `<div class="pane nbk ${nbClosing ? 'closing' : ''}"><div class="nbcover"><span class="nbtitle">Topics</span></div><div class="nbsheet">${hubTabs('set')}${cabinetHTML(fold)}<div class="fbody fb-${fold}" role="tabpanel" aria-label="${fold} folder">${fold === 'P1' ? p1 : fold === 'P3' ? p3 : p2}</div>
-      <p class="count">${n} question${n === 1 ? '' : 's'} match${calcOn() ? ' + endless calculations' : ''}</p>
-      <div class="btnrow"><button type="button" class="btn go nbback" data-act="back">Close notebook and return to counter</button><button type="button" class="btn" data-act="tour">Replay tour</button><button type="button" class="btn" data-act="reset-set">Reset settings</button></div></div></div>`;
+    const bar = (n, sn) => { if (!n) return ''; const pc = Math.round(100 * sn / n); return `<span class="mbar" role="img" aria-label="${pc}% mastered"><i style="width:${pc}%"></i><em>${pc}%</em></span>`; };
+    const chipOf = k => { const m = ms[k] || { n: 0, s: 0 }; return `<button type="button" class="chip tp" data-act="topic" data-v="${k}" aria-pressed="${!!st.topics[k]}" data-find="${esc((CHIP[k] || CATNAME[k]).toLowerCase())}"><span class="cn">${CHIP[k] || CATNAME[k]}${k === 'TOP' && curWeek() ? ' <small class="mc wk">wk ' + curWeek() + '</small>' : ''}${mc[k] ? ` <small class="mc">${mc[k]} missed</small>` : ''}</span>${bar(m.n, m.s)}</button>`; };
+    const total = CATS.filter(c => c[0] !== 'MY' || S.decks.length).length, onN = CATS.filter(c => st.topics[c[0]] && (c[0] !== 'MY' || S.decks.length)).length;
+    const card = (c) => {
+      const cats = courseCats(c); if (!cats.length) return '';
+      const on = cats.filter(k => st.topics[k]).length, open = !(st.cclose || {})[c.id];
+      let n = 0, sn = 0; cats.forEach(k => { const m = ms[k]; if (m) { n += m.n; sn += m.s; } });
+      const status = on === 0 ? 'off' : on === cats.length ? (cats.length === 1 ? 'on' : 'all ' + cats.length + ' on') : on + ' of ' + cats.length + ' on';
+      return `<details class="crs${on ? '' : ' off'}" data-crs="${c.id}"${open ? ' open' : ''}><summary><i class="caret" aria-hidden="true"></i><span class="crsn"><b>${esc(c.name)}</b><small>${c.code ? esc(c.code) + ' · ' : ''}${esc(c.tag)}</small></span><span class="crsst">${status}</span>${bar(n, sn)}</summary>
+        <div class="crsb"><div class="crsr"><span class="note">${esc(c.note)}</span><span class="grpr"><button type="button" class="link" data-act="course-all" data-v="${c.id}">All</button> &middot; <button type="button" class="link" data-act="course-none" data-v="${c.id}">None</button> &middot; <button type="button" class="link${courseOnly(c) ? ' arm' : ''}" data-act="course-only" data-v="${c.id}">${courseOnly(c) ? 'Only this (tap to undo)' : 'Only this'}</button></span></div>
+        <div class="chips">${cats.map(chipOf).join('')}</div>${c.sched ? wkSchedHTML(c.sched, c.sched === 'p3' ? 'Weekly schedule' : 'Weekly schedule') : ''}</div></details>`;
+    };
+    const yr = curYear(), inY = COURSES.filter(c => c.year === yr && courseCats(c).length).concat(COURSES.filter(c => c.year === 'all' && courseCats(c).length)), sched = inY.find(c => c.sched); // this year's courses first, shared ones (Core skills, My studies) after
+    const quick = [`<button type="button" class="chip" data-act="year-only" data-v="${yr}" aria-pressed="${yearOnly(yr)}">Only ${yr} topics</button>`]
+      .concat(sched ? [`<button type="button" class="chip" data-act="week-only" data-v="${sched.sched}" aria-pressed="${weekOnly(sched.sched)}">This week’s drugs only</button>`] : [])
+      .concat(inY.filter(c => c.id !== 'my' && c.id !== 'core').map(c => `<button type="button" class="chip" data-act="course-only" data-v="${c.id}" aria-pressed="${courseOnly(c)}">Only ${esc(c.short || c.name)}</button>`)).join('');
+    const yearTabs = '<div class="fcab" role="tablist" aria-label="Year">' + YEARS.map((f, i) => `<button type="button" role="tab" class="ftab ft${i + 1}" aria-selected="${yr === f}" data-act="year" data-v="${f}"><span>${f}</span></button>`).join('') + '</div>';
+    const empty = inY.every(c => c.year === 'all') ? `<div class="crs off"><div class="crsb"><p class="note">Nothing is filed under ${yr} yet. Core skills stay available in every year.</p></div></div>` : '';
+    const inner = `${hubTabs('set')}
+      <div class="tsum"><b>${onN} of ${total} topics on</b><span class="grpr"><button type="button" class="link" data-act="topics-all">All on</button> &middot; <button type="button" class="link" data-act="topics-none">All off</button></span></div>
+      ${yearTabs}<div class="fbody fb-${yr}" role="tabpanel" aria-label="${yr} courses">
+      <div class="grp"><b>Quick picks</b><div class="chips">${quick}</div><p class="note">One tap focuses on this year, one course, or this week’s drugs. Tap it again to bring the other topics back.</p></div>
+      <label class="find"><span class="vh">Find a topic</span><input type="search" id="tfind" placeholder="Find a topic or week in ${yr}" value="${esc(findQ)}" autocomplete="off"></label>
+      <div class="crsl">${inY.map(card).join('')}${empty}</div></div>
+      <p class="note nomatch" hidden>Nothing matches that. Try a shorter word.</p>
+      ${nbFoot()}`;
+    return nbWrap('Topics', inner);
   }
+  function optionsHTML() {
+    const st = S.set;
+    const diffs = [[1, 'Level 1 easy'], [2, 'Level 2 medium'], [3, 'Level 3 hard']].map(d => `<button type="button" class="chip" data-act="diff" data-v="${d[0]}" aria-pressed="${st.diffs.indexOf(d[0]) >= 0}">${d[1]}</button>`).join('');
+    const modes = MODES.map(m => `<button type="button" class="chip" data-act="mode" data-v="${m[0]}" aria-pressed="${st.mode === m[0]}">${m[1]}${m[0] === 'review' && dueCount() ? ' (' + dueCount() + ' due)' : ''}</button>`).join('');
+    const inner = `${hubTabs('opts')}<h3>How you study</h3><p class="sub">Changes apply to the next patient.</p>
+      <div class="grp"><b>Mode</b><div class="chips">${modes}</div><p class="note">${MODES.find(m => m[0] === st.mode)[2]}</p></div>
+      <div class="grp"><b>Difficulty</b><div class="chips">${diffs}</div></div>
+      <div class="grp"><b>Focus mode</b><div class="chips"><button type="button" class="chip" data-act="focus" aria-pressed="${!!st.focus}">Focus mode ${st.focus ? 'on' : 'off'}</button></div><p class="note">Hides the 3D pharmacy and turns off the timer, patient events, phone calls, Karen and Jim, so it is only questions.</p></div>
+      <div class="grp"><b>Confidence ratings</b><div class="chips"><button type="button" class="chip" data-act="conf" aria-pressed="${st.conf !== false}">Ask how sure I am ${st.conf !== false ? 'on' : 'off'}</button></div><p class="note">After you pick an answer, rate Guess, Pretty sure or Certain before the result shows. Works in Smart mix and Individual review only. Spaced review (SM-2) uses it: certain and right pushes a question far out, a guess comes back soon, certain but wrong returns first.</p></div>
+      <div class="grp"><b>Speed bonus</b><div class="chips"><button type="button" class="chip" data-act="timer" aria-pressed="${st.timer}">Timer bonus ${st.timer ? 'on' : 'off'}</button></div><p class="note">Turn it off to study without time pressure. Karen still has a limit.</p></div>
+      <div class="grp"><b>Compounding pharmacy</b><div class="chips"><button type="button" class="chip" data-act="labk" data-v="comp" aria-pressed="${(S.labK || {}).comp !== false}">Compounding math</button><button type="button" class="chip" data-act="labk" data-v="pk" aria-pressed="${(S.labK || {}).pk !== false}">Kinetics</button></div><p class="note">Used when you tap Switch to compounding in the menu. The level chips above apply there too. ${S.labN ? 'Solved at the bench: ' + S.labOK + ' of ' + S.labN + '.' : ''}</p></div>
+      ${nbFoot()}`;
+    return nbWrap('Settings', inner);
+  }
+  /* find box: filters topic chips and schedule rows in place, no re-render */
+  let findQ = '';
+  function applyFind() {
+    const root = document.querySelector('.crsl'); if (!root) return;
+    const q = findQ.trim().toLowerCase(); let any = false;
+    root.querySelectorAll('.crs').forEach(d => {
+      let hit = 0, tot = 0;
+      d.querySelectorAll('.chip.tp, .p3sched li').forEach(el => { tot++; const t = (el.dataset.find || el.textContent).toLowerCase(); const ok = !q || t.indexOf(q) >= 0; el.hidden = !ok || (!q && el.classList.contains('upc')); if (ok) hit++; });
+      const nameHit = q && (d.querySelector('.crsn').textContent.toLowerCase().indexOf(q) >= 0);
+      if (nameHit) { d.querySelectorAll('.chip.tp, .p3sched li').forEach(el => { el.hidden = el.classList.contains('upc'); }); hit = tot; }
+      d.querySelectorAll('.wkbody').forEach(wb => { const rows = [...wb.querySelectorAll('.p3sched li')]; const rowHit = rows.some(r => !r.hidden); const k = (wb.parentElement.querySelector('.fold') || {}).dataset ? wb.parentElement.querySelector('.fold').dataset.v : ''; const folded = !!S.set[k + 'fold']; wb.hidden = q ? !rowHit : folded; const fn = wb.parentElement.querySelector('.wkfoldnote'); if (fn) fn.hidden = q ? rowHit : false; wb.querySelectorAll('.upmore').forEach(u => { u.hidden = !!q; }); });
+      d.hidden = !!q && !hit; if (q && hit) { d.open = true; any = true; } if (!q) { d.open = !(S.set.cclose || {})[d.dataset.crs]; any = true; }
+    });
+    const nm = document.querySelector('.nomatch'); if (nm) nm.hidden = any;
+  }
+  document.addEventListener('input', (e) => { if (e.target && e.target.id === 'tfind') { findQ = e.target.value; applyFind(); } });
+  document.addEventListener('toggle', (e) => { const d = e.target; if (d.dataset && d.dataset.shop) { shopOpen[d.dataset.shop] = d.open; return; } if (!d.classList || !d.classList.contains('crs') || findQ.trim()) return; S.set.cclose = S.set.cclose || {}; if (d.open) delete S.set.cclose[d.dataset.crs]; else S.set.cclose[d.dataset.crs] = true; save(); }, true);
   function lockNote(d) {
     const t = todayStr(), l = d.items.filter(q => q.from && q.from > t); if (!l.length) return '';
     const next = l.map(q => q.from).sort()[0];
@@ -848,7 +1040,7 @@
   function studiesHTML() {
     const decks = S.decks.map(d => `<div class="deckrow"><b>${esc(d.name)}</b><span>${d.items.length} question${d.items.length === 1 ? '' : 's'}</span>${lockNote(d)}
       <div class="acts"><button type="button" class="mini ${d.enabled ? 'on' : ''}" data-act="deck-toggle" data-id="${d.id}" aria-pressed="${d.enabled}">${d.enabled ? 'In use' : 'Off'}</button>
-      <button type="button" class="mini" data-act="deck-copy" data-id="${d.id}">Copy as text</button>
+      <button type="button" class="mini" data-act="deck-copy" data-id="${d.id}">Copy as text</button>${quizletOK(d.url) ? `<a class="mini" href="${esc(d.url)}" target="_blank" rel="noopener noreferrer">Open Quizlet</a>` : ''}
       <button type="button" class="mini danger ${armedDeck === d.id ? 'arm' : ''}" data-act="deck-del" data-id="${d.id}">${armedDeck === d.id ? 'Tap again to delete' : 'Delete'}</button></div></div>`).join('');
     return `<div class="pane nbk ${nbClosing ? 'closing' : ''}"><div class="nbcover"><span class="nbtitle">My studies</span></div><div class="nbsheet">${hubTabs('studies')}<h3>My studies</h3><p class="sub">Add your own questions and they join the patients in line. Same format every time.</p>
       ${studyMsg ? `<div class="prev good" role="status">${esc(studyMsg)}</div>` : ''}
@@ -859,6 +1051,15 @@
         <textarea id="studytext" class="field" spellcheck="false" aria-label="Questions in the standard format" placeholder="Q: Question text&#10;A: Correct answer&#10;W: Wrong answer&#10;W: Wrong answer&#10;W: Wrong answer&#10;E: Why it is right&#10;&#10;or quick cards:  question | answer">${esc(draft.text)}</textarea>
         <div class="btnrow"><button type="button" class="btn" data-act="preview">Preview</button><button type="button" class="btn go" data-act="addstudy">Add to my deck</button></div>
         <div id="studyprev" aria-live="polite"></div>
+      </div>
+      <div class="grp"><b>Import from Quizlet</b>
+        <p class="note">In Quizlet open your set, tap the three dots, choose Export, then Copy text. Paste it here and each card becomes a question. Wrong choices come from your other cards, so the set needs at least 4 cards.</p>
+        <input id="qzname" class="field" type="text" maxlength="60" placeholder="Deck name (for example Pharmacology unit 2)" value="${esc(qz.name)}" aria-label="Quizlet deck name">
+        <input id="qzurl" class="field" type="url" maxlength="200" placeholder="Link to your Quizlet set (optional)" value="${esc(qz.url)}" aria-label="Quizlet set link">
+        <div class="chips"><button type="button" class="chip" data-act="qz-dir" data-v="td" aria-pressed="${qz.dir === 'td'}">Show term, pick definition</button><button type="button" class="chip" data-act="qz-dir" data-v="dt" aria-pressed="${qz.dir === 'dt'}">Show definition, pick term</button></div>
+        <textarea id="qztext" class="field" spellcheck="false" aria-label="Quizlet export text" placeholder="term&#9;definition&#10;term&#9;definition">${esc(qz.text)}</textarea>
+        <div class="btnrow"><button type="button" class="btn go" data-act="qz-add">Import Quizlet cards</button></div>
+        <div id="qzprev" aria-live="polite"></div>
       </div>
       <div class="grp"><b>Shortcuts</b><div class="btnrow"><button type="button" class="mini" data-act="template">Insert example</button><button type="button" class="mini" data-act="ai-prompt">Copy prompt for an AI helper</button></div>
         <p class="note">The prompt tells Claude or any chatbot to turn your notes into this exact format. Paste its answer above.</p></div>
@@ -874,9 +1075,8 @@
   const ME_SHOES = [['#27384F', 'Navy shoes'], ['#F4F4F0', 'White sneakers'], ['#E04F3A', 'Red sneakers'], ['#2B2B33', 'Black shoes'], ['#F2C94C', 'Gold shoes'], ['#3FD07F', 'Green sneakers'], ['#8A63C9', 'Purple sneakers']];
   const ME_BODIES = [['slim', 'Slim'], ['normal', 'Average'], ['jacked', 'Jacked'], ['obese', 'Round']];
   const ME_GENDERS = [['f', 'Woman'], ['m', 'Man'], ['n', 'Nonbinary']];
-  const ME_HAIRS = ['Short', 'Bob', 'Long', 'Bun', 'Curly', 'Spiky', 'Bald'].concat(SHOP_HAIR.map(h => h[1]));
+  const ME_HAIRS = ['Short', 'Bob', 'Long', 'Bun', 'Curly', 'Spiky', 'Bald'];
   function meSpec() { const m = S.me; return { body: m.body, gender: m.gender, hair: m.hair, skin: ME_SKIN[m.skin], hairCol: ME_HAIR[m.hairColor], scrub: ME_SCRUB[m.scrub], shirtCol: (ME_SHIRT[m.shirt | 0] || ME_SHIRT[0])[0], shoes: (ME_SHOES[m.shoes === undefined ? 3 : m.shoes] || ME_SHOES[3])[0], acc: S.acc || 0, accOn: accOnList(), cosm: cosmSpec() }; }
-  function accOnList() { const off = S.accOff || [], out = []; for (let k = 1; k <= (S.acc || 0); k++) if (off.indexOf(k) < 0) out.push(k); return out; }
   function meSVG() {
     const m = S.me, skin = ME_SKIN[m.skin], hair = ME_HAIR[m.hairColor], scrub = ME_SCRUB[m.scrub];
     const w = ({ slim: 24, normal: 32, jacked: 46, obese: 50 }[m.body] || 32) * (m.gender === 'f' ? 0.92 : m.gender === 'm' ? 1.06 : 1);
@@ -903,63 +1103,78 @@
     const url = World.ok && World.pharmPortrait ? World.pharmPortrait(meSpec()) : null;
     return url ? '<img class="mepv-img" alt="Preview of your pharmacist" src="' + url + '">' : meSVG();
   }
-  /* ---- character screen: one slider row per part, top to bottom ---- */
+  /* ---- character screen: one slider row per part, top to bottom. Gear comes from GEAR (gear.js). ---- */
+  const rdot = (r) => `<i class="rdot r-${r}" title="${RAR[r].n}" aria-label="${RAR[r].n}"></i>`;
+  function gearOpts(slot) { // the choices in a gear slider: None, then everything you own in that slot
+    return [{ v: '', n: 'None' }].concat(GEAR.filter(g => g.slot === slot && gearHave(g.id)).map(g => ({ v: g.id, n: g.name, r: g.r, b: buffText2(g.buff), g })));
+  }
+  function gearLocked(slot) { return GEAR.filter(g => g.slot === slot && !gearHave(g.id)); }
   function crows() {
-    const m = S.me, on = cosmSpec(), N = (arr) => arr.map((x, i) => ({ v: i, n: x[1] || x, c: x[0] && x[0][0] === '#' ? x[0] : '' }));
-    const cos = (slot, std) => [{ v: '', n: 'None' }].concat((std || []).map(c => ({ v: c[1], n: c[2] })), COSM.concat(SHOP_COS).filter(c => c[0] === slot && cosmHave(c[1])).map(c => ({ v: c[1], n: c[2] })));
-    return [
+    const m = S.me, on = S.cosmOn || {};
+    const hairOpts = ME_HAIRS.map((n, i) => ({ v: i, n })).concat(GEAR.filter(g => g.slot === 'hair' && gearHave(g.id)).map(g => ({ v: g.hv, n: g.name, r: g.r, g })));
+    const coatOpts = ME_SHIRT.map((x, i) => ({ v: i, n: x[1], c: x[0] })).concat(gearOpts('coat').slice(1));
+    const cur = (slot) => gearHave(on[slot]) && gearById(on[slot]).slot === slot ? on[slot] : '';
+    const rows = [
       { k: 'gender', t: 'Gender', cur: m.gender, o: ME_GENDERS.map(x => ({ v: x[0], n: x[1] })) },
       { k: 'body', t: 'Body type', cur: m.body, o: ME_BODIES.map(x => ({ v: x[0], n: x[1] })) },
       { k: 'skin', t: 'Skin tone', cur: m.skin, o: ME_SKIN.map((c, i) => ({ v: i, n: ME_SKIN_N[i], c })) },
-      { k: 'hair', t: 'Hair style', cur: m.hair, o: ME_HAIRS.map((n, i) => ({ v: i, n })).filter(x => x.v < 7 || shopOwn(SHOP_HAIR[x.v - 7][0])) },
+      { k: 'hair', t: 'Hair style', cur: m.hair, o: hairOpts, lock: gearLocked('hair') },
       { k: 'hairColor', t: 'Hair color', cur: m.hairColor, o: ME_HAIR.map((c, i) => ({ v: i, n: ME_HAIR_N[i], c })) },
-      { k: 'face', t: 'Facial hair', cur: on.face, o: cos('face') },
-      { k: 'eyes', t: 'Glasses', cur: on.eyes, o: cos('eyes', STD_EYES) },
-      { k: 'hat', t: 'Hat', cur: on.hat, o: cos('hat') },
-      { k: 'shirt', t: 'Shirt', cur: m.shirt | 0, o: ME_SHIRT.map((x, i) => ({ v: i, n: x[1], c: x[0] })) },
+      { k: 'face', t: 'Facial hair', cur: cur('face'), o: gearOpts('face'), lock: gearLocked('face') },
+      { k: 'eyes', t: 'Glasses', cur: cur('eyes'), o: gearOpts('eyes'), lock: gearLocked('eyes') },
+      { k: 'hat', t: 'Hat', cur: cur('hat'), o: gearOpts('hat'), lock: gearLocked('hat') },
+      { k: 'neck', t: 'Neck', cur: cur('neck'), o: gearOpts('neck'), lock: gearLocked('neck') },
+      { k: 'coat', t: 'Coat', cur: cur('coat') || (m.shirt | 0), o: coatOpts, lock: gearLocked('coat') },
       { k: 'scrub', t: 'Pants', cur: m.scrub, o: ME_SCRUB.map((c, i) => ({ v: i, n: ME_SCRUB_N[i] + ' pants', c })) },
       { k: 'shoes', t: 'Shoes', cur: m.shoes === undefined ? 3 : m.shoes, o: ME_SHOES.map((x, i) => ({ v: i, n: x[1], c: x[0] })) },
-      { k: 'extra', t: 'Extras', cur: on.extra, o: cos('extra') }
-    ].concat(SHOP_CYBER.some(c => shopOwn(c[1])) ? [{ k: 'cyber', t: 'Cyborg parts', cur: on.cyber, o: cos('cyber') }] : []);
+      { k: 'hands', t: 'In hand', cur: cur('hands'), o: gearOpts('hands'), lock: gearLocked('hands') },
+      { k: 'extra', t: 'Extras', cur: cur('extra'), o: gearOpts('extra'), lock: gearLocked('extra') },
+      { k: 'cyber', t: 'Cyborg parts', cur: cur('cyber'), o: gearOpts('cyber'), lock: gearLocked('cyber') }
+    ];
+    return rows;
   }
   function crowHTML(r) {
     const n = r.o.length, i = Math.max(0, r.o.findIndex(x => x.v === r.cur)), c = r.o[i], dis = n < 2 ? ' disabled' : '';
-    return `<div class="crow" data-k="${r.k}"><span class="clab">${r.t}</span><div class="cslide"><button type="button" class="carr" data-act="cyc" data-k="${r.k}" data-d="-1" aria-label="Previous ${r.t.toLowerCase()}"${dis}>&#8249;</button><div class="cval" role="status" aria-live="polite">${c.c ? `<i class="csw" style="background:${c.c}"></i>` : ''}<span>${esc(c.n)}</span><small>${i + 1} of ${n}</small></div><button type="button" class="carr" data-act="cyc" data-k="${r.k}" data-d="1" aria-label="Next ${r.t.toLowerCase()}"${dis}>&#8250;</button></div></div>`;
+    const lock = r.lock && r.lock.length ? `<details class="clock"><summary>${r.lock.length} more to unlock</summary><ul>${r.lock.map(g => `<li>${rdot(g.r)}<b>${esc(g.name)}</b><span>${esc(gearSrcText(g))}${g.buff && buffText2(g.buff) ? ' · ' + esc(buffText2(g.buff)) : ''}</span></li>`).join('')}</ul></details>` : '';
+    return `<div class="crow" data-k="${r.k}"><span class="clab">${r.t}</span><div class="cslide"><button type="button" class="carr" data-act="cyc" data-k="${r.k}" data-d="-1" aria-label="Previous ${r.t.toLowerCase()}"${dis}>&#8249;</button><div class="cval" role="status" aria-live="polite">${c.c ? `<i class="csw" style="background:${c.c}"></i>` : c.r ? rdot(c.r) : ''}<span>${esc(c.n)}${c.b ? `<em class="cbuff">${esc(c.b)}</em>` : ''}</span><small>${i + 1}/${n}</small></div><button type="button" class="carr" data-act="cyc" data-k="${r.k}" data-d="1" aria-label="Next ${r.t.toLowerCase()}"${dis}>&#8250;</button></div>${lock}</div>`;
   }
   function setCrow(k, v) {
-    if (['face', 'eyes', 'hat', 'extra', 'cyber'].indexOf(k) >= 0) { S.cosmOn = S.cosmOn || {}; const keep = {}; Object.keys(S.cosmOn).forEach(s => { const c = S.cosmOn[s] && cosmById(S.cosmOn[s]); if (c && c[0] !== k) keep[c[0]] = S.cosmOn[s]; }); S.cosmOn = keep; if (v) S.cosmOn[k] = v; }
-    else S.me[k] = (typeof v === 'number') ? v : v;
+    S.cosmOn = S.cosmOn || {};
+    if (k === 'coat') { if (typeof v === 'number') { S.me.shirt = v; delete S.cosmOn.coat; } else S.cosmOn.coat = v; return; }
+    if (COSM_SLOTS.indexOf(k) >= 0) { if (v) S.cosmOn[k] = v; else delete S.cosmOn[k]; return; }
+    S.me[k] = v;
   }
   /* ---- shop (a tab on the Character screen) ---- */
-  let cTab = 'me', shopCat = 'walls';
+  let cTab = 'me'; const shopOpen = { walls: true };
   const buffText = b => [b.tech ? '+' + Math.round(b.tech * 100) + '% tech tips' : '', b.pay ? '+' + Math.round(b.pay * 100) + '% pay' : ''].filter(Boolean).join(', ');
   function uniSpec() { const u = uniOf(); return u ? { shirt: u[2], scrub: u[3], cosm: { hat: u[4] || '', eyes: u[0] === 'u5' ? 'goggles' : '' } } : null; }
   function applyShop() { if (!World.ok) return; World.setStore(S.store); World.setStaffLook(uniSpec()); World.setPharmacist(meSpec()); }
-  const SHOP_CATS = [['walls', 'Wall paint'], ['floors', 'Floors'], ['uni', 'Tech uniforms'], ['deco', 'Decor'], ['hair', 'Hairstyles'], ['cyber', 'Cyborg'], ['pow', 'Power-ups']];
+  const SHOP_CATS = [['walls', 'Wall paint'], ['floors', 'Floors'], ['uni', 'Tech uniforms'], ['deco', 'Decor'], ['wear', 'Wardrobe'], ['pow', 'Power-ups']];
   function shopRows(cat) {
     const st = S.store;
     if (cat === 'walls') return SHOP_WALLS.map(w => ({ id: w[0], name: w[1], price: w[4], free: !w[4], on: st.walls === w[0], sw: [w[2], w[3]], note: '' }));
     if (cat === 'floors') return SHOP_FLOORS.map(f => ({ id: f[0], name: f[1], price: f[4], free: !f[4], on: st.floor === f[0], sw: [f[2], f[3]], note: '' }));
     if (cat === 'uni') return [{ id: '', name: 'Standard coats', price: 0, free: true, on: !st.uni, sw: ['#F4FAFA', '#27384F'], note: 'No bonus.' }].concat(SHOP_UNI.map(u => ({ id: u[0], name: u[1], price: u[6], on: st.uni === u[0], sw: [u[2], u[3]], note: buffText(u[5]) + '. ' + u[7] })));
     if (cat === 'deco') return SHOP_DECOR.map(d => ({ id: d[0], name: d[1], price: d[2], on: (st.deco || []).indexOf(d[0]) >= 0, emoji: d[4], note: d[3], toggle: true }));
-    if (cat === 'hair') return SHOP_HAIR.map((h, i) => ({ id: h[0], name: h[1], price: h[3], on: S.me.hair === 7 + i, emoji: '💇', note: 'For your pharmacist.' }));
     if (cat === 'pow') return Object.keys(PW).map(k => ({ id: k, name: PW[k].name, price: pwCost(k), emoji: PW[k].emoji, note: PW[k].note, stack: true, count: S.pw[k] || 0 }));
-    return SHOP_CYBER.map(c => ({ id: c[1], name: c[2], price: c[4], on: ((S.cosmOn || {}).cyber) === c[1], emoji: c[3], note: 'For your pharmacist.' }));
+    return GEAR.filter(g => g.src === 'shop').map(g => ({ id: g.id, name: g.name, price: g.price, on: gearOn(g.id), emoji: g.e, r: g.r, note: SLOT_NAME[g.slot] + (buffText2(g.buff) ? ' · ' + buffText2(g.buff) : '') + (g.d ? '. ' + g.d : '') }));
   }
   function shopHTML() {
-    const cash = S.cash, rows = shopRows(shopCat);
-    const cats = SHOP_CATS.map(c => `<button type="button" class="chip" data-act="shopcat" data-v="${c[0]}" aria-pressed="${shopCat === c[0]}">${c[1]}</button>`).join('');
-    const cards = rows.map(r => {
-      const own = r.stack ? false : r.free || shopOwn(r.id), sw = r.sw ? `<span class="spsw"><i style="background:${r.sw[0]}"></i><i style="background:${r.sw[1]}"></i></span>` : `<span class="spem" aria-hidden="true">${r.emoji || ''}</span>`;
-      let btn;
-      if (!own) btn = `<button type="button" class="btn go" data-act="shop-buy" data-k="${shopCat}" data-id="${r.id}"${cash < r.price || (r.stack && r.count >= PW_MAX) ? ' disabled' : ''}>${r.stack && r.count >= PW_MAX ? 'Full' : 'Buy ' + money(r.price)}</button>`;
-      else if (r.toggle) btn = `<button type="button" class="btn" data-act="shop-use" data-k="${shopCat}" data-id="${r.id}" aria-pressed="${r.on}">${r.on ? 'Remove' : 'Place'}</button>`;
-      else btn = r.on ? '<span class="spon">Equipped</span>' : `<button type="button" class="btn" data-act="shop-use" data-k="${shopCat}" data-id="${r.id}">Use</button>`;
-      return `<div class="spcard${r.on ? ' on' : ''}">${sw}<div class="sptx"><b>${esc(r.name)}${r.stack ? ' <em class="pwn">x' + r.count + '</em>' : ''}</b>${r.note ? `<small>${esc(r.note)}</small>` : ''}</div>${btn}</div>`;
+    const cash = S.cash, bf = buffText(uniBuff()), hasT = S.up.tech >= 1;
+    const secs = SHOP_CATS.map(c => {
+      const rows = shopRows(c[0]), ownN = rows.filter(r => r.stack ? r.count > 0 : r.free || shopOwn(r.id)).length;
+      const cards = rows.map(r => {
+        const own = r.stack ? false : r.free || shopOwn(r.id), sw = r.sw ? `<span class="spsw"><i style="background:${r.sw[0]}"></i><i style="background:${r.sw[1]}"></i></span>` : `<span class="spem" aria-hidden="true">${r.emoji || ''}</span>`;
+        let btn;
+        if (!own) btn = `<button type="button" class="btn go" data-act="shop-buy" data-k="${c[0]}" data-id="${r.id}"${cash < r.price || (r.stack && r.count >= PW_MAX) ? ' disabled' : ''}>${r.stack && r.count >= PW_MAX ? 'Full' : 'Buy ' + money(r.price)}</button>`;
+        else if (r.toggle) btn = `<button type="button" class="btn" data-act="shop-use" data-k="${c[0]}" data-id="${r.id}" aria-pressed="${r.on}">${r.on ? 'Remove' : 'Place'}</button>`;
+        else btn = r.on ? '<span class="spon">Equipped</span>' : `<button type="button" class="btn" data-act="shop-use" data-k="${c[0]}" data-id="${r.id}">Use</button>`;
+        return `<div class="spcard${r.on ? ' on' : ''}">${sw}<div class="sptx"><b>${r.r ? rdot(r.r) : ''}${esc(r.name)}${r.stack ? ' <em class="pwn">x' + r.count + '</em>' : ''}</b>${r.note ? `<small>${esc(r.note)}</small>` : ''}</div>${btn}</div>`;
+      }).join('');
+      const note = c[0] === 'uni' ? `<p class="note">${hasT ? (bf ? 'Your techs are earning bonuses: ' + bf + '.' : 'Pick a uniform to give your techs a bonus.') : 'Hire a Pharmacy Technician first. Uniform bonuses work once you have at least one tech.'}</p>` : c[0] === 'wear' ? '<p class="note">Bought gear lands in the matching slider on the Character tab, with its bonus.</p>' : '';
+      return `<details class="crs" data-shop="${c[0]}"${shopOpen[c[0]] ? ' open' : ''}><summary><i class="caret" aria-hidden="true"></i><span class="crsn"><b>${c[1]}</b><small>${c[0] === 'pow' ? rows.reduce((a, r) => a + r.count, 0) + ' in stock' : ownN + ' of ' + rows.length + ' owned'}</small></span></summary><div class="crsb">${note}<div class="spgrid">${cards}</div></div></details>`;
     }).join('');
-    const bf = buffText(uniBuff()), hasT = S.up.tech >= 1;
-    const note = shopCat === 'uni' ? `<p class="note">${hasT ? (bf ? 'Your techs are earning bonuses: ' + bf + '.' : 'Pick a uniform to give your techs a bonus.') : 'Hire a Pharmacy Technician first. Uniform bonuses work once you have at least one tech.'}</p>` : shopCat === 'cyber' || shopCat === 'hair' ? '<p class="note">Bought items show up in the Character tab, where you can mix and match.</p>' : '';
-    return `<div class="spcash">Cash <b>${money(cash)}</b></div><div class="chips spcats" role="group" aria-label="Shop sections">${cats}</div>${note}<div class="spgrid">${cards}</div>`;
+    return `<div class="spcash">Cash <b>${money(cash)}</b></div><div class="crsl">${secs}</div>`;
   }
   function shopBuy(kind, id) {
     if (kind === 'pow') {
@@ -976,21 +1191,35 @@
     const st = S.store;
     if (kind === 'walls') st.walls = id; else if (kind === 'floors') st.floor = id; else if (kind === 'uni') st.uni = id;
     else if (kind === 'deco') { const i = st.deco.indexOf(id); if (i >= 0 && !quiet) st.deco.splice(i, 1); else if (i < 0) st.deco.push(id); }
-    else if (kind === 'hair') { const i = SHOP_HAIR.findIndex(h => h[0] === id); if (i >= 0) S.me.hair = 7 + i; }
-    else if (kind === 'cyber') { S.cosmOn = S.cosmOn || {}; S.cosmOn.cyber = id; }
+    else if (kind === 'wear' || kind === 'hair' || kind === 'cyber') { const g = gearById(id); if (g) { if (g.slot === 'hair') S.me.hair = g.hv; else { S.cosmOn = S.cosmOn || {}; S.cosmOn[g.slot] = id; } } }
     save(); applyShop(); if (view === 'create') renderPanel();
   }
+  function outfitHTML() {
+    const b = gearBuff(), t = buffText2(b), own = GEAR.filter(g => g.slot !== 'pet' && g.src !== 'start' && gearHave(g.id)).length, all = GEAR.filter(g => g.slot !== 'pet' && g.src !== 'start').length;
+    return `<div class="tsum outfit"><b>Outfit bonus: ${t ? esc(t) : 'none yet'}</b><span>${own}/${all} gear found</span></div>`;
+  }
+  function petsHTML() {
+    const have = (S.awards || {}).pets || [];
+    const rows = GEAR.filter(g => g.slot === 'pet').map(g => {
+      const on = have.indexOf(g.kind) >= 0, pd = PET_DEFS.find(p => p.id === g.id), prog = pd ? Math.min(pd.n, petProgress(pd)) : 0;
+      const how = on ? 'Roaming the pharmacy. Tap it to say hi, or press and drag to carry it somewhere else.' : pd ? prog + '/' + pd.n + ' topics at ' + TIER[pd.tier - 1] + ' or better (see Awards)' : gearSrcText(g);
+      return `<div class="awp${on ? ' on' : ''}"><span aria-hidden="true">${g.e}</span><div><b>${rdot(g.r)}${esc(g.name)}</b><small>${esc(g.d)}${buffText2(g.buff) ? ' Bonus: ' + esc(buffText2(g.buff)) + '.' : ''}</small><small>${esc(how)}</small>${pd && !on ? `<span class="awbar pbar"><i style="width:${Math.round(100 * prog / pd.n)}%"></i></span>` : ''}</div></div>`;
+    }).join('');
+    const fish = S.awards.pets.indexOf('fish') >= 0;
+    return `<p class="note">Pets wander the floor. Press and hold one, then drag to carry it; let go to set it down. ${fish ? 'The goldfish tank stays put.' : ''}</p><div class="awpl">${rows}</div>`;
+  }
   function createHTML() {
-    const tabs = S.me.done ? `<div class="chips ctabs" role="tablist" aria-label="Character screen"><button type="button" class="chip" role="tab" data-act="ctab" data-v="me" aria-pressed="${cTab === 'me'}">Character</button><button type="button" class="chip" role="tab" data-act="ctab" data-v="shop" aria-pressed="${cTab === 'shop'}">Shop</button></div>` : '';
-    if (S.me.done && cTab === 'shop') return `<div class="pane cpane"><h3>Pharmacy shop</h3>${tabs}${shopCat === 'hair' || shopCat === 'cyber' ? '<div class="mepv sticky">' + mePreview() + '</div>' : ''}${shopHTML()}<div class="btnrow"><button type="button" class="btn go" data-act="me-done">Done</button></div></div>`;
+    const seg = (id, label) => `<button type="button" role="tab" aria-selected="${cTab === id}" data-act="ctab" data-v="${id}">${label}</button>`;
+    const tabs = S.me.done ? `<div class="hubtabs" role="tablist" aria-label="Character screen">${seg('me', 'Wardrobe')}${seg('shop', 'Shop')}${seg('pets', 'Pets')}</div>` : '';
+    if (S.me.done && cTab === 'shop') return `<div class="pane cpane"><h3>Pharmacy shop</h3>${tabs}<div class="mepv sticky">${mePreview()}</div>${shopHTML()}<div class="btnrow"><button type="button" class="btn go" data-act="me-done">Done</button></div></div>`;
+    if (S.me.done && cTab === 'pets') return `<div class="pane cpane"><h3>Pets</h3>${tabs}${petsHTML()}<div class="btnrow"><button type="button" class="btn go" data-act="me-done">Done</button></div></div>`;
     const m = S.me, rows = crows().map(crowHTML).join('');
-    const gear = (S.acc || 0) < 1 ? '' : `<div class="grp"><b>Rank gear</b><div class="chips">${ACCS.map((a, i) => { const k = i + 1, un = k <= (S.acc || 0), onN = un && (S.accOff || []).indexOf(k) < 0; return un ? `<button type="button" class="chip" data-act="acc-tog" data-v="${k}" aria-pressed="${onN}">${a[1]} ${a[0]}</button>` : ''; }).join('')}</div></div>`;
-    const found = (S.cosm || []).length;
     return `<div class="pane cpane"><h3>Your character</h3>${tabs}
       <div class="mepv sticky">${mePreview()}</div>
+      ${m.done ? outfitHTML() : ''}
       <div class="grp"><b>Name your pharmacy</b><input id="shopname" class="field" type="text" maxlength="24" autocomplete="off" placeholder="Corner Rx" value="${esc(S.shop || '')}" aria-label="Pharmacy name"><p class="note">It goes on the sign above your shelves.</p></div>
-      <p class="note">Use the arrows on each row to flip through your options, top to bottom. ${found ? found + '/' + COSM.length + ' cosmetics found.' : 'Open capsules from the lost pills vial (top bar) to unlock facial hair, hats, glasses and more.'}</p>
-      <div class="crows">${rows}</div>${gear}
+      <p class="note">Use the arrows on each row to flip through what you own. Gear comes from capsules in the lost pills vial (top bar), the Shop tab and rank promotions, and each piece carries a small bonus for your pharmacy.</p>
+      <div class="crows">${rows}</div>
       <div class="btnrow"><button type="button" class="btn go" data-act="me-done">${m.done ? 'Done' : 'Start working'}</button></div></div>`;
   }
 
@@ -1060,16 +1289,17 @@
     showUnlock({ emoji: '\uD83D\uDCC5', title: 'Weekly drug calendar: ' + CAL_NAMES[t - 1], sub: n + (n === 1 ? ' week' : ' weeks') + ' fully mastered', target: { kind: 'cal' }, land: () => { land(); if (view === 'awards') renderPanel(); } });
   }
   /* pharmacist wardrobe: one accessory per promotion */
-  const ACCS = [['Gold chain', '\u26D3\uFE0F'], ['Sunglasses', '\uD83D\uDD76\uFE0F'], ['Brass knuckles', '\uD83D\uDC4A'], ['Gold grill', '\uD83E\uDDB7'], ['Fedora', '\uD83C\uDFA9'], ['Cane', '\uD83E\uDDAF'], ['Purple fur coat', '\uD83E\uDDE5']];
+  const RANK_GEAR = GEAR.filter(g => g.src === 'rank').sort((a, b) => a.rank - b.rank), ACCS = RANK_GEAR.map(g => [g.name, g.e]);
+  const rankEquip = (k) => { const g = RANK_GEAR[k - 1]; if (g) { S.cosmOn = S.cosmOn || {}; S.cosmOn[g.slot] = g.id; } };
   const rankIdx = () => { let i = 0; for (let k = 0; k < RANKS.length; k++) if (S.correct >= RANKS[k][0]) i = k; return i; };
   function syncRank(silent) {
     const target = Math.min(ACCS.length, rankIdx());
     let earned = S.accEarned || 0; if (target <= earned) { if ((S.acc || 0) < earned) { S.acc = earned; World.setPharmacist(meSpec()); } return; }
-    if (silent && target - earned > 1) { earned = target - 1; S.accEarned = earned; S.acc = earned; World.setPharmacist(meSpec()); }
+    if (silent && target - earned > 1) { earned = target - 1; S.accEarned = earned; S.acc = earned; for (let q = 1; q <= earned; q++) rankEquip(q); World.setPharmacist(meSpec()); }
     for (let k = earned + 1; k <= target; k++) {
       S.accEarned = k;
-      if (silent && k < target) { S.acc = k; continue; }
-      showUnlock({ emoji: ACCS[k - 1][1], title: ACCS[k - 1][0] + ' unlocked', sub: 'Promoted to ' + RANKS[k][1], target: { kind: 'pharm', id: k }, land: () => { S.acc = Math.max(S.acc || 0, k); save(); World.setPharmacist(meSpec()); if (view === 'awards') renderPanel(); } });
+      if (silent && k < target) { S.acc = k; rankEquip(k); continue; }
+      showUnlock({ emoji: ACCS[k - 1][1], title: ACCS[k - 1][0] + ' unlocked', sub: 'Promoted to ' + RANKS[k][1], target: { kind: 'pharm', id: k }, land: () => { S.acc = Math.max(S.acc || 0, k); rankEquip(k); save(); World.setPharmacist(meSpec()); if (view === 'awards' || view === 'create') renderPanel(); } });
     }
     save();
   }
@@ -1146,8 +1376,9 @@
   function slip(m) { if (m.box >= 2 && !m.lapse) m.lapse = 1; else { m.box = 0; m.lapse = 0; } }
   function recordMastery(q, ok) {
     if (!q || !q.k) return;
-    const m = S.mastery[q.k] || { box: 0, seen: 0, ok: 0 };
+    const m = srSeed(S.mastery[q.k] || { box: 0, seen: 0, ok: 0 });
     m.seen++; if (ok) { m.ok++; m.lapse = 0; m.box = Math.min(3, m.box + 1); } else slip(m);
+    if (srOn()) srUpdate(m, ok, undefined);
     S.mastery[q.k] = m;
     const mi = S.missed.indexOf(q.k);
     if (!ok && mi < 0) S.missed.push(q.k);
@@ -1270,7 +1501,7 @@
     TOPQ.forEach(q => { if (isTop(q) && S.set.topics[q.c] !== false && q.from <= t && !q.ms) live.push(q); });
     let pool = live;
     const dated = live.filter(q => q.from); if (dated.length) { const latest = dated.map(q => q.from).sort().pop(); pool = live.filter(q => q.from === latest); if (pool.length < 2) pool = dated; }
-    if (pool.length < 2) pool = pool.concat(BANK);
+    if (pool.length < 2) pool = pool.concat(BANK.filter(q => !q.meta && !q.draw));
     const picks = []; shuffle(pool.slice()).forEach(q => { if (picks.length < 2 && picks.every(p => p.k !== q.k)) picks.push(q); });
     return picks.map(q => ({ q: q, opts: shuffle([q.a, ...q.w].map((x, i) => ({ t: x, ok: i === 0 }))) }));
   }
@@ -1330,12 +1561,13 @@
       '<svg class="pptr" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 2l16 9-7 2 4 8-3 1.5-4-8-5 5z" fill="#fff" stroke="#111" stroke-width="1.6" stroke-linejoin="round"/></svg>';
   }
   /* ---- rush hour: the old busy pace, with bonus pay ---- */
+  let tickDt = 0.25;
   const rush = { on: false, left: 0, next: Date.now() + 600000 };
   function rushBadge() { const el = $('#rush3d'); if (!el) return; el.hidden = !rush.on; if (rush.on) el.textContent = 'RUSH HOUR \u00B7 +50% pay \u00B7 ' + Math.ceil(rush.left) + 's'; }
   function rushTick() {
     if (!World.ok || focusOn() || learning() || labOn()) return;
     if (rush.on) {
-      if (!fp.on && view === 'q') rush.left -= 0.25;
+      if (!fp.on && view === 'q') rush.left -= tickDt;
       if (rush.left <= 0) { rush.on = false; rush.next = Date.now() + (480 + Math.random() * 240) * 1000; World.setRush(false); toast('Rush hour is over. The line thins out.'); }
       rushBadge(); return;
     }
@@ -1457,8 +1689,9 @@
       chips.push('<span>reputation -5</span>', '<span>queued for review</span>');
       head = 'Not quite. The caller sounds unsure and hangs up.';
     }
-    const m = S.mastery[q.k] || { box: 0, seen: 0, ok: 0 };
+    const m = srSeed(S.mastery[q.k] || { box: 0, seen: 0, ok: 0 });
     m.seen++; if (ok) { m.ok++; m.lapse = 0; m.box = Math.min(3, m.box + 1); } else slip(m);
+    if (srOn()) srUpdate(m, ok, undefined);
     S.mastery[q.k] = m;
     const mi = S.missed.indexOf(q.k);
     if (!ok && mi < 0) S.missed.push(q.k);
@@ -1493,7 +1726,7 @@
   function renderPanel() {
     const pn = $('#qpanel'); if (!pn) return;
     pn.classList.toggle('karen', !!(cur && cur.karen && !cur.done && view === 'q'));
-    const body = view === 'create' ? createHTML() : view === 'awards' ? awardsHTML() : view === 'phone' ? phoneHTML() : view === 'fp' || view === 'him' ? '' : view === 'shift' ? shiftHTML() : view === 'daily' ? dailyHTML() : view === 'flash' ? fcHTML() : view === 'syn' ? synHTML() : view === 'ref' ? refHTML() : view === 'retire' ? retireHTML() : view === 'set' ? settingsHTML() : view === 'studies' ? studiesHTML() : (cur ? cardHTML() : '');
+    const body = view === 'create' ? createHTML() : view === 'awards' ? awardsHTML() : view === 'phone' ? phoneHTML() : view === 'fp' || view === 'him' ? '' : view === 'shift' ? shiftHTML() : view === 'daily' ? dailyHTML() : view === 'board' ? boardHTML() : view === 'flags' ? flagsHTML() : view === 'flash' ? fcHTML() : view === 'syn' ? synHTML() : view === 'ref' ? refHTML() : view === 'retire' ? retireHTML() : view === 'set' ? settingsHTML() : view === 'opts' ? optionsHTML() : view === 'studies' ? studiesHTML() : (cur ? cardHTML() : '');
     $('#counter').innerHTML = qbar() + body;
     const nb = document.querySelector('.nbk');
     if (nb) {
@@ -1501,6 +1734,7 @@
       else if (lastRendered === view) nb.classList.add('still');
     }
     flipTab = false; lastRendered = view;
+    if (view === 'set') applyFind();
     fitPanel();
     observeInset();
   }
@@ -1545,19 +1779,19 @@
     if (view === 'syn' && v !== 'syn') synExit();
     qExpand();
     if (view === 'q' && cur && !cur.done && !cur.empty) cur.pausedAt = Date.now();
-    view = v; studyMsg = v === 'studies' ? studyMsg : ''; renderPanel();
+    view = v; studyMsg = v === 'studies' ? studyMsg : ''; viewTimers(); renderPanel();
     $('#qpanel').scrollTop = 0;
   }
   let nbClosing = false;
   document.addEventListener('click', (e) => { const b = e.target.closest && e.target.closest('#qgrab'); if (!b) return; const p = $('#qpanel'), min = p.classList.toggle('min'); b.setAttribute('aria-expanded', String(!min)); b.firstElementChild.textContent = min ? 'Show question card' : 'Hide card to look around'; if (World.ok) updateInset(); fitPanel(); });
   document.addEventListener('keydown', (e) => { if (e.key === 'Escape') document.body.classList.remove('drawer'); });
   function backToQ() {
-    if ((view === 'studies' || view === 'set') && !nbClosing) {
+    if ((view === 'studies' || view === 'set' || view === 'opts') && !nbClosing) {
       const pane = document.querySelector('.nbk');
       if (pane) { nbClosing = true; pane.classList.add('closing'); setTimeout(() => { backToQ(); nbClosing = false; }, 320); return; }
     }
-    if ((view === 'studies' || view === 'set') && nbClosing && !document.querySelector('.nbk.closing')) return;
-    view = 'q';
+    if ((view === 'studies' || view === 'set' || view === 'opts') && nbClosing && !document.querySelector('.nbk.closing')) return;
+    view = 'q'; viewTimers();
     if (dirty) { dirty = false; newCard(); return; }
     resumeTimers();
     renderPanel();
@@ -1624,7 +1858,7 @@
   }
   function masteryRow(label, n, total) { return `<div class="mrow"><b>${esc(label)}</b><span>${n}/${total}</span><div class="bar"><i style="width:${total ? n / total * 100 : 0}%"></i></div></div>`; }
   function renderMastery() {
-    let h = '<h2>Mastery by topic <small>2 right in a row = mastered</small></h2>' + (dueCount() ? '<p class="note">' + dueCount() + ' mastered question' + (dueCount() === 1 ? ' is' : 's are') + ' ready for a memory check. They return in your mix on their own.</p>' : '');
+    let h = '<h2>Mastery by topic <small>2 right in a row = mastered</small></h2>' + calibNote() + (dueCount() ? '<p class="note"><b>' + dueCount() + ' question' + (dueCount() === 1 ? ' is' : 's are') + ' due for review.</b> Pick Individual review in Settings whenever you want to run through them. They wait if you are busy with something else.</p>' : '');
     CATS.forEach(c => {
       if (c[0] === 'MY') return;
       if (c[0] === 'CALC') { h += `<div class="mrow"><b>${c[1]}</b><span>${S.calcOK} solved</span><div class="bar"><i style="width:${Math.min(100, S.calcOK / 20 * 100)}%"></i></div></div>`; return; }
@@ -1666,6 +1900,7 @@
   function syncBrand() { const h = document.querySelector('.brand h1'); if (h) h.textContent = shopName(); }
   function readShop() { const el = $('#shopname'); if (el) { S.shop = el.value.replace(/\s+/g, ' ').trim().slice(0, 24); save(); syncBrand(); } }
   function readDraft() {
+    readQz();
     const t = $('#studytext'), n = $('#deckname');
     if (t) draft.text = t.value; if (n) draft.name = n.value; const dd = $('#deckdate'); if (dd) draft.from = dd.value;
   }
@@ -1676,31 +1911,45 @@
     if (r.warnings.length) h += `<div>Notes: ${esc(r.warnings.slice(0, 3).map(w => 'line ' + w.line + ' ' + w.msg).join(' '))}</div>`;
     return `<div class="prev ${r.errors.length ? 'err' : 'good'}">${h}</div>`;
   }
-  function addStudy() {
-    readDraft();
-    const r = parseStudy(draft.text, 'My notes');
+  const quizletOK = u => /^https:\/\/(www\.)?quizlet\.com\//i.test(String(u || ''));
+  function readQz() { const g = id => { const e = $(id); return e ? e.value : null; }; const n = g('#qzname'), u = g('#qzurl'), t = g('#qztext'); if (n !== null) qz.name = n; if (u !== null) qz.url = u; if (t !== null) qz.text = t; }
+  function addQuizlet() {
+    readQz();
+    const c = quizletToJson(qz.text, qz.dir), url = qz.url.trim();
+    const bad = m => { $('#qzprev').innerHTML = `<div class="prev err">${esc(m)}</div>`; };
+    if (url && !quizletOK(url)) return bad('The link should start with https://quizlet.com/. Clear it to import without a link.');
+    if (c.count < 4) return bad(c.count ? 'Only ' + c.count + ' card(s) found. Quizlet sets need at least 4 cards so wrong choices can be filled in.' : 'No cards found. Paste the exported text with the term and definition on each line separated by a tab.');
+    const r = parseStudy(c.json, 'Quizlet set');
+    if (!r.items.length) return bad(r.errors.length ? r.errors[0].msg : 'Nothing could be imported.');
+    addStudy(r, (qz.name.trim() || 'Quizlet set').slice(0, 60), url);
+    qz.text = ''; qz.url = ''; qz.name = ''; renderPanel();
+  }
+  function addStudy(pre, preName, preUrl) {
+    if (!pre) readDraft();
+    const r = pre || parseStudy(draft.text, 'My notes');
     if (!r.items.length) { $('#studyprev').innerHTML = previewHTML(r); return; }
-    const name = (draft.name.trim() || r.deckName || 'My notes').slice(0, 60);
+    const name = preName || (draft.name.trim() || r.deckName || 'My notes').slice(0, 60);
     let deck = findDeck(name);
     if (!deck) { deck = { id: 'd' + Date.now().toString(36), name, enabled: true, items: [] }; S.decks.push(deck); }
+    if (preUrl) deck.url = preUrl;
     const have = {}; deck.items.forEach(q => { have[q.k] = q; });
     let added = 0;
     r.items.forEach(it => {
-      const from = it.from || draft.from || '';
+      const from = it.from || (pre ? '' : draft.from) || '';
       const q = { c: 'MY', d: it.d, q: it.q, a: it.a, w: it.w, e: it.e, t: it.t, from: from, k: hash(deck.id + '|' + it.q) };
       if (!have[q.k]) { deck.items.push(q); have[q.k] = q; added++; } else if (from) have[q.k].from = from;
     });
     S.set.topics.MY = true; deck.enabled = true; dirty = true;
     rebuildIndex(); save();
     studyMsg = `Added ${added} question${added === 1 ? '' : 's'} to "${name}"` + (r.items.length - added ? ` (${r.items.length - added} duplicates skipped)` : '') + (r.errors.length ? `, ${r.errors.length} skipped because of problems` : '') + '. They join your next patients.';
-    draft.text = ''; renderPanel(); renderMastery(); renderReview();
+    if (!pre) draft.text = ''; renderPanel(); renderMastery(); renderReview();
     if (World.ok) World.sync();
   }
   /* ---- first-run tour (menus only; events stay a surprise) ---- */
   let tourEl = null, tourStep = 0, tourPaused = 0;
   const TOUR = [
     { t: 'Welcome to Corner Rx', p: 'You are the pharmacist at the counter. Each patient asks one question. Pick the right answer to earn cash and reputation, and read the explanation when you miss one. Take your time at first.' },
-    { t: 'The menu', p: 'Tap the menu button in the top right.', l: [['Upgrades', 'spend your cash on the pharmacy'], ['Progress & awards', 'mastery, photos, pets and the weekly calendar'], ['Topics', 'choose topics and weekly drugs, or add your own questions'], ['Focus mode', 'just the questions, no 3D world'], ['Drug reference', 'the weekly drug lists']] },
+    { t: 'The menu', p: 'Tap the menu button in the top right.', l: [['Upgrades', 'spend your cash on the pharmacy'], ['Progress & awards', 'mastery, photos, pets and the weekly calendar'], ['Topics', 'pick courses, topics and weekly drugs; the Settings tab has mode and difficulty; add your own questions under My studies'], ['Focus mode', 'just the questions, no 3D world'], ['Drug reference', 'the weekly drug lists']] },
     { t: 'Look around', p: 'Drag to look around the pharmacy and pinch to zoom. Tap glowing spots to build upgrades. The corner button makes the game full screen, and the bar above the question card hides it so you can see the shop.' },
     { t: 'Your progress', p: 'Everything saves in this browser. To back up or move to another device, open Progress and copy your save code. Good luck out there.' }
   ];
@@ -1714,14 +1963,24 @@
   function showTour() { if (tourEl) return; tourStep = 0; tourPaused = Date.now(); tourEl = document.createElement('div'); tourEl.className = 'tour'; document.body.appendChild(tourEl); drawTour(); }
   function endTour() {
     if (tourEl) { tourEl.remove(); tourEl = null; }
-    S.tutDone = true; save();
+    S.tutDone = true; save(); setTimeout(maybeJoinAsk, 1500);
     if (cur && !cur.done && !cur.empty && tourPaused) cur.t0 += Date.now() - tourPaused;
     tourPaused = 0;
   }
+  /* one-time welcome prompt: pick a nickname to join the leaderboard (only when the online database is configured) */
+  let joinEl = null;
+  function maybeJoinAsk() {
+    if (navigator.webdriver && !/[?&]ask=1/.test(location.search)) return; /* automated tests: stay quiet unless ?ask=1 */
+    if (joinEl || !Net.on() || !S.me.done || !S.tutDone || S.boardOn || S.boardAsked || tourEl) return;
+    joinEl = document.createElement('div'); joinEl.className = 'tour joinask'; joinEl.setAttribute('role', 'dialog'); joinEl.setAttribute('aria-label', 'Join the leaderboard');
+    joinEl.innerHTML = `<div class="joincard"><h3>Join the leaderboard?</h3><p>Pick a nickname and see how you rank against other pharmacy students this week. No account, no email. Only your nickname and your numbers are shared, and you can leave any time from the Leaderboard page.</p><input id="joinnick" class="field" type="text" maxlength="24" autocomplete="off" placeholder="e.g. RxRanger" aria-label="Nickname"><div class="btnrow"><button type="button" class="btn go" data-act="join-go">Join</button><button type="button" class="btn" data-act="join-skip">Not now</button></div></div>`;
+    document.body.appendChild(joinEl); const f = joinEl.querySelector('input'); if (f) f.focus();
+  }
+  function closeJoin() { if (joinEl) { joinEl.remove(); joinEl = null; } S.boardAsked = true; save(); }
   function maybeTour() { if (S.me.done && !S.tutDone && !tourEl) showTour(); }
   /* ---- save code: the whole save as one long code, to move progress between devices or keep a backup ---- */
 /*@EXT@*/
-  const GAME_VERSION = 103;
+  const GAME_VERSION = 127;
   const b64u = (u8) => { let s = ''; for (let i = 0; i < u8.length; i += 0x8000) s += String.fromCharCode.apply(null, u8.subarray(i, i + 0x8000)); return btoa(s).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); };
   const unb64u = (t) => { const s = atob(t.replace(/-/g, '+').replace(/_/g, '/')), u = new Uint8Array(s.length); for (let i = 0; i < s.length; i++) u[i] = s.charCodeAt(i); return u; };
   const chk = (t) => { let h = 2166136261; for (let i = 0; i < t.length; i++) { h ^= t.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36); };
@@ -1754,7 +2013,7 @@
     }
     const raw = ta.value.trim(); if (!raw) { say('Paste a save code above first.', true); return; }
     let s; try { s = await readCode(raw); } catch (e) { say('That code is not valid. Copy the whole thing, including the RX at the start.', true); armedLoad = false; return; }
-    if (!armedLoad) { armedLoad = true; say('Valid code. Loading replaces this device\u2019s progress. Tap Load code again to confirm.'); setTimeout(() => { armedLoad = false; }, 8000); return; }
+    if (!armedLoad) { armedLoad = true; say('Valid code. Loading replaces this device’s progress. Tap Load code again to confirm.'); setTimeout(() => { armedLoad = false; }, 8000); return; }
     armedLoad = false; clearTimeout(saveTimer);
     window.__rxLoading = true;
     try { localStorage.setItem(SAVE_KEY, JSON.stringify(s)); say('Loaded. Restarting\u2026'); setTimeout(() => location.reload(), 300); } catch (e) { say('This browser would not store the save.', true); }
@@ -1776,18 +2035,16 @@
     switch (a) {
       case 'settings': openView(view === 'set' ? 'q' : 'set'); if (view === 'q') { resumeTimers(); renderPanel(); } return;
       case 'studies': openView(view === 'studies' ? 'q' : 'studies'); if (view === 'q') { resumeTimers(); renderPanel(); } return;
-      case 'acc-tog': { readShop(); const k = +v; S.accOff = S.accOff || []; const i = S.accOff.indexOf(k); if (i >= 0) S.accOff.splice(i, 1); else S.accOff.push(k); save(); World.setPharmacist(meSpec()); renderPanel(); return; }
       case 'vial': openVial(); return;
       case 'cyc': { readShop(); const k = t.dataset.k, d = +t.dataset.d, r = crows().find(x => x.k === k); if (!r || r.o.length < 2) return; const i = Math.max(0, r.o.findIndex(x => x.v === r.cur)), nx = r.o[(i + d + r.o.length) % r.o.length]; setCrow(k, nx.v); save(); World.setPharmacist(meSpec());
         const row = document.querySelector('.crow[data-k="' + k + '"]'), nr = crows().find(x => x.k === k); if (row && nr) { row.outerHTML = crowHTML(nr); const nb = document.querySelector('.crow[data-k="' + k + '"] [data-d="' + d + '"]'); if (nb) nb.focus(); } const pv = document.querySelector('.mepv'); if (pv) pv.innerHTML = mePreview(); return; }
       case 'create': openView(view === 'create' ? 'q' : 'create'); if (view === 'q') { resumeTimers(); renderPanel(); } return;
       case 'awards': openView(view === 'awards' ? 'q' : 'awards'); if (view === 'q') { resumeTimers(); renderPanel(); } return;
       case 'me': { readShop(); const k = t.dataset.k, v = t.dataset.v; S.me[k] = (k === 'hair' || k === 'hairColor' || k === 'skin' || k === 'scrub') ? +v : v; save(); World.setPharmacist(meSpec()); renderPanel(); return; }
-      case 'ctab': readShop(); cTab = v === 'shop' ? 'shop' : 'me'; renderPanel(); return;
-      case 'shopcat': shopCat = v; renderPanel(); return;
+      case 'ctab': readShop(); cTab = v === 'shop' || v === 'pets' ? v : 'me'; renderPanel(); return;
       case 'shop-buy': shopBuy(t.dataset.k, t.dataset.id); if (view === 'create') renderPanel(); return;
       case 'shop-use': shopUse(t.dataset.k, t.dataset.id); return;
-      case 'pwshop': cTab = 'shop'; shopCat = 'pow'; openView('create'); return;
+      case 'pwshop': cTab = 'shop'; Object.keys(shopOpen).forEach(k => { shopOpen[k] = false; }); shopOpen.pow = true; openView('create'); return;
       case 'me-done': readShop(); S.me.done = true; save(); syncBrand(); backToQ(); maybeTour(); return;
       case 'back': if (view === 'syn') synExit(); if (view === 'shift') return shiftNext(false); readDraft(); const wasC = view === 'create' && !S.me.done; if (view === 'create') readShop(); if (wasC) { S.me.done = true; save(); } backToQ(); if (wasC) maybeTour(); return;
       case 'phone': return openPhone();
@@ -1804,6 +2061,7 @@
       case 'dev-recall': { const q = BANK.find(x => !x.ms && x.k !== lastKey); if (!q) return; S.recall = S.recall || []; if (!S.recall.some(r => r.k === q.k)) S.recall.push({ k: q.k, seed: 4321, body: 'obese', name: 'Rosa', due: 0, tries: 0, at: Date.now() - 2 * 864e5 }); forceSp = { recall: q.k, seed: 4321, body: 'obese' }; if (view === 'q') newCard(); return; }
       case 'dev-regular': { const w = WEEKS[0]; S.reg = S.reg || {}; if (!S.reg[w.n]) { S.reg[w.n] = { n: w.n, name: 'Big Mike', seed: 7000 + w.n * 137, body: 'jacked', visits: 0, ok: 0, at: Date.now() }; if (World.ok && World.setMastery) World.setMastery(masteryList()); } forceSp = { regular: w.n, seed: S.reg[w.n].seed, body: 'jacked' }; if (view === 'q') newCard(); return; }
       case 'dev-pill': { const ok = World.ok && World.devPill(); toast(ok ? 'A pill popped out. Tap it.' : 'Could not spawn one.'); return; }
+      case 'dev-legcap': { S.vial = S.vial || []; S.vial.push({ k: 'c', c: '#F2A516', c2: '#F4F4F0', s: 'two', r: 'legendary' }); save(); vialSync(); toast('A legendary capsule is in the vial.'); return; }
       case 'dev-bottle': learnOff(); fp.cool = 0; return startBottles();
       case 'dev-shelve': learnOff(); return startShelve(false);
       case 'dev-prior': learnOff(); return startPrior();
@@ -1836,10 +2094,10 @@
       case 'fc-no': return fcRate(false);
       case 'dev-sky': case 'dev-plant': { const ok = World.ok && World.devCapsule(a === 'dev-sky' ? 'sky' : 'plant'); toast(ok ? 'A capsule is out. Tap it.' : 'Could not spawn one.'); return; }
       case 'dev-insp': case 'dev-driver': { const k = { 'dev-insp': 'inspector', 'dev-driver': 'driver' }[a]; learnOff(); if (!(World.ok && World.devEvent && World.devEvent(k))) forceEvt = k; toast(!World.ok ? 'A visitor is next in line. Use "Test: skip to next patient".' : 'The visitor is walking in. Wait for them behind the counter, then click them.'); return; }
-      case 'dev-him-walk': learnOff(); forceHim = true; if (cur && (cur.done || cur.empty) && view === 'q') newCard(); else toast('Himothy is the next patient. Finish this one first (or use "skip to next patient").'); return;
-      case 'dev-him-asc': { learnOff(); if (!World.ok || !World.himArrive) { toast('Needs the 3D pharmacy (turn off Focus mode).'); return; } if (!World.himAtCounter()) World.himArrive(); toast('Himothy is walking in. Watch the counter.'); setTimeout(() => himFarewell(true), 4500); return; }
+      case 'dev-him-walk': learnOff(); forceHim = true; if (cur && (cur.done || cur.empty) && view === 'q') newCard(); else toast('Andy is the next patient. Finish this one first (or use "skip to next patient").'); return;
+      case 'dev-him-asc': { learnOff(); if (!World.ok || !World.himArrive) { toast('Needs the 3D pharmacy (turn off Focus mode).'); return; } if (!World.himAtCounter()) World.himArrive(); toast('Andy is walking in. Watch the counter.'); setTimeout(() => himFarewell(true), 4500); return; }
       case 'dev-him-angel': { learnOff(); toast(World.ok && World.devHimAngel() ? 'The angel is up in the clouds. Click him!' : 'Could not start the flyover.'); return; }
-      case 'dev-him-smash': { learnOff(); toast(World.ok && World.devHimSmash() ? 'Himothy is diving in...' : 'Could not start the smash.'); return; }
+      case 'dev-him-smash': { learnOff(); toast(World.ok && World.devHimSmash() ? 'Andy is diving in...' : 'Could not start the smash.'); return; }
       case 'tour': return showTour();
       case 'shop-save': { const el = $('#shopname2'); const v = el ? el.value.replace(/\s+/g, ' ').trim().slice(0, 24) : ''; if (v) { S.shop = v; save(); syncBrand(); toast('Your pharmacy is now ' + v + '.'); renderPanel(); } return; }
       case 'tour-next': if (tourStep >= TOUR.length - 1) endTour(); else { tourStep++; drawTour(); } return;
@@ -1849,6 +2107,18 @@
       case 'fp-tip': return;
       case 'shelve': return startShelve(false);
       case 'daily': openView(view === 'daily' ? 'q' : 'daily'); if (view === 'q') { resumeTimers(); renderPanel(); } return;
+      case 'board': openView(view === 'board' ? 'q' : 'board'); if (view === 'q') { resumeTimers(); renderPanel(); } return;
+      case 'flags': openView(view === 'flags' ? 'q' : 'flags'); if (view === 'q') { resumeTimers(); renderPanel(); } return;
+      case 'flag-open': if (cur) { cur.flagOpen = !cur.flagOpen; renderPanel(); const ta = document.querySelector('.flagform textarea'); if (ta) ta.focus(); } return;
+      case 'board-join': { const nb = $('#nickbox'), nick = nb ? nb.value.replace(/\s+/g, ' ').trim().slice(0, 24) : ''; if (!nick) { toast('Pick a nickname first.'); return; } S.nick = nick; S.boardOn = true; save(); boardPush().then(boardLoad); renderPanel(); toast('You are on the board as ' + nick + '.'); return; }
+      case 'join-go': { const nb = $('#joinnick'), nick = nb ? nb.value.replace(/\s+/g, ' ').trim().slice(0, 24) : ''; if (!nick) { toast('Type a nickname first, or tap Not now.'); return; } S.nick = nick; S.boardOn = true; closeJoin(); boardPush(); toast('You are on the leaderboard as ' + nick + '.'); return; }
+      case 'join-skip': closeJoin(); toast('No problem. You can join any time from the Leaderboard page.'); return;
+      case 'board-leave': { S.boardOn = false; save(); Net.rpc('leave_board', { p_pid: playerId(), p_tok: playerTok() }).catch(() => {}).then(() => { boardLoad(); }); renderPanel(); toast('Removed from the board.'); return; }
+      case 'board-refresh': boardLoad(); return;
+      case 'flag-refresh': flagsLoad(false); return;
+      case 'flag-showdone': flagShowDone = !flagShowDone; renderPanel(); return;
+      case 'flag-key': { const k = ($('#adminkey') || {}).value || ''; try { localStorage.setItem('rx.adminKey', k); } catch (e) { /* ignore */ } toast(k ? 'Admin key saved in this browser.' : 'Admin key cleared.'); return; }
+      case 'flag-resolve': { const id = +v, done = t.dataset.done === '1'; if (!adminKey()) { toast('Save the admin key first.'); return; } t.disabled = true; Net.rpc('resolve_flag', { fid: id, k: adminKey(), done }).then(ok => { if (ok) { const r = (flagRows || []).find(x => x.id === id); if (r) r.resolved = done; renderPanel(); } else { t.disabled = false; toast('That admin key was not accepted.'); } }).catch(err => { t.disabled = false; toast('Could not update: ' + (err.message || 'offline')); }); return; }
       case 'ref': openView(view === 'ref' ? 'q' : 'ref'); if (view === 'q') { resumeTimers(); renderPanel(); } return;
       case 'retire-new': {
         S.retired = (S.retired || 0) + 1; S.cash = 0; S.franchises = 0; S.rep = 50; S.streak = 0; S.up = defaults().up;
@@ -1860,28 +2130,29 @@
       case 'topics-none': CATS.forEach(c => st.topics[c[0]] = false); break;
       case 'diff': { const i = st.diffs.indexOf(+v); if (i >= 0) { if (st.diffs.length > 1) st.diffs.splice(i, 1); } else st.diffs.push(+v); break; }
       case 'mode': st.mode = v; break;
+      case 'mode-go': st.mode = v; save(); newCard(); return;
       case 'timer': st.timer = !st.timer; break;
+      case 'conf': st.conf = st.conf === false; if (cur) cur.pend = undefined; break;
       case 'focus': st.focus = !st.focus; applyFocus(); toast(st.focus ? 'Focus mode on. No timer, events or 3D world.' : 'Focus mode off. The pharmacy is back.'); break;
       case 'tab-set': flipTab = true; openView('set'); return;
       case 'tab-studies': flipTab = true; openView('studies'); return;
+      case 'tab-opts': flipTab = true; openView('opts'); return;
+      case 'course-all': { const c = COURSES.find(x => x.id === v); if (c) courseCats(c).forEach(k => st.topics[k] = true); break; }
+      case 'course-none': { const c = COURSES.find(x => x.id === v); if (c) courseCats(c).forEach(k => st.topics[k] = false); break; }
+      case 'course-only': { const c = COURSES.find(x => x.id === v); if (!c) break; if (courseOnly(c)) { unsetOnly(); toast('The other topics are back on.'); } else { setOnly(courseCats(c)); toast('Only ' + c.name + ' topics are on.'); } break; }
+      case 'week-only': { const k = WKCFG[v] ? v : 'p2', cat = WKCFG[k].topic; if (weekOnly(k)) { unsetOnly(); wkPick(k, '', 'only'); toast('The other topics and weeks are back on.'); } else { if (!WKCFG[k].cur()) { toast('No week has started yet.'); return; } setOnly([cat]); if (!wkOnlyNow(k)) wkPick(k, '', 'only'); toast('Only this week’s drugs are on.'); } break; }
+      case 'year': st.year = YEARS.indexOf(v) >= 0 ? v : 'P2'; findQ = ''; break;
+      case 'year-only': { if (yearOnly(v)) { unsetOnly(); toast('The other years are back on.'); } else { if (!COURSES.some(c => c.year === v && courseCats(c).length)) { toast(v + ' has no courses filed yet.'); return; } setOnly(yearCats(v)); toast('Only ' + v + ' topics are on.'); } break; }
       case 'wkpick': { const [k, x] = v.split(':'); const a = x === 'all' || x === 'none' || x === 'only' ? x : 'toggle'; if (wkPick(k, a === 'toggle' ? x : '', a) === false) return; break; }
       case 'wkcourse': { const i = v.indexOf(':'); wkPick(v.slice(0, i), v.slice(i + 1), 'course'); break; }
       case 'wkfold': st[v + 'fold'] = !st[v + 'fold']; break;
       case 'wkup': st[v + 'up'] = !st[v + 'up']; break;
-      case 'folder': st.folder = v === 'P1' || v === 'P3' ? v : 'P2'; break;
-      case 'p3-only': CATS.forEach(c => st.topics[c[0]] = c[0] === 'TP3' || c[0] === 'T553'); break;
-      case 'folder-only': {
-        if (v === 'P1') { toast('P1 has no topics yet.'); break; }
-        const inF = c => v === 'P3' ? (c[0] === 'TP3' || c[0] === 'T553') : !(c[0] === 'TP3' || c[0] === 'T553');
-        const outs = CATS.filter(c => !inF(c)), isOn = outs.every(c => !st.topics[c[0]]);
-        if (isOn) { const rs = st.restore || {}; outs.forEach(c => st.topics[c[0]] = rs[c[0]] !== false); delete st.restore; toast('Other folders are back on.'); }
-        else { st.restore = {}; outs.forEach(c => { st.restore[c[0]] = !!st.topics[c[0]]; st.topics[c[0]] = false; }); toast('Only ' + v + ' topics are on.'); }
-        break;
-      }
       case 'wktype': { st.wkTypes = st.wkTypes || {}; const on = WK_TYPES.filter(x => st.wkTypes[x[0]] !== false).length; if (st.wkTypes[v] !== false && on <= 1) { toast('Keep at least one kind of weekly question on.'); return; } st.wkTypes[v] = st.wkTypes[v] === false; break; }
       case 'reset-set': S.set = defaults().set; break;
       case 'preview': readDraft(); $('#studyprev').innerHTML = previewHTML(parseStudy(draft.text, 'My notes')); return;
       case 'addstudy': return addStudy();
+      case 'qz-dir': readQz(); readDraft(); qz.dir = v === 'dt' ? 'dt' : 'td'; renderPanel(); return;
+      case 'qz-add': return addQuizlet();
       case 'template': readDraft(); draft.text = STUDY_TEMPLATE; studyMsg = ''; renderPanel(); return;
       case 'ai-prompt': readDraft(); copyText(STUDY_AI_PROMPT); return;
       case 'deck-toggle': { const d = S.decks.find(x => x.id === t.dataset.id); if (d) { d.enabled = !d.enabled; dirty = true; save(); renderPanel(); } return; }
@@ -1894,6 +2165,9 @@
     }
     dirty = true; save(); renderPanel();
   }
+  function siteTap(id) { if (!cur || !cur.q || !cur.q.meta || cur.done || view !== 'q') return; cur.site = id; renderPanel(); }
+  document.addEventListener('click', (e) => { const sg = e.target.closest && e.target.closest('.molsvg .site[data-site]'); if (sg) siteTap(sg.getAttribute('data-site')); });
+  document.addEventListener('keydown', (e) => { if ((e.key === 'Enter' || e.key === ' ') && e.target.closest && e.target.closest('.molsvg .site[data-site]')) { e.preventDefault(); siteTap(e.target.closest('.site').getAttribute('data-site')); } });
   document.addEventListener('click', (e) => {
     const t = e.target.closest('button'); if (!t) return;
     if (t.dataset.elder !== undefined) return elderPick();
@@ -1903,7 +2177,10 @@
     if (t.dataset.panext) return paNext();
     if (t.id === 'retirebtn') { if (S.cash >= RETIRE_AT) openView('retire'); return; }
     if (t.id === 'hangbtn') return hangUp();
+    if (t.dataset.conf) { if (cur && cur.pend !== undefined && !cur.done) answer(cur.pend, t.dataset.conf); return; }
     if (t.id === 'msgo') return answer(-2);
+    if (t.id === 'drawgo') return drawSubmit();
+    if (t.id === 'drawclr') { if (cur && !cur.done) { cur.dpts = []; renderPanel(); } return; }
     if (t.classList.contains('opt')) return cur && cur.q && cur.q.ms ? msToggle(+t.dataset.i) : answer(+t.dataset.i);
     if (t.id === 'nextbtn') { if (cur && cur.insp && cur.insp.n < cur.insp.of) return inspContinue(); if (cur && cur.visit) return endVisit(); if (shiftDue()) return openShift(); return newCard(); }
     if (t.id === 'hintbtn') return useHint();
@@ -1935,19 +2212,25 @@
       else if (e.key === 'Enter' && phone.call && phone.call.done && !e.target.closest('button')) hangUp();
       return;
     }
+    if (view === 'q' && !cur.done && !cur.empty && cur.q && cur.q.draw) return;
+    if (view === 'q' && !cur.done && !cur.empty && cur.q && cur.q.ms && cur.pend !== undefined && ['1', '2', '3'].indexOf(e.key) >= 0) { answer(-2, ['guess', 'sure', 'certain'][+e.key - 1]); return; }
     if (view === 'q' && !cur.done && !cur.empty && cur.q && cur.q.ms) { if (['1', '2', '3', '4', '5', '6'].indexOf(e.key) >= 0) msToggle(+e.key - 1); else if (e.key === 'Enter' && Object.keys(cur.sel).length) { e.preventDefault(); answer(-2); } return; }
+    if (view === 'q' && cur.pend !== undefined && !cur.done && !cur.empty && ['1', '2', '3'].indexOf(e.key) >= 0) { answer(cur.pend, ['guess', 'sure', 'certain'][+e.key - 1]); return; }
     if (['1', '2', '3', '4'].indexOf(e.key) >= 0) { if (view === 'q' && !cur.done && !cur.empty) answer(+e.key - 1); }
     else if (e.key === 'Enter' && view === 'q' && cur.done && !e.target.closest('button')) newCard();
   });
 
   /* ---- loops ---- */
+  let tickAt = Date.now();
   setInterval(() => {
-    if (S.up.tech > 0) { const g = passive() * 0.25; S.cash += g; S.earned += g; }
+    // real elapsed time, not a fixed 0.25s: hidden tabs throttle timers, which used to make income and countdowns lag
+    const nowT = Date.now(); tickDt = Math.max(0, Math.min(120, (nowT - tickAt) / 1000)); tickAt = nowT;
+    if (S.up.tech > 0) { const g = passive() * tickDt; S.cash += g; S.earned += g; }
     const c = $('#cashv'); if (c) c.textContent = money(S.cash);
     document.querySelectorAll('[data-buy]').forEach(b => { const max = b.textContent === 'MAX'; b.disabled = max || S.cash < +b.dataset.cost; });
     const fb = $('#frbtn'); if (fb) fb.disabled = S.cash < frCost();
     const rb = $('#retirebtn'); if (rb) rb.disabled = S.cash < RETIRE_AT;
-    if (!document.hidden && !tourEl) S.playSec = (S.playSec || 0) + 0.25;
+    if (!document.hidden && !tourEl) S.playSec = (S.playSec || 0) + Math.min(1, tickDt);
     World.setSlow(learning());
     World.refreshTags(); phoneTick(); rushTick(); eventTick(); evtExpire(); holSync();
     const uh = document.querySelector('#ups h2 small'); if (uh) uh.textContent = money(S.cash) + ' on hand';
@@ -1968,28 +2251,30 @@
   setInterval(() => { if (window.__rxLoading) return; try { localStorage.setItem(SAVE_KEY, JSON.stringify(S)); } catch (e) { /* ignore */ } }, 5000);
 
   { const sc = $('#savecard'); if (sc) sc.innerHTML = saveBoxHTML(); }
-  World.init({ host: $('#stage'), getS: () => S, specialRoll: specialRoll, tagInfo: tagInfo, onBuy: buyUp, onNotes: () => openView('studies'), notesInfo: customCount, karenRoll: karenRoll, sweatyRoll: sweatyRoll, elderRoll: elderRoll, eventRoll: eventRoll, onVisitor: visitClick, onVisitorArrive: visitArrive, capsuleOk: capsuleOk, onCapsule: onCapsule, onBrain: synEnter, onSynSite: onSynSite, onEvt: onEvt, pillOk: pillOk, onPill: onPill, onPhone: openPhone, onPolice: policeCome, himOk: himOk, onHimSpawn: onHimSpawn, onHimAngel: himAngelOk, onHimLand: himLand, onHimBless: onHimBless, onFp: fpClick, sign: () => shopName() + '|' + tierName() + ' #' + (S.franchises + 1) });
-  window.__rxDbg = () => ({ nc: newCard, sp: specialRoll, fp: fp, S: S, view: view, rush: rush, phoneR: phone.ringing, TOPQ: TOPQ, pool: poolQs, cur: cur, synQ: () => (typeof SYN !== 'undefined' ? SYN.q : null), synTap: id => onSynSite(id), offer: k => offerEvt(k, 'test'), onEvt: onEvt, holiday: () => holNow(), holN: () => holCount(), renderStats: renderStats, passive: passive, techRate: techRate, buyUp: buyUp, openVial: openVial, tabletTake: tabletTake, capsuleOpen: capsuleOpen, buffOn: buffOn, COSM: COSM });
+  World.init({ host: $('#stage'), getS: () => S, specialRoll: specialRoll, tagInfo: tagInfo, onBuy: buyUp, onNotes: () => openView('studies'), notesInfo: customCount, karenRoll: karenRoll, sweatyRoll: sweatyRoll, elderRoll: elderRoll, eventRoll: eventRoll, onVisitor: visitClick, onVisitorArrive: visitArrive, capsuleOk: capsuleOk, onCapsule: onCapsule, onBrain: synEnter, onSynSite: onSynSite, onEvt: onEvt, pillOk: pillOk, onPill: onPill, pillBoost: () => gearBuff().pills, onPhone: openPhone, onPolice: policeCome, himOk: himOk, onHimSpawn: onHimSpawn, onHimAngel: himAngelOk, onHimLand: himLand, onHimBless: onHimBless, onFp: fpClick, sign: () => shopName() + '|' + tierName() + ' #' + (S.franchises + 1) });
+  window.__rxDbg = () => ({ sr: srUpdate, nc: newCard, sp: specialRoll, fp: fp, S: S, view: view, rush: rush, phoneR: phone.ringing, TOPQ: TOPQ, pool: poolQs, cur: cur, synQ: () => (typeof SYN !== 'undefined' ? SYN.q : null), synTap: id => onSynSite(id), offer: k => offerEvt(k, 'test'), onEvt: onEvt, holiday: () => holNow(), holN: () => holCount(), renderStats: renderStats, passive: passive, techRate: techRate, buyUp: buyUp, openVial: openVial, tabletTake: tabletTake, capsuleOpen: capsuleOpen, buffOn: buffOn, GEAR: GEAR, gearBuff: gearBuff, gearHave: gearHave });
   if (!World.ok) $('#stage').classList.add('flat');
   else { document.body.classList.add('fx'); World.setPharmacist(meSpec()); World.setStore(S.store); World.setStaffLook(uniSpec()); World.setAwards(S.awards); World.setCalendar(Math.min(4, S.awards.calW || 0), false, S.awards.calW || 0); }
   applyFocus(); syncBrand(); sfxLabel();
   /* test tools: open the game with ?dev=1 on the end of the link to get extra menu buttons for trying events quickly */
+  { const bb = document.querySelector('#menu [data-act="board"]'); if (bb) bb.hidden = !Net.on(); }
+  if (/[?&]flags=1/.test(location.search)) setTimeout(() => openView('flags'), 400);
   if (/[?&]dev=1/.test(location.search)) {
     const menu = $('#menu'), close = menu && menu.querySelector('.menuclose');
     if (menu && close) {
       const hr = document.createElement('hr'); menu.insertBefore(hr, close);
-      [['dev-pill', 'Test: pop a pill'], ['dev-elder', 'Test: elder patient next'], ['dev-next', 'Test: skip to next patient'], ['dev-recall', 'Test: recall patient'], ['dev-regular', 'Test: regular patient'], ['dev-bottle', 'Test: bottle check'], ['dev-shelve', 'Test: restock'], ['dev-prior', 'Test: prior auth'], ['dev-rush', 'Test: rush hour'], ['dev-insp', 'Test: health inspector next'], ['dev-driver', 'Test: delivery next'], ['dev-sky', 'Test: sky capsule'], ['dev-him-walk', 'Test: Himothy walks in next'], ['dev-him-asc', 'Test: Himothy ascension'], ['dev-him-angel', 'Test: Himothy angel flyover'], ['dev-him-smash', 'Test: Himothy smash (skip click)'], ['dev-plant', 'Test: plant capsule'], ['dev-fast', 'Test: skip slow start']].forEach(b => {
+      [['dev-pill', 'Test: pop a pill'], ['dev-legcap', 'Test: legendary capsule in vial'], ['flags', 'Question flags (live)'], ['dev-elder', 'Test: elder patient next'], ['dev-next', 'Test: skip to next patient'], ['dev-recall', 'Test: recall patient'], ['dev-regular', 'Test: regular patient'], ['dev-bottle', 'Test: bottle check'], ['dev-shelve', 'Test: restock'], ['dev-prior', 'Test: prior auth'], ['dev-rush', 'Test: rush hour'], ['dev-insp', 'Test: health inspector next'], ['dev-driver', 'Test: delivery next'], ['dev-sky', 'Test: sky capsule'], ['dev-him-walk', 'Test: Andy walks in next'], ['dev-him-asc', 'Test: Andy ascension'], ['dev-him-angel', 'Test: Andy angel flyover'], ['dev-him-smash', 'Test: Andy smash (skip click)'], ['dev-plant', 'Test: plant capsule'], ['dev-fast', 'Test: skip slow start']].forEach(b => {
         const el = document.createElement('button'); el.type = 'button'; el.dataset.act = b[0]; el.innerHTML = '<i aria-hidden="true">\u2699</i><span>' + b[1] + '</span>'; menu.insertBefore(el, close);
       });
     }
   }
   if (S.libRefund) { const r = S.libRefund; delete S.libRefund; toast('The Reference Library is retired. Refunded ' + money(r) + '. Hint pills and more power-ups are in the Shop.'); save(); }
-  checkAwards(true); dailyBadge(); if (World.ok && World.setMastery) World.setMastery(masteryList()); checkRegulars();
+  gearMigrate(); checkAwards(true); dailyBadge(); if (World.ok && World.setMastery) World.setMastery(masteryList()); checkRegulars();
   if (blessOn()) blessStart(false);
   if (S.lab && World.ok && World.setLab) World.setLab(true);
   syncLab();
   renderAll();
   newCard();
   if (!S.me.done) openView('create');
-  maybeTour();
+  maybeTour(); setTimeout(maybeJoinAsk, 4000);
 })();

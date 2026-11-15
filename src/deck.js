@@ -137,6 +137,25 @@ function parseStudy(text, defaultDeckName) {
   return out;
 }
 
+
+/* Quizlet export (Export > copy text): "term<TAB>definition", one card per line.
+   dir 'td' asks for the definition of a term; 'dt' asks for the term for a definition. */
+function quizletToJson(text, dir) {
+  const lines = String(text || '').replace(/\r\n?/g, '\n').split('\n').map(x => x.trim()).filter(Boolean);
+  const sep = lines.some(l => l.indexOf('\t') > 0) ? '\t' : lines.some(l => l.indexOf(' | ') > 0) ? ' | ' : lines.some(l => l.indexOf(' - ') > 0) ? ' - ' : null;
+  const cards = [];
+  lines.forEach(l => {
+    const i = sep ? l.indexOf(sep) : -1;
+    if (i > 0) cards.push({ t: l.slice(0, i).trim(), d: l.slice(i + sep.length).trim() });
+    else if (cards.length) cards[cards.length - 1].d += ' ' + l;
+  });
+  const good = cards.filter(c => c.t && c.d);
+  const items = good.map(c => dir === 'dt'
+    ? { q: 'Which term matches: ' + c.d, a: c.t, e: c.t + ': ' + c.d, t: 'Quizlet' }
+    : { q: 'Which matches "' + c.t + '"?', a: c.d, e: c.t + ': ' + c.d, t: 'Quizlet' });
+  return { json: JSON.stringify(items), count: good.length, skipped: lines.length - good.length };
+}
+
 function deckToText(deck) {
   let s = '# Deck: ' + deck.name + '\n';
   deck.items.forEach(q => {
@@ -145,4 +164,4 @@ function deckToText(deck) {
   return s;
 }
 
-if (typeof module !== 'undefined') module.exports = Object.assign(module.exports || {}, { parseStudy, deckToText, STUDY_TEMPLATE });
+if (typeof module !== 'undefined') module.exports = Object.assign(module.exports || {}, { parseStudy, quizletToJson, deckToText, STUDY_TEMPLATE });
