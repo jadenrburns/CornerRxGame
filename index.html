@@ -5958,7 +5958,7 @@ const World = (function () {
   /* ---- low-poly organ models: flat-shaded facets like a faceted 3D print. Used small inside the man's open chest and large on the specimen table (zoomed part). Each mesh is tagged with its body site so it can be clicked or hovered. ---- */
   const MICSPEC_KINDS = { cns: 'brain', ear: 'ear', upper: 'upper', mouth: 'mouth', lower: 'lungs', heart: 'heart', intra: 'liver', gi: 'gut', uti: 'urinary', skin: 'skin', bone: 'femur' };
   /* tiny .glb reader (three r128 has no loader): first mesh primitive, positions and indices only; cached per model name */
-  const glbCache = {};
+  const glbCache = {}, micBeat = [];
   function glbGeo(name) {
     if (glbCache[name]) return glbCache[name];
     try {
@@ -5984,7 +5984,7 @@ const World = (function () {
     const rings = (x, y0, n, step, R, r, c) => { for (let i = 0; i < n; i++) tor(R, r, c, x, y0 + i * step, 0, PI / 2); };
     switch (kind) {
       case 'heart': {
-        const hg = glbGeo('heart'); if (hg) { const hm = reg(new T.Mesh(hg, MT('#E0553F'))); hm.scale.set(1.5, 1.5, 1.5); hm.position.y = 0.1; break; }
+        const hg = glbGeo('heart'); if (hg) { const hm = reg(new T.Mesh(hg, MT('#E0553F'))); hm.scale.set(1.5, 1.5, 1.5); hm.position.y = 0.1; hm.userData.beat = 1.5; micBeat.push(hm); break; }
         ico(0.5, 1, '#D6503F', 0, 0, 0, 0.82, 1.1, 0.75, 0.07, 0.3); ico(0.3, 1, '#CC4536', 0.12, -0.42, 0.03, 0.8, 1.05, 0.75, 0.05, 0.3);
         ico(0.2, 1, '#E4694F', -0.34, 0.3, 0.06, 1, 0.9, 0.9, 0.05); ico(0.15, 1, '#E8745B', 0.3, 0.36, 0.16, 1, 0.8, 0.9, 0.05);
         tube([[0.02, 0.4, 0], [0.06, 0.72, 0], [0.2, 0.9, -0.02], [0.38, 0.78, -0.05], [0.42, 0.5, -0.08]], 0.1, '#E4604B', 14, 6);
@@ -6302,6 +6302,8 @@ const World = (function () {
     Object.keys(micPinMap).forEach(id => { const m = micPinMap[id], on = id === micSel, hv = id === micHoverId, s = (on ? 1.5 + Math.sin(micTt * 6) * 0.15 : hv ? 1.3 : 1) * (m.ster ? 1 : 1); m.g.scale.set(s, s, s); if (on) m.dot.material.color.setHex(0xE04F3A); if (m.flash > 0) { m.flash -= dt; m.dot.material.color.setHex(m.flashOk ? 0x2FD07F : 0xE23B2E); m.g.scale.set(s * 1.6, s * 1.6, s * 1.6); } });
     Object.keys(micPaperMap).forEach(id => { const p = micPaperMap[id]; if (p.t < 0.4) { p.t += dt; const k = Math.max(0.001, Math.min(1, p.t / 0.35)), e = 1 - Math.pow(1 - k, 3) * (1 + (1 - k) * 0.4); p.g.scale.set(e, e, e); } if (p.flash > 0) { p.flash -= dt; if (p.flash <= 0) api.micPaperSet(id, { flash: null }); } });
     Object.keys(micPaperMap).forEach(k => { const ic = micPaperMap[k].icon; if (ic) { ic.rotation.y = Math.sin(micTt * 1.1) * 0.55; ic.position.y = 0.8 + Math.sin(micTt * 2) * 0.05; } });
+    /* heartbeat: lub-dub pulse about 70 bpm, squeezes a little sideways like a real beat */
+    micBeat.forEach(m => { const ph = (micTt % 0.86) / 0.86, bump = (c, w) => Math.exp(-Math.pow((ph - c) / w, 2)), p = bump(0.08, 0.045) * 1 + bump(0.3, 0.05) * 0.7, b = m.userData.beat; m.scale.set(b * (1 + 0.07 * p), b * (1 + 0.1 * p), b * (1 + 0.07 * p)); });
     Object.keys(micOrg).forEach(id => { const k = id === micSel ? 0.5 + Math.sin(micTt * 6) * 0.15 : id === micHoverId ? 0.35 : 0; micOrg[id].forEach(m => m.material.emissive.setRGB(k * 0.6, k * 0.5, k * 0.2)); });
     Object.keys(micDishMap).forEach(id => { const d = micDishMap[id]; d.ring.visible = micHot === id; d.g.scale.y = 1; if (d.flash > 0) { d.flash -= dt; const k = Math.max(0, d.flash) / 0.7; d.agar.material.emissive.setRGB(d.flashOk ? 0.1 * k : 0.55 * k, d.flashOk ? 0.5 * k : 0.05 * k, d.flashOk ? 0.1 * k : 0.05 * k); } });
     if (micLabEl) {
@@ -10598,7 +10600,7 @@ const micLab3 = () => !!(World.ok && World.setMic);
   }
   setInterval(micTick, 25000);
 
-  const GAME_VERSION = 137;
+  const GAME_VERSION = 138;
   const b64u = (u8) => { let s = ''; for (let i = 0; i < u8.length; i += 0x8000) s += String.fromCharCode.apply(null, u8.subarray(i, i + 0x8000)); return btoa(s).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); };
   const unb64u = (t) => { const s = atob(t.replace(/-/g, '+').replace(/_/g, '/')), u = new Uint8Array(s.length); for (let i = 0; i < s.length; i++) u[i] = s.charCodeAt(i); return u; };
   const chk = (t) => { let h = 2166136261; for (let i = 0; i < t.length; i++) { h ^= t.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36); };
