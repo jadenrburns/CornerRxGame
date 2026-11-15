@@ -1199,15 +1199,16 @@ table.board tbody tr:nth-child(-n+3) td:first-child { font-weight: 800; color: v
    Fill RX_NET with the project URL and the anon public key (Supabase: Project Settings > API). Both are meant to be
    public; the SQL in net/supabase.sql sets the row rules. Empty values keep everything offline and the game hides the online bits.
    For local testing a JSON object in localStorage.rxNet ({"url":..., "key":...}) overrides this block. */
-const RX_NET = { url: '', key: '' };
+const RX_NET = { url: 'https://crzgekhluqnyzeuhffib.supabase.co', key: 'sb_publishable_n7RddvbU4qGIZc3oGyHMcQ_FEMkQNqi' };
 
 const Net = (function () {
-  const cfg = () => { try { const o = JSON.parse(localStorage.getItem('rxNet') || 'null'); if (o && o.url && o.key) return o; } catch (e) { /* ignore */ } return RX_NET; };
+  const cfg = () => { try { const o = JSON.parse(localStorage.getItem('rxNet') || 'null'); if (o && o.off) return { url: '', key: '' }; if (o && o.url && o.key) return o; } catch (e) { /* ignore */ } return RX_NET; };
   const on = () => { const c = cfg(); return !!(c.url && c.key); };
-  const headers = (extra) => { const c = cfg(); return Object.assign({ apikey: c.key, Authorization: 'Bearer ' + c.key, 'Content-Type': 'application/json' }, extra || {}); };
+  /* newer sb_publishable_ keys are not JWTs: send them as apikey only. Older anon keys (eyJ...) also go in Authorization. */
+  const headers = (extra) => { const c = cfg(), h = { apikey: c.key, 'Content-Type': 'application/json' }; if (/^eyJ/.test(c.key)) h.Authorization = 'Bearer ' + c.key; return Object.assign(h, extra || {}); };
   async function req(path, opts) {
     const c = cfg(); if (!c.url) throw new Error('offline');
-    const r = await fetch(c.url.replace(/\/$/, '') + '/rest/v1/' + path, Object.assign({ headers: headers(opts && opts.headers) }, opts || {}, { headers: headers(opts && opts.headers) }));
+    const r = await fetch(c.url.replace(/\/(rest\/v1\/?)?$/, '') + '/rest/v1/' + path, Object.assign({ headers: headers(opts && opts.headers) }, opts || {}, { headers: headers(opts && opts.headers) }));
     if (!r.ok) { let t = ''; try { t = await r.text(); } catch (e) { /* ignore */ } throw new Error('HTTP ' + r.status + ' ' + t.slice(0, 200)); }
     const txt = await r.text(); return txt ? JSON.parse(txt) : null;
   }
@@ -8065,6 +8066,7 @@ const World = (function () {
   /* one-time welcome prompt: pick a nickname to join the leaderboard (only when the online database is configured) */
   let joinEl = null;
   function maybeJoinAsk() {
+    if (navigator.webdriver && !/[?&]ask=1/.test(location.search)) return; /* automated tests: stay quiet unless ?ask=1 */
     if (joinEl || !Net.on() || !S.me.done || !S.tutDone || S.boardOn || S.boardAsked || tourEl) return;
     joinEl = document.createElement('div'); joinEl.className = 'tour joinask'; joinEl.setAttribute('role', 'dialog'); joinEl.setAttribute('aria-label', 'Join the leaderboard');
     joinEl.innerHTML = `<div class="joincard"><h3>Join the leaderboard?</h3><p>Pick a nickname and see how you rank against other pharmacy students this week. No account, no email. Only your nickname and your numbers are shared, and you can leave any time from the Leaderboard page.</p><input id="joinnick" class="field" type="text" maxlength="24" autocomplete="off" placeholder="e.g. RxRanger" aria-label="Nickname"><div class="btnrow"><button type="button" class="btn go" data-act="join-go">Join</button><button type="button" class="btn" data-act="join-skip">Not now</button></div></div>`;
@@ -9169,7 +9171,7 @@ const World = (function () {
       <div class="btnrow"><button type="button" class="btn go" data-act="back">Back to the pharmacy</button></div></div>`;
   }
 
-  const GAME_VERSION = 124;
+  const GAME_VERSION = 125;
   const b64u = (u8) => { let s = ''; for (let i = 0; i < u8.length; i += 0x8000) s += String.fromCharCode.apply(null, u8.subarray(i, i + 0x8000)); return btoa(s).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); };
   const unb64u = (t) => { const s = atob(t.replace(/-/g, '+').replace(/_/g, '/')), u = new Uint8Array(s.length); for (let i = 0; i < s.length; i++) u[i] = s.charCodeAt(i); return u; };
   const chk = (t) => { let h = 2166136261; for (let i = 0; i < t.length; i++) { h ^= t.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36); };

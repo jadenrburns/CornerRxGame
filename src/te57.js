@@ -7,9 +7,9 @@ const { chromium } = require('playwright');
     await p.route('**/three.min.js', r => r.fulfill({ path: 'three-stub2.js', contentType: 'text/javascript' }));
     await p.route('https://fake.supabase.test/**', r => { const u = r.request().url(); if (r.request().method() === 'OPTIONS') return r.fulfill({ status: 204, headers: { 'access-control-allow-origin': '*', 'access-control-allow-headers': '*', 'access-control-allow-methods': '*' } }); calls.push(u.split('/rpc/')[1]); r.fulfill({ status: 200, contentType: 'application/json', headers: { 'access-control-allow-origin': '*' }, body: 'true' }); });
     const SEED = JSON.stringify(Object.assign({ me: { done: true, name: 'T', look: {} }, served: 30, correct: 25, tutDone: true, playSec: 999 }, extra || {}));
-    await p.goto('file://' + process.cwd() + '/corner-rx.html?noconf=1');
-    await p.evaluate(([s, n]) => { localStorage.setItem('cornerRx.v1', s); if (n) localStorage.setItem('rxNet', n); }, [SEED, net ? JSON.stringify({ url: 'https://fake.supabase.test', key: 'k' }) : '']);
-    await p.goto('file://' + process.cwd() + '/corner-rx.html?noconf=1'); await p.waitForTimeout(4800); return p;
+    await p.goto('file://' + process.cwd() + '/corner-rx.html?noconf=1&ask=1');
+    await p.evaluate(([s, n]) => { localStorage.setItem('cornerRx.v1', s); localStorage.setItem('rxNet', n); }, [SEED, net ? JSON.stringify({ url: 'https://fake.supabase.test', key: 'k' }) : JSON.stringify({ off: 1 })]);
+    await p.goto('file://' + process.cwd() + '/corner-rx.html?noconf=1&ask=1'); await p.waitForTimeout(4800); return p;
   }
   let p = await mk(false); if (await p.$('.joinask')) fail.push('prompt shown offline'); await p.close();
   p = await mk(true, { boardOn: true, nick: 'X' }); if (await p.$('.joinask')) fail.push('prompt shown to member'); await p.close();

@@ -27,7 +27,7 @@ const { chromium } = require('playwright');
     });
     const SEED = JSON.stringify(Object.assign({ me: { done: true, name: 'T', look: {} }, served: 30, correct: 25, tutDone: true, playSec: 999, boardAsked: true }, seed || {}));
     await p.goto('file://' + process.cwd() + '/corner-rx.html?noconf=1');
-    await p.evaluate(([s, n]) => { localStorage.setItem('cornerRx.v1', s); if (n) localStorage.setItem('rxNet', n); }, [SEED, net ? JSON.stringify({ url: URL, key: KEY }) : '']);
+    await p.evaluate(([s, n]) => { localStorage.setItem('cornerRx.v1', s); if (n) localStorage.setItem('rxNet', n); }, [SEED, net ? JSON.stringify({ url: URL, key: KEY }) : JSON.stringify({ off: 1 })]);
     await p.goto('file://' + process.cwd() + '/corner-rx.html?noconf=1'); await p.waitForTimeout(800);
     await p.evaluate(() => document.querySelectorAll('.tour,.unlock').forEach(e => e.remove()));
     return p;

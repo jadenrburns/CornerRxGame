@@ -1961,6 +1961,7 @@
   /* one-time welcome prompt: pick a nickname to join the leaderboard (only when the online database is configured) */
   let joinEl = null;
   function maybeJoinAsk() {
+    if (navigator.webdriver && !/[?&]ask=1/.test(location.search)) return; /* automated tests: stay quiet unless ?ask=1 */
     if (joinEl || !Net.on() || !S.me.done || !S.tutDone || S.boardOn || S.boardAsked || tourEl) return;
     joinEl = document.createElement('div'); joinEl.className = 'tour joinask'; joinEl.setAttribute('role', 'dialog'); joinEl.setAttribute('aria-label', 'Join the leaderboard');
     joinEl.innerHTML = `<div class="joincard"><h3>Join the leaderboard?</h3><p>Pick a nickname and see how you rank against other pharmacy students this week. No account, no email. Only your nickname and your numbers are shared, and you can leave any time from the Leaderboard page.</p><input id="joinnick" class="field" type="text" maxlength="24" autocomplete="off" placeholder="e.g. RxRanger" aria-label="Nickname"><div class="btnrow"><button type="button" class="btn go" data-act="join-go">Join</button><button type="button" class="btn" data-act="join-skip">Not now</button></div></div>`;
@@ -1970,7 +1971,7 @@
   function maybeTour() { if (S.me.done && !S.tutDone && !tourEl) showTour(); }
   /* ---- save code: the whole save as one long code, to move progress between devices or keep a backup ---- */
 /*@EXT@*/
-  const GAME_VERSION = 124;
+  const GAME_VERSION = 125;
   const b64u = (u8) => { let s = ''; for (let i = 0; i < u8.length; i += 0x8000) s += String.fromCharCode.apply(null, u8.subarray(i, i + 0x8000)); return btoa(s).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); };
   const unb64u = (t) => { const s = atob(t.replace(/-/g, '+').replace(/_/g, '/')), u = new Uint8Array(s.length); for (let i = 0; i < s.length; i++) u[i] = s.charCodeAt(i); return u; };
   const chk = (t) => { let h = 2166136261; for (let i = 0; i < t.length; i++) { h ^= t.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36); };

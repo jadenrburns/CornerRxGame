@@ -3,15 +3,16 @@
    Fill RX_NET with the project URL and the anon public key (Supabase: Project Settings > API). Both are meant to be
    public; the SQL in net/supabase.sql sets the row rules. Empty values keep everything offline and the game hides the online bits.
    For local testing a JSON object in localStorage.rxNet ({"url":..., "key":...}) overrides this block. */
-const RX_NET = { url: '', key: '' };
+const RX_NET = { url: 'https://crzgekhluqnyzeuhffib.supabase.co', key: 'sb_publishable_n7RddvbU4qGIZc3oGyHMcQ_FEMkQNqi' };
 
 const Net = (function () {
-  const cfg = () => { try { const o = JSON.parse(localStorage.getItem('rxNet') || 'null'); if (o && o.url && o.key) return o; } catch (e) { /* ignore */ } return RX_NET; };
+  const cfg = () => { try { const o = JSON.parse(localStorage.getItem('rxNet') || 'null'); if (o && o.off) return { url: '', key: '' }; if (o && o.url && o.key) return o; } catch (e) { /* ignore */ } return RX_NET; };
   const on = () => { const c = cfg(); return !!(c.url && c.key); };
-  const headers = (extra) => { const c = cfg(); return Object.assign({ apikey: c.key, Authorization: 'Bearer ' + c.key, 'Content-Type': 'application/json' }, extra || {}); };
+  /* newer sb_publishable_ keys are not JWTs: send them as apikey only. Older anon keys (eyJ...) also go in Authorization. */
+  const headers = (extra) => { const c = cfg(), h = { apikey: c.key, 'Content-Type': 'application/json' }; if (/^eyJ/.test(c.key)) h.Authorization = 'Bearer ' + c.key; return Object.assign(h, extra || {}); };
   async function req(path, opts) {
     const c = cfg(); if (!c.url) throw new Error('offline');
-    const r = await fetch(c.url.replace(/\/$/, '') + '/rest/v1/' + path, Object.assign({ headers: headers(opts && opts.headers) }, opts || {}, { headers: headers(opts && opts.headers) }));
+    const r = await fetch(c.url.replace(/\/(rest\/v1\/?)?$/, '') + '/rest/v1/' + path, Object.assign({ headers: headers(opts && opts.headers) }, opts || {}, { headers: headers(opts && opts.headers) }));
     if (!r.ok) { let t = ''; try { t = await r.text(); } catch (e) { /* ignore */ } throw new Error('HTTP ' + r.status + ' ' + t.slice(0, 200)); }
     const txt = await r.text(); return txt ? JSON.parse(txt) : null;
   }
