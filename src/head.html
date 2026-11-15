@@ -1154,6 +1154,57 @@ table.board tbody tr:nth-child(-n+3) td:first-child { font-weight: 800; color: v
 .molsvg .site circle { transition: fill .12s; }
 .molnote { margin: 0; font-size: 13px; color: var(--muted); text-align: center; }
 .molnote b { color: var(--ink); }
+/* microbe lab */
+.seg { display: flex; gap: 6px; flex-wrap: wrap; }
+.seg-b { flex: 1 1 auto; min-height: 40px; padding: 8px 12px; border: 1.5px solid var(--ink); border-radius: 10px; background: var(--surface); color: var(--ink); font: 700 13px/1.1 var(--f-body); cursor: pointer; }
+.seg-b.on { background: var(--teal); border-color: var(--teal-ink); color: var(--on-teal); }
+.micbug { margin: 0; padding: 8px 10px; border-radius: 10px; background: var(--amber-soft); color: var(--ink); font-size: 13px; font-weight: 700; }
+.micbody { display: grid; grid-template-columns: minmax(120px, 190px) 1fr; gap: 14px; align-items: start; }
+@media (max-width: 420px) { .micbody { grid-template-columns: 1fr; } .mantw { max-width: 190px; margin: 0 auto; } }
+.mantw { position: relative; width: 100%; aspect-ratio: 200 / 420; background: var(--surface2); border: 1.5px solid var(--line); border-radius: 14px; min-width: 0; }
+.micman { position: absolute; inset: 0; width: 100%; height: 100%; }
+.mpin { position: absolute; width: 26px; height: 26px; margin: -13px 0 0 -13px; padding: 0; border-radius: 50%; border: 2px solid var(--ink); background: var(--amber); color: var(--ink); font: 800 13px/1 var(--f-body); cursor: pointer; display: grid; place-items: center; }
+.mpin::before { content: ""; position: absolute; inset: -9px; }
+.mpin.st1 { background: #BFE9D6; } .mpin.st2 { background: var(--teal); color: var(--on-teal); }
+.mpin.ster { border-style: dashed; }
+.mpin.on { outline: 3px solid var(--coral); outline-offset: 2px; }
+.micside { display: grid; gap: 10px; min-width: 0; }
+.micpick { display: grid; gap: 6px; padding: 10px; border: 1.5px solid var(--line); border-radius: 12px; background: var(--surface); }
+.micpick.empty { color: var(--muted); }
+.micfam { display: grid; gap: 6px; }
+.micfam .btn { justify-content: space-between; text-align: left; }
+.note.small { font-size: 11.5px; }
+.mstars { display: inline-flex; gap: 2px; }
+.mstars i { font-style: normal; color: var(--line); font-size: 16px; line-height: 1; }
+.mstars i.on { color: var(--amber); }
+.miclist { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+.microw { width: 100%; display: flex; align-items: center; gap: 10px; padding: 10px 12px; min-height: 44px; border: 1.5px solid var(--line); border-radius: 12px; background: var(--surface); color: var(--ink); font: 700 14px/1.2 var(--f-body); text-align: left; cursor: pointer; }
+.microw .mrn { flex: 1; min-width: 0; }
+.microw small { color: var(--muted); font-weight: 600; }
+.mslots, .mdishes { display: flex; flex-wrap: wrap; gap: 8px; }
+.mslot { flex: 1 1 130px; min-height: 44px; padding: 8px 10px; border: 2px dashed var(--muted); border-radius: 12px; background: var(--surface2); color: var(--ink); font: 700 14px/1.2 var(--f-body); text-align: left; }
+.mslot em { color: var(--muted); font-style: normal; }
+.mslot.over { border-color: var(--teal); background: var(--teal-soft); }
+.mslot.full { border: 2px solid var(--teal); background: var(--teal-soft); opacity: 1; }
+.petri { display: flex; align-items: center; gap: 6px; padding: 4px 10px 4px 4px; min-height: 52px; border: 1.5px solid var(--line); border-radius: 26px; background: var(--surface); color: var(--ink); font: 700 13px/1.15 var(--f-body); cursor: grab; touch-action: none; user-select: none; -webkit-user-select: none; max-width: 100%; text-align: left; }
+.petri span { min-width: 0; font-style: italic; }
+.petri.sel { border-color: var(--teal); box-shadow: 0 0 0 3px var(--teal-soft); }
+.petri.used { opacity: .3; cursor: default; }
+.petri.drag { opacity: .35; }
+.petri.shake { animation: micshake .35s; border-color: var(--coral); }
+@keyframes micshake { 25% { transform: translateX(-5px); } 75% { transform: translateX(5px); } }
+.pghost { position: fixed; z-index: 9999; pointer-events: none; transform: translate(-50%, -50%); display: flex; align-items: center; gap: 6px; padding: 4px 10px 4px 4px; border: 2px solid var(--teal); border-radius: 26px; background: var(--surface); color: var(--ink); font: 700 13px/1.15 var(--f-body); box-shadow: 0 8px 20px rgba(0,0,0,.3); }
+.pghost span { font-style: italic; }
+.micmsg { margin: 0; min-height: 18px; font-size: 13px; font-weight: 700; color: var(--coral); }
+.mfills { display: grid; gap: 8px; }
+.mfill { display: flex; align-items: center; gap: 8px; }
+.mfill span { width: 24px; text-align: center; font: 800 13px var(--f-mono); color: var(--muted); }
+.mfill input { flex: 1; min-width: 0; min-height: 44px; padding: 8px 12px; border: 1.5px solid var(--ink); border-radius: 10px; background: var(--surface); color: var(--ink); font: 600 15px var(--f-body); }
+.mfill.ok input { border-color: var(--teal); background: var(--teal-soft); font-style: italic; }
+.mfill.bad input { border-color: var(--coral); background: var(--coral-soft); }
+.micans { margin: 0; font-style: normal; }
+.result .pay { display: flex; gap: 10px; flex-wrap: wrap; align-items: baseline; font-size: 13px; }
+.result .pay .big { font: 800 22px var(--f-display); }
 </style>
 
 <div class="shell">
@@ -1186,6 +1237,7 @@ table.board tbody tr:nth-child(-n+3) td:first-child { font-weight: 800; color: v
     <button type="button" data-act="sheet-ups"><i aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg></i><span>Upgrades</span></button>
     <button type="button" data-act="sheet-prog"><i aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 4h8v5a4 4 0 0 1-8 0zM8 6H4v1a3 3 0 0 0 4 3M16 6h4v1a3 3 0 0 1-4 3M12 13v4M8 20h8"/></svg></i><span>Progress &amp; awards</span></button>
     <button type="button" data-act="daily"><i aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="4"/><path d="M12 12l5-5"/></svg></i><span>Daily goals <em id="dailybadge" class="dgbadge"></em></span></button>
+    <button type="button" data-act="mic"><i aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="8"/><circle cx="9" cy="10" r="1.6"/><circle cx="14.5" cy="9" r="1"/><circle cx="14" cy="14" r="2"/></svg></i><span>Microbe lab <em id="micbadge" class="dgbadge"></em></span></button>
     <button type="button" data-act="board"><i aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 4h10v5a5 5 0 0 1-10 0V4z"/><path d="M7 6H4v2a3 3 0 0 0 3 3M17 6h3v2a3 3 0 0 1-3 3M12 14v4M8 20h8"/></svg></i><span>Leaderboard</span></button>
     <button type="button" data-act="settings"><i aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5.5A1.5 1.5 0 0 1 5.5 4H12v16H5.5A1.5 1.5 0 0 1 4 18.5zM12 4h6.5A1.5 1.5 0 0 1 20 5.5v13a1.5 1.5 0 0 1-1.5 1.5H12"/></svg></i><span>Topics</span></button>
     <button type="button" data-act="flash"><i aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="6" width="14" height="12" rx="2"/><path d="M7 3h12a2 2 0 0 1 2 2v10"/></svg></i><span>Flashcards</span></button>

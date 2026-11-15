@@ -1154,6 +1154,57 @@ table.board tbody tr:nth-child(-n+3) td:first-child { font-weight: 800; color: v
 .molsvg .site circle { transition: fill .12s; }
 .molnote { margin: 0; font-size: 13px; color: var(--muted); text-align: center; }
 .molnote b { color: var(--ink); }
+/* microbe lab */
+.seg { display: flex; gap: 6px; flex-wrap: wrap; }
+.seg-b { flex: 1 1 auto; min-height: 40px; padding: 8px 12px; border: 1.5px solid var(--ink); border-radius: 10px; background: var(--surface); color: var(--ink); font: 700 13px/1.1 var(--f-body); cursor: pointer; }
+.seg-b.on { background: var(--teal); border-color: var(--teal-ink); color: var(--on-teal); }
+.micbug { margin: 0; padding: 8px 10px; border-radius: 10px; background: var(--amber-soft); color: var(--ink); font-size: 13px; font-weight: 700; }
+.micbody { display: grid; grid-template-columns: minmax(120px, 190px) 1fr; gap: 14px; align-items: start; }
+@media (max-width: 420px) { .micbody { grid-template-columns: 1fr; } .mantw { max-width: 190px; margin: 0 auto; } }
+.mantw { position: relative; width: 100%; aspect-ratio: 200 / 420; background: var(--surface2); border: 1.5px solid var(--line); border-radius: 14px; min-width: 0; }
+.micman { position: absolute; inset: 0; width: 100%; height: 100%; }
+.mpin { position: absolute; width: 26px; height: 26px; margin: -13px 0 0 -13px; padding: 0; border-radius: 50%; border: 2px solid var(--ink); background: var(--amber); color: var(--ink); font: 800 13px/1 var(--f-body); cursor: pointer; display: grid; place-items: center; }
+.mpin::before { content: ""; position: absolute; inset: -9px; }
+.mpin.st1 { background: #BFE9D6; } .mpin.st2 { background: var(--teal); color: var(--on-teal); }
+.mpin.ster { border-style: dashed; }
+.mpin.on { outline: 3px solid var(--coral); outline-offset: 2px; }
+.micside { display: grid; gap: 10px; min-width: 0; }
+.micpick { display: grid; gap: 6px; padding: 10px; border: 1.5px solid var(--line); border-radius: 12px; background: var(--surface); }
+.micpick.empty { color: var(--muted); }
+.micfam { display: grid; gap: 6px; }
+.micfam .btn { justify-content: space-between; text-align: left; }
+.note.small { font-size: 11.5px; }
+.mstars { display: inline-flex; gap: 2px; }
+.mstars i { font-style: normal; color: var(--line); font-size: 16px; line-height: 1; }
+.mstars i.on { color: var(--amber); }
+.miclist { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+.microw { width: 100%; display: flex; align-items: center; gap: 10px; padding: 10px 12px; min-height: 44px; border: 1.5px solid var(--line); border-radius: 12px; background: var(--surface); color: var(--ink); font: 700 14px/1.2 var(--f-body); text-align: left; cursor: pointer; }
+.microw .mrn { flex: 1; min-width: 0; }
+.microw small { color: var(--muted); font-weight: 600; }
+.mslots, .mdishes { display: flex; flex-wrap: wrap; gap: 8px; }
+.mslot { flex: 1 1 130px; min-height: 44px; padding: 8px 10px; border: 2px dashed var(--muted); border-radius: 12px; background: var(--surface2); color: var(--ink); font: 700 14px/1.2 var(--f-body); text-align: left; }
+.mslot em { color: var(--muted); font-style: normal; }
+.mslot.over { border-color: var(--teal); background: var(--teal-soft); }
+.mslot.full { border: 2px solid var(--teal); background: var(--teal-soft); opacity: 1; }
+.petri { display: flex; align-items: center; gap: 6px; padding: 4px 10px 4px 4px; min-height: 52px; border: 1.5px solid var(--line); border-radius: 26px; background: var(--surface); color: var(--ink); font: 700 13px/1.15 var(--f-body); cursor: grab; touch-action: none; user-select: none; -webkit-user-select: none; max-width: 100%; text-align: left; }
+.petri span { min-width: 0; font-style: italic; }
+.petri.sel { border-color: var(--teal); box-shadow: 0 0 0 3px var(--teal-soft); }
+.petri.used { opacity: .3; cursor: default; }
+.petri.drag { opacity: .35; }
+.petri.shake { animation: micshake .35s; border-color: var(--coral); }
+@keyframes micshake { 25% { transform: translateX(-5px); } 75% { transform: translateX(5px); } }
+.pghost { position: fixed; z-index: 9999; pointer-events: none; transform: translate(-50%, -50%); display: flex; align-items: center; gap: 6px; padding: 4px 10px 4px 4px; border: 2px solid var(--teal); border-radius: 26px; background: var(--surface); color: var(--ink); font: 700 13px/1.15 var(--f-body); box-shadow: 0 8px 20px rgba(0,0,0,.3); }
+.pghost span { font-style: italic; }
+.micmsg { margin: 0; min-height: 18px; font-size: 13px; font-weight: 700; color: var(--coral); }
+.mfills { display: grid; gap: 8px; }
+.mfill { display: flex; align-items: center; gap: 8px; }
+.mfill span { width: 24px; text-align: center; font: 800 13px var(--f-mono); color: var(--muted); }
+.mfill input { flex: 1; min-width: 0; min-height: 44px; padding: 8px 12px; border: 1.5px solid var(--ink); border-radius: 10px; background: var(--surface); color: var(--ink); font: 600 15px var(--f-body); }
+.mfill.ok input { border-color: var(--teal); background: var(--teal-soft); font-style: italic; }
+.mfill.bad input { border-color: var(--coral); background: var(--coral-soft); }
+.micans { margin: 0; font-style: normal; }
+.result .pay { display: flex; gap: 10px; flex-wrap: wrap; align-items: baseline; font-size: 13px; }
+.result .pay .big { font: 800 22px var(--f-display); }
 </style>
 
 <div class="shell">
@@ -1186,6 +1237,7 @@ table.board tbody tr:nth-child(-n+3) td:first-child { font-weight: 800; color: v
     <button type="button" data-act="sheet-ups"><i aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg></i><span>Upgrades</span></button>
     <button type="button" data-act="sheet-prog"><i aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 4h8v5a4 4 0 0 1-8 0zM8 6H4v1a3 3 0 0 0 4 3M16 6h4v1a3 3 0 0 1-4 3M12 13v4M8 20h8"/></svg></i><span>Progress &amp; awards</span></button>
     <button type="button" data-act="daily"><i aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="4"/><path d="M12 12l5-5"/></svg></i><span>Daily goals <em id="dailybadge" class="dgbadge"></em></span></button>
+    <button type="button" data-act="mic"><i aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="8"/><circle cx="9" cy="10" r="1.6"/><circle cx="14.5" cy="9" r="1"/><circle cx="14" cy="14" r="2"/></svg></i><span>Microbe lab <em id="micbadge" class="dgbadge"></em></span></button>
     <button type="button" data-act="board"><i aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 4h10v5a5 5 0 0 1-10 0V4z"/><path d="M7 6H4v2a3 3 0 0 0 3 3M17 6h3v2a3 3 0 0 1-3 3M12 14v4M8 20h8"/></svg></i><span>Leaderboard</span></button>
     <button type="button" data-act="settings"><i aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5.5A1.5 1.5 0 0 1 5.5 4H12v16H5.5A1.5 1.5 0 0 1 4 18.5zM12 4h6.5A1.5 1.5 0 0 1 20 5.5v13a1.5 1.5 0 0 1-1.5 1.5H12"/></svg></i><span>Topics</span></button>
     <button type="button" data-act="flash"><i aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="6" width="14" height="12" rx="2"/><path d="M7 3h12a2 2 0 0 1 2 2v10"/></svg></i><span>Flashcards</span></button>
@@ -2166,6 +2218,102 @@ MQ("Tolterodine", 3, "tolterodine", "methyl", "Tolterodine is converted to an ac
 MQ("Tolterodine", 3, "tolterodine", "iprop", "In CYP2D6 poor metabolizers tolterodine is cleared by CYP3A4. Tap the site CYP3A4 attacks, then choose the change.", "An N-isopropyl group is removed (N-dealkylation)", ["The ring methyl is hydroxylated to the active 5-HMT", "The phenol is oxidized to a quinone", "The tertiary amine is hydrolyzed"], "N-dealkylation is the CYP3A4 route. The CYP2D6 route is hydroxylation of the ring methyl.", CHOS(54));
 MQ("Fesoterodine", 3, "fesoterodine", "ester", "Fesoterodine is an inactive prodrug. Tap the site where it is activated, then choose the change.", "The isobutyrate ester is hydrolyzed by nonspecific esterases, releasing the active 5-HMT", ["An N-isopropyl group is removed by CYP3A4, and that step is required to activate the prodrug", "The hydroxymethyl is oxidized to a carboxylic acid by CYP2D6", "The ester is glucuronidated by UGT to the active form"], "No CYP step is needed for activation, which is the advantage over tolterodine in poor CYP2D6 metabolizers.", CHOS(54));
 MQ("Parathion", 3, "parathion", "ps", "Parathion is a thiophosphate that must be activated to inhibit AChE. Tap the group that CYP changes, then choose the change.", "CYP desulfuration replaces P=S with P=O, giving the active oxon (paraoxon)", ["The nitro group is reduced to an amine, which inhibits AChE", "An ethoxy group is hydrolyzed by carboxylesterase", "The P–O–aryl bond is cleaved by AChE"], "P=S compounds are prodrugs. The oxon phosphorylates the active-site serine of AChE.", CHOS(37));
+/* Microbe lab data (trash can menu): the "human body microbes" map and the "Resistant organisms and important antibiotics 2026" handout.
+   MICSETS: sets of groups. A group is a list of items to place (drag mode) or type (fill-in mode).
+   Helpers (global, no game state): micNorm, micAliases, micMatch, micTags, micDecoys. */
+const MICSETS = [
+  { id: 'body', name: 'Body map', sub: 'Usual bugs by body site', src: 'Human body microbes map', groups: [
+    { id: 'cns', name: 'CNS / Meningitis', sterile: true, items: ['Streptococcus pneumoniae', 'Neisseria meningitidis', 'Haemophilus influenzae', 'Streptococcus agalactiae (Group B Strep)'] },
+    { id: 'ear', name: 'Ear', items: ['Streptococcus pneumoniae', 'Haemophilus influenzae', 'Moraxella catarrhalis'] },
+    { id: 'upper', name: 'Upper respiratory', items: ['Streptococcus pneumoniae', 'Streptococcus pyogenes', 'Haemophilus influenzae', 'Moraxella catarrhalis'] },
+    { id: 'mouth', name: 'Mouth', items: ['Viridans group Streptococci', 'Anaerobes'] },
+    { id: 'lower', name: 'Lower respiratory', sterile: true, items: ['Streptococcus pneumoniae', 'Haemophilus influenzae', 'Atypicals'] },
+    { id: 'heart', name: 'Heart / Endocarditis', sterile: true, items: ['Staphylococcus aureus', 'Viridans group Streptococci', 'Staphylococcus epidermidis', 'Enterococci'] },
+    { id: 'intra', name: 'Intra-abdominal', items: ['Enteric gram negative rods', 'Bacteroides species', 'Enterococci'] },
+    { id: 'gi', name: 'Gastrointestinal', items: ['Clostridioides difficile', 'Campylobacter jejuni', 'Helicobacter pylori (stomach)'] },
+    { id: 'bone', name: 'Bone and joint', sterile: true, items: ['Staphylococcus aureus', 'Staphylococcus epidermidis', 'Streptococcus species', 'Enteric gram negative rods'] },
+    { id: 'uti', name: 'Urinary tract', items: ['Escherichia coli', 'Klebsiella species', 'Proteus mirabilis', 'Enterococci', 'Staphylococcus saprophyticus'] },
+    { id: 'skin', name: 'Skin / Soft tissue', items: ['Staphylococcus species', 'Streptococcus species'] },
+    { id: 'sti', name: 'Sexually transmitted diseases', items: ['Neisseria gonorrhoeae', 'Chlamydia trachomatis'] },
+    { id: 'egnr', name: 'Enteric gram negative rods', fam: true, items: ['Escherichia coli', 'Klebsiella species', 'Enterobacter cloacae', 'Citrobacter species', 'Proteus species'] },
+    { id: 'aty', name: 'Atypicals', fam: true, items: ['Chlamydia species', 'Mycoplasma species', 'Legionella species'] }
+  ] },
+  { id: 'res', name: 'Resistant bugs', sub: 'Resistant organisms and their drugs', src: 'Resistant organisms and important antibiotics 2026', groups: [
+    { id: 'rp', name: 'Common resistant pathogens', bug: 'rp', items: ['MRSA (methicillin-resistant S. aureus)', 'E. faecalis, E. faecium (VRE)', 'E. coli (ESBL, CRE)', 'K. pneumoniae (ESBL, CRE)', 'Pseudomonas aeruginosa', 'Acinetobacter baumannii'],
+      al: [['mrsa', 'methicillin resistant staph aureus', 'methicillin resistant s aureus'], ['vre', 'vancomycin resistant enterococcus', 'e faecalis', 'e faecium', 'enterococcus faecalis', 'enterococcus faecium'], ['e coli esbl', 'e coli cre', 'esbl e coli', 'escherichia coli'], ['k pneumoniae esbl', 'k pneumoniae cre', 'klebsiella pneumoniae', 'klebsiella'], ['p aeruginosa', 'pseudomonas'], ['a baumannii', 'acinetobacter']], decoyFree: true },
+    { id: 'paiv', name: 'Pseudomonas: IV', bug: 'pa', items: ['Piperacillin/Tazobactam', 'Ticarcillin/Clavulanate', 'Ceftazidime', 'Cefepime', 'Ceftolozane/Tazobactam', 'Aztreonam', 'Imipenem/Cilastatin', 'Meropenem', 'Ciprofloxacin', 'Levofloxacin', 'Gentamicin', 'Tobramycin'], ban: ['Carbapenems', 'Fosfomycin'] },
+    { id: 'papo', name: 'Pseudomonas: PO', bug: 'pa', items: ['Ciprofloxacin', 'Levofloxacin'], ban: ['Moxifloxacin', 'Carbapenems', 'Fosfomycin'] },
+    { id: 'mrsaiv', name: 'MRSA: IV', bug: 'mrsa', items: ['Vancomycin', 'Daptomycin', 'Linezolid', 'Ceftaroline'], ban: ['Tigecycline', 'Doxycycline', 'Minocycline', 'Trimethoprim/Sulfamethoxazole', 'Rifampin'] },
+    { id: 'mrsapo', name: 'MRSA: PO', bug: 'mrsa', items: ['Trimethoprim/Sulfamethoxazole', 'Doxycycline', 'Minocycline', 'Linezolid', 'Rifampin (only with other antibiotics)'], al: [['tmp smx', 'tmpsmx', 'sulfamethoxazole trimethoprim', 'bactrim'], [], [], [], ['rifampin']], ban: ['Tetracyclines', 'Tigecycline'] },
+    { id: 'vreiv', name: 'VRE: IV', bug: 'vre', items: ['Linezolid', 'Daptomycin', 'Tigecycline'], ban: ['Doxycycline', 'Minocycline'] },
+    { id: 'vrepo', name: 'VRE: PO', bug: 'vre', items: ['Linezolid', 'Nitrofurantoin (UTI only)', 'Fosfomycin (UTI only)'], al: [[], ['nitrofurantoin'], ['fosfomycin']] },
+    { id: 'anaiv', name: 'Anaerobes: IV', bug: 'ana', items: ['Metronidazole', 'Carbapenems', 'Piperacillin/Tazobactam', 'Ampicillin/Sulbactam', 'Moxifloxacin', 'Cefoxitin'], ban: ['Imipenem/Cilastatin', 'Meropenem', 'Linezolid', 'Tigecycline', 'Levofloxacin', 'Ciprofloxacin', 'Amoxicillin/Clavulanate', 'Clindamycin'] },
+    { id: 'anapo', name: 'Anaerobes: PO', bug: 'ana', items: ['Metronidazole', 'Amoxicillin/Clavulanate'], ban: ['Ampicillin/Sulbactam', 'Clindamycin', 'Moxifloxacin', 'Linezolid', 'Tigecycline', 'Doxycycline', 'Carbapenems', 'Piperacillin/Tazobactam'] },
+    { id: 'atyd', name: 'Atypical organisms', bug: 'aty', items: ['Azithromycin', 'Ciprofloxacin', 'Levofloxacin', 'Moxifloxacin', 'Tetracyclines', 'Tigecycline'], ban: ['Doxycycline', 'Minocycline', 'Clindamycin', 'Linezolid', 'Erythromycin'] }
+  ] },
+  { id: 'pk', name: 'Antibiotic traits', sub: 'Killing pattern and kidney dosing', src: 'Resistant organisms and important antibiotics 2026, last page', groups: [
+    { id: 'time', name: 'Time-dependent antibiotics', items: ['Beta-lactams', 'Carbapenems', 'Tetracyclines', 'Macrolides', 'Clindamycin', 'Linezolid'], ban: ['Nafcillin', 'Ceftriaxone', 'Doxycycline'] },
+    { id: 'conc', name: 'Concentration-dependent antibiotics', items: ['Fluoroquinolones', 'Aminoglycosides', 'Nitrofurantoin', 'Fosfomycin', 'Daptomycin', 'Metronidazole'], ban: ['Moxifloxacin'] },
+    { id: 'norenal', name: 'Antibiotics that are NOT renally adjusted', items: ['Nafcillin', 'Ceftriaxone', 'Doxycycline', 'Macrolides', 'Moxifloxacin'], ban: ['Beta-lactams', 'Tetracyclines', 'Clindamycin', 'Linezolid', 'Metronidazole', 'Fluoroquinolones', 'Nitrofurantoin', 'Fosfomycin'] }
+  ] }
+];
+
+const micNorm = s => String(s || '').toLowerCase().replace(/\([^)]*\)/g, ' ').replace(/[^a-z0-9]+/g, ' ').trim();
+const micInner = s => { const m = String(s).match(/\(([^)]*)\)/); return m ? m[1] : ''; };
+/* every spelling that counts for an item: the full text, the text without brackets, the bracket text, "Genus species" shortened to "G species",
+   a genus alone for "... species", and any aliases given in the data (list of strings) */
+function micAliases(t, extra) {
+  const out = new Set(), add = x => { const n = String(x).toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim(); if (n) out.add(n); };
+  add(t); add(micNorm(t)); const inn = micInner(t); if (inn && !/^(esbl|cre|esbl, cre|group b strep|stomach|uti only|only with other antibiotics)$/i.test(inn.trim())) add(inn);
+  const base = micNorm(t), w = base.split(' ');
+  if (w.length === 2 && w[1] !== 'species') { add(w[0][0] + ' ' + w[1]); add(w[0][0] + w[1]); }
+  if (w.length === 2 && w[1] === 'species') { add(w[0]); add(w[0] + ' spp'); add(w[0] + ' sp'); }
+  if (/enterococci/.test(base)) add('enterococcus');
+  if (/viridans/.test(base)) { add('viridans strep'); add('viridans streptococci'); add('viridans streptococcus'); add('viridans group strep'); }
+  if (/gram negative rods/.test(base)) { add('enteric gnr'); add('gnr'); add('enteric gram negative bacilli'); add('enteric gram negatives'); }
+  if (/^anaerobes$/.test(base)) add('anaerobe');
+  if (/^atypicals$/.test(base)) { add('atypical'); add('atypical organisms'); }
+  if (/trimethoprim sulfamethoxazole/.test(base)) { add('tmp smx'); add('tmpsmx'); add('tmp sulfa'); }
+  if (/ampicillin sulbactam/.test(base)) add('unasyn');
+  if (/streptococcus agalactiae/.test(base)) { add('group b strep'); add('group b streptococcus'); add('s agalactiae'); add('strep agalactiae'); add('gbs'); }
+  if (/helicobacter pylori/.test(base)) { add('h pylori'); add('helicobacter pylori'); }
+  if (/clostridioides difficile/.test(base)) { add('c diff'); add('c difficile'); add('clostridium difficile'); add('clostridium difficille'); }
+  if (/^bacteroides species$/.test(base)) add('bacterioides');
+  (extra || []).forEach(add);
+  return [...out];
+}
+function micLev(a, b) { const m = a.length, n = b.length; if (Math.abs(m - n) > 2) return 3; let p = []; for (let j = 0; j <= n; j++) p[j] = j; for (let i = 1; i <= m; i++) { const c = [i]; for (let j = 1; j <= n; j++) c[j] = Math.min(p[j] + 1, c[j - 1] + 1, p[j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1)); p = c; } return p[n]; }
+/* does typed text match this item? exact on an alias, or one typo for 6 to 11 letters, two for longer */
+function micMatch(typed, item, extra) {
+  const x = String(typed || '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim(); if (!x) return false;
+  return micAliases(item, extra).some(a => { if (a === x) return true; const L = Math.max(a.length, x.length); if (L < 6 || /\d/.test(a)) return false; return micLev(a, x) <= (L >= 12 ? 2 : 1); });
+}
+/* tags used to keep decoys from being arguably right (a different staph species for a Staphylococcus box, and so on) */
+function micTags(t) {
+  const s = String(t).toLowerCase(), g = [];
+  if (/staphylococc|^staph/.test(s)) g.push('staph');
+  if (/streptococc|^strep|viridans/.test(s)) g.push('strep');
+  if (/enterococc|e\. faecalis|faecium/.test(s)) g.push('ent');
+  if (/escherichia|e\. coli|klebsiella|k\. pneumoniae|enterobacter|citrobacter|proteus|enteric gram/.test(s)) g.push('egnr');
+  if (/chlamydia|mycoplasma|legionella|atypical/.test(s)) g.push('aty');
+  if (/bacteroides|clostridioides|anaerobes/.test(s)) g.push('ana');
+  if (/haemophilus|moraxella/.test(s)) g.push('hm');
+  if (/neisseria/.test(s)) g.push('neis');
+  if (/pseudomonas|acinetobacter|mrsa/.test(s)) g.push('res');
+  return g;
+}
+/* chips for a drag round: all the group's items plus a few decoys that are plainly wrong for this group */
+function micDecoys(set, grp, n, rnd) {
+  if (grp.decoyFree) return [];
+  const mine = new Set(grp.items.map(micNorm)), banned = new Set((grp.ban || []).map(micNorm)), myTags = new Set(); grp.items.forEach(t => micTags(t).forEach(g => myTags.add(g)));
+  const pool = [], seen = new Set();
+  set.groups.forEach(o => {
+    if (o.id === grp.id || o.decoyFree) return; if (grp.bug && o.bug === grp.bug) return;
+    o.items.forEach(t => { const k = micNorm(t); if (mine.has(k) || banned.has(k) || seen.has(k)) return; if (set.id === 'body' && micTags(t).some(g => myTags.has(g))) return; seen.add(k); pool.push(t.replace(/ \((UTI only|only with other antibiotics)\)$/, '')); });
+  });
+  for (let i = pool.length - 1; i > 0; i--) { const j = Math.floor(rnd() * (i + 1)); const x = pool[i]; pool[i] = pool[j]; pool[j] = x; }
+  return pool.slice(0, n);
+}
 /* Therapeutics Exam 3: IBS, constipation, diarrhea, IBD, peptic ulcer disease, hemorrhoids and GI tests (from the lecture slides and class questions) */
 /* Three categories: TH3F = IBS, constipation and diarrhea; TH3C = contraceptives (th3c.js); TH3 = everything else */
 const T = (t, d, q, a, w, e, s) => Q(/^(Diarrhea|Constipation|IBS|Opioid-induced)/.test(t) ? "TH3F" : "TH3", d, q, a, w, e, t, s);
@@ -3602,7 +3750,8 @@ const World = (function () {
     { x0: -9.6, x1: -8.4, z0: -5.8, z1: -2.2 },    // mastery shelf (left wall)
     { x0: 7.4, x1: 10.0, z0: -6.7, z1: -4.1 },     // robot (back-right corner)
     { x0: -6.2, x1: 6.2, z0: -7.1, z1: -6.0 },     // shelves
-    { x0: 3.3, x1: 7.3, z0: -5.7, z1: -4.1 }       // event table
+    { x0: 3.3, x1: 7.3, z0: -5.7, z1: -4.1 },      // event table
+    { x0: 8.15, x1: 9.25, z0: -2.95, z1: -1.85 }   // trash can (right side)
   ];
   const EXIT = [[-3.4, 2.8], [-3.4, 6.3], [4.4, 6.4], [5, 7.2], [5, 10.8]];
 
@@ -3936,6 +4085,34 @@ const World = (function () {
     bx(p, 0.12, 0.3, 0.12, '#27384F', x, 1.42, z, up);
     bx(p, 0.85, 0.56, 0.07, '#27384F', x, 1.84, z, up);
     return bx(p, 0.72, 0.44, 0.03, '#2CCDBB', x, 1.84, z - 0.05, up, { emissive: new T.Color(0x1FB5A5), emissiveIntensity: glow });
+  }
+  /* ---- trash can on the right side: normal most of the time, crawling with bacteria when infested (api.setBin) ---- */
+  let binG = null, binBugs = [], binGlow = null, binInfested = false;
+  function buildBin() {
+    binG = new T.Group(); binG.position.set(8.7, 0, -2.4); binG.rotation.y = -0.35; binG.userData.bin = true; scene.add(binG);
+    cy(binG, 0.52, 0.42, 1.15, 8, '#5C7377', 0, 0.58, 0);
+    for (let i = 0; i < 3; i++) { const r = cy(binG, 0.535 - i * 0.004, 0.52, 0.06, 8, '#3F5457', 0, 0.28 + i * 0.3, 0); r.scale.set(1, 1, 1); }
+    cy(binG, 0.58, 0.58, 0.1, 8, '#3F5457', 0, 1.2, 0);
+    bx(binG, 0.34, 0.07, 0.24, '#8D9FA2', 0.02, 1.27, 0.05); bx(binG, 0.26, 0.2, 0.2, '#E9E1CE', -0.12, 1.34, -0.02).rotation.z = 0.4;
+    const h = bx(binG, 0.5, 0.08, 0.08, '#3F5457', 0, 1.0, 0.6); h.rotation.y = 0; bx(binG, 0.08, 0.22, 0.08, '#3F5457', -0.26, 0.96, 0.56); bx(binG, 0.08, 0.22, 0.08, '#3F5457', 0.26, 0.96, 0.56);
+    binGlow = new T.Mesh(new T.CylinderGeometry(1.7, 1.7, 0.02, 14), new T.MeshBasicMaterial({ color: 0x7ED321, transparent: true, opacity: 0.0, depthWrite: false })); binGlow.position.y = 0.04; binGlow.userData.bin = true; binG.add(binGlow);
+    const cols = ['#8BE04A', '#B26BE0', '#E8D44A', '#4AD6B8', '#F08A4B'];
+    for (let i = 0; i < 26; i++) {
+      const m = new T.Mesh(i % 3 === 0 ? new T.IcosahedronGeometry(0.075 + (i % 4) * 0.012, 0) : new T.OctahedronGeometry(0.06 + (i % 5) * 0.01, 0), new T.MeshStandardMaterial({ color: cols[i % cols.length], flatShading: true, roughness: 0.6, emissive: new T.Color(cols[i % cols.length]), emissiveIntensity: 0.35 }));
+      m.visible = false; m.userData.bin = true; m.userData.bug = { a: Math.random() * PI * 2, sp: (0.4 + Math.random() * 0.9) * (i % 2 ? 1 : -1), r: 0.62 + Math.random() * 0.9, up: Math.random(), ph: Math.random() * 6 }; binG.add(m); binBugs.push(m);
+    }
+  }
+  api.setBin = function (on) { binInfested = !!on; binBugs.forEach(m => { m.visible = binInfested; }); if (binGlow) binGlow.material.opacity = 0; };
+  api.binOn = () => binInfested;
+  function animBin(dt) {
+    if (!binG || !binInfested) return;
+    binBugs.forEach(m => {
+      const u = m.userData.bug; u.a += u.sp * dt; u.ph += dt * 6;
+      if (u.up < 0.45) { const hy = 0.25 + (Math.sin(u.ph * 0.35 + u.a) * 0.5 + 0.5) * 0.95; m.position.set(Math.cos(u.a) * 0.52, hy, Math.sin(u.a) * 0.52); }
+      else m.position.set(Math.cos(u.a) * u.r, 0.07, Math.sin(u.a) * u.r);
+      m.rotation.set(u.ph, u.a * 2, 0); m.position.y += Math.abs(Math.sin(u.ph)) * 0.04;
+    });
+    if (binGlow) binGlow.material.opacity = 0.12 + (Math.sin(time * 3) * 0.5 + 0.5) * 0.14;
   }
   function buildStatic() {
     const g = new T.Group(); scene.add(g);
@@ -4778,8 +4955,8 @@ const World = (function () {
     const r = canvas.getBoundingClientRect();
     ndc.x = ((e.clientX - r.left) / r.width) * 2 - 1; ndc.y = -((e.clientY - r.top) / r.height) * 2 + 1;
     raycaster.setFromCamera(ndc, camera);
-    const hits = raycaster.intersectObjects(synOn ? synItems.filter(g => g.visible) : labOn ? labItems : [].concat(CLICK.map(i => ug[i]), [staffGroup, custGroup, petG, pharmG], phoneG ? [phoneG] : [], capG ? [capG] : [], pillG ? [pillG] : [], brainG ? [brainG] : [], evtG ? [evtG] : []), true);
-    for (const h of hits) { let o = h.object; while (o) { if (o.userData && (o.userData.up || o.userData.cust || o.userData.pet || o.userData.pharm || o.userData.vis || o.userData.cap || o.userData.himA || o.userData.pill || o.userData.lab || o.userData.site || o.userData.brain || o.userData.evt)) { pickObj = h.object; return o.userData; } o = o.parent; } }
+    const hits = raycaster.intersectObjects(synOn ? synItems.filter(g => g.visible) : labOn ? labItems : [].concat(CLICK.map(i => ug[i]), [staffGroup, custGroup, petG, pharmG], phoneG ? [phoneG] : [], binG ? [binG] : [], capG ? [capG] : [], pillG ? [pillG] : [], brainG ? [brainG] : [], evtG ? [evtG] : []), true);
+    for (const h of hits) { let o = h.object; while (o) { if (o.userData && (o.userData.up || o.userData.cust || o.userData.pet || o.userData.pharm || o.userData.vis || o.userData.cap || o.userData.himA || o.userData.pill || o.userData.lab || o.userData.site || o.userData.brain || o.userData.evt || o.userData.bin)) { pickObj = h.object; return o.userData; } o = o.parent; } }
     return null;
   }
   function setHover(up) {
@@ -4836,7 +5013,7 @@ const World = (function () {
       if (e.pointerType !== 'mouse' || (drag && drag.on)) return;
       if (fpT) { setFpHover(fpPick(e)); return; }
       const h = pick(e); setHover(h && h.up ? h.up : null);
-      if (!hovered) canvas.style.cursor = h && (h.cust || h.pet || h.pharm || h.vis || h.cap || h.himA || h.lab || h.site || h.brain || h.evt) ? 'pointer' : 'default';
+      if (!hovered) canvas.style.cursor = h && (h.cust || h.pet || h.pharm || h.vis || h.cap || h.himA || h.lab || h.site || h.brain || h.evt || h.bin) ? 'pointer' : 'default';
       if (synOn) synHover = h && h.site ? h.site : null;
     });
     canvas.addEventListener('click', e => {
@@ -4844,6 +5021,7 @@ const World = (function () {
       if (fpT) { const id = fpPick(e); if (id && B.onFp) B.onFp(id); return; }
       const h = pick(e); dismissHint();
       if (synOn) { if (h && h.site && B.onSynSite) B.onSynSite(h.site); return; }
+      if (h && h.bin) { if (B.onBin) B.onBin(); return; }
       if (h && h.brain) { if (B.onBrain) B.onBrain(); return; }
       if (h && h.evt) { if (B.onEvt) B.onEvt(h.evt); return; }
       if (h && h.lab) { labClick(h); return; }
@@ -5297,6 +5475,7 @@ const World = (function () {
       const P = s.g.userData.P;
       if (!w) { s.idle -= dt; P.arms[1].rotation.x = -1.2 + Math.sin(time * 5 + s.phase) * 0.5; s.g.rotation.y = lerpAngle(s.g.rotation.y, s.g.position.z < -3 ? PI : 0, dt * 4); if (s.idle <= 0) { s.idle = 1.5 + Math.random() * 3; s.wp.push(staffTarget()); } }
     });
+    animBin(dt);
     if (phoneG) {
       if (phoneRinging) {
         phoneG.rotation.z = Math.sin(time * 42) * 0.06; phoneHS.position.y = 0.3 + Math.abs(Math.sin(time * 22)) * 0.05;
@@ -6386,7 +6565,7 @@ const World = (function () {
       hemi = new T.HemisphereLight(0xffffff, 0x88aaaa, 0.85); scene.add(hemi);
       sun = new T.DirectionalLight(0xffffff, 0.8); sun.position.set(8, 16, 9); sun.castShadow = true;
       sun.shadow.mapSize.set(1024, 1024); const sc = sun.shadow.camera; sc.left = -16; sc.right = 16; sc.top = 14; sc.bottom = -14; sc.near = 1; sc.far = 50; scene.add(sun);
-      buildStatic();
+      buildStatic(); try { buildBin(); } catch (e) { /* decor */ }
       CLICK.forEach(id => { const b = document.createElement('button'); b.type = 'button'; b.className = 'tag3d'; b.dataset.up = id; tagsEl.appendChild(b); tags[id] = b; });
       applyTheme(); bind();
       if (window.ResizeObserver) new ResizeObserver(resize).observe(host); else window.addEventListener('resize', resize);
@@ -8129,7 +8308,7 @@ const World = (function () {
   function renderPanel() {
     const pn = $('#qpanel'); if (!pn) return;
     pn.classList.toggle('karen', !!(cur && cur.karen && !cur.done && view === 'q'));
-    const body = view === 'create' ? createHTML() : view === 'awards' ? awardsHTML() : view === 'phone' ? phoneHTML() : view === 'fp' || view === 'him' ? '' : view === 'shift' ? shiftHTML() : view === 'daily' ? dailyHTML() : view === 'board' ? boardHTML() : view === 'flags' ? flagsHTML() : view === 'flash' ? fcHTML() : view === 'syn' ? synHTML() : view === 'ref' ? refHTML() : view === 'retire' ? retireHTML() : view === 'set' ? settingsHTML() : view === 'opts' ? optionsHTML() : view === 'studies' ? studiesHTML() : (cur ? cardHTML() : '');
+    const body = view === 'create' ? createHTML() : view === 'awards' ? awardsHTML() : view === 'phone' ? phoneHTML() : view === 'fp' || view === 'him' ? '' : view === 'shift' ? shiftHTML() : view === 'daily' ? dailyHTML() : view === 'mic' ? micHTML() : view === 'board' ? boardHTML() : view === 'flags' ? flagsHTML() : view === 'flash' ? fcHTML() : view === 'syn' ? synHTML() : view === 'ref' ? refHTML() : view === 'retire' ? retireHTML() : view === 'set' ? settingsHTML() : view === 'opts' ? optionsHTML() : view === 'studies' ? studiesHTML() : (cur ? cardHTML() : '');
     $('#counter').innerHTML = qbar() + body;
     const nb = document.querySelector('.nbk');
     if (nb) {
@@ -9478,7 +9657,222 @@ const World = (function () {
       <div class="btnrow"><button type="button" class="btn go" data-act="back">Back to the pharmacy</button></div></div>`;
   }
 
-  const GAME_VERSION = 127;
+  /* ---- Microbe lab (the trash can). Spliced into game.js at the MIC marker so it shares the game's scope. Data and matching helpers live in micdata.js.
+     Two ways to study each group: drag from the petri dish (word bank) into slots, or type the blanks. A perfect round with no hints earns a star for that mode. ---- */
+  const micS = () => { const m = S.mic = S.mic || { st: {}, mode: 'drag', set: 'body', rounds: 0 }; m.st = m.st || {}; return m; };
+  const micSet = (id) => MICSETS.find(s => s.id === id) || MICSETS[0];
+  const micGrp = (set, gid) => set.groups.find(g => g.id === gid);
+  const micRec = (gid) => { const r = micS().st[gid]; return r || { d: 0, f: 0, n: 0 }; };
+  const micStars = (g) => { const r = micRec(g.id); return (r.d ? 1 : 0) + (r.f ? 1 : 0); };
+  let micR = null, micSelG = null, micDrag = null;
+  const micAl = (g, i) => (g.al && g.al[i]) || [];
+  const micItalic = (set) => set.id === 'body' || (set.id === 'res' && set.groups[0]);
+
+  /* a low-poly man (fan-triangulated facets) with the brain and a leg bone popping out; the other sites are pins */
+  function micShade(hex, f) { const n = parseInt(hex.slice(1), 16); let r = n >> 16 & 255, g = n >> 8 & 255, b = n & 255; const k = f >= 0 ? 255 : 0, a = Math.abs(f); r = Math.round(r + (k - r) * a); g = Math.round(g + (k - g) * a); b = Math.round(b + (k - b) * a); return 'rgb(' + r + ',' + g + ',' + b + ')'; }
+  function micFacets(pts, base, seed, str) {
+    let cx = 0, cy = 0; pts.forEach(p => { cx += p[0]; cy += p[1]; }); cx /= pts.length; cy /= pts.length; let o = '';
+    for (let i = 0; i < pts.length; i++) {
+      const a = pts[i], b = pts[(i + 1) % pts.length], mx = (a[0] + b[0] + cx) / 3, my = (a[1] + b[1] + cy) / 3, light = (-(mx - cx) * 0.6 - (my - cy) * 0.8) / 60;
+      const f = Math.max(-0.2, Math.min(0.2, light * 0.12 + (((seed * 31 + i * 17) % 11) / 11 - 0.5) * (str || 0.16)));
+      o += '<polygon points="' + a.join(',') + ' ' + b.join(',') + ' ' + cx.toFixed(1) + ',' + cy.toFixed(1) + '" fill="' + micShade(base, f) + '"/>';
+    }
+    return o;
+  }
+  const MIC_PINS = { cns: [121, 17], ear: [82, 56], mouth: [120, 73], upper: [120, 97], lower: [98, 133], heart: [141, 147], intra: [96, 186], gi: [144, 186], uti: [120, 215], sti: [120, 250], skin: [50, 150], bone: [199, 322] };
+  function micManSVG() {
+    const mir = (p) => p.map(q => [240 - q[0], q[1]]);
+    let s = '', k = 1;
+    const part = (pts, c, str) => { s += micFacets(pts, c, k++, str); };
+    const legL = [[[80, 236], [118, 236], [116, 312], [84, 312]], [[84, 312], [116, 312], [112, 392], [88, 392]], [[84, 392], [114, 392], [120, 412], [78, 412]]];
+    legL.forEach((p, i) => { part(p, i === 2 ? '#35405A' : '#3F5F8C'); part(mir(p), i === 2 ? '#35405A' : '#3F5F8C'); });
+    const armU = [[72, 104], [58, 112], [44, 168], [60, 174], [74, 132]], armF = [[44, 168], [60, 174], [54, 228], [38, 224]], hand = [[38, 224], [54, 228], [54, 244], [44, 250], [36, 240]];
+    [armF, hand].forEach(p => { part(p, '#F2C9A5'); part(mir(p), '#F2C9A5'); });
+    part([[108, 86], [132, 86], [134, 100], [106, 100]], '#E3B68F');
+    part([[76, 100], [106, 100], [120, 106], [134, 100], [164, 100], [172, 122], [164, 176], [160, 236], [80, 236], [76, 176], [68, 122]], '#2BB5A5', 0.12);
+    part(armU, '#2BB5A5'); part(mir(armU), '#2BB5A5');
+    part([[120, 24], [142, 30], [152, 48], [148, 70], [134, 84], [120, 88], [106, 84], [92, 70], [88, 48], [98, 30]], '#F2C9A5', 0.1);
+    part([[86, 48], [79, 52], [79, 63], [88, 65]], '#E3B68F'); part([[154, 48], [161, 52], [161, 63], [152, 65]], '#E3B68F');
+    s += '<polygon points="104,54 114,52 114,58 105,59" fill="#27384F"/><polygon points="126,52 136,54 135,59 126,58" fill="#27384F"/><polygon points="112,70 128,70 124,77 116,77" fill="#C4463B"/>';
+    /* the brain, lifted out of the skull */
+    part([[94, 36], [90, 22], [100, 10], [116, 4], [134, 5], [148, 14], [152, 26], [146, 38], [132, 33], [118, 37], [104, 33]], '#F08DB0', 0.2);
+    s += '<path d="M121 6 L118 20 L124 28" fill="none" stroke="#B94E79" stroke-width="1.6" stroke-linejoin="round"/>';
+    /* the leg bone, popping out of the shin with a torn patch of skin */
+    part([[146, 338], [154, 333], [161, 344], [157, 357], [148, 359], [141, 348]], '#C4463B', 0.2);
+    const bx0 = 150, by0 = 348, bx1 = 206, by1 = 316, dx = bx1 - bx0, dy = by1 - by0, L = Math.hypot(dx, dy), nx = -dy / L * 6, ny = dx / L * 6;
+    part([[bx0 + nx, by0 + ny], [bx1 + nx, by1 + ny], [bx1 - nx, by1 - ny], [bx0 - nx, by0 - ny]], '#F2EEE0', 0.1);
+    const knob = (x, y, ox, oy) => { part([[x + ox - 6, y + oy - 6], [x + ox + 3, y + oy - 9], [x + ox + 9, y + oy - 1], [x + ox + 2, y + oy + 8], [x + ox - 7, y + oy + 4]], '#E6E0CC', 0.1); };
+    knob(bx1, by1, 3, -7); knob(bx1, by1, 7, 5);
+    return '<svg class="micman" viewBox="40 0 160 420" aria-hidden="true" focusable="false">' + s + '</svg>';
+  }
+  function micPinsHTML(set, groups) {
+    const W = 240, H = 420, x0 = 20, vw = 200;
+    return groups.map(g => {
+      const p = MIC_PINS[g.id]; if (!p) return '';
+      const st = micStars(g), sel = micSelG === g.id;
+      return `<button type="button" class="mpin st${st}${g.sterile ? ' ster' : ''}${sel ? ' on' : ''}" data-act="mic-sel" data-v="${g.id}" style="left:${((p[0] - x0) / vw * 100).toFixed(1)}%;top:${(p[1] / H * 100).toFixed(1)}%" aria-label="${esc(g.name)}${g.sterile ? ' (normally sterile)' : ''}, ${st} of 2 stars" title="${esc(g.name)}"><span>${st === 2 ? '✓' : ''}</span></button>`;
+    }).join('');
+  }
+  const micStarsHTML = (g) => { const r = micRec(g.id); return `<span class="mstars" aria-label="${micStars(g)} of 2 stars"><i class="${r.d ? 'on' : ''}" title="Drag and drop">★</i><i class="${r.f ? 'on' : ''}" title="Fill in the blank">★</i></span>`; };
+
+  /* ---- menu ---- */
+  function micHTML() {
+    const m = micS(), set = micSet(m.set);
+    if (micR) return micRoundHTML();
+    const total = MICSETS.reduce((n, s) => n + s.groups.length * 2, 0), got = MICSETS.reduce((n, s) => n + s.groups.reduce((a, g) => a + micStars(g), 0), 0);
+    const tabs = MICSETS.map(s => `<button type="button" class="seg-b ${s.id === set.id ? 'on' : ''}" data-act="mic-set" data-v="${s.id}" aria-pressed="${s.id === set.id}">${esc(s.name)}</button>`).join('');
+    const modes = [['drag', 'Drag from the petri dish'], ['fill', 'Fill in the blank']].map(a => `<button type="button" class="seg-b ${m.mode === a[0] ? 'on' : ''}" data-act="mic-mode" data-v="${a[0]}" aria-pressed="${m.mode === a[0]}">${a[1]}</button>`).join('');
+    let body = '';
+    if (set.id === 'body') {
+      const sites = set.groups.filter(g => !g.fam), fams = set.groups.filter(g => g.fam), sel = micSelG && micGrp(set, micSelG);
+      body = `<div class="micbody"><div class="mantw">${micManSVG()}${micPinsHTML(set, sites)}</div>
+        <div class="micside"><p class="note">Tap a pin to pick a body site. The brain (CNS) and the leg bone (bone and joint) are popping out. Dashed pins are normally sterile sites.</p>
+        ${sel ? `<div class="micpick"><b>${esc(sel.name)}</b>${micStarsHTML(sel)}<small>${sel.items.length} usual bugs${sel.sterile ? ' · normally sterile' : ''}</small><button type="button" class="btn go" data-act="mic-go" data-v="${sel.id}">Start this site</button></div>` : '<div class="micpick empty"><small>No site picked yet.</small></div>'}
+        <div class="micfam"><b>Bug families</b>${fams.map(g => `<button type="button" class="btn" data-act="mic-go" data-v="${g.id}">${esc(g.name)} ${micStarsHTML(g)}</button>`).join('')}</div>
+        <p class="note small">Normally sterile (no bugs): bone, heart, lower respiratory area, the central nervous system, and the blood.</p></div></div>`;
+    } else {
+      body = `<ul class="miclist">${set.groups.map(g => `<li><button type="button" class="microw" data-act="mic-go" data-v="${g.id}"><span class="mrn">${esc(g.name)}</span><small>${g.items.length} to place</small>${micStarsHTML(g)}</button></li>`).join('')}</ul>`;
+    }
+    const bug = S.binBug ? '<p class="micbug">🦠 The trash can is crawling with bacteria! Finish a round to clean it up and earn double.</p>' : '';
+    return `<div class="pane micpane"><h3>Microbe lab</h3><p class="sub">${esc(set.sub)}. Stars: <b>${got}</b> of ${total}. One star per mode when you finish a group with no misses and no hint.</p>${bug}
+      <div class="seg" role="group" aria-label="Study mode">${modes}</div><div class="seg sets" role="group" aria-label="List">${tabs}</div>${body}
+      <div class="btnrow"><button type="button" class="btn go" data-act="back">Back to counter</button></div></div>`;
+  }
+
+  /* ---- a round ---- */
+  const micItemLabel = (set, t) => `<i>${esc(t)}</i>`;
+  function micDish(label, kind, seed) {
+    const cols = kind === 'drug' ? ['#E8B04A', '#C27A1E'] : ['#BFE9D6', '#5BB89A'];
+    let c = '', r = seed;
+    for (let i = 0; i < 5; i++) { r = (r * 9301 + 49297) % 233280; const a = r / 233280 * 6.28, d = 6 + (r % 9); r = (r * 9301 + 49297) % 233280; c += `<polygon points="${(24 + Math.cos(a) * d).toFixed(1)},${(24 + Math.sin(a) * d).toFixed(1)} ${(27 + Math.cos(a) * d).toFixed(1)},${(22 + Math.sin(a) * d).toFixed(1)} ${(28 + Math.cos(a) * d).toFixed(1)},${(27 + Math.sin(a) * d).toFixed(1)}" fill="${cols[1]}" opacity=".85"/>`; }
+    return `<svg viewBox="0 0 48 48" width="46" height="46" aria-hidden="true"><polygon points="24,3 38,8 45,21 42,36 31,45 16,45 6,36 3,21 10,8" fill="${cols[0]}" stroke="#7B9AA0" stroke-width="2"/><polygon points="24,8 35,12 40,22 37,33 29,40 18,40 11,33 8,22 13,12" fill="none" stroke="#7B9AA0" stroke-width="1" opacity=".6"/>${c}</svg>`;
+  }
+  function micStart(gid) {
+    const m = micS(); let set = null, grp = null; [micSet(m.set)].concat(MICSETS).some(s => { const g = micGrp(s, gid); if (g) { set = s; grp = g; return true; } return false; });
+    if (!grp) return; m.set = set.id;
+    const mode = m.mode, n = grp.items.length;
+    const R = { set: set.id, gid, mode, mist: 0, hint: false, done: false, msg: '', sel: null };
+    if (mode === 'drag') {
+      const decoys = micDecoys(set, grp, Math.max(2, Math.min(4, 8 - n)), Math.random);
+      const chips = grp.items.map(t => ({ t, k: micNorm(t), ok: true })).concat(decoys.map(t => ({ t, k: micNorm(t), ok: false })));
+      for (let i = chips.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); const x = chips[i]; chips[i] = chips[j]; chips[j] = x; }
+      chips.forEach((c, i) => { c.id = i; c.used = false; });
+      R.chips = chips; R.slots = grp.items.map(() => null);
+    } else { R.vals = grp.items.map(() => ''); R.lock = grp.items.map(() => -1); R.bad = grp.items.map(() => false); }
+    micR = R; renderPanel();
+  }
+  function micRoundHTML() {
+    const R = micR, set = micSet(R.set), g = micGrp(set, R.gid), n = g.items.length, drug = set.id !== 'body' && g.bug && g.bug !== 'rp' || set.id === 'pk';
+    const head = `<h3>${esc(g.name)}</h3><p class="sub">${R.mode === 'drag' ? 'Drag the right ' + (drug ? 'drugs' : 'microbes') + ' from the petri dish into the slots. You can also tap a dish, then tap a slot. Some dishes are wrong.' : 'Fill in the blanks: type the ' + (drug ? 'drugs' : 'microbes') + ' for this ' + (set.id === 'body' ? 'body site' : 'list') + '. Order does not matter.'}${g.sterile ? ' This site is normally sterile.' : ''}</p>`;
+    let body = '';
+    if (R.done) {
+      const r = R.res, next = micNextGroup(set, g);
+      body = `<div class="result ${r.stars ? 'good' : 'fail'}"><h3>${r.gaveUp ? 'Answers shown' : R.mist === 0 && !R.hint ? 'Perfect round!' : 'Round complete'}</h3>
+        ${r.gaveUp ? '<p>No payout when you show the answers. Try again to earn a star.</p>' : `<div class="pay"><span class="big">+${money(r.pay)}</span><span>${R.mist} miss${R.mist === 1 ? '' : 'es'}</span>${R.hint ? '<span>hint x0.7</span>' : ''}${r.bug ? '<span>trash can cleaned x2</span>' : ''}${r.stars ? '<span>★ star earned</span>' : ''}</div>`}
+        <p class="micans"><b>${esc(g.name)}:</b> ${g.items.map(t => esc(t)).join(' · ')}</p>
+        <div class="btnrow"><button type="button" class="btn go" data-act="mic-again" data-v="${g.id}">Again</button>${next ? `<button type="button" class="btn" data-act="mic-go" data-v="${next.id}">Next: ${esc(next.name)}</button>` : ''}<button type="button" class="btn" data-act="mic-menu">Back to the lab</button></div></div>`;
+    } else if (R.mode === 'drag') {
+      const slots = R.slots.map((c, i) => { const ch = c === null ? null : R.chips[c]; return `<button type="button" class="mslot ${ch ? 'full' : ''}" data-slot="${i}" aria-label="Slot ${i + 1}${ch ? ': ' + esc(ch.t) : ', empty'}" ${ch ? 'disabled' : ''}>${ch ? `<i>${esc(ch.t.replace(/ \((UTI only|only with other antibiotics)\)$/, ''))}</i>` : '<em>' + (i + 1) + '</em>'}</button>`; }).join('');
+      const dishes = R.chips.map(c => `<button type="button" class="petri ${c.used ? 'used' : ''} ${R.sel === c.id ? 'sel' : ''} ${R.shake === c.id ? 'shake' : ''}" data-chip="${c.id}" ${c.used ? 'disabled' : ''}>${micDish(c.t, drug ? 'drug' : 'bug', c.id * 7 + c.t.length)}<span>${esc(c.t)}</span></button>`).join('');
+      body = `<div class="mslots" aria-label="Slots">${slots}</div><p class="micmsg" aria-live="polite">${esc(R.msg || (R.sel !== null ? 'Dish picked. Tap an empty slot.' : ''))}</p><div class="mdishes" aria-label="Petri dish word bank">${dishes}</div><p class="note">Misses: <b>${R.mist}</b></p>
+        <div class="btnrow"><button type="button" class="btn" data-act="mic-menu">Back to the lab</button></div>`;
+    } else {
+      const rows = g.items.map((t, i) => { const lk = R.lock[i] >= 0; const ph = R.hint ? (() => { const w = lk ? '' : (g.items.find((x, j) => R.lock.indexOf(j) < 0 && j >= 0) || ''); return ''; })() : ''; return `<label class="mfill ${lk ? 'ok' : R.bad[i] ? 'bad' : ''}"><span>${i + 1}</span><input type="text" data-fill="${i}" value="${esc(lk ? g.items[R.lock[i]].replace(/ \((UTI only|only with other antibiotics)\)$/, '') : R.vals[i])}" ${lk ? 'readonly' : ''} placeholder="${R.hint && !lk ? esc(micHintFor(g, R, i)) : 'Type here'}" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" aria-label="Blank ${i + 1}"></label>`; }).join('');
+      body = `<div class="mfills">${rows}</div><p class="micmsg" aria-live="polite">${esc(R.msg)}</p><p class="note">Misses: <b>${R.mist}</b>. Spelling does not need to be perfect, and short forms like <i>E. coli</i> or <i>MRSA</i> are fine.</p>
+        <div class="btnrow"><button type="button" class="btn go" data-act="mic-check">Check</button><button type="button" class="btn" data-act="mic-hint" ${R.hint ? 'disabled' : ''}>Hint (first letters)</button><button type="button" class="btn" data-act="mic-reveal">Show answers</button><button type="button" class="btn" data-act="mic-menu">Back to the lab</button></div>`;
+    }
+    return `<div class="pane micpane round">${head}${body}</div>`;
+  }
+  function micHintFor(g, R, i) { const left = g.items.filter((t, j) => R.lock.indexOf(j) < 0); const t = left[R.hintMap ? R.hintMap[i] : 0] || ''; return ''; }
+  function micNextGroup(set, g) { const i = set.groups.findIndex(x => x.id === g.id); for (let k = 1; k <= set.groups.length; k++) { const o = set.groups[(i + k) % set.groups.length]; if (o.id !== g.id && !!o.fam === !!g.fam) return o; } return null; }
+  /* chips: the player drops a dish on a slot, either by dragging or by tap, tap */
+  function micPlace(chipId, slot) {
+    const R = micR; if (!R || R.done || R.mode !== 'drag') return; const set = micSet(R.set), g = micGrp(set, R.gid), ch = R.chips[chipId]; if (!ch || ch.used || R.slots[slot] !== null) return;
+    const okKeys = g.items.map(micNorm), placed = R.slots.filter(c => c !== null).map(c => R.chips[c].k);
+    R.sel = null; R.shake = null;
+    if (okKeys.indexOf(ch.k) >= 0 && placed.indexOf(ch.k) < 0) { ch.used = true; R.slots[slot] = chipId; R.msg = ''; SFX.play('ok'); if (R.slots.every(c => c !== null)) { micFinish(false); return; } }
+    else { R.mist++; R.shake = chipId; R.msg = ch.t.replace(/ \((UTI only|only with other antibiotics)\)$/, '') + ' is not on this list. It goes back in the dish.'; SFX.play('bad'); }
+    renderPanel();
+  }
+  function micCheck() {
+    const R = micR; if (!R || R.done || R.mode !== 'fill') return; const set = micSet(R.set), g = micGrp(set, R.gid); let wrong = 0, empty = 0, added = 0;
+    R.bad = R.bad.map(() => false);
+    R.vals.forEach((v, i) => {
+      if (R.lock[i] >= 0) return; if (!v.trim()) { empty++; return; }
+      const j = g.items.findIndex((t, jj) => R.lock.indexOf(jj) < 0 && micMatch(v, t, micAl(g, jj)));
+      if (j >= 0) { R.lock[i] = j; added++; } else { R.bad[i] = true; wrong++; }
+    });
+    R.mist += wrong;
+    if (R.lock.every(x => x >= 0)) { micFinish(false); return; }
+    R.msg = (added ? added + ' right. ' : '') + (wrong ? wrong + ' not on this list' + (wrong === 1 ? '' : ' (each counts as a miss)') + '. ' : '') + (empty ? empty + ' blank' + (empty === 1 ? '' : 's') + ' still empty.' : '');
+    SFX.play(wrong ? 'bad' : 'ok'); renderPanel();
+  }
+  function micFinish(gaveUp) {
+    const R = micR, set = micSet(R.set), g = micGrp(set, R.gid), n = g.items.length, m = micS(); const rec = m.st[g.id] = m.st[g.id] || { d: 0, f: 0, n: 0 };
+    let pay = 0, stars = false, bug = false;
+    if (!gaveUp) {
+      const acc = R.mist === 0 ? 1.5 : R.mist <= 2 ? 1 : 0.6; bug = !!S.binBug;
+      pay = Math.max(1, Math.round(6 * n * (R.mode === 'fill' ? 1.5 : 1) * acc * (R.hint ? 0.7 : 1) * (bug ? 2 : 1) * buffPay() * franchiseMult()));
+      S.cash += pay; S.earned += pay; rec.n++; m.rounds = (m.rounds || 0) + 1;
+      if (R.mist === 0 && !R.hint) { const key = R.mode === 'fill' ? 'f' : 'd'; if (!rec[key]) { rec[key] = 1; stars = true; } }
+      if (bug) { S.binBug = false; try { World.setBin(false); } catch (e) { /* decor */ } }
+      SFX.play('ok'); SFX.play('coin'); boardPushSoon();
+    } else { R.lock = R.lock && g.items.map((t, i) => i); }
+    R.done = true; R.res = { pay, stars, bug, gaveUp: !!gaveUp };
+    save(); renderStats(); renderPanel();
+  }
+  function micAct(a, v) {
+    const m = micS();
+    switch (a) {
+      case 'mic': micR = null; openView(view === 'mic' ? 'q' : 'mic'); if (view === 'q') { resumeTimers(); renderPanel(); } return;
+      case 'mic-mode': m.mode = v === 'fill' ? 'fill' : 'drag'; save(); renderPanel(); return;
+      case 'mic-set': m.set = v; micSelG = null; save(); renderPanel(); return;
+      case 'mic-sel': micSelG = v; renderPanel(); return;
+      case 'mic-go': case 'mic-again': micStart(v); return;
+      case 'mic-menu': micR = null; renderPanel(); return;
+      case 'mic-check': micCheck(); return;
+      case 'mic-hint': if (micR && !micR.hint && micR.mode === 'fill') { micR.hint = true; const g = micGrp(micSet(micR.set), micR.gid); micR.msg = 'Hint: the answers start with ' + g.items.filter((t, j) => micR.lock.indexOf(j) < 0).map(t => t.replace(/^[^A-Za-z]*/, '').charAt(0).toUpperCase()).sort().join(', ') + '.'; renderPanel(); } return;
+      case 'mic-reveal': if (micR && !micR.done) { const g = micGrp(micSet(micR.set), micR.gid); micR.mist += micR.lock.filter(x => x < 0).length; micFinish(true); } return;
+    }
+  }
+  /* keep typed text when the panel redraws, and use Enter to check */
+  document.addEventListener('input', (e) => { const i = e.target && e.target.dataset && e.target.dataset.fill; if (i === undefined || !micR) return; micR.vals[+i] = e.target.value; micR.bad[+i] = false; const lab = e.target.closest('.mfill'); if (lab) lab.classList.remove('bad'); });
+  document.addEventListener('keydown', (e) => {
+    if (!micR || view !== 'mic' || micR.mode !== 'fill' || micR.done) return;
+    const t = e.target; if (!t || !t.dataset || t.dataset.fill === undefined || e.key !== 'Enter') return; e.preventDefault();
+    const all = [...document.querySelectorAll('.mfill input:not([readonly])')], i = all.indexOf(t); if (i >= 0 && i < all.length - 1 && !all[i + 1].value) all[i + 1].focus(); else micCheck();
+  });
+  /* drag a petri dish onto a slot (pointer events: mouse, touch and pen). A short press-and-release selects the dish instead. */
+  document.addEventListener('pointerdown', (e) => {
+    const b = e.target.closest && e.target.closest('.petri'); if (!b || !micR || micR.done || b.disabled || (e.pointerType === 'mouse' && e.button !== 0)) return;
+    micDrag = { id: +b.dataset.chip, x: e.clientX, y: e.clientY, on: false, el: b, ghost: null, pid: e.pointerId };
+  });
+  document.addEventListener('pointermove', (e) => {
+    const d = micDrag; if (!d || d.pid !== e.pointerId) return;
+    if (!d.on && Math.hypot(e.clientX - d.x, e.clientY - d.y) > 7) { d.on = true; d.el.classList.add('drag'); const g = document.createElement('div'); g.className = 'pghost'; g.innerHTML = d.el.innerHTML; document.body.appendChild(g); d.ghost = g; }
+    if (d.on) { e.preventDefault(); d.ghost.style.left = e.clientX + 'px'; d.ghost.style.top = e.clientY + 'px'; const s = document.elementFromPoint(e.clientX, e.clientY), sl = s && s.closest && s.closest('.mslot:not(.full)'); document.querySelectorAll('.mslot.over').forEach(x => x !== sl && x.classList.remove('over')); if (sl) sl.classList.add('over'); }
+  }, { passive: false });
+  const micDragEnd = (e) => {
+    const d = micDrag; if (!d || d.pid !== e.pointerId) return; micDrag = null;
+    if (d.ghost) d.ghost.remove(); d.el.classList.remove('drag'); document.querySelectorAll('.mslot.over').forEach(x => x.classList.remove('over'));
+    if (e.type === 'pointercancel' || !micR) return;
+    if (d.on) { const s = document.elementFromPoint(e.clientX, e.clientY), sl = s && s.closest && s.closest('.mslot'); if (sl && !sl.disabled) micPlace(d.id, +sl.dataset.slot); }
+    else { micR.sel = micR.sel === d.id ? null : d.id; micR.msg = ''; renderPanel(); }
+  };
+  document.addEventListener('pointerup', micDragEnd); document.addEventListener('pointercancel', micDragEnd);
+  document.addEventListener('click', (e) => {
+    if (!micR || view !== 'mic') return; const sl = e.target.closest && e.target.closest('.mslot'), ch = e.target.closest && e.target.closest('.petri');
+    if (ch && e.detail === 0 && !ch.disabled) { micR.sel = micR.sel === +ch.dataset.chip ? null : +ch.dataset.chip; renderPanel(); return; }
+    if (sl && !sl.disabled && micR.sel !== null && micR.sel !== undefined) micPlace(micR.sel, +sl.dataset.slot);
+  });
+  /* the trash can gets crawling with bacteria now and then; the player does not have to act, but a round while it is dirty pays double */
+  function micTick() {
+    if (!World.ok || S.binBug || !S.tutDone || (S.served || 0) < 5 || document.hidden || view === 'create') return;
+    if (Math.random() < 0.2) { S.binBug = true; try { World.setBin(true); } catch (e) { /* decor */ } save(); toast('Something is crawling on the trash can. Click it!'); }
+  }
+  setInterval(micTick, 25000);
+
+  const GAME_VERSION = 128;
   const b64u = (u8) => { let s = ''; for (let i = 0; i < u8.length; i += 0x8000) s += String.fromCharCode.apply(null, u8.subarray(i, i + 0x8000)); return btoa(s).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); };
   const unb64u = (t) => { const s = atob(t.replace(/-/g, '+').replace(/_/g, '/')), u = new Uint8Array(s.length); for (let i = 0; i < s.length; i++) u[i] = s.charCodeAt(i); return u; };
   const chk = (t) => { let h = 2166136261; for (let i = 0; i < t.length; i++) { h ^= t.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36); };
@@ -9604,6 +9998,7 @@ const World = (function () {
       case 'fp-leave': return fpLeave();
       case 'fp-tip': return;
       case 'shelve': return startShelve(false);
+      case 'mic': case 'mic-mode': case 'mic-set': case 'mic-sel': case 'mic-go': case 'mic-again': case 'mic-menu': case 'mic-check': case 'mic-hint': case 'mic-reveal': return micAct(a, v);
       case 'daily': openView(view === 'daily' ? 'q' : 'daily'); if (view === 'q') { resumeTimers(); renderPanel(); } return;
       case 'board': openView(view === 'board' ? 'q' : 'board'); if (view === 'q') { resumeTimers(); renderPanel(); } return;
       case 'flags': openView(view === 'flags' ? 'q' : 'flags'); if (view === 'q') { resumeTimers(); renderPanel(); } return;
@@ -9749,10 +10144,10 @@ const World = (function () {
   setInterval(() => { if (window.__rxLoading) return; try { localStorage.setItem(SAVE_KEY, JSON.stringify(S)); } catch (e) { /* ignore */ } }, 5000);
 
   { const sc = $('#savecard'); if (sc) sc.innerHTML = saveBoxHTML(); }
-  World.init({ host: $('#stage'), getS: () => S, specialRoll: specialRoll, tagInfo: tagInfo, onBuy: buyUp, onNotes: () => openView('studies'), notesInfo: customCount, karenRoll: karenRoll, sweatyRoll: sweatyRoll, elderRoll: elderRoll, eventRoll: eventRoll, onVisitor: visitClick, onVisitorArrive: visitArrive, capsuleOk: capsuleOk, onCapsule: onCapsule, onBrain: synEnter, onSynSite: onSynSite, onEvt: onEvt, pillOk: pillOk, onPill: onPill, pillBoost: () => gearBuff().pills, onPhone: openPhone, onPolice: policeCome, himOk: himOk, onHimSpawn: onHimSpawn, onHimAngel: himAngelOk, onHimLand: himLand, onHimBless: onHimBless, onFp: fpClick, sign: () => shopName() + '|' + tierName() + ' #' + (S.franchises + 1) });
+  World.init({ host: $('#stage'), getS: () => S, specialRoll: specialRoll, tagInfo: tagInfo, onBuy: buyUp, onNotes: () => openView('studies'), onBin: () => { micR = null; openView('mic'); }, notesInfo: customCount, karenRoll: karenRoll, sweatyRoll: sweatyRoll, elderRoll: elderRoll, eventRoll: eventRoll, onVisitor: visitClick, onVisitorArrive: visitArrive, capsuleOk: capsuleOk, onCapsule: onCapsule, onBrain: synEnter, onSynSite: onSynSite, onEvt: onEvt, pillOk: pillOk, onPill: onPill, pillBoost: () => gearBuff().pills, onPhone: openPhone, onPolice: policeCome, himOk: himOk, onHimSpawn: onHimSpawn, onHimAngel: himAngelOk, onHimLand: himLand, onHimBless: onHimBless, onFp: fpClick, sign: () => shopName() + '|' + tierName() + ' #' + (S.franchises + 1) });
   window.__rxDbg = () => ({ sr: srUpdate, nc: newCard, sp: specialRoll, fp: fp, S: S, view: view, rush: rush, phoneR: phone.ringing, TOPQ: TOPQ, pool: poolQs, cur: cur, synQ: () => (typeof SYN !== 'undefined' ? SYN.q : null), synTap: id => onSynSite(id), offer: k => offerEvt(k, 'test'), onEvt: onEvt, holiday: () => holNow(), holN: () => holCount(), renderStats: renderStats, passive: passive, techRate: techRate, buyUp: buyUp, openVial: openVial, tabletTake: tabletTake, capsuleOpen: capsuleOpen, buffOn: buffOn, GEAR: GEAR, gearBuff: gearBuff, gearHave: gearHave });
   if (!World.ok) $('#stage').classList.add('flat');
-  else { document.body.classList.add('fx'); World.setPharmacist(meSpec()); World.setStore(S.store); World.setStaffLook(uniSpec()); World.setAwards(S.awards); World.setCalendar(Math.min(4, S.awards.calW || 0), false, S.awards.calW || 0); }
+  else { document.body.classList.add('fx'); try { World.setBin(!!S.binBug); } catch (e) { /* decor */ } World.setPharmacist(meSpec()); World.setStore(S.store); World.setStaffLook(uniSpec()); World.setAwards(S.awards); World.setCalendar(Math.min(4, S.awards.calW || 0), false, S.awards.calW || 0); }
   applyFocus(); syncBrand(); sfxLabel();
   /* test tools: open the game with ?dev=1 on the end of the link to get extra menu buttons for trying events quickly */
   { const bb = document.querySelector('#menu [data-act="board"]'); if (bb) bb.hidden = !Net.on(); }

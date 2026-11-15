@@ -25,7 +25,8 @@ const World = (function () {
     { x0: -9.6, x1: -8.4, z0: -5.8, z1: -2.2 },    // mastery shelf (left wall)
     { x0: 7.4, x1: 10.0, z0: -6.7, z1: -4.1 },     // robot (back-right corner)
     { x0: -6.2, x1: 6.2, z0: -7.1, z1: -6.0 },     // shelves
-    { x0: 3.3, x1: 7.3, z0: -5.7, z1: -4.1 }       // event table
+    { x0: 3.3, x1: 7.3, z0: -5.7, z1: -4.1 },      // event table
+    { x0: 8.15, x1: 9.25, z0: -2.95, z1: -1.85 }   // trash can (right side)
   ];
   const EXIT = [[-3.4, 2.8], [-3.4, 6.3], [4.4, 6.4], [5, 7.2], [5, 10.8]];
 
@@ -359,6 +360,34 @@ const World = (function () {
     bx(p, 0.12, 0.3, 0.12, '#27384F', x, 1.42, z, up);
     bx(p, 0.85, 0.56, 0.07, '#27384F', x, 1.84, z, up);
     return bx(p, 0.72, 0.44, 0.03, '#2CCDBB', x, 1.84, z - 0.05, up, { emissive: new T.Color(0x1FB5A5), emissiveIntensity: glow });
+  }
+  /* ---- trash can on the right side: normal most of the time, crawling with bacteria when infested (api.setBin) ---- */
+  let binG = null, binBugs = [], binGlow = null, binInfested = false;
+  function buildBin() {
+    binG = new T.Group(); binG.position.set(8.7, 0, -2.4); binG.rotation.y = -0.35; binG.userData.bin = true; scene.add(binG);
+    cy(binG, 0.52, 0.42, 1.15, 8, '#5C7377', 0, 0.58, 0);
+    for (let i = 0; i < 3; i++) { const r = cy(binG, 0.535 - i * 0.004, 0.52, 0.06, 8, '#3F5457', 0, 0.28 + i * 0.3, 0); r.scale.set(1, 1, 1); }
+    cy(binG, 0.58, 0.58, 0.1, 8, '#3F5457', 0, 1.2, 0);
+    bx(binG, 0.34, 0.07, 0.24, '#8D9FA2', 0.02, 1.27, 0.05); bx(binG, 0.26, 0.2, 0.2, '#E9E1CE', -0.12, 1.34, -0.02).rotation.z = 0.4;
+    const h = bx(binG, 0.5, 0.08, 0.08, '#3F5457', 0, 1.0, 0.6); h.rotation.y = 0; bx(binG, 0.08, 0.22, 0.08, '#3F5457', -0.26, 0.96, 0.56); bx(binG, 0.08, 0.22, 0.08, '#3F5457', 0.26, 0.96, 0.56);
+    binGlow = new T.Mesh(new T.CylinderGeometry(1.7, 1.7, 0.02, 14), new T.MeshBasicMaterial({ color: 0x7ED321, transparent: true, opacity: 0.0, depthWrite: false })); binGlow.position.y = 0.04; binGlow.userData.bin = true; binG.add(binGlow);
+    const cols = ['#8BE04A', '#B26BE0', '#E8D44A', '#4AD6B8', '#F08A4B'];
+    for (let i = 0; i < 26; i++) {
+      const m = new T.Mesh(i % 3 === 0 ? new T.IcosahedronGeometry(0.075 + (i % 4) * 0.012, 0) : new T.OctahedronGeometry(0.06 + (i % 5) * 0.01, 0), new T.MeshStandardMaterial({ color: cols[i % cols.length], flatShading: true, roughness: 0.6, emissive: new T.Color(cols[i % cols.length]), emissiveIntensity: 0.35 }));
+      m.visible = false; m.userData.bin = true; m.userData.bug = { a: Math.random() * PI * 2, sp: (0.4 + Math.random() * 0.9) * (i % 2 ? 1 : -1), r: 0.62 + Math.random() * 0.9, up: Math.random(), ph: Math.random() * 6 }; binG.add(m); binBugs.push(m);
+    }
+  }
+  api.setBin = function (on) { binInfested = !!on; binBugs.forEach(m => { m.visible = binInfested; }); if (binGlow) binGlow.material.opacity = 0; };
+  api.binOn = () => binInfested;
+  function animBin(dt) {
+    if (!binG || !binInfested) return;
+    binBugs.forEach(m => {
+      const u = m.userData.bug; u.a += u.sp * dt; u.ph += dt * 6;
+      if (u.up < 0.45) { const hy = 0.25 + (Math.sin(u.ph * 0.35 + u.a) * 0.5 + 0.5) * 0.95; m.position.set(Math.cos(u.a) * 0.52, hy, Math.sin(u.a) * 0.52); }
+      else m.position.set(Math.cos(u.a) * u.r, 0.07, Math.sin(u.a) * u.r);
+      m.rotation.set(u.ph, u.a * 2, 0); m.position.y += Math.abs(Math.sin(u.ph)) * 0.04;
+    });
+    if (binGlow) binGlow.material.opacity = 0.12 + (Math.sin(time * 3) * 0.5 + 0.5) * 0.14;
   }
   function buildStatic() {
     const g = new T.Group(); scene.add(g);
@@ -1201,8 +1230,8 @@ const World = (function () {
     const r = canvas.getBoundingClientRect();
     ndc.x = ((e.clientX - r.left) / r.width) * 2 - 1; ndc.y = -((e.clientY - r.top) / r.height) * 2 + 1;
     raycaster.setFromCamera(ndc, camera);
-    const hits = raycaster.intersectObjects(synOn ? synItems.filter(g => g.visible) : labOn ? labItems : [].concat(CLICK.map(i => ug[i]), [staffGroup, custGroup, petG, pharmG], phoneG ? [phoneG] : [], capG ? [capG] : [], pillG ? [pillG] : [], brainG ? [brainG] : [], evtG ? [evtG] : []), true);
-    for (const h of hits) { let o = h.object; while (o) { if (o.userData && (o.userData.up || o.userData.cust || o.userData.pet || o.userData.pharm || o.userData.vis || o.userData.cap || o.userData.himA || o.userData.pill || o.userData.lab || o.userData.site || o.userData.brain || o.userData.evt)) { pickObj = h.object; return o.userData; } o = o.parent; } }
+    const hits = raycaster.intersectObjects(synOn ? synItems.filter(g => g.visible) : labOn ? labItems : [].concat(CLICK.map(i => ug[i]), [staffGroup, custGroup, petG, pharmG], phoneG ? [phoneG] : [], binG ? [binG] : [], capG ? [capG] : [], pillG ? [pillG] : [], brainG ? [brainG] : [], evtG ? [evtG] : []), true);
+    for (const h of hits) { let o = h.object; while (o) { if (o.userData && (o.userData.up || o.userData.cust || o.userData.pet || o.userData.pharm || o.userData.vis || o.userData.cap || o.userData.himA || o.userData.pill || o.userData.lab || o.userData.site || o.userData.brain || o.userData.evt || o.userData.bin)) { pickObj = h.object; return o.userData; } o = o.parent; } }
     return null;
   }
   function setHover(up) {
@@ -1259,7 +1288,7 @@ const World = (function () {
       if (e.pointerType !== 'mouse' || (drag && drag.on)) return;
       if (fpT) { setFpHover(fpPick(e)); return; }
       const h = pick(e); setHover(h && h.up ? h.up : null);
-      if (!hovered) canvas.style.cursor = h && (h.cust || h.pet || h.pharm || h.vis || h.cap || h.himA || h.lab || h.site || h.brain || h.evt) ? 'pointer' : 'default';
+      if (!hovered) canvas.style.cursor = h && (h.cust || h.pet || h.pharm || h.vis || h.cap || h.himA || h.lab || h.site || h.brain || h.evt || h.bin) ? 'pointer' : 'default';
       if (synOn) synHover = h && h.site ? h.site : null;
     });
     canvas.addEventListener('click', e => {
@@ -1267,6 +1296,7 @@ const World = (function () {
       if (fpT) { const id = fpPick(e); if (id && B.onFp) B.onFp(id); return; }
       const h = pick(e); dismissHint();
       if (synOn) { if (h && h.site && B.onSynSite) B.onSynSite(h.site); return; }
+      if (h && h.bin) { if (B.onBin) B.onBin(); return; }
       if (h && h.brain) { if (B.onBrain) B.onBrain(); return; }
       if (h && h.evt) { if (B.onEvt) B.onEvt(h.evt); return; }
       if (h && h.lab) { labClick(h); return; }
@@ -1720,6 +1750,7 @@ const World = (function () {
       const P = s.g.userData.P;
       if (!w) { s.idle -= dt; P.arms[1].rotation.x = -1.2 + Math.sin(time * 5 + s.phase) * 0.5; s.g.rotation.y = lerpAngle(s.g.rotation.y, s.g.position.z < -3 ? PI : 0, dt * 4); if (s.idle <= 0) { s.idle = 1.5 + Math.random() * 3; s.wp.push(staffTarget()); } }
     });
+    animBin(dt);
     if (phoneG) {
       if (phoneRinging) {
         phoneG.rotation.z = Math.sin(time * 42) * 0.06; phoneHS.position.y = 0.3 + Math.abs(Math.sin(time * 22)) * 0.05;
@@ -2809,7 +2840,7 @@ const World = (function () {
       hemi = new T.HemisphereLight(0xffffff, 0x88aaaa, 0.85); scene.add(hemi);
       sun = new T.DirectionalLight(0xffffff, 0.8); sun.position.set(8, 16, 9); sun.castShadow = true;
       sun.shadow.mapSize.set(1024, 1024); const sc = sun.shadow.camera; sc.left = -16; sc.right = 16; sc.top = 14; sc.bottom = -14; sc.near = 1; sc.far = 50; scene.add(sun);
-      buildStatic();
+      buildStatic(); try { buildBin(); } catch (e) { /* decor */ }
       CLICK.forEach(id => { const b = document.createElement('button'); b.type = 'button'; b.className = 'tag3d'; b.dataset.up = id; tagsEl.appendChild(b); tags[id] = b; });
       applyTheme(); bind();
       if (window.ResizeObserver) new ResizeObserver(resize).observe(host); else window.addEventListener('resize', resize);
