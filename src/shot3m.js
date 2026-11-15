@@ -10,7 +10,7 @@ await p.evaluate(()=>{World.setBin(true);World.devCam(8.7,0.8,-2.4,0.2,1.15,4.2)
 await p.evaluate(()=>{World.devCam(0.5,1.8,-0.2,0.55,1.05,19)});
 await p.evaluate(()=>{document.querySelector('#menu [data-act="mic"]').click()});await p.waitForTimeout(1500);
 await p.screenshot({path:D+'/lab1.png'});
-await p.waitForTimeout(1200);await p.screenshot({path:D+'/lab1.png'});
+await p.waitForTimeout(1500);await p.screenshot({path:D+'/lab1.png'});await p.evaluate(()=>{World.devCam(-3.2,3.4,0.2,0.3,0.7,7)});await p.waitForTimeout(1500);await p.screenshot({path:D+'/head.png'});await p.evaluate(()=>{World.devCam(3.4,3.4,0.2,-0.2,0.7,7)});await p.waitForTimeout(1500);await p.screenshot({path:D+'/leg.png'});await p.evaluate(()=>{World.devCam(0,3.2,0.2,0,0.85,15)});
 await p.evaluate(()=>{window.__rxDbg().micDbg().startSort('sort-iv')});await p.waitForTimeout(1800);await p.screenshot({path:D+'/sort1.png'});
 await p.evaluate(()=>{const d=window.__rxDbg().micDbg();const R=d.R;const c=R.chips.find(x=>x.valid.length);d.drop(c.id,c.valid[0]);const w=R.chips.find(x=>!x.used&&x.valid.indexOf('pa')<0);d.drop(w.id,'pa')});await p.waitForTimeout(500);await p.screenshot({path:D+'/sort2.png'});
 await p.evaluate(()=>{document.querySelector('[data-act="back"]').click()});await p.waitForTimeout(2500);await p.screenshot({path:D+'/back.png'});

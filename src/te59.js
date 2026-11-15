@@ -84,7 +84,7 @@ const { chromium } = require('playwright');
   if (!(await p.evaluate(() => !!document.querySelector('.micpane')))) fail.push('menu without S.mic');
   // sort rounds (labeled dishes): every drug has a valid dish; wrong drops are misses; all right earns a star
   await clickSel('[data-act="mic-menu"]'); await clickSel('[data-act="mic-mode"][data-v="drag"]');
-  for (const sid of ['sort-iv', 'sort-po', 'sort-all', 'sort-pk']) {
+  for (const sid of ['sort-man', 'sort-dis', 'sort-iv', 'sort-po', 'sort-all', 'sort-pk']) {
     const info = await p.evaluate(sid => { const d = window.__rxDbg().micDbg(); d.startSort(sid); const R = d.R; const wrongDish = R.dishes.find(x => R.chips[0].valid.indexOf(x.id) < 0); return { n: R.chips.length, noValid: R.chips.filter(c => !c.valid.length).length, dishes: R.dishes.length, wrong: wrongDish && wrongDish.id }; }, sid);
     if (info.noValid || info.n < 6) fail.push('sort chips ' + sid + ' ' + JSON.stringify(info));
     if (info.wrong) { await p.evaluate(w => { const d = window.__rxDbg().micDbg(); d.drop(0, w); }, info.wrong); const mm = await p.evaluate(() => window.__rxDbg().micDbg().R.mist); if (mm !== 1) fail.push('sort miss ' + sid); }

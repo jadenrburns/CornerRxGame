@@ -1210,6 +1210,12 @@ table.board tbody tr:nth-child(-n+3) td:first-child { font-weight: 800; color: v
 .micdishes { display: flex; flex-wrap: wrap; gap: 6px; }
 .micdishes span { padding: 4px 10px; border-radius: 999px; border: 1.5px solid var(--line); background: var(--surface2); font: 700 12px/1 var(--f-body); }
 .micdishes span.hot { border-color: var(--teal); background: var(--teal-soft); }
+.petri.bug { padding: 2px 12px 2px 4px; animation: micwander 7s ease-in-out infinite; animation-delay: calc(var(--d, 0) * -1s); }
+.petri.bug .leg { transform-box: fill-box; transform-origin: center; animation: micleg .45s ease-in-out infinite alternate; }
+.petri.bug.shake { animation: micshake .35s; }
+.petri.bug.used { animation: none; }
+@keyframes micwander { 0%, 100% { transform: translate(0, 0) rotate(0); } 25% { transform: translate(5px, -3px) rotate(1.8deg); } 50% { transform: translate(-3px, 2px) rotate(-1.2deg); } 75% { transform: translate(3px, 3px) rotate(1deg); } }
+@keyframes micleg { from { transform: rotate(-14deg); } to { transform: rotate(14deg); } }
 </style>
 
 <div class="shell">
