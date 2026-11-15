@@ -8,7 +8,7 @@ await p.evaluate(()=>document.querySelectorAll('.tour,.unlock').forEach(e=>e.rem
 await p.evaluate(()=>{document.querySelector('#menu [data-act="mic"]').click()});await p.waitForTimeout(2500);
 const D=process.argv[2];await p.screenshot({path:D+'/menu.png'});
 const pt=await p.evaluate(()=>{for(let y=60;y<740;y+=6)for(let x=20;x<700;x+=6){if(World.micSiteAt(x,y)==='heart')return [x,y]}return null});console.log('heart px',pt);
-await p.mouse.click(pt[0],pt[1]);await p.waitForTimeout(8000);
+
 console.log(await p.evaluate(()=>{const R=window.__rxDbg().micDbg().R;return R?R.kind+':'+R.part:'none'}));
 const hp=await p.evaluate(()=>{for(let y=60;y<740;y+=5)for(let x=20;x<700;x+=5){if(World.micSiteAt(x,y)==='heart')return [x,y]}return null});console.log('zoom heart px',hp);
 // tap a correct bug, then tap the heart

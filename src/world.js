@@ -2321,7 +2321,7 @@ const World = (function () {
     bmk(new T.BoxGeometry(0.1, 0.035, 0.2), BC, 0, -0.68, 0.06);
     bone.userData.micSite = 'bone'; bone.traverse(o => { o.userData.micSite = 'bone'; });
     // open chest and belly: a cut window with the organs sitting in it (no genitalia); each organ is clickable for its site
-    const cav = new T.Group(); cav.position.z = 0.12; micManG.add(cav);
+    const cav = new T.Group(); cav.position.z = 0.03; micManG.add(cav);
     const cb = (w, h, d, c, x, y, z) => { const m = new T.Mesh(new T.BoxGeometry(w, h, d), mat(c)); m.position.set(x, y, z); cav.add(m); return m; };
     cb(0.54, 0.9, 0.03, '#5A1E22', 0, 1.1, 0.305); cb(0.58, 0.04, 0.05, '#B84A44', 0, 1.56, 0.31); cb(0.58, 0.04, 0.05, '#B84A44', 0, 0.64, 0.31); cb(0.04, 0.9, 0.05, '#B84A44', -0.28, 1.1, 0.31); cb(0.04, 0.9, 0.05, '#B84A44', 0.28, 1.1, 0.31);
     [1.46, 1.38, 1.3].forEach(y => cb(0.5, 0.022, 0.03, '#F1E8D4', 0, y, 0.325));
