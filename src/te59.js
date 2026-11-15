@@ -32,21 +32,19 @@ const { chromium } = require('playwright');
   await p.evaluate(() => { window.__rxDbg().micDbg().sel('cns'); });
   await clickSel('[data-act="mic-go"][data-v="cns"]');
   await p.waitForTimeout(80);
-  const cns = await p.evaluate(() => { const g = MICSETS[0].groups.find(x => x.id === 'cns'); return { items: g.items.map(micNorm), slots: document.querySelectorAll('.mslot').length, dishes: [...document.querySelectorAll('.petri')].map(e => ({ id: +e.dataset.chip, k: micNorm(e.querySelector('span').textContent) })) }; });
+  const cns = await p.evaluate(() => { const g = MICSETS[0].groups.find(x => x.id === 'cns'); return { items: g.items.map(micNorm), slots: window.__rxDbg().micDbg().R.slots.length, dishes: [...document.querySelectorAll('.petri')].map(e => ({ id: +e.dataset.chip, k: micNorm(e.querySelector('span').textContent) })) }; });
   if (cns.slots !== cns.items.length) fail.push('slots ' + cns.slots);
   const wrong = cns.dishes.find(d => cns.items.indexOf(d.k) < 0), right = cns.dishes.filter(d => cns.items.indexOf(d.k) >= 0);
   if (!wrong) fail.push('no wrong dish'); if (right.length !== cns.items.length) fail.push('right dishes');
-  await clickSel('.petri[data-chip="' + wrong.id + '"]'); await clickSel('.mslot[data-slot="0"]');
-  let mist = await p.evaluate(() => document.querySelector('.note b').textContent); if (mist !== '1') fail.push('miss not counted ' + mist);
-  // a real mouse drag for the first right dish, then taps for the rest
-  const box = async sel => p.evaluate(s => { const r = document.querySelector(s).getBoundingClientRect(); return { x: r.x + r.width / 2, y: r.y + r.height / 2 }; }, sel);
-  const a = await box('.petri[data-chip="' + right[0].id + '"]'), s0 = await box('.mslot[data-slot="0"]');
-  await p.mouse.move(a.x, a.y); await p.mouse.down(); await p.mouse.move((a.x + s0.x) / 2, (a.y + s0.y) / 2, { steps: 4 }); await p.mouse.move(s0.x, s0.y, { steps: 4 }); await p.mouse.up();
+  const paper = (id, row) => p.evaluate(([i, r]) => window.__rxDbg().micDbg().paper(i, r), [id, row]);
+  await clickSel('.petri[data-chip="' + wrong.id + '"]'); await paper('slots', 0);
+  let mist = await p.evaluate(() => document.querySelector('.nmiss b').textContent); if (mist !== '1') fail.push('miss not counted ' + mist);
+  await clickSel('.petri[data-chip="' + right[0].id + '"]'); await paper('slots', -1);
   await p.waitForTimeout(80);
-  const filled = await p.evaluate(() => document.querySelectorAll('.mslot.full').length); if (filled !== 1) fail.push('drag did not fill slot (' + filled + ')');
+  const filled = await p.evaluate(() => window.__rxDbg().micDbg().R.slots.filter(c => c !== null).length); if (filled !== 1) fail.push('paper drop did not fill slot (' + filled + ')');
   const cash0 = await p.evaluate(() => window.__rxDbg().S.cash);
   await p.evaluate(() => { const d = window.__rxDbg(); d.S.binBug = true; });
-  for (let i = 1; i < right.length; i++) { await clickSel('.petri[data-chip="' + right[i].id + '"]'); await clickSel('.mslot:not(.full)'); }
+  for (let i = 1; i < right.length; i++) { await clickSel('.petri[data-chip="' + right[i].id + '"]'); await paper('slots', -1); }
   await p.waitForTimeout(100);
   r = await p.evaluate(() => ({ done: !!document.querySelector('.result'), txt: (document.querySelector('.result') || {}).textContent || '', cash: window.__rxDbg().S.cash, bug: window.__rxDbg().S.binBug, st: window.__rxDbg().S.mic.st.cns }));
   console.log('drag round', JSON.stringify({ done: r.done, cash: r.cash - cash0, bug: r.bug, st: r.st }));
@@ -55,18 +53,19 @@ const { chromium } = require('playwright');
   // perfect fill round earns star
   await clickSel('[data-act="mic-menu"]'); await clickSel('[data-act="mic-mode"][data-v="fill"]');
   await clickSel('[data-act="mic-go"][data-v="cns"]'); await p.waitForTimeout(80);
-  const n = await p.evaluate(() => document.querySelectorAll('.mfill input').length);
+  const n = await p.evaluate(() => window.__rxDbg().micDbg().R.vals.length), nin = await p.evaluate(() => document.querySelectorAll('.mfillone input').length); if (nin !== 1) fail.push('one input expected ' + nin);
   const items = await p.evaluate(() => MICSETS[0].groups.find(x => x.id === 'cns').items);
-  if (n !== items.length) fail.push('inputs ' + n);
+  if (n !== items.length) fail.push('blanks ' + n);
   await p.fill('.mfill input[data-fill="0"]', 'zzz not a bug'); await clickSel('[data-act="mic-check"]');
-  mist = await p.evaluate(() => document.querySelector('.note b').textContent); if (mist !== '1') fail.push('fill miss ' + mist);
-  for (let i = 0; i < n; i++) { await p.fill('.mfill input[data-fill="' + i + '"]', items[i].replace(/ \(.*\)$/, '').replace(/^(\w)\w+ /, '$1. ').toLowerCase()); }
+  mist = await p.evaluate(() => document.querySelector('.nmiss b').textContent); if (mist !== '1') fail.push('fill miss ' + mist);
+  for (let i = 1; i < n; i++) { await p.evaluate(([i, v]) => { window.__rxDbg().micDbg().R.vals[i] = v; }, [i, items[i].replace(/ \(.*\)$/, '').replace(/^(\w)\w+ /, '$1. ').toLowerCase()]); }
+  await p.evaluate(v => { window.__rxDbg().micDbg().R.vals[0] = v; }, items[0].replace(/ \(.*\)$/, '').toLowerCase());
   await clickSel('[data-act="mic-check"]'); await p.waitForTimeout(80);
   r = await p.evaluate(() => ({ done: !!document.querySelector('.result'), st: window.__rxDbg().S.mic.st.cns }));
   console.log('fill (with a miss)', JSON.stringify(r)); if (!r.done) fail.push('fill not finished');
   if (r.st.f) fail.push('fill star with a miss');
   await clickSel('[data-act="mic-again"]'); await p.waitForTimeout(80);
-  for (let i = 0; i < n; i++) await p.fill('.mfill input[data-fill="' + i + '"]', items[i].replace(/ \(.*\)$/, '').toLowerCase());
+  for (let i = 0; i < n; i++) await p.evaluate(([i, v]) => { window.__rxDbg().micDbg().R.vals[i] = v; }, [i, items[i].replace(/ \(.*\)$/, '').toLowerCase()]);
   await clickSel('[data-act="mic-check"]'); await p.waitForTimeout(80);
   r = await p.evaluate(() => ({ done: !!document.querySelector('.result'), st: window.__rxDbg().S.mic.st.cns, txt: document.querySelector('.result h3').textContent }));
   console.log('perfect fill', JSON.stringify(r)); if (!r.done || !r.st.f) fail.push('perfect fill star'); 
@@ -82,9 +81,11 @@ const { chromium } = require('playwright');
   await p.evaluate(() => { const d = window.__rxDbg(); delete d.S.mic; });
   await clickSel('#menu [data-act="mic"]'); await p.waitForTimeout(80);
   if (!(await p.evaluate(() => !!document.querySelector('.micpane')))) fail.push('menu without S.mic');
+  { const sk = await p.evaluate(() => ({ aur: micCovers('Staphylococcus species', micNorm('Staphylococcus aureus')), epi: micCovers('Staphylococcus species', micNorm('Staphylococcus epidermidis')), pyo: micCovers('Streptococcus species', micNorm('Streptococcus pyogenes')), vir: micCovers('Streptococcus species', micNorm('Viridans group Streptococci')), no: micCovers('Staphylococcus species', micNorm('Streptococcus pyogenes')), fill: micMatch('staph aureus', 'Staphylococcus species', MICSETS[0].groups.find(g => g.id === 'skin').al[0]) }));
+    console.log('skin cover', JSON.stringify(sk)); if (!sk.aur || !sk.epi || !sk.pyo || !sk.vir || sk.no || !sk.fill) fail.push('skin cover ' + JSON.stringify(sk)); }
   // sort rounds (labeled dishes): every drug has a valid dish; wrong drops are misses; all right earns a star
   await clickSel('[data-act="mic-menu"]'); await clickSel('[data-act="mic-mode"][data-v="drag"]');
-  for (const sid of ['sort-man', 'sort-dis', 'sort-iv', 'sort-po', 'sort-all', 'sort-pk', 'sort-fam']) {
+  for (const sid of ['sort-man', 'sort-dis', 'sort-iv', 'sort-po', 'sort-all', 'sort-pk', 'sort-fam', 'sort-gp', 'sort-gn']) {
     const info = await p.evaluate(sid => { const d = window.__rxDbg().micDbg(); d.startSort(sid); const R = d.R; const wrongDish = R.dishes.find(x => R.chips[0].valid.indexOf(x.id) < 0); return { n: R.chips.length, noValid: R.chips.filter(c => !c.valid.length).length, dishes: R.dishes.length, wrong: wrongDish && wrongDish.id }; }, sid);
     if (info.noValid || info.n < 6) fail.push('sort chips ' + sid + ' ' + JSON.stringify(info));
     if (info.wrong) { await p.evaluate(w => { const d = window.__rxDbg().micDbg(); d.drop(0, w); }, info.wrong); const mm = await p.evaluate(() => window.__rxDbg().micDbg().R.mist); if (mm !== 1) fail.push('sort miss ' + sid); }
@@ -102,7 +103,7 @@ const { chromium } = require('playwright');
     await clickSel('[data-act="mic-menu"]'); await clickSel('[data-act="mic-mode"][data-v="' + mode + '"]');
     for (const [sid, gid, cnt] of ids) {
       await clickSel('[data-act="mic-menu"]'); await clickSel('[data-act="mic-set"][data-v="' + sid + '"]'); if (sid === 'body') await p.evaluate(g => { window.__rxDbg().micDbg().sel(g); }, gid); await clickSel('[data-act="mic-go"][data-v="' + gid + '"]');
-      const got = await p.evaluate(m => m === 'drag' ? [document.querySelectorAll('.mslot').length, document.querySelectorAll('.petri').length] : [document.querySelectorAll('.mfill input').length, 0], mode);
+      const got = await p.evaluate(m => { const R = window.__rxDbg().micDbg().R; return m === 'drag' ? [R.slots.length, document.querySelectorAll('.petri').length] : [R.vals.length, 0]; }, mode);
       if (got[0] !== cnt) fail.push(mode + ' ' + gid + ' count ' + got[0] + '/' + cnt);
       if (mode === 'drag' && got[1] < cnt) fail.push('dishes ' + gid);
     }

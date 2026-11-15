@@ -11,9 +11,11 @@ const MICSETS = [
     { id: 'heart', name: 'Heart / Endocarditis', sterile: true, items: ['Staphylococcus aureus', 'Viridans group Streptococci', 'Staphylococcus epidermidis', 'Enterococci'] },
     { id: 'intra', name: 'Intra-abdominal', items: ['Enteric gram negative rods', 'Bacteroides species', 'Enterococci'] },
     { id: 'gi', name: 'Gastrointestinal', items: ['Clostridioides difficile', 'Campylobacter jejuni', 'Helicobacter pylori (stomach)'] },
-    { id: 'bone', name: 'Bone and joint', sterile: true, items: ['Staphylococcus aureus', 'Staphylococcus epidermidis', 'Streptococcus species', 'Enteric gram negative rods'] },
+    { id: 'bone', name: 'Bone and joint', sterile: true, items: ['Staphylococcus aureus', 'Staphylococcus epidermidis', 'Streptococcus species', 'Enteric gram negative rods'],
+      al: [[], [], ['streptococcus pneumoniae', 'strep pneumoniae', 'streptococcus pyogenes', 'strep pyogenes', 'streptococcus agalactiae', 'group b strep', 'viridans strep', 'viridans streptococci', 'strep'], ['escherichia coli', 'e coli', 'klebsiella', 'klebsiella pneumoniae', 'enterobacter cloacae', 'citrobacter', 'proteus', 'proteus mirabilis']] },
     { id: 'uti', name: 'Urinary tract', items: ['Escherichia coli', 'Klebsiella species', 'Proteus mirabilis', 'Enterococci', 'Staphylococcus saprophyticus'] },
-    { id: 'skin', name: 'Skin / Soft tissue', items: ['Staphylococcus species', 'Streptococcus species'] },
+    { id: 'skin', name: 'Skin / Soft tissue', items: ['Staphylococcus species', 'Streptococcus species'],
+      al: [['staphylococcus aureus', 'staph aureus', 's aureus', 'staphylococcus epidermidis', 'staph epidermidis', 's epidermidis', 'staphylococcus saprophyticus', 'staph saprophyticus', 'mrsa', 'staph'], ['streptococcus pneumoniae', 'strep pneumoniae', 's pneumoniae', 'streptococcus pyogenes', 'strep pyogenes', 's pyogenes', 'group a strep', 'streptococcus agalactiae', 'strep agalactiae', 'group b strep', 'viridans strep', 'viridans streptococci', 'strep']] },
     { id: 'sti', name: 'Sexually transmitted diseases', items: ['Neisseria gonorrhoeae', 'Chlamydia trachomatis'] },
     { id: 'egnr', name: 'Enteric gram negative rods', fam: true, items: ['Escherichia coli', 'Klebsiella species', 'Enterobacter cloacae', 'Citrobacter species', 'Proteus species'] },
     { id: 'aty', name: 'Atypicals', fam: true, items: ['Chlamydia species', 'Mycoplasma species', 'Legionella species'] }
@@ -35,8 +37,29 @@ const MICSETS = [
     { id: 'time', name: 'Time-dependent antibiotics', items: ['Beta-lactams', 'Carbapenems', 'Tetracyclines', 'Macrolides', 'Clindamycin', 'Linezolid'], ban: ['Nafcillin', 'Ceftriaxone', 'Doxycycline'] },
     { id: 'conc', name: 'Concentration-dependent antibiotics', items: ['Fluoroquinolones', 'Aminoglycosides', 'Nitrofurantoin', 'Fosfomycin', 'Daptomycin', 'Metronidazole'], ban: ['Moxifloxacin'] },
     { id: 'norenal', name: 'Antibiotics that are NOT renally adjusted', items: ['Nafcillin', 'Ceftriaxone', 'Doxycycline', 'Macrolides', 'Moxifloxacin'], ban: ['Beta-lactams', 'Tetracyclines', 'Clindamycin', 'Linezolid', 'Metronidazole', 'Fluoroquinolones', 'Nitrofurantoin', 'Fosfomycin'] }
+  ] },
+  { id: 'gram', name: 'Gram tree', sub: 'Gram-positive and gram-negative bacteria', src: 'Survival guide: bacterial class 2026', groups: [
+    { id: 'gpba', name: 'Gram-positive: anaerobic bacilli', items: ['Clostridioides difficile'] },
+    { id: 'gpca', name: 'Gram-positive: anaerobic cocci', items: ['Peptostreptococci'], al: [['peptostreptococcus', 'peptostrep']] },
+    { id: 'gpch', name: 'Gram-positive: aerobic cocci in chains', items: ['Streptococcus pneumoniae', 'Streptococcus agalactiae', 'Streptococcus pyogenes', 'Viridans streptococci', 'Enterococcus faecium', 'Enterococcus faecalis'] },
+    { id: 'gpcp', name: 'Gram-positive: clusters, coagulase positive', items: ['Staphylococcus aureus'] },
+    { id: 'gpcn', name: 'Gram-positive: clusters, coagulase negative (CoNS)', items: ['Staphylococcus epidermidis', 'Staphylococcus saprophyticus'] },
+    { id: 'gndi', name: 'Gram-negative: aerobic diplococci', items: ['Neisseria gonorrhoeae', 'Moraxella catarrhalis'] },
+    { id: 'gncc', name: 'Gram-negative: aerobic coccobacilli', items: ['Haemophilus influenzae'] },
+    { id: 'gnnl', name: 'Gram-negative aerobic bacilli: not lactose fermenting', items: ['Pseudomonas aeruginosa', 'Proteus mirabilis'] },
+    { id: 'gnlf', name: 'Gram-negative aerobic bacilli: lactose fermenting', items: ['Escherichia coli', 'Klebsiella pneumoniae', 'Enterobacter cloacae'] },
+    { id: 'gnan', name: 'Gram-negative: anaerobic bacilli', items: ['Bacteroides fragilis'] }
   ] }
 ];
+
+/* generic menu entries such as "Staphylococcus species" cover every species of that genus; "Enteric gram negative rods" covers the family */
+function micCovers(item, k) {
+  const i = micNorm(item); if (i === k) return true;
+  if (i === 'staphylococcus species') return /^(staphylococcus|staph) /.test(k);
+  if (i === 'streptococcus species') return /^(streptococcus|strep) /.test(k) || /viridans/.test(k);
+  if (i === 'enteric gram negative rods') return /^(escherichia|klebsiella|enterobacter|citrobacter|proteus) /.test(k) || /^(klebsiella|proteus) species$/.test(k);
+  return false;
+}
 
 const micNorm = s => String(s || '').toLowerCase().replace(/\([^)]*\)/g, ' ').replace(/[^a-z0-9]+/g, ' ').trim();
 const micInner = s => { const m = String(s).match(/\(([^)]*)\)/); return m ? m[1] : ''; };

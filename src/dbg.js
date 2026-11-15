@@ -1,0 +1,11 @@
+const {chromium}=require('playwright');
+(async()=>{const b=await chromium.launch({args:['--use-angle=swiftshader','--use-gl=angle','--enable-unsafe-swiftshader','--ignore-gpu-blocklist']});
+const p=await b.newPage({viewport:{width:1200,height:800}});const errs=[];p.on('pageerror',e=>errs.push(e.message));
+await p.route('**/three.min.js',r=>r.fulfill({path:process.env.THREE_JS,contentType:'text/javascript'}));
+await p.addInitScript(()=>{localStorage.setItem('cornerRx.v1',JSON.stringify({me:{done:true,name:'T',look:{}},served:30,correct:25,tutDone:true,playSec:999,boardAsked:true,set:{topics:{}},mic:{st:{},mode:'drag',set:'body'}}));localStorage.setItem('rxNet','{"off":1}')});
+await p.goto('file://'+process.cwd()+'/corner-rx.html?noconf=1');await p.waitForTimeout(3500);
+await p.evaluate(()=>document.querySelectorAll('.tour,.unlock').forEach(e=>e.remove()));
+await p.evaluate(()=>{document.querySelector('#menu [data-act="mic"]').click()});await p.waitForTimeout(600);
+await p.evaluate(()=>{document.querySelector('[data-act="mic-set"][data-v="gram"]').click()});await p.waitForTimeout(2500);
+await p.evaluate(()=>{window.__rxDbg().micDbg().startSort('sort-gn')});await p.waitForTimeout(2000);console.log(await p.evaluate(()=>JSON.stringify(window.__rxDbg().micDbg().R.chips.map(c=>c.valid))));await p.screenshot({path:process.argv[2]+'/gn1.png'});const r=await p.evaluate(()=>{const o={};for(let y=60;y<760;y+=8)for(let x=10;x<710;x+=8){let h;try{h=World.micPaperAt(x,y)}catch(e){return String(e)}if(h)o[h.id]=(o[h.id]||0)+1}return o});console.log(JSON.stringify(r));
+console.log('errs',JSON.stringify(errs));await b.close()})();
