@@ -8,7 +8,7 @@
 3. Run the tests from `src/` (see below).
 4. `cp src/corner-rx.html ../index.html` and commit both `src/` and `index.html`.
 
-`build.sh` concatenates, in order: `head.html`, the three.js r128 CDN tag, then `bank.js pt3*.js pt4.js cycle.js th3.js th3c.js ger.js th553.js him.js lab.js ind.js drugs.js shop.js gear.js deck.js crowd.js world.js game.full.js` into one page. `ext.js` is spliced into `game.js` at the `/*@EXT@*/` marker to make `game.full.js`. Add new question files to the list in `build.sh`.
+`build.sh` concatenates, in order: `head.html`, the three.js r128 CDN tag, then `net.js bank.js pt3*.js pt4.js cycle.js th3.js th3c.js ger.js th553.js him.js lab.js ind.js drugs.js shop.js gear.js deck.js crowd.js world.js game.full.js` into one page. `ext.js` is spliced into `game.js` at the `/*@EXT@*/` marker to make `game.full.js`. Add new question files to the list in `build.sh`.
 
 ## Files
 - Questions: `Q(category, difficulty 1-3, question, correct, [3 wrongs], explanation, section)` in `bank.js`. Category files: `pt3*.js`, `pt4.js` (PharmTox), `th3.js` (Therapeutics Exam 3), `th3c.js` (contraceptives), `th553.js` (`T553`), `him.js` (`HIM`, Andy's heart failure questions), `lab.js`, `ind.js`. Weekly drug questions are generated from `drugs.js`.
@@ -68,6 +68,13 @@ The notebook has three tabs: Topics (what to study), Settings (mode, difficulty,
 - Quick picks: "Only P2 topics" (`year-only`), "This week's drugs only" (`week-only` with the schedule key, `p2` or `p3`) and "Only <course>" (`course-only`). Both remember the previous topic set in `S.set.restore` (`setOnly` / `unsetOnly`) and a second tap restores it.
 - Find box (`#tfind`, `findQ`, `applyFind`): filters chips and schedule rows by `data-find` text in place, opens matching cards, hides the rest, no re-render.
 - Adding a topic: `CATS` entry, `FLAVOR` lines, `CHIP` label, and its id in a `COURSES` card (or a new course object with a `year`). Test: `te54`.
+
+## Online: question flags and leaderboard (v123)
+No login. `src/net.js` holds `RX_NET = { url, key }` (a Supabase project URL and its anon public key, both safe to publish) and a tiny fetch wrapper `Net` (`on`, `rpc`, `weekKey`, `uuid`). Empty values keep everything offline: the Leaderboard menu button hides and the flag link falls back to the old GitHub issue link. `localStorage.rxNet` ({"url","key"}) overrides it for testing.
+- Backend is `src/net/supabase.sql` (run once in the Supabase SQL editor after setting the admin key line). Tables have row level security and no policies; the game only calls functions: `submit_flag`, `push_score`, `leave_board`, `get_board`, and admin-only `admin_flags`, `resolve_flag`, `admin_remove_player`. A leaderboard row is owned by a secret token (`S.tok`, travels in the save code); `S.pid` is the public row id. Tested against a local Postgres in v123.
+- Flags: after answering, "Flag this question" opens a small form (reason + note) that calls `submit_flag`. The result card is cached in `cur.resHTML`, so the flag area is a `<!--FLAG-->` marker filled at render time by `flagLink`. The author reads them live (8 s poll) by opening the game with `?flags=1` (or the dev menu entry) and saving the admin key once; Resolve/Reopen use `resolve_flag`.
+- Leaderboard: menu > Leaderboard. Opt in with a nickname (`S.nick`, `S.boardOn`); shares only nickname, correct answers this week (`S.wk`, resets Monday), mastered count and best streak, pushed 45 s after a correct answer. Numbers are clamped server side; there is no cheat protection beyond that.
+- The claude.ai artifact cannot reach the database (sandbox blocks outside requests). Online parts work on the real site only. Test: `te56` (fake backend that mimics the SQL).
 
 ## Wardrobe, gear and pets (v122)
 - `gear.js`: `GEAR` is the single table of unlockables: `id, slot, name, e, r (rarity in RAR: common/rare/epic/legendary), src (start | capsule | shop + price | rank + rank number | award), buff, d`. Hair styles carry `hv` (world.js style number); pets carry `kind`. Never rename a shipped id. Helpers in `ext.js`: `gearById`, `gearHave`, `gearOn`, `gearBuff()` (sums buffs of everything equipped plus every owned pet), `cosmSpec()` (what the 3D pharmacist wears, by slot), `accOnList()` (rank gear travels to world.js as rank numbers, drawn by `on(k)` in `person()`), `gearMigrate()` (one-time, `S.gearV`: old always-on rank gear and `accOff` become slot picks; the bow tie moved from extras to the neck slot).

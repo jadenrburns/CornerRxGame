@@ -1115,6 +1115,29 @@ body.trip .stats .stat { animation: tripbob 1.4s ease-in-out infinite; }
 .vpill.rar-rare { border-color: #3E72D9; box-shadow: 0 0 0 1px #3E72D9 inset; } .vpill.rar-epic { border-color: #8A63C9; box-shadow: 0 0 0 1px #8A63C9 inset, 0 0 8px rgba(138,99,201,.5); } .vpill.rar-legendary { border-color: #D99A00; box-shadow: 0 0 0 1px #F2C94C inset, 0 0 10px rgba(242,201,76,.8); }
 .vpill.rar-legendary[aria-pressed="true"], .vpill.rar-epic[aria-pressed="true"], .vpill.rar-rare[aria-pressed="true"] { box-shadow: 0 3px 0 var(--ink); }
 .cpane .hubtabs { margin-bottom: 8px; }
+.namerow { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.namerow .field { flex: 1 1 160px; min-width: 0; width: auto; }
+.boardwrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 14px; background: var(--surface); }
+table.board { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+table.board th { text-align: left; font: 700 10.5px/1.2 var(--f-mono); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); padding: 9px 10px; border-bottom: 1px solid var(--line); white-space: nowrap; }
+table.board td { padding: 8px 10px; border-bottom: 1px solid var(--line); font-variant-numeric: tabular-nums; }
+table.board tr:last-child td { border-bottom: 0; }
+table.board td:nth-child(2) { font-weight: 700; overflow-wrap: anywhere; }
+table.board tr.me td { background: var(--teal-soft); }
+table.board tbody tr:nth-child(-n+3) td:first-child { font-weight: 800; color: var(--teal-ink); }
+.flagform { display: grid; gap: 8px; margin-top: 10px; padding: 12px; border: 1px solid var(--line); border-radius: 14px; background: var(--surface2); }
+.flagform label { display: flex; gap: 8px; align-items: flex-start; font-size: 13.5px; }
+.flagform textarea { width: 100%; border: 1.5px solid var(--line); border-radius: 12px; background: var(--surface); color: var(--ink); padding: 8px 10px; font: 500 13.5px/1.4 var(--f-body); resize: vertical; }
+.flagdone { font-size: 12.5px; color: var(--teal-ink); font-weight: 600; }
+.flaglist { display: grid; gap: 10px; }
+.flagcard { border: 1px solid var(--line); border-radius: 14px; background: var(--surface); padding: 12px 14px; display: grid; gap: 6px; min-width: 0; }
+.flagcard.new { border-color: var(--amber); box-shadow: 0 0 0 2px var(--amber) inset; }
+.flagcard.done { opacity: .6; }
+.flagcard header { display: grid; gap: 2px; }
+.flagcard header span { font-size: 11.5px; color: var(--muted); }
+.flagcard p { margin: 0; font-size: 13.5px; overflow-wrap: anywhere; }
+.flagcard .fq { font-weight: 600; }
+.flagcard .fnote { font-style: italic; color: var(--muted); }
 </style>
 
 <div class="shell">
@@ -1147,6 +1170,7 @@ body.trip .stats .stat { animation: tripbob 1.4s ease-in-out infinite; }
     <button type="button" data-act="sheet-ups"><i aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg></i><span>Upgrades</span></button>
     <button type="button" data-act="sheet-prog"><i aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 4h8v5a4 4 0 0 1-8 0zM8 6H4v1a3 3 0 0 0 4 3M16 6h4v1a3 3 0 0 1-4 3M12 13v4M8 20h8"/></svg></i><span>Progress &amp; awards</span></button>
     <button type="button" data-act="daily"><i aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="4"/><path d="M12 12l5-5"/></svg></i><span>Daily goals <em id="dailybadge" class="dgbadge"></em></span></button>
+    <button type="button" data-act="board"><i aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 4h10v5a5 5 0 0 1-10 0V4z"/><path d="M7 6H4v2a3 3 0 0 0 3 3M17 6h3v2a3 3 0 0 1-3 3M12 14v4M8 20h8"/></svg></i><span>Leaderboard</span></button>
     <button type="button" data-act="settings"><i aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5.5A1.5 1.5 0 0 1 5.5 4H12v16H5.5A1.5 1.5 0 0 1 4 18.5zM12 4h6.5A1.5 1.5 0 0 1 20 5.5v13a1.5 1.5 0 0 1-1.5 1.5H12"/></svg></i><span>Topics</span></button>
     <button type="button" data-act="flash"><i aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="6" width="14" height="12" rx="2"/><path d="M7 3h12a2 2 0 0 1 2 2v10"/></svg></i><span>Flashcards</span></button>
     <button type="button" data-act="syn"><i aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 4a3 3 0 0 0-3 3 3 3 0 0 0-2 5 3 3 0 0 0 2 5 3 3 0 0 0 6 1V4a3 3 0 0 0-3 0zM15 4a3 3 0 0 1 3 3 3 3 0 0 1 2 5 3 3 0 0 1-2 5 3 3 0 0 1-6 1"/></svg></i><span>Synapse lab</span></button>

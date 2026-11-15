@@ -609,7 +609,7 @@
     const unseen = !q.gen && !(S.mastery[q.k] && S.mastery[q.k].seen);
     let pay = 0; const chips = []; let head = '', extra = '';
     if (ok) {
-      S.streak++; S.best = Math.max(S.best, S.streak); S.correct++; holCorrect();
+      S.streak++; S.best = Math.max(S.best, S.streak); S.correct++; holCorrect(); wkBump(); boardPushSoon();
       const base = 10 * [1, 1.6, 2.4][q.d - 1];
       const shelf = 1 + 0.25 * S.up.shelf;
       const speed = timerOn() ? 1 + 0.5 * Math.max(0, 1 - elapsed / (20 + gearBuff().time)) : 1;
@@ -695,7 +695,7 @@
     cur.resHTML = `<div class="result ${ok ? 'good' : 'fail'}" id="result"><h3>${esc(head)}</h3>
       ${ok ? '' : q.ms ? msMiss() : `<p><b>Answer:</b> ${esc(correctText)}</p>`}${!ok && idx >= 0 && !q.ms && whyNot(o.t) ? '<p class="whynot"><b>Why not \u201C' + esc(o.t) + '\u201D?</b> ' + whyNot(o.t) + '</p>' : ''}${extra}
       <div class="pay">${chips.join('')}</div>${explHTML(q)}
-      <div><button class="btn go" id="nextbtn" type="button">${cur.lab ? 'Next order' : 'Next patient'}</button> ${flagLink(q, q.ms ? cur.opts.filter((x, i) => cur.sel[i]).map(x => x.t).join(' | ') : (o ? o.t : ''))}</div></div>`;
+      <div><button class="btn go" id="nextbtn" type="button">${cur.lab ? 'Next order' : 'Next patient'}</button> <!--FLAG--></div></div>`; cur.flagPick = q.ms ? cur.opts.filter((x, i) => cur.sel[i]).map(x => x.t).join(' | ') : (o ? o.t : '');
     renderPanel(); renderStats(); renderStore(); renderUpgrades(); renderMastery(); renderReview(); renderFranchise();
     if (ok) { const b = document.querySelector('.opt[data-i="' + idx + '"]'); if (b) pop(b, '+' + money(pay)); }
     const nb = $('#nextbtn'); if (nb) { nb.focus({ preventScroll: true }); nb.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); }
@@ -710,11 +710,80 @@
       '**Category**: ' + (q.c || '') + (q.t ? ' / ' + q.t : '') + (q.wk ? ' (week ' + q.wk + ')' : ''), '**Game version**: ' + GAME_VERSION, '', '**What is wrong or unclear?**', '', ''].join('\n');
     return 'https://github.com/' + FLAG_REPO + '/issues/new?labels=' + encodeURIComponent('question-feedback') + '&title=' + encodeURIComponent(title) + '&body=' + encodeURIComponent(body);
   }
+  const FLAG_REASONS = [['wrong', 'The marked answer is wrong'], ['two', 'More than one answer is correct'], ['unclear', 'The wording is unclear'], ['typo', 'Typo or formatting'], ['outdated', 'Outdated or not in our lecture'], ['other', 'Something else']];
   function flagLink(q, picked) {
-    const done = (S.flagged || []).indexOf(q.k) >= 0;
-    return '<a class="flaglink" data-flagk="' + esc(q.k || '') + '" href="' + esc(flagURL(q, picked)) + '" target="_blank" rel="noopener noreferrer">' + (done ? 'Flagged \u2713 (open again)' : 'Flag this question') + '</a>';
+    const done = (S.flagged || []).indexOf(q.k) >= 0; cur.flagPicked = picked || '';
+    if (!Net.on()) return '<a class="flaglink" data-flagk="' + esc(q.k || '') + '" href="' + esc(flagURL(q, picked)) + '" target="_blank" rel="noopener noreferrer">' + (done ? 'Flagged ✓ (open again)' : 'Flag this question') + '</a>';
+    if (cur.flagSent) return '<span class="flagdone">Flagged ✓ Thanks, it goes straight to the question list.</span>';
+    return `<button type="button" class="link flaglink" data-act="flag-open" aria-expanded="${!!cur.flagOpen}">${done ? 'Flagged before. Flag again' : 'Flag this question'}</button>` + (cur.flagOpen ? `<form class="flagform" data-act="flag-send"><b>What is wrong with it?</b>${FLAG_REASONS.map((r, i) => `<label><input type="radio" name="freason" value="${r[0]}"${i === 0 ? ' checked' : ''}> ${r[1]}</label>`).join('')}<textarea name="fnote" maxlength="600" rows="3" placeholder="What would you change? (optional)"></textarea><div class="btnrow"><button type="submit" class="btn go">Send flag</button><button type="button" class="btn" data-act="flag-open">Cancel</button></div><small class="note">No account needed. Your nickname goes with it if you set one on the Leaderboard.</small></form>` : '');
   }
-  document.addEventListener('click', (e) => { const a = e.target.closest && e.target.closest('.flaglink'); if (!a) return; const k = a.dataset.flagk; if (k) { S.flagged = S.flagged || []; if (S.flagged.indexOf(k) < 0) { S.flagged.push(k); save(); } a.textContent = 'Flagged \u2713 (open again)'; } });
+  document.addEventListener('click', (e) => { const a = e.target.closest && e.target.closest('a.flaglink'); if (!a) return; const k = a.dataset.flagk; if (k) { S.flagged = S.flagged || []; if (S.flagged.indexOf(k) < 0) { S.flagged.push(k); save(); } a.textContent = 'Flagged ✓ (open again)'; } });
+  document.addEventListener('submit', (e) => {
+    const f = e.target.closest && e.target.closest('form.flagform'); if (!f) return; e.preventDefault();
+    const q = cur && cur.q; if (!q) return; const reason = (f.querySelector('input[name=freason]:checked') || {}).value || 'other', note = (f.querySelector('textarea[name=fnote]').value || '').trim().slice(0, 600);
+    const row = { qk: q.k || '', cat: q.c || '', topic: (q.t || '') + (q.wk ? ' (week ' + q.wk + ')' : ''), q: String(q.q || '').slice(0, 800), a: String(q.ms ? (q.as || []).join(' | ') : q.a || '').slice(0, 400), picked: String(cur.flagPicked || '').slice(0, 400), reason, note, pid: playerId(), nick: S.nick || '', v: GAME_VERSION };
+    const btn = f.querySelector('button[type=submit]'); btn.disabled = true; btn.textContent = 'Sending…';
+    Net.rpc('submit_flag', { p: row }).then(ok => { if (!ok) throw new Error('too many flags, try later'); S.flagged = S.flagged || []; if (S.flagged.indexOf(q.k) < 0) S.flagged.push(q.k); cur.flagSent = true; cur.flagOpen = false; save(); toast('Flag sent. Thank you.'); renderPanel(); })
+      .catch(err => { btn.disabled = false; btn.textContent = 'Send flag'; toast('Could not send the flag (' + (err.message || 'offline') + '). Try again in a moment.'); });
+  });
+  const playerId = () => { if (!S.pid) { S.pid = Net.uuid(); save(); } return S.pid; };
+  const playerTok = () => { if (!S.tok) { S.tok = Net.uuid() + Net.uuid(); save(); } return S.tok; };
+  /* ---- leaderboard (opt in, nickname only) ---- */
+  const masteredN = () => { let n = 0; Object.keys(S.mastery || {}).forEach(k => { if (S.mastery[k] && S.mastery[k].box >= 2) n++; }); return n; };
+  function wkBump() { const k = Net.weekKey(); if (!S.wk || S.wk.k !== k) S.wk = { k, c: 0 }; S.wk.c++; }
+  const weekXp = () => { const k = Net.weekKey(); return S.wk && S.wk.k === k ? S.wk.c : 0; };
+  let boardRows = null, boardErr = '', boardT = null, pushT = null, boardBusy = false;
+  function boardPush() {
+    if (!Net.on() || !S.boardOn || !S.nick) return Promise.resolve();
+    return Net.rpc('push_score', { p_pid: playerId(), p_tok: playerTok(), p_name: S.nick, p_mastered: masteredN(), p_best: S.best || 0, p_correct: S.correct || 0, p_week: Net.weekKey(), p_week_xp: weekXp(), p_v: GAME_VERSION }).catch(() => { /* quiet */ });
+  }
+  function boardPushSoon() { if (!Net.on() || !S.boardOn) return; clearTimeout(pushT); pushT = setTimeout(boardPush, 45000); }
+  function boardLoad() {
+    if (!Net.on() || boardBusy) return; boardBusy = true;
+    Net.rpc('get_board', { p_week: Net.weekKey() }).then(rows => { boardRows = rows || []; boardErr = ''; }).catch(err => { boardErr = err.message || 'offline'; }).finally(() => { boardBusy = false; if (view === 'board') renderPanel(); });
+  }
+  function boardHTML() {
+    const wk = Net.weekKey(), me = playerId();
+    const nameBox = `<div class="grp"><b>Your nickname</b><div class="namerow"><input id="nickbox" class="field" type="text" maxlength="24" autocomplete="off" placeholder="e.g. RxRanger" value="${esc(S.nick || '')}" aria-label="Nickname"><button type="button" class="btn go" data-act="board-join">${S.boardOn ? 'Update' : 'Join the board'}</button>${S.boardOn ? '<button type="button" class="btn" data-act="board-leave">Leave</button>' : ''}</div><p class="note">${S.boardOn ? 'You are on the board as ' + esc(S.nick) + '. Only this nickname and your numbers are shared.' : 'Opt in with a nickname. No account, no email. You can leave any time.'}</p></div>`;
+    if (!Net.on()) return `<div class="pane"><h3>Leaderboard</h3><p class="sub">Not connected yet.</p><p class="note">The online leaderboard switches on once the game has a database configured (see net.js). Until then your progress stays in this browser.</p><div class="btnrow"><button type="button" class="btn go" data-act="back">Back to counter</button></div></div>`;
+    const rows = boardRows;
+    const sorted = rows ? rows.slice().sort((a, b) => ((b.week_key === wk ? b.week_xp : 0) - (a.week_key === wk ? a.week_xp : 0)) || (b.mastered - a.mastered)) : null;
+    const tbl = !rows ? '<p class="note">Loading…</p>' : !rows.length ? '<p class="note">Nobody is on the board yet. Be the first.</p>' : `<div class="boardwrap"><table class="board"><thead><tr><th>#</th><th>Pharmacist</th><th title="Correct answers since Monday">This week</th><th>Mastered</th><th>Best streak</th></tr></thead><tbody>${sorted.map((r, i) => `<tr${r.pid === me ? ' class="me"' : ''}><td>${i + 1}</td><td>${esc(r.name)}</td><td>${r.week_key === wk ? r.week_xp : 0}</td><td>${r.mastered}</td><td>${r.best}</td></tr>`).join('')}</tbody></table></div>`;
+    return `<div class="pane boardpane"><h3>Leaderboard</h3><p class="sub">Correct answers this week (resets Monday), questions mastered, and best streak. Refreshes every 30 seconds.</p>${nameBox}${boardErr ? '<p class="note">Could not reach the board: ' + esc(boardErr) + '</p>' : ''}${tbl}<div class="btnrow"><button type="button" class="btn go" data-act="back">Back to counter</button><button type="button" class="btn" data-act="board-refresh">Refresh</button></div></div>`;
+  }
+  /* ---- flags page: live list for the question author (?flags=1 or the dev menu) ---- */
+  let flagRows = null, flagErr = '', flagT = null, flagSeen = 0, flagShowDone = false, flagBusy = false;
+  const adminKey = () => { try { return localStorage.getItem('rx.adminKey') || ''; } catch (e) { return ''; } };
+  function flagsLoad(quiet) {
+    if (!Net.on() || flagBusy) return; flagBusy = true;
+    if (!adminKey()) { flagBusy = false; flagErr = 'Save your admin key below to load the flag list.'; if (view === 'flags') renderPanel(); return; }
+    Net.rpc('admin_flags', { k: adminKey() }).then(rows => {
+      rows = rows || []; const maxId = rows.reduce((m, r) => Math.max(m, r.id), 0);
+      if (flagRows && maxId > flagSeen && quiet) { const n = rows.filter(r => r.id > flagSeen).length; toast(n + ' new flag' + (n === 1 ? '' : 's') + ' just came in.'); SFX.play('ok'); }
+      flagRows = rows; flagErr = ''; if (!quiet || !flagSeen) flagSeen = maxId; flagNewMax = maxId;
+    }).catch(err => { flagErr = err.message || 'offline'; }).finally(() => { flagBusy = false; if (view === 'flags') renderPanel(); });
+  }
+  let flagNewMax = 0;
+  function flagsHTML() {
+    if (!Net.on()) return `<div class="pane"><h3>Question flags</h3><p class="note">Not connected: fill in RX_NET in net.js first.</p><div class="btnrow"><button type="button" class="btn go" data-act="back">Back</button></div></div>`;
+    const rows = (flagRows || []).filter(r => flagShowDone || !r.resolved), open = (flagRows || []).filter(r => !r.resolved).length;
+    const when = (t) => { const d = new Date(t), m = Math.round((Date.now() - d) / 60000); return m < 1 ? 'just now' : m < 60 ? m + ' min ago' : m < 1440 ? Math.round(m / 60) + ' h ago' : d.toLocaleDateString(); };
+    const reasonN = (r) => (FLAG_REASONS.find(x => x[0] === r) || ['', r])[1];
+    const list = !flagRows ? '<p class="note">Loading…</p>' : !rows.length ? '<p class="note">' + (flagShowDone ? 'No flags yet.' : 'No open flags. Nice.') + '</p>' : rows.map(r => {
+      const issue = flagURL({ q: r.q, a: r.a, c: r.cat, t: r.topic, k: r.qk }, r.picked);
+      return `<article class="flagcard${r.resolved ? ' done' : ''}${r.id > flagSeen ? ' new' : ''}"><header><b>${esc(reasonN(r.reason))}</b><span>${esc(r.cat || '')}${r.topic ? ' · ' + esc(r.topic) : ''} · v${r.v || '?'} · ${when(r.created_at)}${r.nick ? ' · ' + esc(r.nick) : ''}</span></header><p class="fq">${esc(r.q || '')}</p><p><b>Marked:</b> ${esc(r.a || '')}${r.picked ? ' <b>Picked:</b> ' + esc(r.picked) : ''}</p>${r.note ? '<p class="fnote">“' + esc(r.note) + '”</p>' : ''}<div class="btnrow"><button type="button" class="btn${r.resolved ? '' : ' go'}" data-act="flag-resolve" data-v="${r.id}" data-done="${r.resolved ? '0' : '1'}">${r.resolved ? 'Reopen' : 'Resolve'}</button><a class="btn" href="${esc(issue)}" target="_blank" rel="noopener noreferrer">Open as GitHub issue</a></div></article>`;
+    }).join('');
+    return `<div class="pane flagspane"><h3>Question flags <small>${open} open</small></h3><p class="sub">Live: checks for new flags every 8 seconds while this page is open.</p>
+      <div class="grp"><b>Admin key</b><div class="namerow"><input id="adminkey" class="field" type="password" autocomplete="off" placeholder="the key you put in the admin table" value="${esc(adminKey())}" aria-label="Admin key"><button type="button" class="btn" data-act="flag-key">Save key</button></div><p class="note">Needed only to resolve or reopen flags. Stored in this browser.</p></div>
+      <div class="btnrow"><button type="button" class="chip" data-act="flag-showdone" aria-pressed="${flagShowDone}">Show resolved</button><button type="button" class="btn" data-act="flag-refresh">Refresh now</button></div>
+      ${flagErr ? '<p class="note">Could not load flags: ' + esc(flagErr) + '</p>' : ''}<div class="flaglist">${list}</div>
+      <div class="btnrow"><button type="button" class="btn go" data-act="back">Back to counter</button></div></div>`;
+  }
+  function viewTimers() {
+    clearInterval(boardT); clearInterval(flagT); boardT = flagT = null;
+    if (view === 'board' && Net.on()) { boardLoad(); boardT = setInterval(boardLoad, 30000); }
+    if (view === 'flags' && Net.on()) { flagsLoad(false); flagT = setInterval(() => flagsLoad(true), 8000); }
+  }
   function pop(btn, text) {
     const rx = $('.rx'); if (!rx) return;
     const a = btn.getBoundingClientRect(), b = rx.getBoundingClientRect();
@@ -818,7 +887,7 @@
           <button type="button" class="btn" id="bindbtn" ${S.pw.binder < 1 || cur.binder || cur.done || q.draw ? 'disabled' : ''}>\uD83D\uDCD8 Binder (${S.pw.binder})</button>
           ${S.pw.hint + S.pw.second + S.pw.binder < 1 && !cur.done ? '<button type="button" class="mini" data-act="pwshop">Get power-ups</button>' : ''}
           <span class="keyhint">${isK ? 'Karen leaves in ' + KAREN_SEC + ' s. A wrong answer costs an upgrade.' : cur.lab ? 'Lab bench: no timer. Pays x1.5.' : timerOn() ? 'Speed bonus fades over 20 s' : focusOn() ? 'Focus mode: no timer' : 'Timer bonus is off'}</span></div>
-      </div>${cur.resHTML || ''}</article>`;
+      </div>${(cur.resHTML || '').replace('<!--FLAG-->', () => cur.q && cur.done ? flagLink(cur.q, cur.flagPick) : '')}</article>`;
   }
   /* ---- draw-the-hormone-line question (cycle.js) ---- */
   function drawHTML() {
@@ -1648,7 +1717,7 @@
   function renderPanel() {
     const pn = $('#qpanel'); if (!pn) return;
     pn.classList.toggle('karen', !!(cur && cur.karen && !cur.done && view === 'q'));
-    const body = view === 'create' ? createHTML() : view === 'awards' ? awardsHTML() : view === 'phone' ? phoneHTML() : view === 'fp' || view === 'him' ? '' : view === 'shift' ? shiftHTML() : view === 'daily' ? dailyHTML() : view === 'flash' ? fcHTML() : view === 'syn' ? synHTML() : view === 'ref' ? refHTML() : view === 'retire' ? retireHTML() : view === 'set' ? settingsHTML() : view === 'opts' ? optionsHTML() : view === 'studies' ? studiesHTML() : (cur ? cardHTML() : '');
+    const body = view === 'create' ? createHTML() : view === 'awards' ? awardsHTML() : view === 'phone' ? phoneHTML() : view === 'fp' || view === 'him' ? '' : view === 'shift' ? shiftHTML() : view === 'daily' ? dailyHTML() : view === 'board' ? boardHTML() : view === 'flags' ? flagsHTML() : view === 'flash' ? fcHTML() : view === 'syn' ? synHTML() : view === 'ref' ? refHTML() : view === 'retire' ? retireHTML() : view === 'set' ? settingsHTML() : view === 'opts' ? optionsHTML() : view === 'studies' ? studiesHTML() : (cur ? cardHTML() : '');
     $('#counter').innerHTML = qbar() + body;
     const nb = document.querySelector('.nbk');
     if (nb) {
@@ -1701,7 +1770,7 @@
     if (view === 'syn' && v !== 'syn') synExit();
     qExpand();
     if (view === 'q' && cur && !cur.done && !cur.empty) cur.pausedAt = Date.now();
-    view = v; studyMsg = v === 'studies' ? studyMsg : ''; renderPanel();
+    view = v; studyMsg = v === 'studies' ? studyMsg : ''; viewTimers(); renderPanel();
     $('#qpanel').scrollTop = 0;
   }
   let nbClosing = false;
@@ -1713,7 +1782,7 @@
       if (pane) { nbClosing = true; pane.classList.add('closing'); setTimeout(() => { backToQ(); nbClosing = false; }, 320); return; }
     }
     if ((view === 'studies' || view === 'set' || view === 'opts') && nbClosing && !document.querySelector('.nbk.closing')) return;
-    view = 'q';
+    view = 'q'; viewTimers();
     if (dirty) { dirty = false; newCard(); return; }
     resumeTimers();
     renderPanel();
@@ -1892,7 +1961,7 @@
   function maybeTour() { if (S.me.done && !S.tutDone && !tourEl) showTour(); }
   /* ---- save code: the whole save as one long code, to move progress between devices or keep a backup ---- */
 /*@EXT@*/
-  const GAME_VERSION = 122;
+  const GAME_VERSION = 123;
   const b64u = (u8) => { let s = ''; for (let i = 0; i < u8.length; i += 0x8000) s += String.fromCharCode.apply(null, u8.subarray(i, i + 0x8000)); return btoa(s).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); };
   const unb64u = (t) => { const s = atob(t.replace(/-/g, '+').replace(/_/g, '/')), u = new Uint8Array(s.length); for (let i = 0; i < s.length; i++) u[i] = s.charCodeAt(i); return u; };
   const chk = (t) => { let h = 2166136261; for (let i = 0; i < t.length; i++) { h ^= t.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36); };
@@ -2019,6 +2088,16 @@
       case 'fp-tip': return;
       case 'shelve': return startShelve(false);
       case 'daily': openView(view === 'daily' ? 'q' : 'daily'); if (view === 'q') { resumeTimers(); renderPanel(); } return;
+      case 'board': openView(view === 'board' ? 'q' : 'board'); if (view === 'q') { resumeTimers(); renderPanel(); } return;
+      case 'flags': openView(view === 'flags' ? 'q' : 'flags'); if (view === 'q') { resumeTimers(); renderPanel(); } return;
+      case 'flag-open': if (cur) { cur.flagOpen = !cur.flagOpen; renderPanel(); const ta = document.querySelector('.flagform textarea'); if (ta) ta.focus(); } return;
+      case 'board-join': { const nb = $('#nickbox'), nick = nb ? nb.value.replace(/\s+/g, ' ').trim().slice(0, 24) : ''; if (!nick) { toast('Pick a nickname first.'); return; } S.nick = nick; S.boardOn = true; save(); boardPush().then(boardLoad); renderPanel(); toast('You are on the board as ' + nick + '.'); return; }
+      case 'board-leave': { S.boardOn = false; save(); Net.rpc('leave_board', { p_pid: playerId(), p_tok: playerTok() }).catch(() => {}).then(() => { boardLoad(); }); renderPanel(); toast('Removed from the board.'); return; }
+      case 'board-refresh': boardLoad(); return;
+      case 'flag-refresh': flagsLoad(false); return;
+      case 'flag-showdone': flagShowDone = !flagShowDone; renderPanel(); return;
+      case 'flag-key': { const k = ($('#adminkey') || {}).value || ''; try { localStorage.setItem('rx.adminKey', k); } catch (e) { /* ignore */ } toast(k ? 'Admin key saved in this browser.' : 'Admin key cleared.'); return; }
+      case 'flag-resolve': { const id = +v, done = t.dataset.done === '1'; if (!adminKey()) { toast('Save the admin key first.'); return; } t.disabled = true; Net.rpc('resolve_flag', { fid: id, k: adminKey(), done }).then(ok => { if (ok) { const r = (flagRows || []).find(x => x.id === id); if (r) r.resolved = done; renderPanel(); } else { t.disabled = false; toast('That admin key was not accepted.'); } }).catch(err => { t.disabled = false; toast('Could not update: ' + (err.message || 'offline')); }); return; }
       case 'ref': openView(view === 'ref' ? 'q' : 'ref'); if (view === 'q') { resumeTimers(); renderPanel(); } return;
       case 'retire-new': {
         S.retired = (S.retired || 0) + 1; S.cash = 0; S.franchises = 0; S.rep = 50; S.streak = 0; S.up = defaults().up;
@@ -2154,11 +2233,13 @@
   else { document.body.classList.add('fx'); World.setPharmacist(meSpec()); World.setStore(S.store); World.setStaffLook(uniSpec()); World.setAwards(S.awards); World.setCalendar(Math.min(4, S.awards.calW || 0), false, S.awards.calW || 0); }
   applyFocus(); syncBrand(); sfxLabel();
   /* test tools: open the game with ?dev=1 on the end of the link to get extra menu buttons for trying events quickly */
+  { const bb = document.querySelector('#menu [data-act="board"]'); if (bb) bb.hidden = !Net.on(); }
+  if (/[?&]flags=1/.test(location.search)) setTimeout(() => openView('flags'), 400);
   if (/[?&]dev=1/.test(location.search)) {
     const menu = $('#menu'), close = menu && menu.querySelector('.menuclose');
     if (menu && close) {
       const hr = document.createElement('hr'); menu.insertBefore(hr, close);
-      [['dev-pill', 'Test: pop a pill'], ['dev-legcap', 'Test: legendary capsule in vial'], ['dev-elder', 'Test: elder patient next'], ['dev-next', 'Test: skip to next patient'], ['dev-recall', 'Test: recall patient'], ['dev-regular', 'Test: regular patient'], ['dev-bottle', 'Test: bottle check'], ['dev-shelve', 'Test: restock'], ['dev-prior', 'Test: prior auth'], ['dev-rush', 'Test: rush hour'], ['dev-insp', 'Test: health inspector next'], ['dev-driver', 'Test: delivery next'], ['dev-sky', 'Test: sky capsule'], ['dev-him-walk', 'Test: Andy walks in next'], ['dev-him-asc', 'Test: Andy ascension'], ['dev-him-angel', 'Test: Andy angel flyover'], ['dev-him-smash', 'Test: Andy smash (skip click)'], ['dev-plant', 'Test: plant capsule'], ['dev-fast', 'Test: skip slow start']].forEach(b => {
+      [['dev-pill', 'Test: pop a pill'], ['dev-legcap', 'Test: legendary capsule in vial'], ['flags', 'Question flags (live)'], ['dev-elder', 'Test: elder patient next'], ['dev-next', 'Test: skip to next patient'], ['dev-recall', 'Test: recall patient'], ['dev-regular', 'Test: regular patient'], ['dev-bottle', 'Test: bottle check'], ['dev-shelve', 'Test: restock'], ['dev-prior', 'Test: prior auth'], ['dev-rush', 'Test: rush hour'], ['dev-insp', 'Test: health inspector next'], ['dev-driver', 'Test: delivery next'], ['dev-sky', 'Test: sky capsule'], ['dev-him-walk', 'Test: Andy walks in next'], ['dev-him-asc', 'Test: Andy ascension'], ['dev-him-angel', 'Test: Andy angel flyover'], ['dev-him-smash', 'Test: Andy smash (skip click)'], ['dev-plant', 'Test: plant capsule'], ['dev-fast', 'Test: skip slow start']].forEach(b => {
         const el = document.createElement('button'); el.type = 'button'; el.dataset.act = b[0]; el.innerHTML = '<i aria-hidden="true">\u2699</i><span>' + b[1] + '</span>'; menu.insertBefore(el, close);
       });
     }
