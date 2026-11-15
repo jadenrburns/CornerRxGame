@@ -1142,6 +1142,18 @@ table.board tbody tr:nth-child(-n+3) td:first-child { font-weight: 800; color: v
 .joincard { width: min(420px, 100%); display: grid; gap: 12px; padding: 20px; border-radius: 18px; background: var(--surface); border: 1px solid var(--line); box-shadow: var(--shadow); color: var(--ink); }
 .joincard h3 { margin: 0; font: 800 20px/1.15 var(--f-display); }
 .joincard p { margin: 0; font-size: 13.5px; color: var(--muted); }
+.molbox { display: grid; justify-items: center; gap: 6px; margin: 8px 0 2px; }
+.molsvg { width: 100%; height: auto; background: var(--surface2); border: 1px solid var(--line); border-radius: 12px; touch-action: manipulation; }
+.molsvg .bonds line { stroke: var(--ink); stroke-width: 2; stroke-linecap: round; }
+.molsvg .lbls text { font: 700 14px/1 var(--f-body, system-ui); fill: var(--ink); paint-order: stroke; stroke: var(--surface2); stroke-width: 4px; }
+.molsvg .site circle { fill: transparent; stroke: var(--teal); stroke-width: 1.6; stroke-dasharray: 3 3; cursor: pointer; opacity: .75; }
+.molsvg .site:hover circle, .molsvg .site:focus circle { fill: var(--teal-soft); opacity: 1; outline: none; }
+.molsvg .site.pick circle { fill: var(--amber-soft); stroke: var(--amber); stroke-dasharray: none; stroke-width: 3; opacity: 1; }
+.molsvg .site.ok circle { fill: var(--teal-soft); stroke: var(--teal); stroke-dasharray: none; stroke-width: 3.5; opacity: 1; cursor: default; }
+.molsvg .site.bad circle { fill: var(--coral-soft); stroke: var(--coral); stroke-dasharray: none; stroke-width: 3; opacity: 1; cursor: default; }
+.molsvg .site circle { transition: fill .12s; }
+.molnote { margin: 0; font-size: 13px; color: var(--muted); text-align: center; }
+.molnote b { color: var(--ink); }
 </style>
 
 <div class="shell">
