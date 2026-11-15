@@ -32,16 +32,18 @@ create table if not exists scores (
   mastered int not null default 0,
   best int not null default 0,
   correct int not null default 0,
+  earned bigint not null default 0,   -- total money made, all time
   week_key text,
   week_xp int not null default 0,
   v int,
   updated_at timestamptz not null default now()
 );
-create index if not exists scores_week on scores (week_key, week_xp desc);
+
 
 create table if not exists admin (key text primary key);
 insert into admin (key) values ('CHANGE-ME-to-a-long-random-phrase') on conflict do nothing;
 
+alter table scores add column if not exists earned bigint not null default 0;
 alter table flags enable row level security;
 alter table scores enable row level security;
 alter table admin enable row level security;
@@ -67,19 +69,17 @@ begin
   return true;
 end $$;
 
--- create or update the caller's leaderboard row. Numbers are clamped so a typo or a tampered browser cannot post silly values.
-create or replace function push_score(p_pid text, p_tok text, p_name text, p_mastered int, p_best int, p_correct int, p_week text, p_week_xp int, p_v int)
+-- create or update the caller's leaderboard row: nickname and total money made. The number is clamped and can only go up.
+drop function if exists push_score(text, text, text, int, int, int, text, int, int);
+create or replace function push_score(p_pid text, p_tok text, p_name text, p_earned bigint, p_v int)
 returns boolean language plpgsql security definer set search_path = public as $$
 declare nm text := left(btrim(regexp_replace(coalesce(p_name, ''), '[[:cntrl:]]', '', 'g')), 24);
 begin
   if length(coalesce(p_pid, '')) < 8 or length(coalesce(p_tok, '')) < 16 or length(nm) < 1 then return false; end if;
-  if coalesce(p_week, '') !~ '^\d{4}-\d{2}-\d{2}$' then return false; end if;
-  insert into scores as s (pid, tok, name, mastered, best, correct, week_key, week_xp, v)
-  values (left(p_pid, 64), left(p_tok, 64), nm, greatest(0, least(p_mastered, 20000)), greatest(0, least(p_best, 5000)),
-          greatest(0, least(p_correct, 1000000)), p_week, greatest(0, least(p_week_xp, 5000)), p_v)
+  insert into scores as s (pid, tok, name, earned, v)
+  values (left(p_pid, 64), left(p_tok, 64), nm, greatest(0, least(coalesce(p_earned, 0), 10000000000000)), p_v)
   on conflict (pid) do update
-    set name = excluded.name, mastered = excluded.mastered, best = greatest(s.best, excluded.best), correct = excluded.correct,
-        week_key = excluded.week_key, week_xp = excluded.week_xp, v = excluded.v, updated_at = now()
+    set name = excluded.name, earned = greatest(s.earned, excluded.earned), v = excluded.v, updated_at = now()
     where s.tok = excluded.tok;
   return exists (select 1 from scores where pid = left(p_pid, 64) and tok = left(p_tok, 64));
 end $$;
@@ -90,14 +90,11 @@ begin
   return true;
 end $$;
 
--- the public board: this week's top 100. The token is never returned.
-create or replace function get_board(p_week text) returns table (pid text, name text, mastered int, best int, correct int, week_key text, week_xp int)
+-- the public board: top 100 by total money made. The token is never returned.
+drop function if exists get_board(text);
+create or replace function get_board() returns table (pid text, name text, earned bigint)
 language sql security definer set search_path = public as $$
-  select s.pid, s.name, s.mastered, s.best, s.correct, s.week_key, case when s.week_key = p_week then s.week_xp else 0 end
-  from scores s
-  where s.updated_at > now() - interval '120 days'
-  order by case when s.week_key = p_week then s.week_xp else 0 end desc, s.mastered desc, s.updated_at asc
-  limit 100;
+  select s.pid, s.name, s.earned from scores s order by s.earned desc, s.updated_at asc limit 100;
 $$;
 
 -- admin only (needs your key): the live flag list, resolve or reopen a flag, and remove a player from the board
@@ -123,9 +120,11 @@ end $$;
 
 revoke all on function rx_is_admin(text) from public, anon, authenticated;
 grant execute on function submit_flag(jsonb) to anon;
-grant execute on function push_score(text, text, text, int, int, int, text, int, int) to anon;
+grant execute on function push_score(text, text, text, bigint, int) to anon;
 grant execute on function leave_board(text, text) to anon;
-grant execute on function get_board(text) to anon;
+grant execute on function get_board() to anon;
 grant execute on function admin_flags(text) to anon;
 grant execute on function resolve_flag(bigint, text, boolean) to anon;
 grant execute on function admin_remove_player(text, text) to anon;
+
+create index if not exists scores_earned on scores (earned desc);

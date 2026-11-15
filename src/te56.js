@@ -8,9 +8,9 @@ const { chromium } = require('playwright');
   const week = (s) => /^\d{4}-\d{2}-\d{2}$/.test(s || '');
   const rpc = {
     submit_flag: ({ p }) => { if (!p.pid || p.pid.length < 8) return false; if (db.flags.filter(f => f.pid === p.pid).length >= 12) return false; db.flags.push(Object.assign({ id: db.flags.length + 1, created_at: new Date().toISOString(), resolved: false }, p, { cat: p.cat })); return true; },
-    push_score: (a) => { if (!week(a.p_week) || (a.p_tok || '').length < 16) return false; const r = db.scores[a.p_pid]; if (r && r.tok !== a.p_tok) return false; db.scores[a.p_pid] = { pid: a.p_pid, tok: a.p_tok, name: a.p_name, mastered: a.p_mastered, best: a.p_best, correct: a.p_correct, week_key: a.p_week, week_xp: Math.min(5000, a.p_week_xp) }; return true; },
+    push_score: (a) => { if ((a.p_tok || '').length < 16) return false; const r = db.scores[a.p_pid]; if (r && r.tok !== a.p_tok) return false; db.scores[a.p_pid] = { pid: a.p_pid, tok: a.p_tok, name: a.p_name, earned: Math.max(r ? r.earned : 0, a.p_earned) }; return true; },
     leave_board: (a) => { const r = db.scores[a.p_pid]; if (r && r.tok === a.p_tok) delete db.scores[a.p_pid]; return true; },
-    get_board: (a) => Object.values(db.scores).map(r => ({ pid: r.pid, name: r.name, mastered: r.mastered, best: r.best, correct: r.correct, week_key: r.week_key, week_xp: r.week_key === a.p_week ? r.week_xp : 0 })),
+    get_board: () => Object.values(db.scores).map(r => ({ pid: r.pid, name: r.name, earned: r.earned })),
     admin_flags: (a) => a.k === ADMIN ? db.flags.slice().reverse() : [],
     resolve_flag: (a) => { if (a.k !== ADMIN) return false; const f = db.flags.find(x => x.id === a.fid); if (f) f.resolved = a.done; return true; }
   };
@@ -65,11 +65,11 @@ const { chromium } = require('playwright');
   await p.waitForTimeout(600); const sv2 = await p.evaluate(() => JSON.parse(localStorage.getItem('cornerRx.v1')));
   if (!sv2.tok || sv2.boardOn !== true || sv2.nick !== 'RxRanger') fail.push('save fields ' + JSON.stringify({ t: !!sv2.tok, b: sv2.boardOn, n: sv2.nick }));
   // another player's row appears, and a stolen id cannot overwrite mine
-  db.scores.other = { pid: 'other', tok: 'x'.repeat(20), name: 'Zed', mastered: 3, best: 4, correct: 9, week_key: await p.evaluate(() => Net.weekKey()), week_xp: 99 };
+  db.scores.other = { pid: 'other', tok: 'x'.repeat(20), name: 'Zed', earned: 99999999 };
   await act(p, 'board-refresh'); await p.waitForTimeout(500);
   const names = await p.evaluate(() => [...document.querySelectorAll('table.board tbody tr')].map(r => r.children[1].textContent));
   if (names[0] !== 'Zed' || names[1] !== 'RxRanger') fail.push('board order ' + names);
-  const stolen = await p.evaluate(async ([pid]) => Net.rpc('push_score', { p_pid: pid, p_tok: 'wrong-token-wrong-token', p_name: 'Hax', p_mastered: 1, p_best: 1, p_correct: 1, p_week: Net.weekKey(), p_week_xp: 1, p_v: 1 }), [row.pid]);
+  const stolen = await p.evaluate(async ([pid]) => Net.rpc('push_score', { p_pid: pid, p_tok: 'wrong-token-wrong-token', p_name: 'Hax', p_earned: 1, p_v: 1 }), [row.pid]);
   if (stolen !== false || db.scores[row.pid].name !== 'RxRanger') fail.push('stolen id overwrote a row');
   await act(p, 'board-leave'); await p.waitForTimeout(500);
   if (db.scores[row.pid]) fail.push('leave did not delete');
