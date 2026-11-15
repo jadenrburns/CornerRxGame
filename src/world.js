@@ -2140,12 +2140,14 @@ const World = (function () {
   /* ---- microbe lab: a separate room with a low-poly man (brain and leg bone popping out) and labeled petri dishes ---- */
   let micRig = null, micLay = null, manBed = null, micV = null, micG = null, micOn = false, micHid = [], micSaved = null, micManG = null, micPinMap = {}, micDishMap = {}, micSel = null, micHoverId = null, micHot = null, micLabEl = null, micBench = null, micTt = 0;
   const micItems = [];
-  const MICPOS = { cns: [0, 2.3, 0.0], ear: [0.37, 1.86, 0.02], mouth: [0, 1.68, 0.42], upper: [0, 1.5, 0.3], lower: [-0.17, 1.38, 0.44], heart: [0.17, 1.2, 0.44], intra: [-0.16, 0.96, 0.43], gi: [0.17, 0.84, 0.43], uti: [-0.11, 0.72, 0.4], sti: [0.12, 0.72, 0.4], skin: [0.62, 1.05, 0.12], bone: [0.15, 0.47, 0.2] };
+  const MICPOS = { cns: [0, 2.3, 0.0], ear: [0.37, 1.86, 0.02], mouth: [0, 1.68, 0.42], upper: [0, 1.5, 0.41], lower: [-0.14, 1.37, 0.48], heart: [0.07, 1.2, 0.52], intra: [-0.1, 1.03, 0.46], gi: [0.11, 1.0, 0.46], uti: [0, 0.74, 0.44], sti: [0.17, 0.66, 0.34], skin: [0.62, 1.05, 0.12], bone: [0.15, 0.47, 0.2] };
   function micText(txt, w, h, bg, fg) {
     const cv = document.createElement('canvas'); cv.width = w; cv.height = h; const c = cv.getContext('2d');
     if (c) { c.fillStyle = bg; const r = h / 2; c.beginPath(); c.moveTo(r, 4); c.lineTo(w - r, 4); c.arc(w - r, h / 2, h / 2 - 4, -PI / 2, PI / 2); c.lineTo(r, h - 4); c.arc(r, h / 2, h / 2 - 4, PI / 2, PI * 1.5); c.fill(); c.lineWidth = 5; c.strokeStyle = '#10292C'; c.stroke(); c.fillStyle = fg; c.textAlign = 'center'; c.textBaseline = 'middle'; let fs = h * 0.5; c.font = '800 ' + fs + 'px sans-serif'; while (c.measureText(txt).width > w - h && fs > 16) { fs -= 2; c.font = '800 ' + fs + 'px sans-serif'; } c.fillText(txt, w / 2, h / 2 + 2); }
     return new T.CanvasTexture(cv);
   }
+  const MICPOS_HIT = { cns: 0.18, ear: 0.1, mouth: 0.1, skin: 0.12, bone: 0.12, sti: 0.1 };
+  let micOrg = {};
   function buildMic() {
     micG = new T.Group(); micG.visible = false; scene.add(micG); const g = micG;
     bx(g, 30, 0.7, 20, '#BFCACE', 0, -0.35, -1);
@@ -2182,12 +2184,27 @@ const World = (function () {
     const trochanter = new T.Mesh(new T.IcosahedronGeometry(0.04, 0), kmat); trochanter.position.set(0.04, 0.63, 0.045); bone.add(trochanter);
     [-1, 1].forEach(s => { const k = new T.Mesh(new T.IcosahedronGeometry(0.048, 1), kmat); k.position.set(s * 0.03, 0.28, 0.05); bone.add(k); });
     bone.userData.micSite = 'bone'; bone.traverse(o => { o.userData.micSite = 'bone'; });
+    // open chest and belly: a cut window with the organs sitting in it (no genitalia); each organ is clickable for its site
+    const cav = new T.Group(); micManG.add(cav);
+    const cb = (w, h, d, c, x, y, z) => { const m = new T.Mesh(new T.BoxGeometry(w, h, d), mat(c)); m.position.set(x, y, z); cav.add(m); return m; };
+    cb(0.54, 0.9, 0.03, '#5A1E22', 0, 1.1, 0.305); cb(0.58, 0.04, 0.05, '#B84A44', 0, 1.56, 0.31); cb(0.58, 0.04, 0.05, '#B84A44', 0, 0.64, 0.31); cb(0.04, 0.9, 0.05, '#B84A44', -0.28, 1.1, 0.31); cb(0.04, 0.9, 0.05, '#B84A44', 0.28, 1.1, 0.31);
+    [1.46, 1.38, 1.3].forEach(y => cb(0.5, 0.022, 0.03, '#F1E8D4', 0, y, 0.325));
+    cb(0.03, 0.2, 0.03, '#F1E8D4', 0, 1.35, 0.325);
+    micOrg = {};
+    const org = (id, geo, c, x, y, z, sx, sy, sz, rz) => { const m = new T.Mesh(geo, new T.MeshStandardMaterial({ color: new T.Color(c), flatShading: true, roughness: 0.55, emissive: new T.Color(0x000000) })); m.position.set(x, y, z); m.scale.set(sx || 1, sy || 1, sz || 1); if (rz) m.rotation.z = rz; cav.add(m); m.userData.micSite = id; (micOrg[id] = micOrg[id] || []).push(m); return m; };
+    org('upper', new T.CylinderGeometry(0.024, 0.024, 0.2, 7), '#EBD8C2', 0, 1.47, 0.36); org('upper', new T.CylinderGeometry(0.016, 0.016, 0.12, 6), '#EBD8C2', -0.04, 1.4, 0.36, 1, 1, 1, 0.8); org('upper', new T.CylinderGeometry(0.016, 0.016, 0.12, 6), '#EBD8C2', 0.04, 1.4, 0.36, 1, 1, 1, -0.8);
+    org('lower', new T.IcosahedronGeometry(0.11, 1), '#E58A9A', -0.13, 1.32, 0.37, 0.85, 1.5, 0.7); org('lower', new T.IcosahedronGeometry(0.11, 1), '#E58A9A', 0.14, 1.32, 0.37, 0.8, 1.5, 0.7);
+    org('heart', new T.IcosahedronGeometry(0.07, 1), '#C62F3F', 0.07, 1.2, 0.43, 1, 1.2, 0.9); org('heart', new T.CylinderGeometry(0.02, 0.025, 0.1, 6), '#D9505C', 0.05, 1.3, 0.42);
+    org('intra', new T.IcosahedronGeometry(0.1, 1), '#8C3B2A', -0.1, 1.02, 0.38, 1.5, 0.75, 0.7); org('intra', new T.IcosahedronGeometry(0.03, 0), '#58A04A', -0.02, 0.95, 0.42);
+    org('gi', new T.IcosahedronGeometry(0.075, 1), '#E39B8C', 0.11, 1.02, 0.38, 1.05, 0.8, 0.75, 0.5);
+    [[0, 0.86, 0.1], [0.01, 0.84, 0.075]].forEach(r => { const m = org('gi', new T.TorusGeometry(r[2], 0.028, 5, 10), '#EAB8A4', r[0], r[1], 0.38); });
+    org('uti', new T.IcosahedronGeometry(0.045, 1), '#F0D56A', 0, 0.73, 0.38, 1, 1.1, 0.9);
     // site markers, always drawn on top, with a bigger invisible touch target
     Object.keys(MICPOS).forEach(id => {
       const p = MICPOS[id], pg = new T.Group(); pg.position.set(p[0], p[1], p[2]); micManG.add(pg);
-      const dot = new T.Mesh(new T.IcosahedronGeometry(0.055, 1), new T.MeshBasicMaterial({ color: 0xF1A20E, depthTest: false, transparent: true })); dot.renderOrder = 20; pg.add(dot);
-      const ring = new T.Mesh(new T.TorusGeometry(0.088, 0.013, 5, 14), new T.MeshBasicMaterial({ color: 0xFFFFFF, depthTest: false, transparent: true })); ring.renderOrder = 21; ring.visible = false; pg.add(ring);
-      const hit = new T.Mesh(new T.SphereGeometry(0.2, 6, 5), new T.MeshBasicMaterial({ visible: false })); pg.add(hit);
+      const dot = new T.Mesh(new T.IcosahedronGeometry(0.026, 1), new T.MeshBasicMaterial({ color: 0xF1A20E, depthTest: false, transparent: true })); dot.renderOrder = 20; pg.add(dot);
+      const ring = new T.Mesh(new T.TorusGeometry(0.05, 0.008, 5, 14), new T.MeshBasicMaterial({ color: 0xFFFFFF, depthTest: false, transparent: true })); ring.renderOrder = 21; ring.visible = false; pg.add(ring);
+      const hit = new T.Mesh(new T.SphereGeometry(MICPOS_HIT[id] || 0.06, 6, 5), new T.MeshBasicMaterial({ visible: false })); pg.add(hit);
       pg.traverse(o => { o.userData.micSite = id; }); micPinMap[id] = { g: pg, dot, ring, st: 0, ster: false, name: id };
     });
     micItems.push(micManG);
@@ -2262,6 +2279,7 @@ const World = (function () {
     micTt += dt;
     scene.children.forEach(c => { if (c !== micG && c !== hemi && c !== sun && c.visible && !(c.userData && c.userData.fx)) { c.visible = false; if (micHid.indexOf(c) < 0) micHid.push(c); } });
     Object.keys(micPinMap).forEach(id => { const m = micPinMap[id], on = id === micSel, hv = id === micHoverId, s = (on ? 1.5 + Math.sin(micTt * 6) * 0.15 : hv ? 1.3 : 1) * (m.ster ? 1 : 1); m.g.scale.set(s, s, s); if (on) m.dot.material.color.setHex(0xE04F3A); if (m.flash > 0) { m.flash -= dt; m.dot.material.color.setHex(m.flashOk ? 0x2FD07F : 0xE23B2E); m.g.scale.set(s * 1.6, s * 1.6, s * 1.6); } });
+    Object.keys(micOrg).forEach(id => { const k = id === micSel ? 0.5 + Math.sin(micTt * 6) * 0.15 : id === micHoverId ? 0.35 : 0; micOrg[id].forEach(m => m.material.emissive.setRGB(k * 0.6, k * 0.5, k * 0.2)); });
     Object.keys(micDishMap).forEach(id => { const d = micDishMap[id]; d.ring.visible = micHot === id; d.g.scale.y = 1; if (d.flash > 0) { d.flash -= dt; const k = Math.max(0, d.flash) / 0.7; d.agar.material.emissive.setRGB(d.flashOk ? 0.1 * k : 0.55 * k, d.flashOk ? 0.5 * k : 0.05 * k, d.flashOk ? 0.1 * k : 0.05 * k); } });
     if (micLabEl) {
       const id = micHoverId || micSel, m = id && micPinMap[id];

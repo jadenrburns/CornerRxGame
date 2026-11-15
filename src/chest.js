@@ -1,0 +1,11 @@
+const {chromium}=require('playwright');
+(async()=>{const b=await chromium.launch({args:['--use-angle=swiftshader','--use-gl=angle','--enable-unsafe-swiftshader','--ignore-gpu-blocklist']});
+const p=await b.newPage({viewport:{width:1200,height:760}});const errs=[];p.on('pageerror',e=>errs.push(e.message));
+await p.route('**/three.min.js',r=>r.fulfill({path:process.env.THREE_JS,contentType:'text/javascript'}));
+await p.addInitScript(()=>{localStorage.setItem('cornerRx.v1',JSON.stringify({me:{done:true,name:'T',look:{}},served:30,correct:25,tutDone:true,playSec:999,boardAsked:true,set:{topics:{}},mic:{st:{},mode:'drag',set:'body'}}));localStorage.setItem('rxNet','{"off":1}')});
+await p.goto('file://'+process.cwd()+'/corner-rx.html?noconf=1');await p.waitForTimeout(3500);
+await p.evaluate(()=>document.querySelectorAll('.tour,.unlock').forEach(e=>e.remove()));
+await p.evaluate(()=>{document.querySelector('#menu [data-act="mic"]').click()});await p.waitForTimeout(1500);
+await p.evaluate(()=>{World.devCam(0.2,3.0,0.2,0.0,0.6,6)});await p.waitForTimeout(1500);await p.screenshot({path:process.argv[2]+'/chest.png'});
+const r=await p.evaluate(()=>{const o={};for(let y=60;y<740;y+=4)for(let x=20;x<700;x+=4){const id=World.micSiteAt(x,y);if(id)o[id]=(o[id]||0)+1}return o});console.log(JSON.stringify(r));
+console.log('errs',JSON.stringify(errs));await b.close()})();
