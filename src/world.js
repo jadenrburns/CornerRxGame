@@ -2176,6 +2176,20 @@ const World = (function () {
   let micOrg = {};
   /* ---- low-poly organ models: flat-shaded facets like a faceted 3D print. Used small inside the man's open chest and large on the specimen table (zoomed part). Each mesh is tagged with its body site so it can be clicked or hovered. ---- */
   const MICSPEC_KINDS = { cns: 'brain', ear: 'ear', upper: 'upper', mouth: 'mouth', lower: 'lungs', heart: 'heart', intra: 'liver', gi: 'gut', uti: 'urinary', skin: 'skin', bone: 'femur' };
+  /* tiny .glb reader (three r128 has no loader): first mesh primitive, positions and indices only; cached per model name */
+  const glbCache = {};
+  function glbGeo(name) {
+    if (glbCache[name]) return glbCache[name];
+    try {
+      const bin = atob(RXMODELS[name]), u8 = new Uint8Array(bin.length); for (let i = 0; i < bin.length; i++) u8[i] = bin.charCodeAt(i);
+      const dv = new DataView(u8.buffer), jl = dv.getUint32(12, true), j = JSON.parse(new TextDecoder().decode(u8.subarray(20, 20 + jl)));
+      const off = 20 + jl + 8, prim = j.meshes[0].primitives[0];
+      const rd = (ai, Cls) => { const a = j.accessors[ai], bv = j.bufferViews[a.bufferView], n = a.count * (a.type === 'VEC3' ? 3 : 1); return new Cls(u8.buffer.slice(off + (bv.byteOffset || 0) + (a.byteOffset || 0), off + (bv.byteOffset || 0) + (a.byteOffset || 0) + n * Cls.BYTES_PER_ELEMENT)); };
+      const pos = rd(prim.attributes.POSITION, Float32Array), idx = rd(prim.indices, j.accessors[prim.indices].componentType === 5125 ? Uint32Array : Uint16Array);
+      const g = new T.BufferGeometry(); g.setAttribute('position', new T.BufferAttribute(pos, 3)); g.setIndex(new T.BufferAttribute(idx, 1)); g.computeVertexNormals();
+      return (glbCache[name] = g);
+    } catch (e) { return null; }
+  }
   function micOrganBuild(kind, parent, site, list) {
     const cache = {}, MT = (c) => cache[c] || (cache[c] = new T.MeshStandardMaterial({ color: new T.Color(c), flatShading: true, roughness: 0.55, side: T.DoubleSide, emissive: new T.Color(0x000000) }));
     const reg = (m) => { m.userData.micSite = site; list.push(m); parent.add(m); return m; };
@@ -2189,6 +2203,7 @@ const World = (function () {
     const rings = (x, y0, n, step, R, r, c) => { for (let i = 0; i < n; i++) tor(R, r, c, x, y0 + i * step, 0, PI / 2); };
     switch (kind) {
       case 'heart': {
+        const hg = glbGeo('heart'); if (hg) { const hm = reg(new T.Mesh(hg, MT('#E0553F'))); hm.scale.set(1.5, 1.5, 1.5); hm.position.y = 0.1; break; }
         ico(0.5, 1, '#D6503F', 0, 0, 0, 0.82, 1.1, 0.75, 0.07, 0.3); ico(0.3, 1, '#CC4536', 0.12, -0.42, 0.03, 0.8, 1.05, 0.75, 0.05, 0.3);
         ico(0.2, 1, '#E4694F', -0.34, 0.3, 0.06, 1, 0.9, 0.9, 0.05); ico(0.15, 1, '#E8745B', 0.3, 0.36, 0.16, 1, 0.8, 0.9, 0.05);
         tube([[0.02, 0.4, 0], [0.06, 0.72, 0], [0.2, 0.9, -0.02], [0.38, 0.78, -0.05], [0.42, 0.5, -0.08]], 0.1, '#E4604B', 14, 6);
