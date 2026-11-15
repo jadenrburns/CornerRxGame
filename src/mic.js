@@ -5,10 +5,9 @@
   const micGrp = (set, gid) => set.groups.find(g => g.id === gid);
   const micRec = (gid) => { const r = micS().st[gid]; return r || { d: 0, f: 0, n: 0 }; };
   const micStars = (g) => { const r = micRec(g.id); return (r.d ? 1 : 0) + (r.f ? 1 : 0); };
-  let micR = null, micSelG = null, micDrag = null, micIn = false, micSig = '', micNonce = 0;
+  let micZSig = '', micPicking = false, micR = null, micSelG = null, micDrag = null, micIn = false, micSig = '', micNonce = 0;
   const MICSORTS = {
     body: [
-      { id: 'sort-man', kind: 'site', name: 'Place the bugs on the man', n: 10, sites: ['cns', 'ear', 'lower', 'heart', 'gi', 'uti', 'skin'], help: 'Each bug in the bank crawls to the body site where it usually causes infection. Drag a bug onto the right marker on the man in the lab, or tap a bug and then tap a marker.' },
       { id: 'sort-dis', kind: 'dish', name: 'Put the bugs in the disease dishes', n: 10, dishes: [['cns', 'Meningitis', ['cns']], ['lower', 'Pneumonia', ['lower']], ['uti', 'UTI', ['uti']], ['heart', 'Endocarditis', ['heart']], ['bone', 'Bone and joint infection', ['bone']]], help: 'Each petri dish in the lab is labeled with a disease. Drag each bug from the bank onto the dish for the infection it usually causes, or tap a bug and then tap a dish.' }
       , { id: 'sort-fam', board: 'fam', name: 'Fill the bug family boxes', n: 10, cells: ['egnr', 'aty', 'sti'], help: 'The bottom of the body map has three boxes. Drag each bug from the bank into its box: enteric gram negative rods, atypicals or sexually transmitted diseases.' }
     ],
@@ -55,6 +54,7 @@
   /* what is under the pointer in the lab: {id, row} for a man site, a dish or a paper */
   function micHit(x, y) {
     if (!micR || !World.ok) return null;
+    if (micR.sort && micR.kind === 'part') { const id = World.micSiteAt(x, y); return id === micR.part ? { id, row: -1 } : null; }
     if (micR.sort && micR.kind === 'site') { const id = World.micSiteAt(x, y); return id ? { id, row: -1 } : null; }
     if (micR.sort && micR.kind === 'dish') { const id = World.micDishAt(x, y); return id ? { id, row: -1 } : null; }
     if ((micR.sort && micR.kind === 'board') || (!micR.sort && micR.mode === 'drag' && !micR.done)) return World.micPaperAt(x, y);
@@ -62,7 +62,7 @@
   }
   function micHot(h) {
     if (!micR || !World.ok) return; const id = h ? h.id : null;
-    try { if (micR.sort && micR.kind === 'site') World.micSiteHot(id); else if (micR.sort && micR.kind === 'dish') World.micDishHot(id); else World.micPaperHot(id); } catch (e) { /* decor */ }
+    try { if (micR.sort && (micR.kind === 'site' || micR.kind === 'part')) World.micSiteHot(id); else if (micR.sort && micR.kind === 'dish') World.micDishHot(id); else World.micPaperHot(id); } catch (e) { /* decor */ }
   }
   function micCommit(chipId, h) {
     if (!micR || !h) return;
@@ -77,6 +77,7 @@ const micLab3 = () => !!(World.ok && World.setMic);
     const m = micS(), R = micR;
     if (R) {
       if (R.sort) {
+        if (R.kind === 'part') return { k: 'man', key: 'part:' + R.part + ':' + R.nonce, zoom: R.part };
         if (R.kind === 'dish') return { k: 'dish', key: 'd:' + R.sid + ':' + R.nonce, list: R.dishes };
         if (R.kind === 'board') return { k: 'paper', key: 'b:' + R.sid + ':' + R.nonce, spec: micBoardSpec(R.board, new Set(R.dishes.map(d => d.id))) };
         return { k: 'man', key: 'man' };
@@ -101,8 +102,8 @@ const micLab3 = () => !!(World.ok && World.setMic);
   }
   function micSync() {
     const want = view === 'mic' && !!World.ok && !!World.setMic;
-    if (want && !micIn) { micIn = true; micSig = ''; try { World.setMic(true); } catch (e) { micIn = false; } }
-    else if (!want && micIn) { micIn = false; micSig = ''; try { World.setMic(false); } catch (e) { /* decor */ } if (view !== 'mic') micR = null; return; }
+    if (want && !micIn) { micIn = true; micSig = ''; micZSig = ''; try { World.setMic(true); } catch (e) { micIn = false; } }
+    else if (!want && micIn) { micIn = false; micSig = ''; micZSig = ''; try { World.setMic(false); } catch (e) { /* decor */ } if (view !== 'mic') micR = null; return; }
     if (!micIn) return;
     const m = micS(), body = MICSETS[0], d = micDesc();
     try {
@@ -111,9 +112,9 @@ const micLab3 = () => !!(World.ok && World.setMic);
         if (d.k === 'paper') { World.micDishes([]); World.micPapers(d.spec); }
         else { World.micPapers(null); World.micDishes(d.k === 'dish' ? d.list.map(x => ({ id: x.id, label: x.label })) : []); }
       }
-      World.micMan(d.k === 'man');
+      World.micMan(d.k === 'man'); if (d.key !== micZSig) { micZSig = d.key; World.micZoom(d.zoom || null); }
       World.micPins(body.groups.filter(g => !g.fam).map(g => ({ id: g.id, st: micStars(g), ster: !!g.sterile, name: g.name })));
-      World.micSelect(micSelG && micGrp(body, micSelG) ? micSelG : null);
+      World.micSelect(micR && micR.kind === 'part' ? micR.part : micSelG && micGrp(body, micSelG) ? micSelG : null);
     } catch (e) { /* decor */ }
     micPaperStates();
   }
@@ -135,15 +136,36 @@ const micLab3 = () => !!(World.ok && World.setMic);
     micR = { sort: true, kind, board: def.board || null, items: {}, bugs: sk === 'body' || sk === 'gram', sid, name: def.name, help: def.help, set: sk, mode: 'drag', dishes: dishes.map(d => ({ id: d.id, label: d.label })), chips, placed: {}, mist: 0, hint: false, done: false, msg: '', sel: null, nonce: ++micNonce };
     renderPanel(); return true;
   }
+  function micStartPart(gid) {
+    const body = MICSETS[0], g = micGrp(body, gid); if (!g || g.fam) return false;
+    const m = micS(); m.set = 'body'; micPicking = false;
+    const shuf = (a) => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); const x = a[i]; a[i] = a[j]; a[j] = x; } return a; };
+    const covers = (t) => g.items.some(x => micCovers(x, micNorm(t)) || micNorm(x) === micNorm(t));
+    const good = shuf(g.items).slice(0, 6).map(t => ({ t: micClean(t), k: micNorm(t), valid: [gid] }));
+    const seen = new Set(good.map(c => c.k)), pool = [];
+    body.groups.forEach(o => { if (o.id !== gid) o.items.forEach(t => { const k = micNorm(t); if (!seen.has(k) && !covers(t)) { seen.add(k); pool.push(t); } }); });
+    const bad = shuf(pool).slice(0, Math.max(3, 9 - good.length)).map(t => ({ t: micClean(t), k: micNorm(t), valid: [] }));
+    const chips = shuf(good.concat(bad)); chips.forEach((c, i) => { c.id = i; c.used = false; });
+    micR = { sort: true, kind: 'part', part: gid, board: null, items: {}, bugs: true, sid: 'part:' + gid, name: g.name, help: 'Zoomed in on the ' + g.name.toLowerCase() + ' on the man. Drag each bug that usually infects it onto the glowing part in the lab, or tap a bug and then tap the part. Some bugs in the bank do not belong here.', set: 'body', mode: 'drag', dishes: [{ id: gid, label: g.name }], chips, placed: {}, mist: 0, hint: false, done: false, msg: '', sel: null, nonce: ++micNonce };
+    renderPanel(); return true;
+  }
+  function micPickHTML() {
+    const body = MICSETS[0], parts = body.groups.filter(g => !g.fam), lab3 = micLab3();
+    return `<div class="pane micpane">${micTop(true)}<h3>Pick a body part</h3><p class="sub">${lab3 ? 'Click a part of the man in the lab: the brain, ear, mouth, throat, lungs, heart, liver, bowel, bladder, skin or the leg bone. The camera zooms in, then you place the bugs that usually infect it.' : 'Pick a body part. Then place the bugs that usually infect it.'}</p>
+      <div class="micfam">${parts.map(g => `<button type="button" class="btn" data-act="mic-go" data-v="part:${g.id}">${esc(g.name)} ${micStarsHTML(g)}</button>`).join('')}</div></div>`;
+  }
   function micDrop(chipId, dishId) {
     const R = micR; if (!R || !R.sort || R.done || !dishId) return; const ch = R.chips[chipId]; if (!ch || ch.used) return; R.sel = null; R.shake = null;
     const dish = R.kind === 'site' ? { id: dishId, label: (micGrp(MICSETS[0], dishId) || { name: dishId }).name } : R.dishes.find(d => d.id === dishId); if (!dish) return;
-    const fill = (ok) => { try { if (R.kind === 'board') World.micPaperFill(dishId, ok); else if (R.kind === 'site') World.micSiteFill(dishId, ok); else World.micDishFill(dishId, ok); } catch (e) { /* decor */ } };
-    if (ch.valid.indexOf(dishId) >= 0) { ch.used = true; R.placed[dishId] = (R.placed[dishId] || 0) + 1; (R.items[dishId] = R.items[dishId] || []).push(ch.t); R.msg = ''; fill(true); SFX.play('ok'); if (R.chips.every(c => c.used)) { micFinish(false); return; } }
-    else { R.mist++; R.shake = chipId; R.msg = ch.t + (R.kind === 'site' ? ' does not usually infect the ' : ' does not belong in the ') + dish.label.toLowerCase() + (R.kind === 'dish' ? ' dish.' : '.'); fill(false); SFX.play('bad'); }
+    const fill = (ok) => { try { if (R.kind === 'part') { World.micSiteFill(dishId, ok); } else if (R.kind === 'board') World.micPaperFill(dishId, ok); else if (R.kind === 'site') World.micSiteFill(dishId, ok); else World.micDishFill(dishId, ok); } catch (e) { /* decor */ } };
+    if (ch.valid.indexOf(dishId) >= 0) { ch.used = true; R.placed[dishId] = (R.placed[dishId] || 0) + 1; (R.items[dishId] = R.items[dishId] || []).push(ch.t); R.msg = ''; fill(true); SFX.play('ok'); if (R.chips.every(c => c.used || (R.kind === 'part' && !c.valid.length))) { micFinish(false); return; } }
+    else { R.mist++; R.shake = chipId; R.msg = ch.t + ((R.kind === 'site' || R.kind === 'part') ? ' does not usually infect the ' : ' does not belong in the ') + dish.label.toLowerCase() + (R.kind === 'dish' ? ' dish.' : '.'); fill(false); SFX.play('bad'); }
     renderPanel();
   }
-  function micSiteClick(id) { if (micR && micR.sort && micR.kind === 'site') { if (!micR.done && micR.sel !== null && micR.sel !== undefined) micDrop(micR.sel, id); return; } micSelG = id; renderPanel(); }
+  function micSiteClick(id) {
+    if (micR && micR.sort && micR.kind === 'part') { if (id === micR.part && !micR.done && micR.sel !== null && micR.sel !== undefined) micDrop(micR.sel, micR.part); return; }
+    if (!micR && view === 'mic' && (micPicking || micS().mode === 'drag') && micS().set === 'body') { const g = micGrp(MICSETS[0], id); if (g && !g.fam) { micStartPart(id); return; } }
+    if (micR && micR.sort && micR.kind === 'site') { if (!micR.done && micR.sel !== null && micR.sel !== undefined) micDrop(micR.sel, id); return; } micSelG = id; renderPanel(); }
   function micPaperClick(id, row) {
     const R = micR; if (!R || R.done) return;
     if (R.sort && R.kind === 'board') { if (R.sel !== null && R.sel !== undefined) micDrop(R.sel, id); return; }
@@ -172,7 +194,7 @@ const micLab3 = () => !!(World.ok && World.setMic);
         <div class="btnrow"><button type="button" class="btn go" data-act="mic-again" data-v="${R.sid}">Again</button><button type="button" class="btn" data-act="mic-menu">Back to the lab</button></div></div></div>`;
     }
     const dishes = R.chips.map(c => `<button type="button" class="petri ${R.bugs ? 'bug' : ''} ${c.used ? 'used' : ''} ${R.sel === c.id ? 'sel' : ''} ${R.shake === c.id ? 'shake' : ''}" data-chip="${c.id}" style="--d:${c.id * 1.7 % 7}" ${c.used ? 'disabled' : ''}>${R.bugs ? micCrit(c.id * 7 + c.t.length) : micDish(c.t, 'drug', c.id * 7 + c.t.length)}<span>${esc(c.t)}</span></button>`).join('');
-    return `<div class="pane micpane round">${micTop(true)}${head}${count}<p class="micmsg" aria-live="polite">${esc(R.msg || (R.sel !== null ? (R.kind === 'board' ? (R.bugs ? 'Bug picked. Tap the right paper.' : 'Drug picked. Tap the right box.') : (R.bugs ? 'Bug picked. Tap the right dish.' : 'Drug picked. Tap the right dish.')) : ''))}</p><div class="mdishes" aria-label="Petri dish word bank">${dishes}</div><p class="note nmiss">Misses: <b>${R.mist}</b></p>
+    return `<div class="pane micpane round">${micTop(true)}${head}${count}<p class="micmsg" aria-live="polite">${esc(R.msg || (R.sel !== null ? (R.kind === 'board' ? (R.bugs ? 'Bug picked. Tap the right paper.' : 'Drug picked. Tap the right box.') : (R.kind === 'part' ? 'Bug picked. Tap the ' + R.name.toLowerCase() + ' in the lab.' : R.bugs ? 'Bug picked. Tap the right dish.' : 'Drug picked. Tap the right dish.')) : ''))}</p><div class="mdishes" aria-label="Petri dish word bank">${dishes}</div><p class="note nmiss">Misses: <b>${R.mist}</b></p>
       <div class="btnrow"><button type="button" class="btn" data-act="mic-menu">Back to the lab</button></div></div>`;
   }
   const micAl = (g, i) => (g.al && g.al[i]) || [];
@@ -232,6 +254,7 @@ const micLab3 = () => !!(World.ok && World.setMic);
   function micHTML() {
     const m = micS(), set = micSet(m.set);
     if (micR) return micR.sort ? micSortHTML() : micRoundHTML();
+    if (micPicking && micS().set === 'body') return micPickHTML();
     const srt = World.ok && World.setMic ? micAllSorts() : [], total = MICSETS.reduce((n, s) => n + s.groups.length * 2, 0) + srt.length, got = MICSETS.reduce((n, s) => n + s.groups.reduce((a, g) => a + micStars(g), 0), 0) + srt.filter(x => micRec(x.id).d).length;
     const tabs = MICSETS.map(s => `<button type="button" class="seg-b ${s.id === set.id ? 'on' : ''}" data-act="mic-set" data-v="${s.id}" aria-pressed="${s.id === set.id}">${esc(s.name)}</button>`).join('');
     const gramOnly = set.id === 'gram' && World.ok && World.setMic;
@@ -241,8 +264,8 @@ const micLab3 = () => !!(World.ok && World.setMic);
       const sites = set.groups.filter(g => !g.fam), fams = set.groups.filter(g => g.fam), sel = micSelG && micGrp(set, micSelG);
       const lab3 = micIn || (World.ok && World.setMic);
       body = `<div class="micbody ${lab3 ? 'solo' : ''}">${lab3 ? '' : `<div class="mantw">${micManSVG()}${micPinsHTML(set, sites)}</div>`}
-        <div class="micside">${m.mode === 'drag' ? micSortRows(micSortsFor('body'), 'Drag bugs from the bank') : ''}<p class="note">${lab3 ? 'Click a marker on the man in the lab, or the brain or the leg bone, to pick a body site. Markers with a ring are normally sterile sites.' : 'Tap a pin to pick a body site. The brain (CNS) and the leg bone (bone and joint) are popping out. Dashed pins are normally sterile sites.'}</p>
-        ${sel ? `<div class="micpick"><b>${esc(sel.name)}</b>${micStarsHTML(sel)}<small>${sel.items.length} usual bugs${sel.sterile ? ' · normally sterile' : ''}</small><button type="button" class="btn go" data-act="mic-go" data-v="${sel.id}">Start this site</button></div>` : '<div class="micpick empty"><small>No site picked yet.</small></div>'}
+        <div class="micside">${m.mode === 'drag' && lab3 ? '<div class="grp"><b>Place the bugs</b><ul class="miclist"><li><button type="button" class="microw" data-act="mic-pick"><span class="mrn">Pick a body part</span><small>click it, zoom in, place the bugs</small></button></li></ul></div>' : ''}${m.mode === 'drag' ? micSortRows(micSortsFor('body'), 'Drag bugs from the bank') : ''}<p class="note">${lab3 ? (m.mode === 'drag' ? 'Click a part of the man in the lab to zoom in on it, or use Pick a body part. Markers with a ring are normally sterile sites.' : 'Click a marker or an organ on the man in the lab to pick a body site for typing. Markers with a ring are normally sterile sites.') : 'Tap a pin to pick a body site. The brain (CNS) and the leg bone (bone and joint) are popping out. Dashed pins are normally sterile sites.'}</p>
+        ${sel ? `<div class="micpick"><b>${esc(sel.name)}</b>${micStarsHTML(sel)}<small>${sel.items.length} usual bugs${sel.sterile ? ' · normally sterile' : ''}</small><button type="button" class="btn go" data-act="mic-go" data-v="${sel.id}">Start this site</button></div>` : (m.mode === 'fill' ? '<div class="micpick empty"><small>No site picked yet.</small></div>' : '')}
         <div class="micfam"><b>Bug families</b>${fams.map(g => `<button type="button" class="btn" data-act="mic-go" data-v="${g.id}">${esc(g.name)} ${micStarsHTML(g)}</button>`).join('')}</div>
         <p class="note small">Normally sterile (no bugs): bone, heart, lower respiratory area, the central nervous system, and the blood.</p></div></div>`;
     } else {
@@ -335,7 +358,7 @@ const micLab3 = () => !!(World.ok && World.setMic);
     SFX.play(wrong ? 'bad' : 'ok'); renderPanel();
   }
   function micFinish(gaveUp) {
-    const R = micR, set = micSet(R.set), g = R.sort ? { id: R.sid, items: R.chips } : micGrp(set, R.gid), n = g.items.length, m = micS(); const rec = m.st[g.id] = m.st[g.id] || { d: 0, f: 0, n: 0 };
+    const R = micR, set = micSet(R.set), g = R.sort ? { id: R.kind === 'part' ? R.part : R.sid, items: R.chips } : micGrp(set, R.gid), n = g.items.length, m = micS(); const rec = m.st[g.id] = m.st[g.id] || { d: 0, f: 0, n: 0 };
     let pay = 0, stars = false, bug = false;
     if (!gaveUp) {
       const acc = R.mist === 0 ? 1.5 : R.mist <= 2 ? 1 : 0.6; bug = !!S.binBug;
@@ -351,12 +374,13 @@ const micLab3 = () => !!(World.ok && World.setMic);
   function micAct(a, v) {
     const m = micS();
     switch (a) {
-      case 'mic': micR = null; openView(view === 'mic' ? 'q' : 'mic'); if (view === 'q') { resumeTimers(); renderPanel(); } return;
+      case 'mic': micR = null; micPicking = false; openView(view === 'mic' ? 'q' : 'mic'); if (view === 'q') { resumeTimers(); renderPanel(); } return;
       case 'mic-mode': m.mode = v === 'fill' ? 'fill' : 'drag'; save(); renderPanel(); return;
       case 'mic-set': m.set = v; micSelG = null; save(); renderPanel(); return;
       case 'mic-sel': micSelG = v; renderPanel(); return;
-      case 'mic-go': case 'mic-again': micStart(v); return;
-      case 'mic-menu': micR = null; renderPanel(); return;
+      case 'mic-go': case 'mic-again': if (/^part:/.test(String(v))) micStartPart(String(v).slice(5)); else micStart(v); return;
+      case 'mic-pick': micPicking = true; micSelG = null; m.set = 'body'; renderPanel(); return;
+      case 'mic-menu': micPicking = !!(micR && micR.kind === 'part'); micR = null; renderPanel(); return;
       case 'mic-check': micCheck(); return;
       case 'mic-hint': if (micR && !micR.hint && micR.mode === 'fill') { micR.hint = true; const g = micGrp(micSet(micR.set), micR.gid); micR.msg = 'Hint: the answers start with ' + g.items.filter((t, j) => micR.lock.indexOf(j) < 0).map(t => t.replace(/^[^A-Za-z]*/, '').charAt(0).toUpperCase()).sort().join(', ') + '.'; renderPanel(); } return;
       case 'mic-reveal': if (micR && !micR.done) { const g = micGrp(micSet(micR.set), micR.gid); micR.mist += micR.lock.filter(x => x < 0).length; micFinish(true); } return;

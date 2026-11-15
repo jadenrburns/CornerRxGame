@@ -85,7 +85,7 @@ const { chromium } = require('playwright');
     console.log('skin cover', JSON.stringify(sk)); if (!sk.aur || !sk.epi || !sk.pyo || !sk.vir || sk.no || !sk.fill) fail.push('skin cover ' + JSON.stringify(sk)); }
   // sort rounds (labeled dishes): every drug has a valid dish; wrong drops are misses; all right earns a star
   await clickSel('[data-act="mic-menu"]'); await clickSel('[data-act="mic-mode"][data-v="drag"]');
-  for (const sid of ['sort-man', 'sort-dis', 'sort-iv', 'sort-po', 'sort-all', 'sort-pk', 'sort-fam', 'sort-gp', 'sort-gn', 'sort-gb']) {
+  for (const sid of ['sort-dis', 'sort-iv', 'sort-po', 'sort-all', 'sort-pk', 'sort-fam', 'sort-gp', 'sort-gn', 'sort-gb']) {
     const info = await p.evaluate(sid => { const d = window.__rxDbg().micDbg(); d.startSort(sid); const R = d.R; const wrongDish = R.dishes.find(x => R.chips[0].valid.indexOf(x.id) < 0); return { n: R.chips.length, noValid: R.chips.filter(c => !c.valid.length).length, dishes: R.dishes.length, wrong: wrongDish && wrongDish.id }; }, sid);
     if (info.noValid || info.n < 6) fail.push('sort chips ' + sid + ' ' + JSON.stringify(info));
     if (info.wrong) { await p.evaluate(w => { const d = window.__rxDbg().micDbg(); d.drop(0, w); }, info.wrong); const mm = await p.evaluate(() => window.__rxDbg().micDbg().R.mist); if (mm !== 1) fail.push('sort miss ' + sid); }
@@ -95,6 +95,16 @@ const { chromium } = require('playwright');
     await p.evaluate(sid => { const d = window.__rxDbg().micDbg(); d.startSort(sid); d.R.chips.forEach(c => d.drop(c.id, c.valid[0])); }, sid);
     const res2 = await p.evaluate(sid => window.__rxDbg().S.mic.st[sid], sid); console.log('sort', sid, JSON.stringify(res2)); if (!res2 || !res2.d) fail.push('sort star ' + sid);
   }
+  // zoom-in part rounds: every non-family body site; decoys are misses, all right bugs earn the group's drag star
+  { const ids = await p.evaluate(() => MICSETS[0].groups.filter(g => !g.fam).map(g => g.id));
+    for (const gid of ids) {
+      const info = await p.evaluate(g => { const d = window.__rxDbg().micDbg(); d.part(g); const R = d.R; const bad = R.chips.find(c => !c.valid.length); const good = R.chips.filter(c => c.valid.length).length; if (bad) d.drop(bad.id, g); return { kind: R.kind, good, bad: !!bad, mist: R.mist }; }, gid);
+      if (info.kind !== 'part' || info.good < 1 || !info.bad || info.mist !== 1) fail.push('part ' + gid + ' ' + JSON.stringify(info));
+      await p.evaluate(g => { const d = window.__rxDbg().micDbg(); d.R.chips.forEach(c => { if (c.valid.length) d.drop(c.id, g); }); }, gid);
+      if (!(await p.evaluate(() => !!document.querySelector('.result')))) fail.push('part not finished ' + gid);
+      await p.evaluate(g => { const d = window.__rxDbg().micDbg(); d.part(g); d.R.chips.forEach(c => { if (c.valid.length) d.drop(c.id, g); }); }, gid);
+      const st = await p.evaluate(g => window.__rxDbg().S.mic.st[g], gid); if (!st || !st.d) fail.push('part star ' + gid);
+    } console.log('parts ok', ids.length); }
   await clickSel('[data-act="mic-menu"]');
   // every group starts in both modes
   await clickSel('[data-act="back"]'); await clickSel('#menu [data-act="mic"]');

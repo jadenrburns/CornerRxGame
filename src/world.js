@@ -36,6 +36,7 @@ const World = (function () {
   const queue = [], leaving = [], staff = [];
   let hovered = null, hintGone = false;
   const keysDown = { l: false, r: false, u: false, d: false };
+  var micZoomR = 0;
   let th = 0.55, ph = 1.05, rad = 19, gth = 0.55, gph = 1.05, grad = 19, baseRad = 19, shake = 0;
   let TX = 0.5, TY = 1.8, TZ = -0.2;
 
@@ -1961,7 +1962,7 @@ const World = (function () {
     camera.updateProjectionMatrix();
     const k = 2 * Math.tan(20 * PI / 180);
     const ratio = baseRad ? grad / baseRad : 1;
-    baseRad = Math.min(58, Math.max(17 * h / vh, 21 / (k * vw / h))); grad = clamp(baseRad * ratio, baseRad * 0.55, baseRad * 1.3);
+    baseRad = Math.min(58, Math.max(17 * h / vh, 21 / (k * vw / h))); grad = clamp(baseRad * ratio, baseRad * 0.55, baseRad * 1.3); if (micZoomR) grad = micZoomR;
   }
   api.setInset = function (r, b) { insR = Math.round(r); insB = Math.round(b); if (api.ok) resize(); };
 
@@ -2173,6 +2174,104 @@ const World = (function () {
   }
   const MICPOS_HIT = { cns: 0.18, ear: 0.1, mouth: 0.1, skin: 0.12, bone: 0.12, sti: 0.1 };
   let micOrg = {};
+  /* ---- low-poly organ models: flat-shaded facets like a faceted 3D print. Used small inside the man's open chest and large on the specimen table (zoomed part). Each mesh is tagged with its body site so it can be clicked or hovered. ---- */
+  const MICSPEC_KINDS = { cns: 'brain', ear: 'ear', upper: 'upper', mouth: 'mouth', lower: 'lungs', heart: 'heart', intra: 'liver', gi: 'gut', uti: 'urinary', skin: 'skin', bone: 'femur' };
+  function micOrganBuild(kind, parent, site, list) {
+    const cache = {}, MT = (c) => cache[c] || (cache[c] = new T.MeshStandardMaterial({ color: new T.Color(c), flatShading: true, roughness: 0.55, side: T.DoubleSide, emissive: new T.Color(0x000000) }));
+    const reg = (m) => { m.userData.micSite = site; list.push(m); parent.add(m); return m; };
+    const jig = (geo, a, f) => { try { const p = geo.attributes && geo.attributes.position; if (!p || !(p.count > 0)) return geo; for (let i = 0; i < p.count; i++) { const x = p.getX(i), y = p.getY(i), z = p.getZ(i); const n = Math.sin(x * f * 1.7 + y * f * 0.9) * Math.cos(z * f * 1.3 + x * f * 0.6) + Math.sin(y * f * 2.1 + z * f * 1.1) * 0.5; const s = 1 + a * n; p.setXYZ(i, x * s, y * s, z * s); } geo.computeVertexNormals(); } catch (e) { /* decor */ } return geo; };
+    const ico = (r, det, c, x, y, z, sx, sy, sz, j, rz, f) => { const m = reg(new T.Mesh(j ? jig(new T.IcosahedronGeometry(r, det), j, f || 5) : new T.IcosahedronGeometry(r, det), MT(c))); m.position.set(x, y, z); m.scale.set(sx || 1, sy || 1, sz || 1); m.rotation.z = rz || 0; return m; };
+    const cyl = (rt, rb, h, c, x, y, z, rx, ry, rz, seg, open) => { const m = reg(new T.Mesh(new T.CylinderGeometry(rt, rb, h, seg || 8, 1, !!open), MT(c))); m.position.set(x, y, z); m.rotation.x = rx || 0; m.rotation.y = ry || 0; m.rotation.z = rz || 0; return m; };
+    const tor = (R, r, c, x, y, z, rx, ry, rz, arc) => { const m = reg(new T.Mesh(new T.TorusGeometry(R, r, 5, 12, arc || PI * 2), MT(c))); m.position.set(x, y, z); m.rotation.x = rx || 0; m.rotation.y = ry || 0; m.rotation.z = rz || 0; return m; };
+    const box = (w, h, d, c, x, y, z, rx, ry, rz) => { const m = reg(new T.Mesh(new T.BoxGeometry(w, h, d), MT(c))); m.position.set(x, y, z); m.rotation.x = rx || 0; m.rotation.y = ry || 0; m.rotation.z = rz || 0; return m; };
+    const crv = (pts) => new T.CatmullRomCurve3(pts.map(p => new T.Vector3(p[0], p[1], p[2])));
+    const tube = (pts, r, c, seg, rs) => reg(new T.Mesh(new T.TubeGeometry(crv(pts), seg || 12, r, rs || 5, false), MT(c)));
+    const rings = (x, y0, n, step, R, r, c) => { for (let i = 0; i < n; i++) tor(R, r, c, x, y0 + i * step, 0, PI / 2); };
+    switch (kind) {
+      case 'heart': {
+        ico(0.5, 1, '#D6503F', 0, 0, 0, 0.82, 1.1, 0.75, 0.07, 0.3); ico(0.3, 1, '#CC4536', 0.12, -0.42, 0.03, 0.8, 1.05, 0.75, 0.05, 0.3);
+        ico(0.2, 1, '#E4694F', -0.34, 0.3, 0.06, 1, 0.9, 0.9, 0.05); ico(0.15, 1, '#E8745B', 0.3, 0.36, 0.16, 1, 0.8, 0.9, 0.05);
+        tube([[0.02, 0.4, 0], [0.06, 0.72, 0], [0.2, 0.9, -0.02], [0.38, 0.78, -0.05], [0.42, 0.5, -0.08]], 0.1, '#E4604B', 14, 6);
+        cyl(0.045, 0.05, 0.26, '#E8735C', 0.06, 0.98, -0.01, 0, 0, 0.1, 6); cyl(0.045, 0.05, 0.24, '#E8735C', 0.17, 1.03, -0.02, 0, 0, 0, 6); cyl(0.04, 0.05, 0.22, '#E8735C', 0.28, 0.97, -0.04, 0, 0, -0.1, 6);
+        tube([[0, 0.3, 0.22], [-0.05, 0.58, 0.26], [-0.12, 0.82, 0.2]], 0.09, '#EE826C', 10, 6); tube([[-0.12, 0.82, 0.2], [-0.4, 0.9, 0.12]], 0.06, '#EE826C', 6, 5); tube([[-0.12, 0.82, 0.2], [0.1, 0.96, 0.16]], 0.055, '#EE826C', 6, 5);
+        cyl(0.07, 0.07, 0.5, '#C9473A', -0.36, 0.62, 0.02, 0, 0, 0, 6); cyl(0.08, 0.08, 0.28, '#B93E34', -0.38, -0.28, 0, 0, 0, 0, 6);
+        tube([[0, 0.35, 0.4], [0.1, 0.1, 0.42], [0.15, -0.15, 0.38], [0.12, -0.4, 0.3]], 0.02, '#A8322B', 10, 4); tube([[-0.3, 0.2, 0.28], [-0.28, -0.1, 0.3], [-0.2, -0.3, 0.3]], 0.02, '#A8322B', 8, 4);
+        [0.12, -0.04].forEach(y => cyl(0.035, 0.04, 0.14, '#EC7A62', 0.4, y, -0.18, 0, 0, 1.1, 6)); break;
+      }
+      case 'lungs': {
+        [-1, 1].forEach(s => {
+          ico(0.4, 1, '#E8909F', s * 0.4, 0.22, 0, 0.82, 1.15, 0.6, 0.06, -s * 0.15); ico(0.42, 1, '#DE7E93', s * 0.42, -0.3, 0, 0.92, 1, 0.62, 0.06);
+          if (s < 0) ico(0.25, 1, '#E3869A', s * 0.54, -0.02, 0.12, 1, 0.7, 0.6, 0.05);
+          tube([[0, 0.28, 0], [s * 0.14, 0.15, 0], [s * 0.28, 0, 0]], 0.05, '#E0CBAF', 8, 5); tube([[s * 0.28, 0, 0], [s * 0.42, 0.2, 0.04]], 0.035, '#E0CBAF', 6, 4); tube([[s * 0.28, 0, 0], [s * 0.42, -0.22, 0.04]], 0.035, '#E0CBAF', 6, 4);
+        });
+        cyl(0.07, 0.07, 0.7, '#EBD7BE', 0, 0.62, 0, 0, 0, 0, 8); rings(0, 0.4, 7, 0.09, 0.077, 0.016, '#D9C3A5'); break;
+      }
+      case 'upper': {
+        cyl(0.1, 0.1, 0.8, '#EBD7BE', 0, -0.5, 0, 0, 0, 0, 8); rings(0, -0.85, 8, 0.1, 0.105, 0.02, '#D6BFA0');
+        cyl(0.17, 0.15, 0.32, '#E4CFB8', 0, 0.05, 0, 0, 0, 0, 6); box(0.22, 0.2, 0.1, '#EBD9C5', 0, 0.08, 0.15);
+        cyl(0.3, 0.17, 0.6, '#D96B6B', 0, 0.5, -0.05, 0, 0, 0, 10, true); ico(0.22, 1, '#E0707F', 0, 0.28, 0.12, 1.2, 0.6, 1, 0.04);
+        [-1, 1].forEach(s => ico(0.1, 1, '#E8868E', s * 0.2, 0.55, 0.02, 1, 1.3, 0.9, 0.05)); cyl(0.0, 0.05, 0.16, '#E89AA0', 0, 0.68, 0.12, PI, 0, 0, 6);
+        break;
+      }
+      case 'brain': {
+        ico(0.5, 2, '#F08DB0', -0.27, 0.1, 0, 0.62, 0.76, 0.95, 0.11, 0, 6); ico(0.5, 2, '#EC7FA6', 0.27, 0.1, 0, 0.62, 0.76, 0.95, 0.11, 0, 6);
+        ico(0.25, 1, '#F59AB9', -0.34, -0.2, 0.34, 0.9, 0.7, 1, 0.08); ico(0.25, 1, '#F59AB9', 0.34, -0.2, 0.34, 0.9, 0.7, 1, 0.08);
+        ico(0.3, 2, '#D96B97', 0, -0.32, -0.5, 1.3, 0.6, 0.8, 0.1, 0, 6); cyl(0.1, 0.07, 0.5, '#F2A9C0', 0, -0.52, -0.18, 0.35, 0, 0, 8); tube([[0, -0.7, -0.28], [0, -0.95, -0.4], [0, -1.2, -0.45]], 0.045, '#F6D27A', 8, 5); break;
+      }
+      case 'ear': {
+        ico(0.5, 1, '#F2C9A5', -0.6, 0.2, 0, 0.2, 1.1, 0.8, 0.03); tor(0.5, 0.05, '#E8B98F', -0.58, 0.2, 0, 0, PI / 2, 0, PI * 1.5).scale.set(1, 1.25, 1); ico(0.1, 1, '#E8B98F', -0.55, -0.35, 0, 1, 1.2, 0.8, 0.03);
+        cyl(0.09, 0.09, 0.55, '#E8B98F', -0.1, 0.15, 0, 0, 0, PI / 2, 8); cyl(0.13, 0.13, 0.025, '#E8DAC4', 0.2, 0.15, 0, 0, 0, PI / 2, 10);
+        ico(0.05, 0, '#EFE6D2', 0.29, 0.15, 0); ico(0.04, 0, '#EFE6D2', 0.38, 0.2, 0.03); ico(0.035, 0, '#EFE6D2', 0.46, 0.14, 0); tube([[0.29, 0.15, 0], [0.38, 0.2, 0.03], [0.46, 0.14, 0]], 0.012, '#EFE6D2', 6, 4);
+        tor(0.17, 0.075, '#F0A0B0', 0.8, -0.1, 0, PI / 2); tor(0.11, 0.065, '#F0A0B0', 0.8, -0.1, 0.1, PI / 2); tor(0.05, 0.05, '#F0A0B0', 0.8, -0.1, 0.19, PI / 2);
+        tor(0.2, 0.03, '#E2B04A', 0.62, 0.42, 0, 0); tor(0.2, 0.03, '#E2B04A', 0.62, 0.42, 0, 0, PI / 2); tor(0.2, 0.03, '#E2B04A', 0.62, 0.42, 0, PI / 2); ico(0.08, 1, '#E8C060', 0.55, 0.22, 0);
+        tube([[0.9, -0.1, -0.02], [1.05, -0.3, -0.1], [1.2, -0.38, -0.2]], 0.03, '#F6E27A', 8, 5); break;
+      }
+      case 'mouth': {
+        [[0, 1], [0.5, -1]].forEach(a => {
+          const y0 = a[0], sg = a[1]; tor(0.55, 0.09, '#E58A94', 0, y0, 0, PI / 2, 0, 0, PI);
+          for (let i = 0; i < 10; i++) { const t = PI * i / 9, big = i < 2 || i > 7; box(big ? 0.15 : 0.1, 0.14, big ? 0.12 : 0.08, '#FBF8EE', 0.55 * Math.cos(t), y0 + sg * 0.1, 0.55 * Math.sin(t), 0, PI / 2 - t, 0); }
+        });
+        ico(0.36, 1, '#E0707F', 0, 0.12, 0.0, 1, 0.36, 1.25, 0.05); box(0.025, 0.03, 0.7, '#B5505E', 0, 0.26, 0.0); ico(0.45, 1, '#E99AA3', 0, 0.9, -0.1, 1.1, 0.3, 1.1, 0.03); cyl(0.04, 0.0, 0.15, '#E89AA0', 0, 0.7, -0.35, 0, 0, 0, 6); break;
+      }
+      case 'liver': {
+        ico(0.55, 1, '#8F3A2B', -0.15, 0.2, 0, 1.35, 0.7, 0.8, 0.05, -0.1); ico(0.3, 1, '#9C4535', 0.55, 0.12, 0.02, 1.2, 0.7, 0.7, 0.05);
+        ico(0.13, 1, '#4F9E4A', 0, -0.12, 0.28, 0.8, 1.5, 0.8); tube([[0, 0, 0.25], [0.08, 0.1, 0.2], [0.15, 0.2, 0.1]], 0.02, '#4F9E4A', 6, 4);
+        tube([[0.05, 0.15, 0.1], [0.3, 0, 0], [0.6, -0.2, 0]], 0.045, '#3A5FA8', 8, 5); tube([[0.05, 0.12, 0.14], [0.3, -0.04, 0.06], [0.55, -0.22, 0.04]], 0.03, '#C0392B', 8, 4);
+        ico(0.1, 1, '#E8C45C', 0.3, -0.58, 0.05, 3.4, 0.8, 0.8, 0.05, 0.15); ico(0.15, 1, '#E8C45C', -0.2, -0.58, 0.05, 1, 0.9, 0.9, 0.05);
+        tube([[-0.1, -0.4, 0.05], [-0.38, -0.6, 0.05], [-0.3, -0.88, 0.05], [0.1, -0.9, 0.05]], 0.06, '#E9A89A', 12, 5); break;
+      }
+      case 'gut': {
+        tube([[0.0, 1.15, -0.02], [-0.03, 0.9, -0.02], [0, 0.72, 0]], 0.05, '#E8B0A0', 8, 5);
+        ico(0.28, 1, '#E39A8C', 0.18, 0.6, -0.03, 1.15, 0.72, 0.7, 0.04, -0.5); ico(0.1, 1, '#E0907F', -0.1, 0.43, -0.03);
+        const pts = []; for (let r = 0; r < 6; r++) { const y = 0.3 - 0.14 * r, dir = r % 2 ? -1 : 1; pts.push([-0.3 * dir, y, 0.02 * (r % 3)], [0, y - 0.05, 0.04], [0.3 * dir, y, 0.02]); }
+        tube(pts, 0.055, '#EBA596', 90, 5); tube(pts.map(p => [p[0] * 0.92, p[1] - 0.03, p[2] + 0.06]), 0.045, '#E59788', 80, 5);
+        const cp = [[-0.45, -0.62, 0], [-0.46, -0.3, 0], [-0.46, 0.1, 0], [-0.44, 0.42, 0], [-0.3, 0.52, 0], [-0.1, 0.46, 0], [0.1, 0.42, 0], [0.3, 0.52, 0], [0.46, 0.42, 0], [0.47, 0.1, 0], [0.46, -0.3, 0], [0.4, -0.55, 0], [0.2, -0.6, 0], [0.1, -0.45, 0], [0, -0.55, 0], [-0.05, -0.78, 0]];
+        const cc = crv(cp); reg(new T.Mesh(new T.TubeGeometry(cc, 70, 0.075, 6, false), MT('#B98C84')));
+        for (let i = 0; i <= 28; i++) { const q = cc.getPoint(i / 28); ico(0.1, 0, '#C99B92', q.x, q.y, q.z, 1, 0.9, 1); }
+        ico(0.13, 1, '#C99B92', -0.45, -0.66, 0); tube([[-0.45, -0.66, 0], [-0.52, -0.82, 0], [-0.42, -0.9, 0]], 0.03, '#B98C84', 6, 4); break;
+      }
+      case 'urinary': {
+        [-1, 1].forEach(s => { ico(0.2, 1, '#A9402F', s * 0.36, 0.3, 0, 0.7, 1.1, 0.55, 0.04, s * 0.15); cyl(0.04, 0.04, 0.14, '#D96B5A', s * 0.18, 0.28, 0, 0, 0, PI / 2, 6); tube([[s * 0.25, 0.1, 0], [s * 0.26, -0.1, 0], [s * 0.12, -0.38, 0.02]], 0.022, '#E8C46A', 8, 4); });
+        tube([[0, 0.8, 0], [0, 0.2, 0], [0, -0.1, 0]], 0.045, '#C0392B', 8, 5); tube([[0.1, 0.8, 0], [0.1, 0.2, 0], [0.1, -0.1, 0]], 0.05, '#3A5FA8', 8, 5);
+        ico(0.24, 1, '#F0D56A', 0, -0.52, 0.04, 1, 0.85, 0.9, 0.03); tube([[0, -0.7, 0.04], [0, -0.95, 0.04]], 0.03, '#E8C46A', 5, 4); break;
+      }
+      case 'skin': {
+        box(1.4, 0.07, 0.6, '#D8A47C', 0, 0.5, 0); box(1.4, 0.1, 0.6, '#E9B98F', 0, 0.41, 0); box(1.4, 0.42, 0.6, '#F2A9A3', 0, 0.15, 0); box(1.4, 0.5, 0.6, '#F7D97C', 0, -0.31, 0); box(1.4, 0.2, 0.6, '#B84A44', 0, -0.66, 0);
+        [-0.45, 0.2, 0.55].forEach((x, i) => ico(0.14, 1, '#F9E49A', x, -0.28 - (i % 2) * 0.06, 0.3, 1.2, 0.8, 0.35, 0.03));
+        cyl(0.02, 0.02, 0.5, '#4A3524', -0.45, 0.72, 0, 0, 0, 0.12, 5); cyl(0.04, 0.04, 0.45, '#E8C4A8', -0.45, 0.22, 0.0, 0, 0, 0, 6); ico(0.07, 1, '#F5E8DC', -0.45, -0.03, 0.0); ico(0.07, 1, '#F6E39A', -0.36, 0.26, 0.05);
+        tor(0.07, 0.03, '#7FB1D6', 0.3, -0.05, 0.31, 0, 0, 0); tor(0.05, 0.03, '#7FB1D6', 0.3, 0.02, 0.31, 0, 0, 0); tube([[0.3, 0.05, 0.31], [0.33, 0.3, 0.31], [0.3, 0.55, 0.31]], 0.015, '#7FB1D6', 8, 4);
+        tube([[-0.7, 0.02, 0.31], [0, 0.07, 0.33], [0.7, 0.02, 0.31]], 0.035, '#C0392B', 12, 5); tube([[-0.7, -0.08, 0.31], [0, -0.03, 0.33], [0.7, -0.08, 0.31]], 0.04, '#3A5FA8', 12, 5);
+        ico(0.04, 0, '#FFE27A', 0.62, 0.4, 0.3); ico(0.04, 0, '#FFE27A', -0.1, 0.4, 0.3); break;
+      }
+      case 'femur': {
+        const shell = reg(new T.Mesh(new T.CylinderGeometry(0.14, 0.15, 1.3, 12, 1, true, 0.6, PI * 1.5), MT('#F1E8D0'))); shell.position.set(0, 0, 0);
+        cyl(0.095, 0.1, 1.28, '#E8C65A', 0, 0, 0, 0, 0, 0, 10); cyl(0.1, 0.1, 0.22, '#C8453B', 0, 0.5, 0, 0, 0, 0, 10); cyl(0.1, 0.1, 0.22, '#C8453B', 0, -0.5, 0, 0, 0, 0, 10);
+        ico(0.2, 1, '#F1E8D0', -0.18, 0.78, 0, 1, 0.9, 1, 0.03); ico(0.19, 1, '#E8E0C6', -0.12, 0.6, 0, 1, 1, 1, 0.03); tube([[-0.18, 0.78, 0], [-0.05, 0.68, 0], [0.04, 0.62, 0]], 0.1, '#F1E8D0', 6, 6); ico(0.12, 1, '#E8DEC2', 0.18, 0.72, 0, 1, 1.2, 1, 0.03);
+        ico(0.14, 1, '#9EC9E3', -0.3, 0.92, 0.0, 0.9, 0.9, 0.9, 0.02);
+        [-1, 1].forEach(s => { ico(0.17, 1, '#F1E8D0', s * 0.15, -0.74, 0, 1, 0.9, 1.15, 0.03); ico(0.12, 1, '#9EC9E3', s * 0.15, -0.9, 0.04, 1, 0.5, 1.1, 0.02); }); break;
+      }
+    }
+  }
   function buildMic() {
     micG = new T.Group(); micG.visible = false; scene.add(micG); const g = micG;
     bx(g, 30, 0.7, 20, '#BFCACE', 0, -0.35, -1);
@@ -2227,14 +2326,9 @@ const World = (function () {
     cb(0.54, 0.9, 0.03, '#5A1E22', 0, 1.1, 0.305); cb(0.58, 0.04, 0.05, '#B84A44', 0, 1.56, 0.31); cb(0.58, 0.04, 0.05, '#B84A44', 0, 0.64, 0.31); cb(0.04, 0.9, 0.05, '#B84A44', -0.28, 1.1, 0.31); cb(0.04, 0.9, 0.05, '#B84A44', 0.28, 1.1, 0.31);
     [1.46, 1.38, 1.3].forEach(y => cb(0.5, 0.022, 0.03, '#F1E8D4', 0, y, 0.325));
     cb(0.03, 0.2, 0.03, '#F1E8D4', 0, 1.35, 0.325);
-    const org = (id, geo, c, x, y, z, sx, sy, sz, rz) => { const m = new T.Mesh(geo, new T.MeshStandardMaterial({ color: new T.Color(c), flatShading: true, roughness: 0.55, emissive: new T.Color(0x000000) })); m.position.set(x, y, z); m.scale.set(sx || 1, sy || 1, sz || 1); if (rz) m.rotation.z = rz; cav.add(m); m.userData.micSite = id; (micOrg[id] = micOrg[id] || []).push(m); return m; };
-    org('upper', new T.CylinderGeometry(0.024, 0.024, 0.2, 7), '#EBD8C2', 0, 1.47, 0.36); org('upper', new T.CylinderGeometry(0.016, 0.016, 0.12, 6), '#EBD8C2', -0.04, 1.4, 0.36, 1, 1, 1, 0.8); org('upper', new T.CylinderGeometry(0.016, 0.016, 0.12, 6), '#EBD8C2', 0.04, 1.4, 0.36, 1, 1, 1, -0.8);
-    org('lower', new T.IcosahedronGeometry(0.11, 1), '#E58A9A', -0.13, 1.32, 0.37, 0.85, 1.5, 0.7); org('lower', new T.IcosahedronGeometry(0.11, 1), '#E58A9A', 0.14, 1.32, 0.37, 0.8, 1.5, 0.7);
-    org('heart', new T.IcosahedronGeometry(0.07, 1), '#C62F3F', 0.07, 1.2, 0.43, 1, 1.2, 0.9); org('heart', new T.CylinderGeometry(0.02, 0.025, 0.1, 6), '#D9505C', 0.05, 1.3, 0.42);
-    org('intra', new T.IcosahedronGeometry(0.1, 1), '#8C3B2A', -0.1, 1.02, 0.38, 1.5, 0.75, 0.7); org('intra', new T.IcosahedronGeometry(0.03, 0), '#58A04A', -0.02, 0.95, 0.42);
-    org('gi', new T.IcosahedronGeometry(0.075, 1), '#E39B8C', 0.11, 1.02, 0.38, 1.05, 0.8, 0.75, 0.5);
-    [[0, 0.86, 0.1], [0.01, 0.84, 0.075]].forEach(r => { const m = org('gi', new T.TorusGeometry(r[2], 0.028, 5, 10), '#EAB8A4', r[0], r[1], 0.38); });
-    org('uti', new T.IcosahedronGeometry(0.045, 1), '#F0D56A', 0, 0.73, 0.38, 1, 1.1, 0.9);
+    const place = (kind, id, x, y, z, sc, rz) => { const gg = new T.Group(); gg.position.set(x, y, z); gg.scale.set(sc, sc, sc * 1.1); gg.rotation.z = rz || 0; cav.add(gg); micOrganBuild(kind, gg, id, micOrg[id] = micOrg[id] || []); };
+    place('upper', 'upper', 0, 1.46, 0.36, 0.17); place('lungs', 'lower', 0, 1.31, 0.37, 0.25); place('heart', 'heart', 0.06, 1.2, 0.5, 0.25, -0.1);
+    place('gut', 'gi', 0.02, 0.9, 0.36, 0.2); place('liver', 'intra', -0.09, 1.04, 0.42, 0.19); place('urinary', 'uti', 0, 0.76, 0.46, 0.15);
     // site markers, always drawn on top, with a bigger invisible touch target
     Object.keys(MICPOS).forEach(id => {
       const p = MICPOS[id], pg = new T.Group(); pg.position.set(p[0], p[1], p[2]); micManG.add(pg);
@@ -2276,6 +2370,14 @@ const World = (function () {
   api.micPins = function (list) { if (!micG) return; (list || []).forEach(p => { const m = micPinMap[p.id]; if (!m) return; m.st = p.st || 0; m.ster = !!p.ster; m.name = p.name || p.id; m.ring.visible = m.ster; m.dot.material.color.setHex(m.st >= 2 ? 0x0E9A8E : m.st === 1 ? 0x8ED9BC : 0xF1A20E); }); };
   api.micSelect = function (id) { micSel = id || null; };
   let micManWant = true;
+  /* zoom the camera onto a body part of the man (the organs stay inside him); null goes back to the full view */
+  let micZoomId = null;
+  const MICZOOM_RAD = { cns: 4.2, ear: 3.6, mouth: 3.6, upper: 4.2, lower: 5.0, heart: 4.2, intra: 4.6, gi: 4.6, uti: 4.2, sti: 4.2, skin: 4.6, bone: 5.2 };
+  api.micZoom = function (id) {
+    micZoomId = id && micPinMap[id] ? id : null; micZoomR = 0; Object.keys(micPinMap).forEach(k => { const pg = micPinMap[k].g; pg.visible = !micZoomId || k === micZoomId; pg.scale.set(1, 1, 1); if (micZoomId && k === micZoomId) pg.scale.set(0.2, 0.2, 0.2); }); if (!micOn) return;
+    if (!micZoomId) { micAim(); gph = 0.85; gth = 0; grad = baseRad * 0.62; return; }
+    try { micG.updateMatrixWorld(true); const v = new T.Vector3(); micPinMap[micZoomId].g.getWorldPosition(v); TX = v.x; TY = v.y - 0.3; TZ = v.z; gth = 0; gph = 0.7; grad = micZoomR = MICZOOM_RAD[micZoomId] || 4.5; } catch (e) { /* decor */ }
+  };
   api.micMan = function (v) { micManWant = !!v; micItemsFix(); };
   function micClearDishes() { Object.keys(micDishMap).forEach(id => { const d = micDishMap[id], i = micItems.indexOf(d.g); if (i >= 0) micItems.splice(i, 1); micBench.remove(d.g); }); micDishMap = {}; micHot = null; }
   api.micDishes = function (list) {
@@ -2371,7 +2473,7 @@ const World = (function () {
     for (const h of hits) { const id = h.object.userData.micPaper, p = micPaperMap[id]; let row = -1; if (p && p.spec.rows && h.uv) { const H = p.cv.height, tb = micTb(H), v = (1 - h.uv.y) * H, rh = (H - tb - 14) / p.spec.rows; row = v < tb + 8 ? -1 : Math.min(p.spec.rows - 1, Math.floor((v - tb - 8) / rh)); } return { id, row }; }
     return null;
   };
-  function micItemsFix() { if (!micManG) return; const hp = !!micPaperG, has = Object.keys(micDishMap).length > 0 || hp; micManG.visible = micManWant && !has; if (manBed) manBed.visible = micManG.visible; micBench.visible = has; if (micOn) { if (hp) { gph = 0.62; TY = 0.4; TZ = 0.2; } else if (has) { gph = 0.9; TY = 0.5; TZ = 0.1; } else { gph = 0.85; TY = 3.2; TZ = 0.2; } } }
+  function micItemsFix() { if (!micManG) return; const hp = !!micPaperG, has = Object.keys(micDishMap).length > 0 || hp; micManG.visible = micManWant && !has; if (manBed) manBed.visible = micManG.visible; micBench.visible = has; if (micOn) { if (hp) { gph = 0.62; TY = 0.4; TZ = 0.2; } else if (has) { gph = 0.9; TY = 0.5; TZ = 0.1; } else if (!micZoomId) { gph = 0.85; TY = 3.2; TZ = 0.2; } } }
   api.micDishAt = function (cx, cy) {
     if (!micOn) return null; const r = canvas.getBoundingClientRect(); if (cx < r.left || cx > r.right || cy < r.top || cy > r.bottom) return null;
     ndc.x = ((cx - r.left) / r.width) * 2 - 1; ndc.y = -((cy - r.top) / r.height) * 2 + 1; raycaster.setFromCamera(ndc, camera);
@@ -2389,7 +2491,7 @@ const World = (function () {
   api.micSiteHot = function (id) { micHoverId = id || null; };
   api.micSiteFill = function (id, ok) {
     const m = micPinMap[id]; if (!m) return; m.flash = 0.8; m.flashOk = !!ok;
-    if (ok) { const cols = ['#8BE04A', '#B26BE0', '#E8C23A', '#38C9B0', '#F0804B']; const c = new T.Mesh(new T.IcosahedronGeometry(0.05, 0), mat(cols[Math.floor(Math.random() * 5)], null, { emissive: new T.Color(0x224400), emissiveIntensity: 0.3 })); c.position.set((Math.random() - 0.5) * 0.12, (Math.random() - 0.5) * 0.12, 0.06); m.g.add(c); }
+    if (ok) { const cols = ['#8BE04A', '#B26BE0', '#E8C23A', '#38C9B0', '#F0804B']; const c = new T.Mesh(new T.IcosahedronGeometry(0.05, 0), mat(cols[Math.floor(Math.random() * 5)], null, { emissive: new T.Color(0x224400), emissiveIntensity: 0.3 })); c.position.set((Math.random() - 0.5) * 0.12, (Math.random() - 0.5) * 0.12, 0.06); if (micZoomId) { c.scale.set(2.6, 2.6, 2.6); c.position.set((Math.random() - 0.5) * 0.5, (Math.random() - 0.5) * 0.5, 0.1); } m.g.add(c); }
   };
   api.micDishHot = function (id) { micHot = id || null; };
   api.micDishFill = function (id, ok) {
