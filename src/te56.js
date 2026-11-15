@@ -25,7 +25,7 @@ const { chromium } = require('playwright');
       db.calls.push(fn); const out = rpc[fn] ? rpc[fn](body) : null;
       r.fulfill({ status: 200, contentType: 'application/json', headers: { 'access-control-allow-origin': '*' }, body: JSON.stringify(out) });
     });
-    const SEED = JSON.stringify(Object.assign({ me: { done: true, name: 'T', look: {} }, served: 30, correct: 25, tutDone: true, playSec: 999 }, seed || {}));
+    const SEED = JSON.stringify(Object.assign({ me: { done: true, name: 'T', look: {} }, served: 30, correct: 25, tutDone: true, playSec: 999, boardAsked: true }, seed || {}));
     await p.goto('file://' + process.cwd() + '/corner-rx.html?noconf=1');
     await p.evaluate(([s, n]) => { localStorage.setItem('cornerRx.v1', s); if (n) localStorage.setItem('rxNet', n); }, [SEED, net ? JSON.stringify({ url: URL, key: KEY }) : '']);
     await p.goto('file://' + process.cwd() + '/corner-rx.html?noconf=1'); await p.waitForTimeout(800);

@@ -1954,14 +1954,23 @@
   function showTour() { if (tourEl) return; tourStep = 0; tourPaused = Date.now(); tourEl = document.createElement('div'); tourEl.className = 'tour'; document.body.appendChild(tourEl); drawTour(); }
   function endTour() {
     if (tourEl) { tourEl.remove(); tourEl = null; }
-    S.tutDone = true; save();
+    S.tutDone = true; save(); setTimeout(maybeJoinAsk, 1500);
     if (cur && !cur.done && !cur.empty && tourPaused) cur.t0 += Date.now() - tourPaused;
     tourPaused = 0;
   }
+  /* one-time welcome prompt: pick a nickname to join the leaderboard (only when the online database is configured) */
+  let joinEl = null;
+  function maybeJoinAsk() {
+    if (joinEl || !Net.on() || !S.me.done || !S.tutDone || S.boardOn || S.boardAsked || tourEl) return;
+    joinEl = document.createElement('div'); joinEl.className = 'tour joinask'; joinEl.setAttribute('role', 'dialog'); joinEl.setAttribute('aria-label', 'Join the leaderboard');
+    joinEl.innerHTML = `<div class="joincard"><h3>Join the leaderboard?</h3><p>Pick a nickname and see how you rank against other pharmacy students this week. No account, no email. Only your nickname and your numbers are shared, and you can leave any time from the Leaderboard page.</p><input id="joinnick" class="field" type="text" maxlength="24" autocomplete="off" placeholder="e.g. RxRanger" aria-label="Nickname"><div class="btnrow"><button type="button" class="btn go" data-act="join-go">Join</button><button type="button" class="btn" data-act="join-skip">Not now</button></div></div>`;
+    document.body.appendChild(joinEl); const f = joinEl.querySelector('input'); if (f) f.focus();
+  }
+  function closeJoin() { if (joinEl) { joinEl.remove(); joinEl = null; } S.boardAsked = true; save(); }
   function maybeTour() { if (S.me.done && !S.tutDone && !tourEl) showTour(); }
   /* ---- save code: the whole save as one long code, to move progress between devices or keep a backup ---- */
 /*@EXT@*/
-  const GAME_VERSION = 123;
+  const GAME_VERSION = 124;
   const b64u = (u8) => { let s = ''; for (let i = 0; i < u8.length; i += 0x8000) s += String.fromCharCode.apply(null, u8.subarray(i, i + 0x8000)); return btoa(s).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); };
   const unb64u = (t) => { const s = atob(t.replace(/-/g, '+').replace(/_/g, '/')), u = new Uint8Array(s.length); for (let i = 0; i < s.length; i++) u[i] = s.charCodeAt(i); return u; };
   const chk = (t) => { let h = 2166136261; for (let i = 0; i < t.length; i++) { h ^= t.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36); };
@@ -2092,6 +2101,8 @@
       case 'flags': openView(view === 'flags' ? 'q' : 'flags'); if (view === 'q') { resumeTimers(); renderPanel(); } return;
       case 'flag-open': if (cur) { cur.flagOpen = !cur.flagOpen; renderPanel(); const ta = document.querySelector('.flagform textarea'); if (ta) ta.focus(); } return;
       case 'board-join': { const nb = $('#nickbox'), nick = nb ? nb.value.replace(/\s+/g, ' ').trim().slice(0, 24) : ''; if (!nick) { toast('Pick a nickname first.'); return; } S.nick = nick; S.boardOn = true; save(); boardPush().then(boardLoad); renderPanel(); toast('You are on the board as ' + nick + '.'); return; }
+      case 'join-go': { const nb = $('#joinnick'), nick = nb ? nb.value.replace(/\s+/g, ' ').trim().slice(0, 24) : ''; if (!nick) { toast('Type a nickname first, or tap Not now.'); return; } S.nick = nick; S.boardOn = true; closeJoin(); boardPush(); toast('You are on the leaderboard as ' + nick + '.'); return; }
+      case 'join-skip': closeJoin(); toast('No problem. You can join any time from the Leaderboard page.'); return;
       case 'board-leave': { S.boardOn = false; save(); Net.rpc('leave_board', { p_pid: playerId(), p_tok: playerTok() }).catch(() => {}).then(() => { boardLoad(); }); renderPanel(); toast('Removed from the board.'); return; }
       case 'board-refresh': boardLoad(); return;
       case 'flag-refresh': flagsLoad(false); return;
@@ -2252,5 +2263,5 @@
   renderAll();
   newCard();
   if (!S.me.done) openView('create');
-  maybeTour();
+  maybeTour(); setTimeout(maybeJoinAsk, 4000);
 })();
