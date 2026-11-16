@@ -13,9 +13,38 @@ const RAR = {
   legendary: { n: 'Legendary', c: '#D99A00', w: 2 }
 };
 const SLOTS = [
-  ['face', 'Facial hair'], ['eyes', 'Glasses'], ['hat', 'Hat'], ['neck', 'Neck'], ['coat', 'Coat'], ['hands', 'In hand'], ['extra', 'Extras'], ['cyber', 'Cyborg parts'], ['hair', 'Hair style'], ['pet', 'Pets']
+  ['outfit', 'Outfit'], ['face', 'Facial hair'], ['eyes', 'Glasses'], ['hat', 'Hat'], ['neck', 'Neck'], ['coat', 'Coat'], ['hands', 'In hand'], ['extra', 'Extras'], ['cyber', 'Cyborg parts'], ['hair', 'Hair style'], ['pet', 'Pets']
 ];
 const GEAR = [
+  /* outfits: each is a City Characters pack character (assets/outfits.*, id = pack number). The id ('o'+number) is what saves store. */
+  { id: 'o46', slot: 'outfit', name: 'Doctor', e: '🩺', r: 'common', src: 'start', outfit: 46, buff: {}, d: 'The classic white-coat look.' },
+  { id: 'o47', slot: 'outfit', name: 'Doctor (she)', e: '🩺', r: 'common', src: 'start', outfit: 47, buff: {}, d: 'The classic white-coat look.' },
+  { id: 'o48', slot: 'outfit', name: 'Doctor, big and friendly', e: '🩺', r: 'rare', src: 'shop', price: 500, outfit: 48, buff: { rep: 1 }, d: 'Patients relax around this doctor.' },
+  { id: 'o49', slot: 'outfit', name: 'Doctor, big and cheerful', e: '🩺', r: 'rare', src: 'shop', price: 500, outfit: 49, buff: { rep: 1 }, d: 'Patients relax around this doctor.' },
+  { id: 'o50', slot: 'outfit', name: 'Senior doctor', e: '🩺', r: 'rare', src: 'shop', price: 500, outfit: 50, buff: { rep: 1 }, d: 'Decades at the counter.' },
+  { id: 'o51', slot: 'outfit', name: 'Senior doctor (she)', e: '🩺', r: 'rare', src: 'shop', price: 500, outfit: 51, buff: { rep: 1 }, d: 'Decades at the counter.' },
+  { id: 'o52', slot: 'outfit', name: 'EMT', e: '🚑', r: 'common', src: 'shop', price: 600, outfit: 52, buff: { tech: 0.03 }, d: 'Calm in a crunch. Techs step up.' },
+  { id: 'o53', slot: 'outfit', name: 'EMT (she)', e: '🚑', r: 'common', src: 'shop', price: 600, outfit: 53, buff: { tech: 0.03 }, d: 'Calm in a crunch. Techs step up.' },
+  { id: 'o36', slot: 'outfit', name: 'Chef', e: '👨‍🍳', r: 'common', src: 'shop', price: 900, outfit: 36, buff: { pay: 0.02 }, d: 'Cooking up prescriptions.' },
+  { id: 'o37', slot: 'outfit', name: 'Chef (she)', e: '👩‍🍳', r: 'common', src: 'shop', price: 900, outfit: 37, buff: { pay: 0.02 }, d: 'Cooking up prescriptions.' },
+  { id: 'o77', slot: 'outfit', name: 'Security', e: '🛡️', r: 'rare', src: 'shop', price: 2000, outfit: 77, buff: { pills: 0.1 }, d: 'Nothing gets past this counter.' },
+  { id: 'o31', slot: 'outfit', name: 'Cashier', e: '🧾', r: 'common', src: 'capsule', outfit: 31, buff: {}, d: 'Rings up every fill.' },
+  { id: 'o64', slot: 'outfit', name: 'Housemaid', e: '🧹', r: 'common', src: 'capsule', outfit: 64, buff: {}, d: 'Spotless shelves.' },
+  { id: 'o83', slot: 'outfit', name: 'Waiter', e: '🍽️', r: 'common', src: 'capsule', outfit: 83, buff: {}, d: 'Service with a smile.' },
+  { id: 'o41', slot: 'outfit', name: 'Courier', e: '📦', r: 'common', src: 'capsule', outfit: 41, buff: {}, d: 'Always on the move.' },
+  { id: 'o75', slot: 'outfit', name: 'Repairman', e: '🔧', r: 'common', src: 'capsule', outfit: 75, buff: {}, d: 'Fixes the pharmacy and the queue.' },
+  { id: 'o19', slot: 'outfit', name: 'Builder', e: '🏗️', r: 'common', src: 'capsule', outfit: 19, buff: {}, d: 'Hard hat, hard worker.' },
+  { id: 'o4', slot: 'outfit', name: 'Architect', e: '📐', r: 'rare', src: 'capsule', outfit: 4, buff: { time: 1 }, d: 'Plans every fill.' },
+  { id: 'o9', slot: 'outfit', name: 'Artist', e: '🎨', r: 'rare', src: 'capsule', outfit: 9, buff: { streak: 1 }, d: 'A creative streak.' },
+  { id: 'o62', slot: 'outfit', name: 'Hairdresser', e: '💈', r: 'rare', src: 'capsule', outfit: 62, buff: { rep: 1 }, d: 'A fresh look for every patient.' },
+  { id: 'o63', slot: 'outfit', name: 'Hairdresser (she)', e: '💇', r: 'rare', src: 'capsule', outfit: 63, buff: { rep: 1 }, d: 'A fresh look for every patient.' },
+  { id: 'o79', slot: 'outfit', name: 'Stewardess', e: '✈️', r: 'rare', src: 'capsule', outfit: 79, buff: { rep: 1 }, d: 'Welcome aboard.' },
+  { id: 'o1', slot: 'outfit', name: 'Actor', e: '🎭', r: 'rare', src: 'capsule', outfit: 1, buff: { pay: 0.01 }, d: 'Plays the part.' },
+  { id: 'o82', slot: 'outfit', name: 'Teacher', e: '🍎', r: 'epic', src: 'capsule', outfit: 82, buff: { time: 2 }, d: 'Patient with every question.' },
+  { id: 'o23', slot: 'outfit', name: 'Businessman', e: '💼', r: 'epic', src: 'capsule', outfit: 23, buff: { pay: 0.02 }, d: 'Closes every deal.' },
+  { id: 'o24', slot: 'outfit', name: 'Businessman, big', e: '💼', r: 'epic', src: 'capsule', outfit: 24, buff: { pay: 0.02 }, d: 'Closes every deal.' },
+  { id: 'o26', slot: 'outfit', name: 'Executive', e: '👔', r: 'legendary', src: 'capsule', outfit: 26, buff: { pay: 0.03, time: 2 }, d: 'Corner office energy.' },
+  { id: 'o27', slot: 'outfit', name: 'Executive, big', e: '👔', r: 'legendary', src: 'capsule', outfit: 27, buff: { pay: 0.03, time: 2 }, d: 'Corner office energy.' },
   /* facial hair (capsules) */
   { id: 'mustache', slot: 'face', name: 'Mustache', e: '🥸', r: 'common', src: 'capsule', buff: { rep: 1 }, d: 'Patients trust a tidy mustache.' },
   { id: 'goatee', slot: 'face', name: 'Goatee', e: '🧔', r: 'common', src: 'capsule', buff: {}, d: 'Just looks sharp.' },

@@ -734,12 +734,14 @@
   }
   /* ---------------- lost pills: vial, tablet buff, capsule cosmetics ---------------- */
   /* gear helpers (the item table is GEAR in gear.js) */
-  const COSM_SLOTS = ['face', 'eyes', 'hat', 'neck', 'coat', 'hands', 'extra', 'cyber'];
+  const COSM_SLOTS = ['outfit', 'face', 'eyes', 'hat', 'neck', 'coat', 'hands', 'extra', 'cyber'];
+  /* only outfits and pets are drawn now (the pharmacist is a pack character); the older slots stay in the table so saves keep their ids, but they give nothing */
+  const GEAR_LIVE = { outfit: 1, pet: 1 };
   const gearById = id => GEAR_BY[id] || null;
   const gearHave = id => { const g = gearById(id); if (!g) return false;
     if (g.src === 'start') return true; if (g.src === 'rank') return (S.acc || 0) >= g.rank; if (g.src === 'shop') return ((S.store || {}).own || []).indexOf(id) >= 0;
     if (g.slot === 'pet') return ((S.awards || {}).pets || []).indexOf(g.kind) >= 0; return (S.cosm || []).indexOf(id) >= 0; };
-  const gearOn = id => { const g = gearById(id); if (!g || !gearHave(id)) return false; if (g.slot === 'pet') return true; if (g.slot === 'hair') return S.me.hair === g.hv; return ((S.cosmOn || {})[g.slot]) === id; };
+  const gearOn = id => { const g = gearById(id); if (!g || !gearHave(id) || !GEAR_LIVE[g.slot]) return false; if (g.slot === 'pet') return true; if (g.slot === 'hair') return S.me.hair === g.hv; return ((S.cosmOn || {})[g.slot]) === id; };
   const gearSrcText = g => g.src === 'start' ? 'Everyone starts with it' : g.src === 'shop' ? 'Shop, ' + money(g.price) : g.src === 'rank' ? 'Rank: ' + RANKS[g.rank][1] : g.src === 'award' ? 'Mastery award (see Awards)' : RAR[g.r].n + ' capsule';
   const buffText2 = b => { b = b || {}; const o = []; if (b.pay) o.push('+' + Math.round(b.pay * 100) + '% pay'); if (b.tech) o.push('+' + Math.round(b.tech * 100) + '% tech tips'); if (b.time) o.push('+' + b.time + ' s on the timer'); if (b.rep) o.push('+' + b.rep + ' reputation per fill'); if (b.pills) o.push('+' + Math.round(b.pills * 100) + '% lost pills'); if (b.streak) o.push('+' + b.streak + ' streak cap'); return o.join(', '); };
   /* total bonus from everything equipped plus every pet you own */
@@ -760,7 +762,7 @@
   }
   /* capsule rarity: rolled when the pill is picked up, so the vial can show it */
   function rollRarity(boost) { let r = Math.random() * 100; const keys = ['legendary', 'epic', 'rare', 'common']; for (const k of keys) { const w = RAR[k].w * (k === 'common' ? 1 : 1 + (boost || 0)); if (r < w) return k; r -= w; } return 'common'; }
-  const capsulePool = (r) => GEAR.filter(g => g.src === 'capsule' && g.r === r && !gearHave(g.id));
+  const capsulePool = (r) => GEAR.filter(g => GEAR_LIVE[g.slot] && g.src === 'capsule' && g.r === r && !gearHave(g.id));
   function capsulePick(r) { const order = { common: ['common', 'rare', 'epic', 'legendary'], rare: ['rare', 'common', 'epic', 'legendary'], epic: ['epic', 'rare', 'legendary', 'common'], legendary: ['legendary', 'epic', 'rare', 'common'] }[r] || ['common']; for (const k of order) { const pool = capsulePool(k); if (pool.length) return pick(pool); } return null; }
   function gearGrant(g, equip) {
     if (g.slot === 'pet') { S.awards.pets = S.awards.pets || []; if (S.awards.pets.indexOf(g.kind) < 0) S.awards.pets.push(g.kind); try { World.setAwards(worldAwards()); World.unlockPet(g.kind); } catch (e) { /* ignore */ } return; }

@@ -1628,7 +1628,7 @@ const World = (function () {
       const cv = document.createElement('canvas'); cv.width = cv.height = S; const cx = cv.getContext('2d'), id = cx.createImageData(S, S);
       for (let y = 0; y < S; y++) id.data.set(buf.subarray((S - 1 - y) * S * 4, (S - y) * S * 4), y * S * 4);
       cx.putImageData(id, 0, 0); url = cv.toDataURL('image/png');
-    } catch (e) { url = null; try { renderer.setRenderTarget(null); } catch (_) { /* ignore */ } }
+    } catch (e) { if (window.__rxDev) console.log("portrait", e.message); url = null; try { renderer.setRenderTarget(null); } catch (_) { /* ignore */ } }
     try { if (rt) rt.dispose(); if (p) p.traverse(o => { if (o.geometry) o.geometry.dispose(); if (o.material) o.material.dispose(); }); } catch (_) { /* ignore */ }
     portraitCache[key] = url; return url;
   };
@@ -1660,7 +1660,7 @@ const World = (function () {
       const cv = document.createElement('canvas'); cv.width = W; cv.height = H; const cx = cv.getContext('2d'), im = cx.createImageData(W, H);
       for (let y = 0; y < H; y++) im.data.set(buf.subarray((H - 1 - y) * W * 4, (H - y) * W * 4), y * W * 4);
       cx.putImageData(im, 0, 0); url = cv.toDataURL('image/png');
-    } catch (e) { url = null; try { renderer.setRenderTarget(null); } catch (_) { /* ignore */ } }
+    } catch (e) { if (window.__rxDev) console.log("portrait", e.message); url = null; try { renderer.setRenderTarget(null); } catch (_) { /* ignore */ } }
     try { if (rt) rt.dispose(); if (grp) grp.traverse(o => { if (o.geometry) o.geometry.dispose(); if (o.material) o.material.dispose(); }); } catch (_) { /* ignore */ }
     cosmCache[key] = url; return url;
   };
@@ -1672,7 +1672,7 @@ const World = (function () {
       const W = 240, H = 300, ps = new T.Scene(), pc = new T.PerspectiveCamera(27, W / H, 0.1, 40);
       ps.add(new T.HemisphereLight(0xffffff, 0x8899aa, 0.95)); const dl = new T.DirectionalLight(0xffffff, 0.75); dl.position.set(2.5, 4, 5); ps.add(dl);
       p = person(1, false, false, false, me.body === 'normal' ? undefined : me.body, { skin: me.skin, hair: me.hairCol, shirt: me.shirtCol || '#F7FBFB', shoes: me.shoes || null, hairStyle: HAIR_MAP[me.hair] === undefined ? 0 : HAIR_MAP[me.hair], gender: me.gender, coat: true, me: true, outfit: me.outfit, scrub: me.scrub, acc: me.acc, accOn: me.accOn || 0, cosm: me.cosm || null, tag: { pharm: true } });
-      p.rotation.y = -0.35; ps.add(p); pc.position.set(0, 1.35, 6.6); pc.lookAt(0, 1.2, 0);
+      p.rotation.y = -0.35; ps.add(p); pc.position.set(0, 1.25, 4.9); pc.lookAt(0, 1.08, 0);
       rt = new T.WebGLRenderTarget(W, H, { samples: 4 });
       const oldRT = renderer.getRenderTarget(), oc = renderer.getClearColor(new T.Color()), oa = renderer.getClearAlpha();
       renderer.setRenderTarget(rt); renderer.setClearColor(0x000000, 0); renderer.clear(); renderer.render(ps, pc);
@@ -1683,7 +1683,7 @@ const World = (function () {
       const cv = document.createElement('canvas'); cv.width = W; cv.height = H; const cx = cv.getContext('2d'), id = cx.createImageData(W, H);
       for (let y = 0; y < H; y++) id.data.set(buf.subarray((H - 1 - y) * W * 4, (H - y) * W * 4), y * W * 4);
       cx.putImageData(id, 0, 0); url = cv.toDataURL('image/png');
-    } catch (e) { url = null; try { renderer.setRenderTarget(null); } catch (_) { /* ignore */ } }
+    } catch (e) { if (window.__rxDev) console.log("portrait", e.message); url = null; try { renderer.setRenderTarget(null); } catch (_) { /* ignore */ } }
     try { if (rt) rt.dispose(); if (p) p.traverse(o => { if (o.geometry) o.geometry.dispose(); if (o.material) o.material.dispose(); }); } catch (_) { /* ignore */ }
     meCache[key] = url; return url;
   };

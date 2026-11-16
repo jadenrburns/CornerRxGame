@@ -1076,7 +1076,7 @@
   const ME_BODIES = [['slim', 'Slim'], ['normal', 'Average'], ['jacked', 'Jacked'], ['obese', 'Round']];
   const ME_GENDERS = [['f', 'Woman'], ['m', 'Man'], ['n', 'Nonbinary']];
   const ME_HAIRS = ['Short', 'Bob', 'Long', 'Bun', 'Curly', 'Spiky', 'Bald'];
-  function meSpec() { const m = S.me; return { outfit: m.outfit || 0, body: m.body, gender: m.gender, hair: m.hair, skin: ME_SKIN[m.skin], hairCol: ME_HAIR[m.hairColor], scrub: ME_SCRUB[m.scrub], shirtCol: (ME_SHIRT[m.shirt | 0] || ME_SHIRT[0])[0], shoes: (ME_SHOES[m.shoes === undefined ? 3 : m.shoes] || ME_SHOES[3])[0], acc: S.acc || 0, accOn: accOnList(), cosm: cosmSpec() }; }
+  function meSpec() { const m = S.me; return { outfit: ((gearById((S.cosmOn || {}).outfit) || {}).outfit) || 46, body: m.body, gender: m.gender, hair: m.hair, skin: ME_SKIN[m.skin], hairCol: ME_HAIR[m.hairColor], scrub: ME_SCRUB[m.scrub], shirtCol: (ME_SHIRT[m.shirt | 0] || ME_SHIRT[0])[0], shoes: (ME_SHOES[m.shoes === undefined ? 3 : m.shoes] || ME_SHOES[3])[0], acc: S.acc || 0, accOn: accOnList(), cosm: cosmSpec() }; }
   function meSVG() {
     const m = S.me, skin = ME_SKIN[m.skin], hair = ME_HAIR[m.hairColor], scrub = ME_SCRUB[m.scrub];
     const w = ({ slim: 24, normal: 32, jacked: 46, obese: 50 }[m.body] || 32) * (m.gender === 'f' ? 0.92 : m.gender === 'm' ? 1.06 : 1);
@@ -1115,21 +1115,7 @@
     const coatOpts = ME_SHIRT.map((x, i) => ({ v: i, n: x[1], c: x[0] })).concat(gearOpts('coat').slice(1));
     const cur = (slot) => gearHave(on[slot]) && gearById(on[slot]).slot === slot ? on[slot] : '';
     const rows = [
-      { k: 'gender', t: 'Gender', cur: m.gender, o: ME_GENDERS.map(x => ({ v: x[0], n: x[1] })) },
-      { k: 'body', t: 'Body type', cur: m.body, o: ME_BODIES.map(x => ({ v: x[0], n: x[1] })) },
-      { k: 'skin', t: 'Skin tone', cur: m.skin, o: ME_SKIN.map((c, i) => ({ v: i, n: ME_SKIN_N[i], c })) },
-      { k: 'hair', t: 'Hair style', cur: m.hair, o: hairOpts, lock: gearLocked('hair') },
-      { k: 'hairColor', t: 'Hair color', cur: m.hairColor, o: ME_HAIR.map((c, i) => ({ v: i, n: ME_HAIR_N[i], c })) },
-      { k: 'face', t: 'Facial hair', cur: cur('face'), o: gearOpts('face'), lock: gearLocked('face') },
-      { k: 'eyes', t: 'Glasses', cur: cur('eyes'), o: gearOpts('eyes'), lock: gearLocked('eyes') },
-      { k: 'hat', t: 'Hat', cur: cur('hat'), o: gearOpts('hat'), lock: gearLocked('hat') },
-      { k: 'neck', t: 'Neck', cur: cur('neck'), o: gearOpts('neck'), lock: gearLocked('neck') },
-      { k: 'coat', t: 'Coat', cur: cur('coat') || (m.shirt | 0), o: coatOpts, lock: gearLocked('coat') },
-      { k: 'scrub', t: 'Pants', cur: m.scrub, o: ME_SCRUB.map((c, i) => ({ v: i, n: ME_SCRUB_N[i] + ' pants', c })) },
-      { k: 'shoes', t: 'Shoes', cur: m.shoes === undefined ? 3 : m.shoes, o: ME_SHOES.map((x, i) => ({ v: i, n: x[1], c: x[0] })) },
-      { k: 'hands', t: 'In hand', cur: cur('hands'), o: gearOpts('hands'), lock: gearLocked('hands') },
-      { k: 'extra', t: 'Extras', cur: cur('extra'), o: gearOpts('extra'), lock: gearLocked('extra') },
-      { k: 'cyber', t: 'Cyborg parts', cur: cur('cyber'), o: gearOpts('cyber'), lock: gearLocked('cyber') }
+      { k: 'outfit', t: 'Outfit', cur: cur('outfit') || 'o46', o: gearOpts('outfit').slice(1), lock: gearLocked('outfit') }
     ];
     return rows;
   }
@@ -1147,9 +1133,11 @@
   /* ---- shop (a tab on the Character screen) ---- */
   let cTab = 'me'; const shopOpen = { walls: true };
   const buffText = b => [b.tech ? '+' + Math.round(b.tech * 100) + '% tech tips' : '', b.pay ? '+' + Math.round(b.pay * 100) + '% pay' : ''].filter(Boolean).join(', ');
-  function uniSpec() { const u = uniOf(); return u ? { shirt: u[2], scrub: u[3], cosm: { hat: u[4] || '', eyes: u[0] === 'u5' ? 'goggles' : '' } } : null; }
+  /* tech uniforms are pack outfits now (City Characters): the id maps to the character number */
+  const UNI_OUT = { u1: 63, u2: 53, u3: 47, u4: 37, u5: 52, u6: 23 };
+  function uniSpec() { const u = uniOf(); return u ? { outfit: UNI_OUT[u[0]] } : null; }
   function applyShop() { if (!World.ok) return; World.setStore(S.store); World.setStaffLook(uniSpec()); World.setPharmacist(meSpec()); }
-  const SHOP_CATS = [['walls', 'Wall paint'], ['floors', 'Floors'], ['uni', 'Tech uniforms'], ['deco', 'Decor'], ['wear', 'Wardrobe'], ['pow', 'Power-ups']];
+  const SHOP_CATS = [['walls', 'Wall paint'], ['floors', 'Floors'], ['uni', 'Tech uniforms'], ['deco', 'Decor'], ['wear', 'Outfits'], ['pow', 'Power-ups']];
   function shopRows(cat) {
     const st = S.store;
     if (cat === 'walls') return SHOP_WALLS.map(w => ({ id: w[0], name: w[1], price: w[4], free: !w[4], on: st.walls === w[0], sw: [w[2], w[3]], note: '' }));
@@ -1157,7 +1145,7 @@
     if (cat === 'uni') return [{ id: '', name: 'Standard coats', price: 0, free: true, on: !st.uni, sw: ['#F4FAFA', '#27384F'], note: 'No bonus.' }].concat(SHOP_UNI.map(u => ({ id: u[0], name: u[1], price: u[6], on: st.uni === u[0], sw: [u[2], u[3]], note: buffText(u[5]) + '. ' + u[7] })));
     if (cat === 'deco') return SHOP_DECOR.map(d => ({ id: d[0], name: d[1], price: d[2], on: (st.deco || []).indexOf(d[0]) >= 0, emoji: d[4], note: d[3], toggle: true }));
     if (cat === 'pow') return Object.keys(PW).map(k => ({ id: k, name: PW[k].name, price: pwCost(k), emoji: PW[k].emoji, note: PW[k].note, stack: true, count: S.pw[k] || 0 }));
-    return GEAR.filter(g => g.src === 'shop').map(g => ({ id: g.id, name: g.name, price: g.price, on: gearOn(g.id), emoji: g.e, r: g.r, note: SLOT_NAME[g.slot] + (buffText2(g.buff) ? ' · ' + buffText2(g.buff) : '') + (g.d ? '. ' + g.d : '') }));
+    return GEAR.filter(g => g.src === 'shop' && GEAR_LIVE[g.slot]).map(g => ({ id: g.id, name: g.name, price: g.price, on: gearOn(g.id), emoji: g.e, r: g.r, note: SLOT_NAME[g.slot] + (buffText2(g.buff) ? ' · ' + buffText2(g.buff) : '') + (g.d ? '. ' + g.d : '') }));
   }
   function shopHTML() {
     const cash = S.cash, bf = buffText(uniBuff()), hasT = S.up.tech >= 1;
@@ -1195,7 +1183,7 @@
     save(); applyShop(); if (view === 'create') renderPanel();
   }
   function outfitHTML() {
-    const b = gearBuff(), t = buffText2(b), own = GEAR.filter(g => g.slot !== 'pet' && g.src !== 'start' && gearHave(g.id)).length, all = GEAR.filter(g => g.slot !== 'pet' && g.src !== 'start').length;
+    const b = gearBuff(), t = buffText2(b), own = GEAR.filter(g => g.slot === 'outfit' && g.src !== 'start' && gearHave(g.id)).length, all = GEAR.filter(g => g.slot === 'outfit' && g.src !== 'start').length;
     return `<div class="tsum outfit"><b>Outfit bonus: ${t ? esc(t) : 'none yet'}</b><span>${own}/${all} gear found</span></div>`;
   }
   function petsHTML() {
@@ -1208,12 +1196,6 @@
     const fish = S.awards.pets.indexOf('fish') >= 0;
     return `<p class="note">Pets wander the floor. Press and hold one, then drag to carry it; let go to set it down. ${fish ? 'The goldfish tank stays put.' : ''}</p><div class="awpl">${rows}</div>`;
   }
-  /* pack outfits (City Characters) for the pharmacist: pick one and the 3D pharmacist wears it */
-  function outfitPicker() {
-    if (typeof RXC === 'undefined' || !RXC.ready()) return '';
-    const cur = S.me.outfit || 46, list = RXC.outfits();
-    return `<div class="grp"><b>Outfit</b><p class="note">Pick who you work as. Your whole look comes from the character.</p><div class="btnrow" style="flex-wrap:wrap;gap:6px">${list.map(c => `<button type="button" class="btn${c.id === cur ? ' go' : ''}" data-act="outfit" data-v="${c.id}">${esc(c.label)} ${c.sex === 'f' ? '\u2640' : '\u2642'}${c.cat === 'PlusSize' ? ' +' : c.cat === 'Senior' ? ' (sr)' : ''}</button>`).join('')}</div></div>`;
-  }
   function createHTML() {
     const seg = (id, label) => `<button type="button" role="tab" aria-selected="${cTab === id}" data-act="ctab" data-v="${id}">${label}</button>`;
     const tabs = S.me.done ? `<div class="hubtabs" role="tablist" aria-label="Character screen">${seg('me', 'Wardrobe')}${seg('shop', 'Shop')}${seg('pets', 'Pets')}</div>` : '';
@@ -1224,8 +1206,7 @@
       <div class="mepv sticky">${mePreview()}</div>
       ${m.done ? outfitHTML() : ''}
       <div class="grp"><b>Name your pharmacy</b><input id="shopname" class="field" type="text" maxlength="24" autocomplete="off" placeholder="Corner Rx" value="${esc(S.shop || '')}" aria-label="Pharmacy name"><p class="note">It goes on the sign above your shelves.</p></div>
-      <p class="note">Use the arrows on each row to flip through what you own. Gear comes from capsules in the lost pills vial (top bar), the Shop tab and rank promotions, and each piece carries a small bonus for your pharmacy.</p>
-      ${outfitPicker()}
+      <p class="note">Use the arrows to flip through the outfits you own. New outfits come from capsules in the lost pills vial (top bar) and the Shop tab, and each carries a small bonus for your pharmacy.</p>
       <div class="crows">${rows}</div>
       <div class="btnrow"><button type="button" class="btn go" data-act="me-done">${m.done ? 'Done' : 'Start working'}</button></div></div>`;
   }
@@ -2049,7 +2030,6 @@
         const row = document.querySelector('.crow[data-k="' + k + '"]'), nr = crows().find(x => x.k === k); if (row && nr) { row.outerHTML = crowHTML(nr); const nb = document.querySelector('.crow[data-k="' + k + '"] [data-d="' + d + '"]'); if (nb) nb.focus(); } const pv = document.querySelector('.mepv'); if (pv) pv.innerHTML = mePreview(); return; }
       case 'create': openView(view === 'create' ? 'q' : 'create'); if (view === 'q') { resumeTimers(); renderPanel(); } return;
       case 'awards': openView(view === 'awards' ? 'q' : 'awards'); if (view === 'q') { resumeTimers(); renderPanel(); } return;
-      case 'outfit': { S.me.outfit = +t.dataset.v; save(); World.setPharmacist(meSpec()); renderPanel(); return; }
       case 'me': { readShop(); const k = t.dataset.k, v = t.dataset.v; S.me[k] = (k === 'hair' || k === 'hairColor' || k === 'skin' || k === 'scrub') ? +v : v; save(); World.setPharmacist(meSpec()); renderPanel(); return; }
       case 'ctab': readShop(); cTab = v === 'shop' || v === 'pets' ? v : 'me'; renderPanel(); return;
       case 'shop-buy': shopBuy(t.dataset.k, t.dataset.id); if (view === 'create') renderPanel(); return;
@@ -2263,7 +2243,7 @@
 
   { const sc = $('#savecard'); if (sc) sc.innerHTML = saveBoxHTML(); }
   World.init({ host: $('#stage'), getS: () => S, specialRoll: specialRoll, tagInfo: tagInfo, onBuy: buyUp, onNotes: () => openView('studies'), onBin: () => { micR = null; openView('mic'); }, onMicSite: (id) => micSiteClick(id), onMicDish: (id) => micDishClick(id), onMicPaper: (id, row) => micPaperClick(id, row), notesInfo: customCount, karenRoll: karenRoll, sweatyRoll: sweatyRoll, elderRoll: elderRoll, eventRoll: eventRoll, onVisitor: visitClick, onVisitorArrive: visitArrive, capsuleOk: capsuleOk, onCapsule: onCapsule, onBrain: synEnter, onSynSite: onSynSite, onEvt: onEvt, pillOk: pillOk, onPill: onPill, pillBoost: () => gearBuff().pills, onPhone: openPhone, onPolice: policeCome, himOk: himOk, onHimSpawn: onHimSpawn, onHimAngel: himAngelOk, onHimLand: himLand, onHimBless: onHimBless, onFp: fpClick, sign: () => shopName() + '|' + tierName() + ' #' + (S.franchises + 1) });
-  window.__rxDbg = () => ({ micDbg: () => ({ open: () => { micR = null; openView('mic'); }, get R() { return micR; }, get inLab() { return micIn; }, drop: micDrop, paper: micPaperClick, part: micStartPart, startSort: micStartSort, sel: id => { micSelG = id; renderPanel(); } }), sr: srUpdate, nc: newCard, sp: specialRoll, fp: fp, S: S, view: view, rush: rush, phoneR: phone.ringing, TOPQ: TOPQ, pool: poolQs, cur: cur, synQ: () => (typeof SYN !== 'undefined' ? SYN.q : null), synTap: id => onSynSite(id), offer: k => offerEvt(k, 'test'), onEvt: onEvt, holiday: () => holNow(), holN: () => holCount(), renderStats: renderStats, passive: passive, techRate: techRate, buyUp: buyUp, openVial: openVial, tabletTake: tabletTake, capsuleOpen: capsuleOpen, buffOn: buffOn, GEAR: GEAR, gearBuff: gearBuff, gearHave: gearHave });
+  window.__rxDbg = () => ({ goView: (v) => { openView(v); }, shopTab: (t) => { cTab = t; renderPanel(); }, micDbg: () => ({ open: () => { micR = null; openView('mic'); }, get R() { return micR; }, get inLab() { return micIn; }, drop: micDrop, paper: micPaperClick, part: micStartPart, startSort: micStartSort, sel: id => { micSelG = id; renderPanel(); } }), sr: srUpdate, nc: newCard, sp: specialRoll, fp: fp, S: S, view: view, rush: rush, phoneR: phone.ringing, TOPQ: TOPQ, pool: poolQs, cur: cur, synQ: () => (typeof SYN !== 'undefined' ? SYN.q : null), synTap: id => onSynSite(id), offer: k => offerEvt(k, 'test'), onEvt: onEvt, holiday: () => holNow(), holN: () => holCount(), renderStats: renderStats, passive: passive, techRate: techRate, buyUp: buyUp, openVial: openVial, tabletTake: tabletTake, capsuleOpen: capsuleOpen, buffOn: buffOn, GEAR: GEAR, gearBuff: gearBuff, gearHave: gearHave });
   if (!World.ok) $('#stage').classList.add('flat');
   else { document.body.classList.add('fx'); try { World.setBin(!!S.binBug); } catch (e) { /* decor */ } World.setPharmacist(meSpec()); World.setStore(S.store); World.setStaffLook(uniSpec()); World.setAwards(S.awards); World.setCalendar(Math.min(4, S.awards.calW || 0), false, S.awards.calW || 0); }
   applyFocus(); syncBrand(); sfxLabel();

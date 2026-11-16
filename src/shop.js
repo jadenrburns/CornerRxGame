@@ -25,12 +25,12 @@ const SHOP_FLOORS = [
 /* technician uniforms: [id, name, shirt, pants, hat, buff, price, blurb]. buff = { tech: x } adds x to tech tip income, { pay: x } adds x to every answer payout.
    Only one uniform is worn at a time, by every technician. The buff works once you have hired at least one technician. */
 const SHOP_UNI = [
-  ['u1', 'Mint scrubs', '#BFEBDD', '#2E7D6B', '', { tech: 0.05 }, 400, 'Cool and calm. Techs earn a little more.'],
-  ['u2', 'Navy scrubs', '#3C5A8F', '#1F2F4F', '', { tech: 0.08 }, 900, 'Sharp and professional.'],
-  ['u3', 'Crisp lab coats', '#FFFFFF', '#27384F', '', { pay: 0.02 }, 1500, 'Customers trust a pressed coat.'],
-  ['u4', 'Chef whites', '#FFFFFF', '#2B2B33', 'chef', { pay: 0.04 }, 2200, 'Cooking up prescriptions, hat and all.'],
-  ['u5', 'Space suits', '#E8EEF7', '#7B8BA8', '', { tech: 0.06, pay: 0.03 }, 3500, 'Goggles on. Mission control energy.'],
-  ['u6', 'Gold executive', '#F2C94C', '#3B2F12', 'tophat', { tech: 0.10, pay: 0.05 }, 6000, 'Top hats for the top team.']
+  ['u1', 'Salon crew', '#BFEBDD', '#2E7D6B', '', { tech: 0.05 }, 400, 'Cool and calm. Techs earn a little more.'],
+  ['u2', 'EMT crew', '#3C5A8F', '#1F2F4F', '', { tech: 0.08 }, 900, 'Sharp and professional.'],
+  ['u3', 'Doctor crew', '#FFFFFF', '#27384F', '', { pay: 0.02 }, 1500, 'Customers trust a pressed coat.'],
+  ['u4', 'Chef crew', '#FFFFFF', '#2B2B33', 'chef', { pay: 0.04 }, 2200, 'Cooking up prescriptions, hat and all.'],
+  ['u5', 'Rescue crew', '#E8EEF7', '#7B8BA8', '', { tech: 0.06, pay: 0.03 }, 3500, 'Goggles on. Mission control energy.'],
+  ['u6', 'Executive crew', '#F2C94C', '#3B2F12', 'tophat', { tech: 0.10, pay: 0.05 }, 6000, 'Top hats for the top team.']
 ];
 /* decorations: [id, name, price, blurb, emoji] */
 const SHOP_DECOR = [

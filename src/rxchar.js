@@ -43,10 +43,10 @@ const RXC = (function () {
   const JN = () => DB.joints;
   function person(seed, o, rnd) {
     const J = JN(), idx = {}; J.forEach((n, i) => { idx[n] = i; });
-    const body = o.body, sex = o.gender || (rnd(36) < 0.5 ? 'f' : 'm');
+    const body = o.body, sex = (o.gender === 'm' || o.gender === 'f') ? o.gender : (rnd(36) < 0.5 ? 'f' : 'm');
     const r = rnd(41);
     let cat = body === 'jacked' ? 'Pumped' : body === 'obese' ? 'PlusSize' : r < 0.12 ? 'Teen' : r < 0.2 ? 'Senior' : r < 0.33 ? 'PlusSize' : 'Adult';
-    let list = byKind[cat + sex]; if (!list || !list.length) { cat = 'Adult'; list = byKind['Adult' + sex] || byKind.Adult + 'm'; }
+    let list = byKind[cat + sex]; if (!list || !list.length) { cat = 'Adult'; list = byKind['Adult' + sex] || byKind.Adultm; }
     if (!list || !list.length) list = DB.chars;
     const hx = (Math.imul((seed | 0) ^ 0x9E3779B9, 2246822519) >>> 0) / 4294967296, c = list[Math.floor(hx * list.length) % list.length], R = rest(c);
     const g = new THREE.Group(), root = new THREE.Group(); g.add(root); root.scale.setScalar(Sx);

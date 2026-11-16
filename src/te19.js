@@ -6,7 +6,7 @@ await p.goto('file://'+process.cwd()+'/corner-rx.html?dev=1');await p.waitForTim
 console.log('menu items',await p.$$eval('#menu button span',e=>e.map(x=>x.textContent).join(' | ')));
 await p.evaluate(()=>document.querySelector('#menu [data-act=create]').click());await p.waitForTimeout(300);
 console.log('view',await p.evaluate(()=>__rxDbg().view),'gear chips (should be 0)',await p.$$eval('.cpane .chips',e=>e.length),'rows',await p.$$eval('.crow',e=>e.map(r=>r.dataset.k).join(',')));
-await p.evaluate(()=>{const i=document.querySelector('#shopname');i.value='Test Rx';document.querySelector('.crow[data-k=neck] .carr[data-d="1"]').click()});
+await p.evaluate(()=>{const i=document.querySelector('#shopname');i.value='Test Rx';document.querySelector('.crow[data-k=outfit] .carr[data-d="1"]').click()});
 console.log('neck after cycle',await p.evaluate(()=>JSON.stringify(__rxDbg().S.cosmOn)),'acc',await p.evaluate(()=>__rxDbg().S.acc));
 await p.evaluate(()=>document.querySelector('[data-act=me-done]').click());await p.waitForTimeout(300);
 console.log('shop',await p.evaluate(()=>__rxDbg().S.shop),'brand',await p.$eval('.brand h1',e=>e.textContent),'view',await p.evaluate(()=>__rxDbg().view));
