@@ -2343,6 +2343,21 @@ const World = (function () {
       }
     }
   }
+  /* Medical Pack props for the lab (RXM, assets/med.*): the hospital bed under the man, bench equipment, cabinets and a cart; the hand-built ones are hidden when the pack is loaded */
+  function micPackDecor(g, rig, n0, n1) {
+    if (typeof RXM === 'undefined' || !RXM.ready()) return;
+    try {
+      const put2 = (name, parent, x, y, z, sc, ry) => { const o = RXM.make(name, sc); if (!o) return null; o.position.set(x, y, z); o.rotation.y = ry || 0; parent.add(o); return o; };
+      for (let i = n0; i < n1; i++) g.children[i].visible = false;
+      manBed.children.forEach(c => { c.visible = false; });
+      const bed = RXM.make('Bed_04', 1); if (bed) { const bb = new T.Box3().setFromObject(bed), L = Math.max(bb.max.x - bb.min.x, bb.max.z - bb.min.z); const holder = new T.Group(); manBed.add(holder); holder.add(bed); bed.position.set(-(bb.max.x + bb.min.x) / 2, -bb.min.y, -(bb.max.z + bb.min.z) / 2); if (bb.max.x - bb.min.x < bb.max.z - bb.min.z) holder.rotation.y = PI / 2; holder.scale.setScalar(5.9 / L); holder.userData.packBed = true; }
+      const S = 4.2, by = 1.34;
+      put2('Microscope_01.001', g, -4.6, by, -7.15, S, 0.25); put2('Centrifuge_01', g, -2.9, by, -7.1, S, 0); put2('Test_Tube_Rack_01', g, -1.4, by, -7.1, S, 0); put2('Flask_01', g, -0.2, by, -7.1, S, 0); put2('Scales_01', g, 1.0, by, -7.1, S, 0);
+      put2('Biochemical_Analyzer_01', g, 2.6, by, -7.15, S, 0); put2('Hematology_Analyzer_01', g, 4.4, by, -7.15, S, 0);
+      put2('Сloset_01', g, -11.5, 0.06, -7.4, 4.2, 0); put2('Сloset_02', g, 11.5, 0.06, -7.4, 4.2, 0); put2('Sink_01', g, -8.4, 0.06, -7.4, 4.2, 0);
+      put2('Utility_Cart_08', g, 8.6, 0.06, -4.6, 4.2, 0.4); put2('Trash_Biohazard_01', g, 9.8, 0.06, -6.1, 4.2, 0); put2('Autoclave_01', g, 8.6, by + 0.07, -7.0, 0, 0);
+    } catch (e) { /* the hand-built props stay */ }
+  }
   function buildMic() {
     micG = new T.Group(); micG.visible = false; scene.add(micG); const g = micG;
     bx(g, 30, 0.7, 20, '#BFCACE', 0, -0.35, -1);
@@ -2350,8 +2365,10 @@ const World = (function () {
     bx(g, 30, 8, 0.4, '#EAF4F6', 0, 4, -8.4); bx(g, 30, 1.4, 0.05, '#C9DDE3', 0, 0.7, -8.18); bx(g, 30, 0.1, 0.07, '#5FB3CE', 0, 1.45, -8.15);
     // back bench with a few lab props
     bx(g, 11, 1.2, 1.3, '#0A6F66', 0, 0.6, -7.2); bx(g, 11.4, 0.14, 1.6, '#F4F9F9', 0, 1.27, -7.2);
+    const propN0 = g.children.length;
     for (let i = 0; i < 5; i++) { const tx = -3.6 + i * 1.8; cy(g, 0.14, 0.14, 0.6, 8, ['#8BE04A', '#B26BE0', '#E8C23A', '#38C9B0', '#F0804B'][i], tx, 1.64, -7.1, null, { transparent: true, opacity: 0.8 }); cy(g, 0.17, 0.17, 0.06, 8, '#6B7F85', tx, 1.97, -7.1); }
     const mc = bx(g, 0.5, 0.9, 0.5, '#2A3B4D', 4.1, 1.8, -7.1); cy(g, 0.12, 0.12, 0.5, 8, '#2A3B4D', 4.1, 2.4, -7.1).rotation.x = 0.4; cy(g, 0.3, 0.3, 0.06, 10, '#6B7F85', 4.1, 1.38, -7.1);
+    const propN1 = g.children.length;
     const sg = new T.Mesh(new T.PlaneGeometry(5.6, 1.1), new T.MeshBasicMaterial({ map: micText('MICROBE LAB', 640, 126, '#F4F9F9', '#07514B') })); sg.position.set(0, 6.6, -8.15); g.add(sg);
     micBench = new T.Group(); micBench.visible = false; g.add(micBench); bx(micBench, 11, 0.5, 7.4, '#1E5C68', 0, 0.25, 0.0); bx(micBench, 11.2, 0.08, 7.6, '#D8CCAA', 0, 0.54, 0.0);
     { const cv = document.createElement('canvas'); cv.width = 1024; cv.height = 700; const c = cv.getContext('2d');
@@ -2370,6 +2387,7 @@ const World = (function () {
     [-1.2, 0.4, 1.4].forEach(x => bx(manBed, 0.08, 0.5, 0.08, dark, x, 2.1, -1.22)); bx(manBed, 3.2, 0.07, 0.07, dark, 0.1, 2.28, -1.22); bx(manBed, 3.2, 0.07, 0.07, dark, 0.1, 1.98, -1.22);
     bx(manBed, 1.2, 0.28, 1.5, '#FFFFFF', -2.3, 1.93, 0);
     const lay = new T.Group(); lay.rotation.y = PI / 2; lay.position.set(2.15, 2.5, 0); rig.add(lay); micLay = lay;
+    micPackDecor(g, rig, propN0, propN1);
     micManG = new T.Group(); micManG.scale.set(2.0, 2.0, 2.0); micManG.rotation.x = -PI / 2; lay.add(micManG);
     const man = person(5, false, false, false, undefined, { skin: '#F2C9A5', hair: '#6B4A2E', shirt: '#2BB5A5', hairStyle: 8, gender: 'm', scrub: '#3F5F8C', tag: { micMan: true }, openHead: true }); micManG.add(man); micManG.userData.micMan = true;
     const P = man.userData.P, hd = P && P.head;
