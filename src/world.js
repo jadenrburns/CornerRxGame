@@ -193,6 +193,7 @@ const World = (function () {
     let par = up;
     const put = (geo, m, x, y, z, parent) => { const o = new T.Mesh(geo, m); o.position.set(x, y, z); o.castShadow = true; Object.assign(o.userData, tag); (parent || par).add(o); return o; };
     const tor = put(jacked ? new T.CylinderGeometry(0.46, 0.15, 0.95, 14) : new T.CylinderGeometry(tr[0], tr[1], 0.95, 14), P.shirtM, 0, 1.12, 0);
+    if (o.openHead) P.tor = tor;
     if (slim) tor.scale.set(o.him ? 0.6 : 0.8, 1, o.him ? 0.6 : 0.8);
     if (jacked) tor.scale.set(2.0, 1.12, 1.5);
     if (obese && !GC) { tor.scale.set(1.8, 1, 1.75); const belly = put(new T.IcosahedronGeometry(0.62, 0), P.shirtM, 0, 0.95, 0.3); belly.scale.set(1.25, 1, 1.05); }
@@ -2439,7 +2440,8 @@ const World = (function () {
     const lay = new T.Group(); lay.rotation.y = PI / 2; lay.position.set(2.15, 2.5, 0); rig.add(lay); micLay = lay;
     micPackDecor(g, rig, propN0, propN1);
     micManG = new T.Group(); micManG.scale.set(2.0, 2.0, 2.0); micManG.rotation.x = -PI / 2; lay.add(micManG);
-    const man = person(5, false, false, false, undefined, { skin: '#F2C9A5', hair: '#6B4A2E', shirt: '#2BB5A5', hairStyle: 8, gender: 'm', scrub: '#3F5F8C', tag: { micMan: true }, openHead: true }); micManG.add(man); micManG.userData.micMan = true;
+    const packMan = typeof RXM !== 'undefined' && RXM.ready() && !!RXM.make('Medical_Models_02', 1), DSK = '#F6CDA2';
+    const man = person(5, false, false, false, undefined, { skin: packMan ? DSK : '#F2C9A5', hair: '#6B4A2E', shirt: packMan ? DSK : '#2BB5A5', hairStyle: 8, gender: 'm', scrub: packMan ? DSK : '#3F5F8C', tag: { micMan: true }, openHead: true }); micManG.add(man); micManG.userData.micMan = true;
     const P = man.userData.P, hd = P && P.head;
     if (hd) hd.traverse(o => { if (o.userData && o.userData.micMan) o.userData.micSite = 'cns'; });
     // the near leg is bone only: pants, thigh, calf and shoe are hidden and one connected skeleton (hip ball, femur, knee, tibia, foot) shows instead
@@ -2461,13 +2463,28 @@ const World = (function () {
     bone.userData.micSite = 'bone'; bone.traverse(o => { o.userData.micSite = 'bone'; });
     // open chest and belly: a cut window with the organs sitting in it (no genitalia); each organ is clickable for its site
     const cav = new T.Group(); cav.position.z = 0.03; micManG.add(cav);
+    if (packMan && P && P.tor) P.tor.visible = false;
     const cb = (w, h, d, c, x, y, z) => { const m = new T.Mesh(new T.BoxGeometry(w, h, d), mat(c)); m.position.set(x, y, z); cav.add(m); return m; };
+    if (!packMan) {
     cb(0.54, 0.9, 0.03, '#5A1E22', 0, 1.1, 0.305); cb(0.58, 0.04, 0.05, '#B84A44', 0, 1.56, 0.31); cb(0.58, 0.04, 0.05, '#B84A44', 0, 0.64, 0.31); cb(0.04, 0.9, 0.05, '#B84A44', -0.28, 1.1, 0.31); cb(0.04, 0.9, 0.05, '#B84A44', 0.28, 1.1, 0.31);
     [1.46, 1.38, 1.3].forEach(y => cb(0.5, 0.022, 0.03, '#F1E8D4', 0, y, 0.325));
     cb(0.03, 0.2, 0.03, '#F1E8D4', 0, 1.35, 0.325);
+    }
     const place = (kind, id, x, y, z, sc, rz) => { const gg = new T.Group(); gg.position.set(x, y, z); gg.scale.set(sc, sc, sc * 1.1); gg.rotation.z = rz || 0; cav.add(gg); micOrganBuild(kind, gg, id, micOrg[id] = micOrg[id] || []); };
+    if (packMan) {
+      /* Medical Pack anatomy mannequin: open torso (head clipped off at the neck, the code skull and brain sit on it) and its organs, each tagged for its site */
+      const SC = 1.25, Y0 = 0.66;
+      const dm = RXM.make('Medical_Models_02', SC); dm.position.set(0, Y0, 0); micManG.add(dm);
+      dm.traverse(m => { if (!m.isMesh) return; const g0 = m.geometry, ix = g0.index.array, pos = g0.attributes.position, keep = []; for (let t = 0; t < ix.length; t += 3) { const v = [ix[t], ix[t + 1], ix[t + 2]]; if (v.every(a => pos.getY(a) < 0.76) && !v.every(a => Math.abs(pos.getX(a)) < 0.17 && pos.getY(a) > 0.1 && pos.getY(a) < 0.68 && pos.getZ(a) > 0.04)) keep.push(v[0], v[1], v[2]); } g0.setIndex(keep); });
+      [['Medical_Models_02_Part_01', 'lower'], ['Medical_Models_02_Part_02', 'intra'], ['Medical_Models_02_Part_03', 'gi'], ['Medical_Models_02_Part_04', 'gi'], ['Medical_Models_02_Part_05', 'gi']].forEach(q => {
+        const og = RXM.make(q[0], SC); if (!og) return; og.position.set(0, Y0, 0); micManG.add(og);
+        og.traverse(m => { if (!m.isMesh) return; m.material = m.material.clone(); m.material.emissive = new T.Color(0x000000); m.userData.micSite = q[1]; (micOrg[q[1]] = micOrg[q[1]] || []).push(m); });
+      });
+      place('upper', 'upper', 0, 1.5, 0.08, 0.15); place('heart', 'heart', 0.06, 1.2, 0.12, 0.2, -0.1); place('urinary', 'uti', 0, 0.8, 0.1, 0.13);
+    } else {
     place('upper', 'upper', 0, 1.46, 0.36, 0.17); place('lungs', 'lower', 0, 1.31, 0.37, 0.25); place('heart', 'heart', 0.06, 1.2, 0.5, 0.25, -0.1);
     place('gut', 'gi', 0.02, 0.9, 0.36, 0.2); place('liver', 'intra', -0.09, 1.04, 0.42, 0.19); place('urinary', 'uti', 0, 0.76, 0.46, 0.15);
+    }
     // site markers, always drawn on top, with a bigger invisible touch target
     Object.keys(MICPOS).forEach(id => {
       const p = MICPOS[id], pg = new T.Group(); pg.position.set(p[0], p[1], p[2]); micManG.add(pg);
