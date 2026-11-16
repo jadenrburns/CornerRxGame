@@ -1,0 +1,23 @@
+/* scratch: load a whole static glTF scene (no animation) into three r128 and render labeled stills of named assets */
+window.loadScene = async function (url) {
+  const buf = await (await fetch(url)).arrayBuffer(), dv = new DataView(buf), jl = dv.getUint32(12, true);
+  const J = JSON.parse(new TextDecoder().decode(new Uint8Array(buf, 20, jl))), bo = 20 + jl + 8, bin = buf.slice(bo, bo + dv.getUint32(20 + jl, true));
+  const CT = { 5120: Int8Array, 5121: Uint8Array, 5122: Int16Array, 5123: Uint16Array, 5125: Uint32Array, 5126: Float32Array }, NT = { SCALAR: 1, VEC2: 2, VEC3: 3, VEC4: 4, MAT4: 16 }, cache = {};
+  const acc = (i) => { if (cache[i]) return cache[i]; const a = J.accessors[i], bv = J.bufferViews[a.bufferView], n = NT[a.type], C = CT[a.componentType], es = C.BYTES_PER_ELEMENT * n, st = bv.byteStride || es, off = (bv.byteOffset || 0) + (a.byteOffset || 0), out = new C(a.count * n), src = new Uint8Array(bin);
+    for (let k = 0; k < a.count; k++) { const sl = src.slice(off + k * st, off + k * st + es); out.set(new C(sl.buffer, 0, n), k * n); } return (cache[i] = { arr: out, n }); };
+  const texs = []; for (const im of J.images) { const bv = J.bufferViews[im.bufferView], el = new Image(); await new Promise((res, rej) => { el.onload = res; el.onerror = rej; el.src = URL.createObjectURL(new Blob([new Uint8Array(bin, bv.byteOffset || 0, bv.byteLength)], { type: im.mimeType })); }); const t = new THREE.Texture(el); t.flipY = false; t.needsUpdate = true; texs.push(t); }
+  const mats = J.materials.map(m => { const p = m.pbrMetallicRoughness || {}, mt = new THREE.MeshStandardMaterial({ roughness: 0.85, metalness: 0, side: THREE.DoubleSide }); if (p.baseColorFactor) mt.color.setRGB(p.baseColorFactor[0], p.baseColorFactor[1], p.baseColorFactor[2]); if (p.baseColorTexture) mt.map = texs[J.textures[p.baseColorTexture.index].source]; if (m.emissiveFactor && m.emissiveFactor.some(x => x > 0)) { mt.emissive.setRGB(...m.emissiveFactor); if (m.emissiveTexture) mt.emissiveMap = texs[J.textures[m.emissiveTexture.index].source]; } if (/Glass/.test(m.name)) { mt.transparent = true; mt.opacity = 0.35; } mt.name = m.name; return mt; });
+  const geos = J.meshes.map(m => m.primitives.map(p => { const g = new THREE.BufferGeometry(), A = p.attributes; g.setAttribute('position', new THREE.BufferAttribute(acc(A.POSITION).arr, 3)); if (A.NORMAL !== undefined) g.setAttribute('normal', new THREE.BufferAttribute(acc(A.NORMAL).arr, 3)); else g.computeVertexNormals(); if (A.TEXCOORD_0 !== undefined) g.setAttribute('uv', new THREE.BufferAttribute(acc(A.TEXCOORD_0).arr, 2)); if (p.indices !== undefined) g.setIndex(new THREE.BufferAttribute(acc(p.indices).arr, 1)); return { g, mat: p.material || 0 }; }));
+  const nodes = J.nodes.map(n => { const o = new THREE.Object3D(); o.name = n.name || ''; if (n.matrix) { o.matrix.fromArray(n.matrix); o.matrix.decompose(o.position, o.quaternion, o.scale); } if (n.translation) o.position.fromArray(n.translation); if (n.rotation) o.quaternion.fromArray(n.rotation); if (n.scale) o.scale.fromArray(n.scale); if (n.mesh !== undefined) geos[n.mesh].forEach(gp => o.add(new THREE.Mesh(gp.g, mats[gp.mat]))); return o; });
+  const scene = new THREE.Scene(); J.nodes.forEach((n, i) => (n.children || []).forEach(c => nodes[i].add(nodes[c]))); const par = new Set(); J.nodes.forEach(n => (n.children || []).forEach(c => par.add(c))); nodes.forEach((o, i) => { if (!par.has(i)) scene.add(o); }); scene.updateMatrixWorld(true);
+  return { scene, nodes, J };
+};
+window.sheet = function (S, groups, size) {
+  const r = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true }); r.setSize(size, size); r.setClearColor(0xcfe6e8);
+  const sc = S.scene; sc.add(new THREE.HemisphereLight(0xffffff, 0x8899aa, 1.1)); const dl = new THREE.DirectionalLight(0xffffff, 0.8); dl.position.set(3, 5, 4); sc.add(dl);
+  const cam = new THREE.PerspectiveCamera(32, 1, 0.01, 100), allMesh = []; sc.traverse(o => { if (o.isMesh) allMesh.push(o); }); const out = [];
+  groups.forEach(g => { const sel = S.nodes.filter(o => o.name === g || o.name.indexOf(g + '_') === 0 || o.name.replace(/\.\d+$/, '') === g); if (!sel.length) { out.push(null); return; }
+    allMesh.forEach(m => m.visible = false); const box = new THREE.Box3(); sel.forEach(o => { o.traverse(c => { if (c.isMesh) { c.visible = true; } }); box.expandByObject(o); });
+    const c = box.getCenter(new THREE.Vector3()), sz = box.getSize(new THREE.Vector3()), R = Math.max(sz.x, sz.y, sz.z) * 1.35 + 0.05; cam.position.set(c.x + R * 0.8, c.y + R * 0.55, c.z + R * 1.1); cam.lookAt(c); r.render(sc, cam); out.push(r.domElement.toDataURL('image/png')); });
+  return out;
+};
