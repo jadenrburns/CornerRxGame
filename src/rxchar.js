@@ -78,11 +78,12 @@ const RXC = (function () {
 })();
 /* Medical Pack props (assets/med.bin, med.json; tools/packmed.py): RXM.make(name, scale) -> Group (pivot at the item's own origin, +y up, metres) */
 const RXM = (function () {
-  let DB = null, BIN = null, TEX = null, st = 0; const M = {}, cache = {};
+  let DB = null, BINS = null, TEX = null, st = 0; const M = {}, cache = {};
   function load(cb) {
     if (st) return; st = 1;
-    Promise.all([fetch('assets/med.json').then(r => r.json()), fetch('assets/med.bin').then(r => r.arrayBuffer()), new Promise((ok, no) => { const im = new Image(); im.onload = () => ok(im); im.onerror = no; im.src = 'assets/atlas.png'; })])
-      .then(a => { DB = a[0]; BINS = a[1]; TEX = new THREE.Texture(a[2]); TEX.flipY = false; TEX.magFilter = THREE.NearestFilter; TEX.minFilter = THREE.NearestFilter; TEX.generateMipmaps = false; TEX.needsUpdate = true; DB.items.forEach(e => { M[e.name] = e; }); st = 2; if (cb) cb(); }).catch(() => { st = -1; });
+    const base = ['med', 'furn'];
+    Promise.all([Promise.all(base.map(n => fetch('assets/' + n + '.json').then(r => r.json()))).then(a => { a.forEach((d, i) => d.items.forEach(e => { e.b = i; })); return { items: a[0].items.concat(a[1].items) }; }), Promise.all(base.map(n => fetch('assets/' + n + '.bin').then(r => r.arrayBuffer()))), new Promise((ok, no) => { const im = new Image(); im.onload = () => ok(im); im.onerror = no; im.src = 'assets/atlas.png'; })])
+      .then(a => { DB = a[0]; BINS = a[1]; TEX = new THREE.Texture(a[2]); TEX.flipY = false; TEX.magFilter = THREE.NearestFilter; TEX.minFilter = THREE.NearestFilter; TEX.generateMipmaps = false; TEX.needsUpdate = true; DB.items.forEach(e => { M[e.name] = e; }); st = 2; if (cb) cb(); try { if (typeof World !== 'undefined' && World.packDecor) World.packDecor(); } catch (e) { /* decor */ } }).catch(() => { st = -1; });
   }
   const mat = (k) => {
     if (cache[k]) return cache[k];
@@ -91,7 +92,7 @@ const RXM = (function () {
     if (k === 'Emission') { m.emissive = new THREE.Color(0xFF9500); m.emissiveMap = TEX; m.emissiveIntensity = 0.9; } return (cache[k] = m);
   };
   function make(name, scale) {
-    const e = M[name]; if (!e) return null; const g = new THREE.Group(); g.name = name;
+    const e = M[name]; if (!e) return null; const g = new THREE.Group(), BIN = BINS[e.b || 0]; g.name = name;
     e.parts.forEach(p => {
       const nv = p.nv, q = new Int16Array(BIN, p.p, nv * 3), pos = new Float32Array(nv * 3); for (let i = 0; i < nv; i++) for (let k = 0; k < 3; k++) pos[i * 3 + k] = e.ctr[k] + q[i * 3 + k] / 32767 * e.half[k];
       const n8 = new Int8Array(BIN, p.n, nv * 4), nor = new Float32Array(nv * 3); for (let i = 0; i < nv; i++) for (let k = 0; k < 3; k++) nor[i * 3 + k] = n8[i * 4 + k] / 127;
@@ -103,4 +104,45 @@ const RXM = (function () {
     if (scale) g.scale.setScalar(scale); return g;
   }
   return { load, make, ready: () => st === 2, names: () => Object.keys(M) };
+})();
+/* Animals (assets/animals.*; tools/packanimals.py): skinned dog and kitty with idle, walk and run clips. RXA.make('dog'|'cat', orange) -> Group that plays walk while it moves and idle when it stands */
+const RXA = (function () {
+  let DB = null, BIN = null, TEX = null, st = 0; const by = {};
+  function load() {
+    if (st) return; st = 1;
+    Promise.all([fetch('assets/animals.json').then(r => r.json()), fetch('assets/animals.bin').then(r => r.arrayBuffer()), new Promise((ok, no) => { const im = new Image(); im.onload = () => ok(im); im.onerror = no; im.src = 'assets/animals.png'; })])
+      .then(a => { DB = a[0]; BIN = a[1]; TEX = new THREE.Texture(a[2]); TEX.flipY = false; TEX.magFilter = THREE.NearestFilter; TEX.minFilter = THREE.NearestFilter; TEX.generateMipmaps = false; TEX.needsUpdate = true; DB.animals.forEach(e => { by[e.name] = e; }); st = 2; try { if (typeof World !== 'undefined' && World.refreshPets) World.refreshPets(); } catch (e) { /* pets */ } }).catch(() => { st = -1; });
+  }
+  function geo(c) {
+    if (c._geo) return c._geo; const nv = c.nv, o = c.off, g = new THREE.BufferGeometry();
+    const p = new Int16Array(BIN, o.p, nv * 3), pos = new Float32Array(nv * 3); for (let i = 0; i < nv; i++) for (let k = 0; k < 3; k++) pos[i * 3 + k] = c.ctr[k] + p[i * 3 + k] / 32767 * c.half[k];
+    const n8 = new Int8Array(BIN, o.n, nv * 4), nor = new Float32Array(nv * 3); for (let i = 0; i < nv; i++) for (let k = 0; k < 3; k++) nor[i * 3 + k] = n8[i * 4 + k] / 127;
+    const u = new Uint16Array(BIN, o.u, nv * 2), uv = new Float32Array(nv * 2); for (let i = 0; i < nv * 2; i++) uv[i] = u[i] / 65535;
+    const w8 = new Uint8Array(BIN, o.w, nv * 4), wt = new Float32Array(nv * 4); for (let i = 0; i < nv * 4; i++) wt[i] = w8[i] / 255;
+    g.setAttribute('position', new THREE.BufferAttribute(pos, 3)); g.setAttribute('normal', new THREE.BufferAttribute(nor, 3)); g.setAttribute('uv', new THREE.BufferAttribute(uv, 2));
+    g.setAttribute('skinIndex', new THREE.BufferAttribute(new Uint16Array(new Uint8Array(BIN, o.j, nv * 4)), 4)); g.setAttribute('skinWeight', new THREE.BufferAttribute(wt, 4)); g.setIndex(new THREE.BufferAttribute(new Uint16Array(BIN, o.i, c.ni), 1));
+    g.computeBoundingSphere(); g.boundingSphere.radius *= 2; return (c._geo = g);
+  }
+  const ready = () => st === 2;
+  function make(kind, orange) {
+    const c = by[kind === 'dog' ? 'Dog_001' : 'Kitty_001']; if (!c) return null;
+    const g = new THREE.Group(), root = new THREE.Group(); g.add(root);
+    const bones = c.par.map((p, i) => { const b = new THREE.Bone(); b.name = c.joints[i]; b.position.set(c.trs[i][0], c.trs[i][1], c.trs[i][2]); b.quaternion.set(c.trs[i][3], c.trs[i][4], c.trs[i][5], c.trs[i][6]); b.scale.set(c.trs[i][7], c.trs[i][8], c.trs[i][9]); return b; });
+    bones.forEach((b, i) => { if (c.par[i] >= 0) bones[c.par[i]].add(b); }); root.add(bones[0]);
+    const mat = new THREE.MeshLambertMaterial({ map: TEX, skinning: true, side: THREE.DoubleSide }); if (orange) mat.color.setHex(0xFFB060);
+    const mesh = new THREE.SkinnedMesh(geo(c), mat); mesh.frustumCulled = false; mesh.castShadow = true; root.add(mesh);
+    mesh.bind(new THREE.Skeleton(bones, c.ibm.map(m => new THREE.Matrix4().fromArray(m))), new THREE.Matrix4());
+    const mx = new THREE.AnimationMixer(root), act = {};
+    Object.keys(c.clips).forEach(k => { const tr = c.clips[k].map(t => { const nm = c.joints[t.j] + '.' + (t.path === 'rotation' ? 'quaternion' : t.path), C = t.path === 'rotation' ? THREE.QuaternionKeyframeTrack : THREE.VectorKeyframeTrack; return new C(nm, t.t, t.v); }); act[k] = mx.clipAction(new THREE.AnimationClip(k, -1, tr)); });
+    let cur = 'idle'; act.idle.play(); const last = new THREE.Vector3(), now = new THREE.Vector3(); let t0 = 0, init = false, still = 0;
+    mesh.onBeforeRender = () => {
+      const t = performance.now() / 1000, dt = t0 ? Math.min(0.1, t - t0) : 0; t0 = t; g.getWorldPosition(now); const mv = init ? Math.hypot(now.x - last.x, now.z - last.z) / Math.max(dt, 1e-3) : 0; init = true; last.copy(now);
+      still = mv > 0.25 ? 0 : still + dt; const want = mv > 0.25 ? 'walk' : still > 0.2 ? 'idle' : cur;
+      if (want !== cur && act[want]) { act[want].reset().play(); act[cur].crossFadeTo(act[want], 0.25, false); cur = want; }
+      mx.update(dt);
+    };
+    const bb = new THREE.Box3(new THREE.Vector3().fromArray(c.bounds[0]), new THREE.Vector3().fromArray(c.bounds[1])), len = Math.max(bb.max.z - bb.min.z, bb.max.x - bb.min.x);
+    root.scale.setScalar((kind === 'dog' ? 1.0 : 0.8) / len); g.userData.rxa = true; return g;
+  }
+  return { load, ready, make };
 })();

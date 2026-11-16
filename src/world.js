@@ -534,10 +534,12 @@ const World = (function () {
     bx(g, 2.9, 0.12, 0.2, '#0E9A8E', 5, 0.18, 5.2);
     [[8.4, 4.5], [-8.6, 6.2]].forEach((p, pi) => { cy(g, 0.4, 0.3, 0.6, 6, '#E04F3A', p[0], 0.3, p[1]); const l1 = ico(g, 0.65, '#3E8E41', p[0], 1.1, p[1]), l2 = ico(g, 0.45, '#56A85A', p[0] + 0.2, 1.6, p[1]); if (pi === 1) { l1.userData.x0 = l1.position.x; l2.userData.x0 = l2.position.x; plantL = [l1, l2]; } });
     // waiting room seating: a bench along the right wall and two chairs near the door
+    seatRoot = g; seatN0 = g.children.length;
     bx(g, 0.75, 0.12, 2.7, '#8A5A3B', 9.0, 0.5, 2.2); bx(g, 0.6, 0.1, 2.55, '#0E9A8E', 8.98, 0.6, 2.2); bx(g, 0.12, 0.8, 2.7, '#8A5A3B', 9.4, 0.95, 2.2);
     [[0.9, 1.0], [0.9, 3.4]].forEach(l => { bx(g, 0.6, 0.45, 0.1, '#6D4630', 9.0, 0.22, l[0] + (l[1] > 3 ? 0.0 : 0.4)); });
     [6.6, 7.7].forEach(x => { bx(g, 0.75, 0.1, 0.75, '#F2A516', x, 0.5, 5.45); bx(g, 0.75, 0.75, 0.1, '#F2A516', x, 0.9, 5.82); [[-0.3, -0.3], [0.3, -0.3], [-0.3, 0.3], [0.3, 0.3]].forEach(o => bx(g, 0.08, 0.45, 0.08, '#6D4630', x + o[0], 0.22, 5.45 + o[1])); });
     bx(g, 0.6, 0.05, 0.6, '#F4F9F9', 7.15, 0.6, 6.7); cy(g, 0.05, 0.05, 0.55, 6, '#6D4630', 7.15, 0.3, 6.7);
+    seatN1 = g.children.length;
     // scenery
     [[-12.5, -2, 1.1], [13, -4, 1.4], [-12, 7, 0.9], [13.5, 6, 1]].forEach(p => {
       cy(g, 0.25 * p[2], 0.3 * p[2], 1.2 * p[2], 5, '#6C4C3A', p[0], 0.6 * p[2], p[1]);
@@ -1233,6 +1235,7 @@ const World = (function () {
   const pets = [];
   const PET_BASE = { bunnyx: 'bunny', catx: 'cat', dogx: 'dog', orange: 'cat' };
   function petModel(kind) {
+    { const pb = PET_BASE[kind] || kind; if ((pb === 'dog' || pb === 'cat') && typeof RXA !== 'undefined' && RXA.ready()) { const pg = RXA.make(pb, kind === 'orange'); if (pg) { if (/x$/.test(kind)) pg.scale.set(1.3, 1.1, 1.3); if (kind === 'orange') pg.scale.set(1.2, 1.2, 1.2); return pg; } } }
     const g = new T.Group(), pe = (geo, c, x, y, z) => { const m = add(g, geo, c, x, y, z); m.userData.pet = true; return m; };
     const B = (w, h, d) => new T.BoxGeometry(w, h, d), I = (r) => new T.IcosahedronGeometry(r, 0);
     const chubby = /x$/.test(kind), orange = kind === 'orange', base = PET_BASE[kind] || kind;
@@ -1262,6 +1265,10 @@ const World = (function () {
     if (orange) g.scale.set(1.2, 1.2, 1.2);
     return g;
   }
+  /* when the animal files arrive after the pets spawned, swap the hand-built ones for the pack animals in place */
+  api.refreshPets = function () {
+    pets.forEach(p => { if (p.g.userData.rxa || p.g.userData.pet === undefined && false) return; const pb = PET_BASE[p.kind] || p.kind; if (pb !== 'dog' && pb !== 'cat') return; const ng = petModel(p.kind); if (!ng.userData.rxa) return; ng.position.copy(p.g.position); ng.rotation.copy(p.g.rotation); ng.userData.P = p.g.userData.P; petG.remove(p.g); petG.add(ng); p.g = ng; });
+  };
   function petTarget() {
     let v;
     for (let k = 0; k < 10; k++) { v = { x: -3.4 + Math.random() * 11.4, z: 1.9 + Math.random() * 4.1 }; if (Crowd.clearance(v.x, v.z) > 0.6) break; }
@@ -2344,6 +2351,16 @@ const World = (function () {
       }
     }
   }
+  /* Cute Furniture (RXM, assets/furn.*): the waiting-room bench, chairs and side table keep their spots; the hand-built ones hide once the pack has loaded */
+  let seatRoot = null, seatN0 = 0, seatN1 = 0, seatDone = false;
+  api.packDecor = function () {
+    if (seatDone || !seatRoot || typeof RXM === 'undefined' || !RXM.ready()) return; seatDone = true;
+    try {
+      for (let i = seatN0; i < seatN1; i++) seatRoot.children[i].visible = false;
+      const put3 = (name, x, y, z, sc, ry) => { const o = RXM.make(name, sc); if (!o) return; o.position.set(x, y, z); o.rotation.y = ry; seatRoot.add(o); };
+      put3('Couch_08', 9.1, 0.0, 2.2, 1.25, -PI / 2); put3('Chair_17', 6.6, 0.05, 5.5, 1.8, PI); put3('Chair_17', 7.7, 0.05, 5.5, 1.8, PI); put3('Coffee_Table_03', 7.15, 0.0, 6.7, 1.5, 0);
+    } catch (e) { seatDone = false; }
+  };
   /* Medical Pack props for the lab (RXM, assets/med.*): the hospital bed under the man, bench equipment, cabinets and a cart; the hand-built ones are hidden when the pack is loaded */
   function micPackDecor(g, rig, n0, n1) {
     if (typeof RXM === 'undefined' || !RXM.ready()) return;
@@ -3367,7 +3384,7 @@ const World = (function () {
     if (brainTag) place(brainTag, brainG.position.x, brainG.position.y + 1.1, brainG.position.z);
   }
   api.init = function (opts) {
-    if (typeof RXC !== "undefined") RXC.load(); if (typeof RXM !== "undefined") RXM.load();
+    if (typeof RXC !== "undefined") RXC.load(); if (typeof RXM !== "undefined") RXM.load(); if (typeof RXA !== "undefined") RXA.load();
     B = opts; host = opts.host;
     if (typeof THREE === 'undefined') return false;
     T = THREE;

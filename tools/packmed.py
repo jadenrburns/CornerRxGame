@@ -52,5 +52,5 @@ for i in sel:
         ent['parts'].append(dict(mat=k,nv=len(p),ni=len(ix),p=pad(q),n=pad(nq),u=pad(uq),i=pad(ix.astype('<u2' if len(p)<65536 else '<u4')),i32=len(p)>=65536))
     items.append(ent)
 os.makedirs(sys.argv[2],exist_ok=True)
-open(os.path.join(sys.argv[2],'med.bin'),'wb').write(blob);json.dump(dict(items=items),open(os.path.join(sys.argv[2],'med.json'),'w'),separators=(',',':'))
+open(os.path.join(sys.argv[2],os.environ.get('NAME','med')+'.bin'),'wb').write(blob);json.dump(dict(items=items),open(os.path.join(sys.argv[2],os.environ.get('NAME','med')+'.json'),'w'),separators=(',',':'))
 print(len(items),'items',len(blob)/1e6,'MB');[print(e['name'],[round(x,2) for x in e['bounds'][1]]) for e in items[:80]]
