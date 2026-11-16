@@ -11,9 +11,10 @@ console.log('devbtns',await p.evaluate(()=>[...document.querySelectorAll('#menu 
 await p.evaluate(()=>{const d=window.__rxDbg();d.cur&&!d.cur.done&&document.querySelector('.opt')&&document.querySelector('.opt').click()});await p.waitForTimeout(300);
 await p.evaluate(()=>document.querySelector('[data-act="dev-him-walk"]').click());await p.waitForTimeout(600);
 console.log('walk',await info());
-const legs=[];for(let i=0;i<8;i++){legs.push(await p.evaluate(()=>{const q=World._dbg().queue[0];const P=q.g.userData.P;return [+P.legs[0].rotation.x.toFixed(2),+(P.knees[0]&&P.knees[0].rotation.x||0).toFixed(2),+q.g.position.z.toFixed(1)]}));await p.waitForTimeout(120)}
+await p.evaluate(()=>{if(!World._dbg().queue.some(x=>x.him))World.himArrive()});await p.waitForTimeout(300);
+const legs=[];for(let i=0;i<8;i++){legs.push(await p.evaluate(()=>{const q=(World._dbg().queue.find(x=>x.him)||World._dbg().queue[0]);const P=q.g.userData.P;return [+P.legs[0].rotation.x.toFixed(2),+(P.knees[0]&&P.knees[0].rotation.x||0).toFixed(2),+q.g.position.z.toFixed(1)]}));await p.waitForTimeout(120)}
 console.log('legs',JSON.stringify(legs));
-await p.waitForTimeout(3500);console.log('arrived',await p.evaluate(()=>{const q=World._dbg().queue[0];return [q.g.position.x.toFixed(2),q.g.position.z.toFixed(2),q.wp.length]}));
+await p.waitForTimeout(3500);console.log('arrived',await p.evaluate(()=>{const q=(World._dbg().queue.find(x=>x.him)||World._dbg().queue[0]);return [q.g.position.x.toFixed(2),q.g.position.z.toFixed(2),q.wp.length]}));
 // 2. angel + smash
 console.log('angel',await p.evaluate(()=>World.devHimAngel()));await p.waitForTimeout(1500);
 console.log('toast',await p.evaluate(()=>[...document.querySelectorAll('.toast,#toast,.toasts *')].map(e=>e.textContent).join('|').slice(0,120)));

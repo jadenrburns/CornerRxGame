@@ -1,0 +1,18 @@
+const {chromium}=require('playwright');
+(async()=>{const b=await chromium.launch({args:['--use-angle=swiftshader','--use-gl=angle','--enable-unsafe-swiftshader','--ignore-gpu-blocklist']});
+const p=await b.newPage({viewport:{width:1200,height:760}});const errs=[];p.on('pageerror',e=>errs.push(e.message));
+await p.route('**/three.min.js',r=>r.fulfill({path:process.env.THREE_JS,contentType:'text/javascript'}));
+await p.addInitScript(()=>{localStorage.setItem('cornerRx.v1',JSON.stringify({me:{done:true,name:'T',look:{}},served:30,correct:25,tutDone:true,playSec:999,boardAsked:true,set:{topics:{}},mic:{st:{},mode:'drag',set:'body'}}));localStorage.setItem('rxNet','{"off":1}')});
+await p.goto('file://'+process.cwd()+'/corner-rx.html?noconf=1');await p.waitForTimeout(3500);
+await p.evaluate(()=>document.querySelectorAll('.tour,.unlock').forEach(e=>e.remove()));
+await p.evaluate(()=>{document.querySelector('#menu [data-act="mic"]').click()});await p.waitForTimeout(600);
+await p.evaluate(()=>{window.__rxDbg().micDbg().startSort('sort-man')});await p.waitForTimeout(2500);
+await p.screenshot({path:process.argv[2]+'/man1.png'});
+const pos=await p.evaluate(()=>{const o={};for(let y=100;y<700;y+=5)for(let x=20;x<700;x+=5){const id=World.micSiteAt(x,y);if(id){(o[id]=o[id]||[]).push([x,y])}}return Object.keys(o).map(k=>[k,o[k].length,o[k][Math.floor(o[k].length/2)]])});
+console.log('sites',JSON.stringify(pos.map(x=>[x[0],x[1]])));
+const c=await p.evaluate(()=>{const R=window.__rxDbg().micDbg().R;const c=R.chips.find(x=>x.valid.length&&x.valid.every(v=>true));return {id:c.id,v:c.valid}});
+const tgt=pos.find(d=>c.v.indexOf(d[0])>=0);console.log('chip',JSON.stringify(c),'target',tgt&&tgt[0]);
+const box=await p.evaluate(id=>{const r=document.querySelector('.petri[data-chip="'+id+'"]').getBoundingClientRect();return{x:r.x+r.width/2,y:r.y+r.height/2}},c.id);
+await p.mouse.move(box.x,box.y);await p.mouse.down();await p.mouse.move((box.x+tgt[2][0])/2,(box.y+tgt[2][1])/2,{steps:5});await p.mouse.move(tgt[2][0],tgt[2][1],{steps:6});await p.screenshot({path:process.argv[2]+'/man2.png'});await p.mouse.up();await p.waitForTimeout(400);
+console.log('placed',JSON.stringify(await p.evaluate(()=>window.__rxDbg().micDbg().R.placed)),'mist',await p.evaluate(()=>window.__rxDbg().micDbg().R.mist));
+console.log('errs',JSON.stringify(errs));await b.close()})();

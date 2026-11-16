@@ -1,0 +1,11 @@
+const {chromium}=require('playwright');
+(async()=>{const b=await chromium.launch({args:['--use-angle=swiftshader','--use-gl=angle','--enable-unsafe-swiftshader','--ignore-gpu-blocklist']});
+const p=await b.newPage({viewport:{width:1000,height:760},deviceScaleFactor:3});const errs=[];p.on('pageerror',e=>errs.push(e.message));
+await p.route('**/three.min.js',r=>r.fulfill({path:process.env.THREE_JS,contentType:'text/javascript'}));
+await p.addInitScript(()=>{localStorage.setItem('cornerRx.v1',JSON.stringify({me:{done:true,name:'T',look:{}},served:30,correct:25,tutDone:true,playSec:999,boardAsked:true,set:{topics:{}}}));localStorage.setItem('rxNet','{"off":1}')});
+await p.goto('file://'+process.cwd()+'/corner-rx.html?noconf=1');await p.waitForTimeout(4000);
+await p.evaluate(()=>document.querySelectorAll('.tour,.unlock').forEach(e=>e.remove()));
+console.log(await p.evaluate(()=>[...document.querySelectorAll('#menu [data-act]')].map(e=>e.dataset.act).join(',')));
+await p.evaluate(()=>{const e=document.querySelector('#menu [data-act="create"],#menu [data-act="char"],#menu [data-act="wardrobe"]');if(e)e.click()});await p.waitForTimeout(2500);
+await p.screenshot({path:process.argv[2]+'/port.png',clip:{x:700,y:245,width:120,height:150}});
+console.log('errs',JSON.stringify(errs));await b.close()})();

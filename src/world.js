@@ -25,7 +25,8 @@ const World = (function () {
     { x0: -9.6, x1: -8.4, z0: -5.8, z1: -2.2 },    // mastery shelf (left wall)
     { x0: 7.4, x1: 10.0, z0: -6.7, z1: -4.1 },     // robot (back-right corner)
     { x0: -6.2, x1: 6.2, z0: -7.1, z1: -6.0 },     // shelves
-    { x0: 3.3, x1: 7.3, z0: -5.7, z1: -4.1 }       // event table
+    { x0: 3.3, x1: 7.3, z0: -5.7, z1: -4.1 },      // event table
+    { x0: 8.15, x1: 9.25, z0: -2.95, z1: -1.85 }   // trash can (right side)
   ];
   const EXIT = [[-3.4, 2.8], [-3.4, 6.3], [4.4, 6.4], [5, 7.2], [5, 10.8]];
 
@@ -35,6 +36,7 @@ const World = (function () {
   const queue = [], leaving = [], staff = [];
   let hovered = null, hintGone = false;
   const keysDown = { l: false, r: false, u: false, d: false };
+  var micZoomR = 0;
   let th = 0.55, ph = 1.05, rad = 19, gth = 0.55, gph = 1.05, grad = 19, baseRad = 19, shake = 0;
   let TX = 0.5, TY = 1.8, TZ = -0.2;
 
@@ -167,11 +169,34 @@ const World = (function () {
     const hd = new T.Group(); hd.position.y = 1.85 * (1 - headS); hd.scale.set(headS, headS, headS); up.add(hd); P.head = hd; P.up = up; P.him = !!o.him;
     let par = up;
     const put = (geo, m, x, y, z, parent) => { const o = new T.Mesh(geo, m); o.position.set(x, y, z); o.castShadow = true; Object.assign(o.userData, tag); (parent || par).add(o); return o; };
-    const tor = put(jacked ? new T.CylinderGeometry(0.46, 0.15, 0.95, 6) : new T.CylinderGeometry(tr[0], tr[1], 0.95, 6), P.shirtM, 0, 1.12, 0);
+    /* Blender character parts replace the code-built body for plain customers (normal build, no coat, no costume); hair styles other than the first keep the code-built hair */
+    const GCb = (varied && !isStaff && !o.coat && !jacked && !obese && !slim && !o.openHead && !o.him) ? glbChar() : null, GC = GCb ? { parts: GCb.parts, sm: null } : null;
+    const gmat = (n) => n === 'Shirt' ? P.shirtM : n === 'Skin' ? P.skinM : n === 'Hair' ? hairM : n === 'Pants' ? pants : (GC.sm || (GC.sm = own(o.shoes || '#2A2A34')));
+    const gadd = (name, parent, usePos) => { const pt = GC && GC.parts[name]; if (!pt) return; pt.prims.forEach(pr => { if (name === 'Hair_1' && style !== 0) return; put(pr.geo, gmat(pr.mat), usePos ? pt.t[0] : 0, usePos ? pt.t[1] : 0, usePos ? pt.t[2] : 0, parent); }); };
+    const tor = put(jacked ? new T.CylinderGeometry(0.46, 0.15, 0.95, 14) : new T.CylinderGeometry(tr[0], tr[1], 0.95, 14), P.shirtM, 0, 1.12, 0);
     if (slim) tor.scale.set(o.him ? 0.6 : 0.8, 1, o.him ? 0.6 : 0.8);
     if (jacked) tor.scale.set(2.0, 1.12, 1.5);
     if (obese) { tor.scale.set(1.8, 1, 1.75); const belly = put(new T.IcosahedronGeometry(0.62, 0), P.shirtM, 0, 0.95, 0.3); belly.scale.set(1.25, 1, 1.05); }
+    if (GC) { tor.visible = false; gadd('Torso', up, true); }
     if (o.coat) put(new T.BoxGeometry(0.2, 0.62, 0.03), own(o.scrub), 0, 1.22, Math.max(tr[0], tr[1]) * tor.scale.z + 0.005);
+    // separate lab coat (pharmacist and technicians): open front over a colored shirt, collar, lapels, pockets, pen and leaf badge
+    const labCoat = (o.coat || isStaff) && !(o.cosm && o.cosm.coat) && !o.him && !o.inspector && !o.driver && !o.cap && !o.elder;
+    if (labCoat) {
+      tor.material = own(o.coat ? '#23A99B' : '#2B7FA8');
+      const cm2 = own(shirt); cm2.side = T.DoubleSide; const hi = own('#FFFFFF'), r0 = tr[0] + 0.05, r1 = tr[1] + 0.13, top = 1.6, hem = 0.52, hh = top - hem;
+      const shell = put(new T.CylinderGeometry(r0, r1, hh, 14, 1, true, 0.3, PI * 2 - 0.6), cm2, 0, (top + hem) / 2, 0); shell.scale.copy(tor.scale);
+      const rAt = (y) => r0 + (r1 - r0) * (top - y) / hh;
+      const onC = (y, x) => { const r = rAt(y); return [x, y, Math.sqrt(Math.max(0.01, r * r - x * x)) * tor.scale.z + 0.012, Math.asin(Math.max(-0.95, Math.min(0.95, x / r)))]; };
+      [-1, 1].forEach(sd => {
+        const c = onC(1.6, sd * 0.1); const col = put(new T.BoxGeometry(0.13, 0.1, 0.04), hi, c[0], 1.62, c[2] - 0.02); col.rotation.z = -sd * 0.55; col.rotation.y = sd * 0.35;
+        const l = onC(1.4, sd * 0.125); const lap = put(new T.BoxGeometry(0.085, 0.42, 0.03), hi, l[0], 1.4, l[2]); lap.rotation.z = sd * 0.16; lap.rotation.y = -sd * l[3];
+        const pk = onC(0.8, sd * 0.25); const pc = put(new T.BoxGeometry(0.15, 0.14, 0.03), hi, pk[0], 0.8, pk[2] + 0.004); pc.rotation.y = -sd * pk[3];
+        const fl = put(new T.BoxGeometry(0.15, 0.025, 0.04), cm2, pk[0], 0.875, pk[2] + 0.012); fl.rotation.y = -sd * pk[3];
+      });
+      const bp = onC(1.3, 0.2); const bpk = put(new T.BoxGeometry(0.11, 0.11, 0.03), hi, bp[0], 1.3, bp[2] + 0.004); bpk.rotation.y = -bp[3];
+      [['#2E9E5B', 0.17], ['#2B5FB5', 0.2], ['#C0392B', 0.23]].forEach(pn => { const pe = onC(1.4, pn[1]); const pen = put(new T.BoxGeometry(0.014, 0.08, 0.014), own(pn[0]), pe[0], 1.37, pe[2] + 0.004); pen.rotation.y = -pe[3]; });
+      const lf = onC(1.42, -0.15); const leaf = put(new T.OctahedronGeometry(0.03, 0), own('#2E9E5B'), lf[0], 1.42, lf[2] + 0.012); leaf.scale.set(1, 1.3, 0.4); leaf.rotation.z = 0.5;
+    }
     if (varied && !isStaff && !o.coat) {
       const rt = jacked ? 0.46 : tr[0], rb = jacked ? 0.15 : tr[1], sz = tor.scale.z, fz = (y) => (rb + (rt - rb) * (y - 0.645) / 0.95) * sz + 0.012, cl = Math.floor(rnd(8) * 6);
       if (cl === 1) { const bc = own('#F4FAFA'); [0.85, 1.07, 1.29].forEach(y => put(new T.BoxGeometry(0.44, 0.07, 0.03), bc, 0, y, fz(y))); }
@@ -181,24 +206,38 @@ const World = (function () {
       else if (cl === 5) { const oc = own('#27384F'); [-1, 1].forEach(s => put(new T.BoxGeometry(0.07, 0.75, 0.03), oc, s * 0.15, 1.2, fz(1.2))); put(new T.BoxGeometry(0.34, 0.26, 0.03), oc, 0, 0.95, fz(0.95)); }
     }
     par = hd;
-    put(new T.IcosahedronGeometry(0.32, 0), P.skinM, 0, 1.85, 0);
-    if (style === 3) { put(new T.SphereGeometry(0.37, 6, 4, 0, PI * 2, 0, PI / 2), hairM, 0, 1.9, 0); put(new T.BoxGeometry(0.14, 0.55, 0.42), hairM, -0.31, 1.68, -0.02); put(new T.BoxGeometry(0.14, 0.55, 0.42), hairM, 0.31, 1.68, -0.02); put(new T.BoxGeometry(0.64, 0.5, 0.14), hairM, 0, 1.7, -0.28); }
-    else if (style === 4) { put(new T.SphereGeometry(0.34, 6, 4, 0, PI * 2, 0, PI / 2), hairM, 0, 1.9, 0); [[-0.2, 0.25], [0, 0.32], [0.2, 0.25], [0.1, 0.18]].forEach((q, i) => { const sp = put(new T.ConeGeometry(0.08, 0.3, 4), hairM, q[0], 2.2 + (i % 2) * 0.03, 0.05 - i * 0.05); sp.rotation.z = -q[0] * 2.4; }); }
-    else if (style === 5) { put(new T.SphereGeometry(0.35, 6, 4, 0, PI * 2, 0, PI / 2), hairM, 0, 1.9, 0); put(new T.BoxGeometry(0.7, 0.95, 0.16), hairM, 0, 1.45, -0.28); put(new T.BoxGeometry(0.14, 0.7, 0.32), hairM, -0.34, 1.58, -0.06); put(new T.BoxGeometry(0.14, 0.7, 0.32), hairM, 0.34, 1.58, -0.06); }
-    else if (style === 6) { put(new T.SphereGeometry(0.35, 6, 4, 0, PI * 2, 0, PI / 2), hairM, 0, 1.9, 0); put(new T.IcosahedronGeometry(0.17, 0), hairM, 0, 2.27, -0.06); }
+    if (o.openHead) {
+      put(new T.SphereGeometry(0.325, 14, 10, 0, PI * 2, PI * 0.3, PI * 0.7), P.skinM, 0, 1.85, 0);
+      const fl = own('#C4463B'), pk = own('#F08DB0'), pk2 = own('#D96B97');
+      put(new T.CylinderGeometry(0.262, 0.262, 0.02, 14), own('#7A2330'), 0, 2.03, 0);
+      const rim = put(new T.TorusGeometry(0.265, 0.025, 5, 16), fl, 0, 2.04, 0); rim.rotation.x = PI / 2;
+      [-1, 1].forEach(s => { const h = put(new T.IcosahedronGeometry(0.17, 1), s < 0 ? pk : pk2, s * 0.085, 2.1, 0.0); h.scale.set(0.95, 0.85, 1.2); });
+      put(new T.IcosahedronGeometry(0.1, 1), pk2, 0, 2.0, -0.17); put(new T.CylinderGeometry(0.035, 0.045, 0.14, 6), pk, 0, 1.96, -0.04);
+      const hinge = new T.Group(); hinge.position.set(0, 2.04, -0.25); hinge.rotation.x = -1.25; hd.add(hinge); P.lid = hinge;
+      const cap = new T.Mesh(new T.SphereGeometry(0.33, 14, 7, 0, PI * 2, 0, PI * 0.3), P.skinM); cap.position.set(0, -0.19, 0.25); cap.castShadow = true; Object.assign(cap.userData, tag); hinge.add(cap);
+      const cr = new T.Mesh(new T.TorusGeometry(0.265, 0.022, 5, 16), fl); cr.rotation.x = PI / 2; cr.position.set(0, 0, 0.25); hinge.add(cr);
+    } else put(new T.IcosahedronGeometry(0.32, 1), P.skinM, 0, 1.85, 0);
+    { const sk = P.skinM;
+      [-1, 1].forEach(s => { const ear = put(new T.IcosahedronGeometry(0.07, 1), sk, s * 0.318, 1.85, 0.0); ear.scale.set(0.45, 1, 0.8); const cb = put(new T.IcosahedronGeometry(0.055, 0), sk, s * 0.17, 1.8, 0.27); cb.scale.set(1, 0.8, 0.7); });
+      const ch = put(new T.IcosahedronGeometry(0.085, 1), sk, 0, 1.6, 0.215); ch.scale.set(1.25, 0.75, 0.9); }
+    if (GC) { hd.children.forEach(c => { c.visible = false; }); gadd('Head', hd, true); gadd('Hair_1', hd, true); }
+    if (style === 3) { put(new T.SphereGeometry(0.37, 10, 6, 0, PI * 2, 0, PI / 2), hairM, 0, 1.9, 0); put(new T.BoxGeometry(0.14, 0.55, 0.42), hairM, -0.31, 1.68, -0.02); put(new T.BoxGeometry(0.14, 0.55, 0.42), hairM, 0.31, 1.68, -0.02); put(new T.BoxGeometry(0.64, 0.5, 0.14), hairM, 0, 1.7, -0.28); }
+    else if (style === 4) { put(new T.SphereGeometry(0.34, 10, 6, 0, PI * 2, 0, PI / 2), hairM, 0, 1.9, 0); [[-0.2, 0.25], [0, 0.32], [0.2, 0.25], [0.1, 0.18]].forEach((q, i) => { const sp = put(new T.ConeGeometry(0.08, 0.3, 4), hairM, q[0], 2.2 + (i % 2) * 0.03, 0.05 - i * 0.05); sp.rotation.z = -q[0] * 2.4; }); }
+    else if (style === 5) { put(new T.SphereGeometry(0.35, 10, 6, 0, PI * 2, 0, PI / 2), hairM, 0, 1.9, 0); put(new T.BoxGeometry(0.7, 0.95, 0.16), hairM, 0, 1.45, -0.28); put(new T.BoxGeometry(0.14, 0.7, 0.32), hairM, -0.34, 1.58, -0.06); put(new T.BoxGeometry(0.14, 0.7, 0.32), hairM, 0.34, 1.58, -0.06); }
+    else if (style === 6) { put(new T.SphereGeometry(0.35, 10, 6, 0, PI * 2, 0, PI / 2), hairM, 0, 1.9, 0); put(new T.IcosahedronGeometry(0.17, 0), hairM, 0, 2.27, -0.06); }
     else if (style === 7) { const cu = put(new T.IcosahedronGeometry(0.46, 0), hairM, 0, 2.08, -0.14); cu.scale.set(1.1, 0.9, 0.8); }
     else if (style === 9) { put(new T.BoxGeometry(0.11, 0.24, 0.62), hairM, 0, 2.15, -0.02); put(new T.BoxGeometry(0.11, 0.14, 0.5), hairM, 0, 2.04, -0.02); }
     else if (style === 10) { const af = put(new T.SphereGeometry(0.48, 7, 5), hairM, 0, 1.98, -0.08); af.scale.set(1.05, 0.95, 1); }
-    else if (style === 11) { put(new T.SphereGeometry(0.35, 6, 4, 0, PI * 2, 0, PI / 2), hairM, 0, 1.9, 0); const tl = put(new T.BoxGeometry(0.11, 0.5, 0.11), hairM, 0, 1.78, -0.38); tl.rotation.x = 0.35; put(new T.IcosahedronGeometry(0.1, 0), own('#E04F3A'), 0, 2.02, -0.33); }
-    else if (style === 12) { put(new T.SphereGeometry(0.35, 6, 4, 0, PI * 2, 0, PI / 2), hairM, 0, 1.9, 0); const pf = put(new T.BoxGeometry(0.5, 0.22, 0.42), hairM, 0, 2.14, 0.08); pf.rotation.x = -0.28; put(new T.BoxGeometry(0.14, 0.2, 0.3), hairM, -0.3, 1.95, -0.02); put(new T.BoxGeometry(0.14, 0.2, 0.3), hairM, 0.3, 1.95, -0.02); }
-    else if (style === 13) { put(new T.SphereGeometry(0.35, 6, 4, 0, PI * 2, 0, PI / 2), hairM, 0, 1.9, 0); [-1, 1].forEach(sd => put(new T.IcosahedronGeometry(0.17, 0), hairM, sd * 0.27, 2.2, -0.04)); }
+    else if (style === 11) { put(new T.SphereGeometry(0.35, 10, 6, 0, PI * 2, 0, PI / 2), hairM, 0, 1.9, 0); const tl = put(new T.BoxGeometry(0.11, 0.5, 0.11), hairM, 0, 1.78, -0.38); tl.rotation.x = 0.35; put(new T.IcosahedronGeometry(0.1, 0), own('#E04F3A'), 0, 2.02, -0.33); }
+    else if (style === 12) { put(new T.SphereGeometry(0.35, 10, 6, 0, PI * 2, 0, PI / 2), hairM, 0, 1.9, 0); const pf = put(new T.BoxGeometry(0.5, 0.22, 0.42), hairM, 0, 2.14, 0.08); pf.rotation.x = -0.28; put(new T.BoxGeometry(0.14, 0.2, 0.3), hairM, -0.3, 1.95, -0.02); put(new T.BoxGeometry(0.14, 0.2, 0.3), hairM, 0.3, 1.95, -0.02); }
+    else if (style === 13) { put(new T.SphereGeometry(0.35, 10, 6, 0, PI * 2, 0, PI / 2), hairM, 0, 1.9, 0); [-1, 1].forEach(sd => put(new T.IcosahedronGeometry(0.17, 0), hairM, sd * 0.27, 2.2, -0.04)); }
     else if (style === 8) { /* bald */ }
     else if (style === 2) put(new T.CylinderGeometry(0.34, 0.34, 0.14, 6), hairM, 0, 2.08, 0);
-    else {
-      put(new T.SphereGeometry(0.35, 6, 4, 0, PI * 2, 0, PI / 2), hairM, 0, 1.9, 0);
+    else if (!(GC && style === 0)) {
+      put(new T.SphereGeometry(0.35, 10, 6, 0, PI * 2, 0, PI / 2), hairM, 0, 1.9, 0);
       if (style === 1) put(new T.IcosahedronGeometry(0.15, 0), hairM, 0, 2.28, -0.12);
     }
-    if (!karen && !sweaty) { const wh = own('#FFFFFF'); put(new T.BoxGeometry(0.105, 0.085, 0.03), wh, -0.11, 1.88, 0.283); put(new T.BoxGeometry(0.105, 0.085, 0.03), wh, 0.11, 1.88, 0.283); }
+    if (!karen && !sweaty) { const wh = own('#FFFFFF'); put(new T.BoxGeometry(0.105, 0.085, 0.03), wh, -0.11, 1.88, GC ? 0.315 : 0.283); put(new T.BoxGeometry(0.105, 0.085, 0.03), wh, 0.11, 1.88, GC ? 0.315 : 0.283); }
     if (costume) {
       if (costume === 'witch') { put(new T.CylinderGeometry(0.52, 0.52, 0.04, 9), own('#1F1B2E'), 0, 2.06, 0); const wc = put(new T.ConeGeometry(0.27, 0.72, 7), own('#1F1B2E'), 0, 2.42, 0); wc.rotation.z = 0.12; put(new T.CylinderGeometry(0.285, 0.3, 0.08, 7), own('#7B3FA0'), 0, 2.12, 0); put(new T.BoxGeometry(0.1, 0.09, 0.03), own('#F2C94C'), 0, 2.12, 0.29); put(new T.ConeGeometry(0.06, 0.16, 4), skin ? own('#6FA051') : dark, 0, 1.78, 0.37).rotation.x = PI / 2; }
       else if (costume === 'vampire') { put(new T.BoxGeometry(0.1, 0.12, 0.04), own('#FFFFFF'), -0.06, 1.675, 0.31); put(new T.BoxGeometry(0.1, 0.12, 0.04), own('#FFFFFF'), 0.06, 1.675, 0.31); put(new T.BoxGeometry(0.6, 0.12, 0.06), own('#1C1826'), 0, 2.06, 0.22); }
@@ -207,10 +246,13 @@ const World = (function () {
       else if (costume === 'antlers') { const br = own('#8A5A2B'); [-1, 1].forEach(s => { const a = put(new T.BoxGeometry(0.05, 0.36, 0.05), br, s * 0.2, 2.2, 0); a.rotation.z = -s * 0.35; const b = put(new T.BoxGeometry(0.05, 0.2, 0.05), br, s * 0.3, 2.28, 0); b.rotation.z = s * 0.6; }); put(new T.IcosahedronGeometry(0.06, 0), own('#E04F3A'), 0, 1.82, 0.35); }
       else if (costume === 'scarf') { const sf = put(new T.TorusGeometry(0.27, 0.075, 5, 8), own(rnd(12) < 0.5 ? '#D8283A' : '#3E8E41'), 0, 1.58, 0); sf.rotation.x = PI / 2; put(new T.BoxGeometry(0.12, 0.4, 0.05), own('#D8283A'), 0.15, 1.35, 0.3, up); }
     }
-    P.dark = dark; P.eyes = [put(new T.BoxGeometry(0.06, 0.065, 0.04), dark, -0.11, 1.88, 0.295), put(new T.BoxGeometry(0.06, 0.065, 0.04), dark, 0.11, 1.88, 0.295)];
+    P.dark = dark; P.eyes = [put(new T.BoxGeometry(0.06, 0.065, 0.04), dark, -0.11, 1.88, GC ? 0.327 : 0.295), put(new T.BoxGeometry(0.06, 0.065, 0.04), dark, 0.11, 1.88, GC ? 0.327 : 0.295)];
     {
       const DSK = { '#F2C9A5': '#D9A883', '#E0A97E': '#C48A60', '#C48A5E': '#A8704A', '#8D5A3B': '#74472C', '#F6D7BD': '#DDB596', '#6F4429': '#59351F' }, noseM = own(DSK[skin] || skin);
-      put(new T.BoxGeometry(0.07, 0.11, 0.1), noseM, 0, 1.815, 0.325);
+      put(new T.BoxGeometry(0.055, 0.1, 0.07), noseM, 0, 1.835, 0.322); put(new T.IcosahedronGeometry(0.047, 1), noseM, 0, 1.775, 0.34);
+      [-1, 1].forEach(s => put(new T.IcosahedronGeometry(0.03, 0), noseM, s * 0.04, 1.772, 0.322));
+      put(new T.BoxGeometry(0.27, 0.035, 0.05), noseM, 0, 1.935, 0.288);
+      if (!karen && !sweaty) { put(new T.BoxGeometry(0.1, 0.022, 0.035), own(o.gender === 'f' ? '#D9677A' : '#B5605A'), 0, 1.7, 0.305); put(new T.BoxGeometry(0.085, 0.026, 0.035), own(o.gender === 'f' ? '#D9677A' : '#C47A6E'), 0, 1.672, 0.3); }
       if (!karen && !sweaty && o.gender !== 'f') {
         const mm = own('#6E2A2A'), mt = rnd(2);
         put(new T.BoxGeometry(0.14, 0.028, 0.04), mm, 0, 1.715, 0.3);
@@ -300,19 +342,28 @@ const World = (function () {
     [-1, 1].forEach(s => {
       const leg = new T.Group(); leg.position.set(s * (jacked ? 0.2 : obese ? 0.24 : slim ? 0.12 : 0.15), legL, 0); g.add(leg);
       if (o.him) {
-        put(new T.BoxGeometry(legW, legL / 2, legW + 0.04), pants, 0, -legL / 4, 0, leg);
+        { const lc = put(new T.CylinderGeometry(legW * 0.62, legW * 0.55, legL / 2, 9), pants, 0, -legL / 4, 0, leg); lc.scale.z = 1.15; }
         const sh = new T.Group(); sh.position.y = -legL / 2; leg.add(sh); (P.knees = P.knees || []).push(sh);
-        put(new T.BoxGeometry(legW * 0.94, legL / 2, legW + 0.03), pants, 0, -legL / 4, 0, sh);
+        { const lc = put(new T.CylinderGeometry(legW * 0.55, legW * 0.5, legL / 2, 9), pants, 0, -legL / 4, 0, sh); lc.scale.z = 1.15; }
         put(new T.BoxGeometry(legW + 0.06, 0.1, legW + 0.22), own(o.shoes), 0, -legL / 2 + 0.05, 0.07, sh);
       } else {
-        put(new T.BoxGeometry(legW, legL, legW + 0.04), pants, 0, -legL / 2, 0, leg);
-        if (o.shoes) put(new T.BoxGeometry(legW + 0.06, 0.1, legW + 0.22), own(o.shoes), 0, -legL + 0.05, 0.07, leg);
+        { const th = put(new T.CylinderGeometry(legW * 0.66, legW * 0.54, legL * 0.5, 12), pants, 0, -legL / 4, 0, leg); th.scale.z = 1.15; put(new T.IcosahedronGeometry(legW * 0.56, 1), pants, 0, -legL / 2, 0.01, leg);
+          const ch = legL * 0.5 - 0.09, cf = put(new T.CylinderGeometry(legW * 0.54, legW * 0.4, ch, 12), pants, 0, -legL * 0.5 - ch / 2, 0, leg); cf.scale.z = 1.1; put(new T.IcosahedronGeometry(legW * 0.5, 1), pants, 0, -legL * 0.58, -0.015, leg).scale.set(1, 1.5, 0.9); }
+        { const sm = own(o.shoes || '#2A2A34'), sh = put(new T.IcosahedronGeometry(0.1, 1), sm, 0, -legL + 0.06, 0.07, leg); sh.scale.set(legW * 6.4, 0.9, 2.4); }
       }
+      if (GC) { leg.children.forEach(c => { c.visible = false; }); gadd(s < 0 ? 'Leg_R' : 'Leg_L', leg, false); const kn = new T.Group(); kn.position.y = -legL / 2; leg.add(kn); (P.knees = P.knees || []).push(kn); gadd(s < 0 ? 'Shin_R' : 'Shin_L', kn, false); P.kneeFollow = true; }
       P.legs.push(leg);
       const arm = new T.Group(); arm.position.set(s * (jacked ? 0.86 : obese ? 0.78 : slim ? (o.him ? 0.37 : 0.38) : 0.46), 1.5, 0); up.add(arm);
       if (jacked) arm.scale.set(2.3, 1.15, 2.3); else if (obese) arm.scale.set(1.6, 1, 1.6); else if (slim) arm.scale.set(0.8, 1, 0.8);
-      put(new T.BoxGeometry(0.15, 0.62, 0.16), jacked ? P.skinM : P.shirtM, 0, -0.3, 0, arm);
-      put(new T.IcosahedronGeometry(0.09, 0), P.skinM, 0, -0.66, 0, arm); P.arms.push(arm);
+      { const am = jacked ? P.skinM : P.shirtM; const ua = put(new T.CylinderGeometry(0.094, 0.076, 0.33, 12), am, 0, -0.165, 0, arm); ua.scale.z = 1.05; put(new T.IcosahedronGeometry(0.08, 1), am, 0, -0.33, 0, arm);
+        const fa = put(new T.CylinderGeometry(0.078, 0.058, 0.3, 12), am, 0, -0.48, 0, arm); fa.scale.z = 1.05; put(new T.IcosahedronGeometry(0.092, 1), am, 0, 0.0, 0, arm);
+        if (labCoat) put(new T.CylinderGeometry(0.066, 0.066, 0.05, 12), own('#FFFFFF'), 0, -0.625, 0, arm); }
+      { const hd2 = put(new T.IcosahedronGeometry(0.072, 1), P.skinM, 0, -0.69, 0.005, arm); hd2.scale.set(1, 1.15, 0.9); put(new T.IcosahedronGeometry(0.03, 0), P.skinM, -s * 0.06, -0.66, 0.05, arm); } if (GC) { arm.children.forEach(c => { c.visible = false; }); gadd(s < 0 ? 'Arm_R' : 'Arm_L', arm, false); } P.arms.push(arm);
+      if (o.coat && s === -1) { const cb = own('#7A4A27'); put(new T.BoxGeometry(0.27, 0.35, 0.03), cb, 0.0, -0.55, 0.13, arm); put(new T.BoxGeometry(0.23, 0.3, 0.02), own('#FFFFFF'), 0, -0.56, 0.148, arm); put(new T.BoxGeometry(0.1, 0.04, 0.05), own('#B9C4CC'), 0, -0.38, 0.15, arm); const cr = own('#D8C9A6'); put(new T.BoxGeometry(0.1, 0.03, 0.02), cr, 0, -0.56, 0.162, arm); put(new T.BoxGeometry(0.03, 0.1, 0.02), cr, 0, -0.56, 0.162, arm); }
+      if (o.coat && s === 1 && !(o.cosm && o.cosm.hands)) {
+        const gl = own('#CFEFF5'); gl.transparent = true; gl.opacity = 0.45; const liq = own('#38E0D0'); if (liq.emissive && liq.emissive.setHex) { liq.emissive.setHex(0x14B8A6); liq.emissiveIntensity = 0.8; }
+        put(new T.CylinderGeometry(0.03, 0.1, 0.2, 10), gl, 0, -0.8, 0.12, arm); put(new T.CylinderGeometry(0.026, 0.088, 0.13, 10), liq, 0, -0.835, 0.12, arm); put(new T.CylinderGeometry(0.032, 0.032, 0.09, 8), gl, 0, -0.65, 0.12, arm); put(new T.CylinderGeometry(0.042, 0.036, 0.04, 8), own('#8B5A2B'), 0, -0.585, 0.12, arm);
+      }
       if (o.him) put(new T.BoxGeometry(0.17, 0.07, 0.18), own('#24508F'), 0, -0.585, 0, arm);
       if (on(3)) put(new T.BoxGeometry(0.2, 0.09, 0.13), goldM, 0, -0.7, 0.02, arm);
       if ((on(6) || o.elder) && s === 1) { put(new T.CylinderGeometry(0.025, 0.025, 1.05, 5), own('#5B3A21'), 0, -1.02, 0.06, arm); put(new T.IcosahedronGeometry(0.07, 0), goldM, 0, -0.5, 0.06, arm); }
@@ -335,6 +386,8 @@ const World = (function () {
     if (varied && !o.elder) { const gs = 0.9 + 0.24 * rnd(9); g.scale.set(gs, gs, gs); }
     P.waddle = obese; g.rotation.order = 'YXZ'; g.userData.P = P; return g;
   }
+  /* knees of the Blender characters follow the thigh: a leg swung forward (negative x) bends the shin back, so sitting and walking both read right */
+  function kneeFollow(P) { if (!P.kneeFollow) return; for (let i = 0; i < 2; i++) { const th = P.legs[i].rotation.x; P.knees[i].rotation.x = Math.max(0, -th) * 0.95 + (th > 0 ? th * 0.35 : 0); } }
   function walkAnim(p, t, walking, dt) {
     const P = p.userData.P, k = Math.min(1, dt * 10);
     if (P.him) {
@@ -348,7 +401,7 @@ const World = (function () {
       return;
     }
     const a = walking ? Math.sin(t * 9) * 0.7 : 0;
-    P.legs[0].rotation.x = lerp(P.legs[0].rotation.x, a, k); P.legs[1].rotation.x = lerp(P.legs[1].rotation.x, -a, k);
+    P.legs[0].rotation.x = lerp(P.legs[0].rotation.x, a, k); P.legs[1].rotation.x = lerp(P.legs[1].rotation.x, -a, k); kneeFollow(P);
     P.arms[0].rotation.x = lerp(P.arms[0].rotation.x, -a * 0.8, k); P.arms[1].rotation.x = lerp(P.arms[1].rotation.x, a * 0.8, k);
     if (P.waddle) p.rotation.z = lerp(p.rotation.z, walking ? Math.sin(t * 9) * 0.07 : 0, k);
   }
@@ -359,6 +412,74 @@ const World = (function () {
     bx(p, 0.12, 0.3, 0.12, '#27384F', x, 1.42, z, up);
     bx(p, 0.85, 0.56, 0.07, '#27384F', x, 1.84, z, up);
     return bx(p, 0.72, 0.44, 0.03, '#2CCDBB', x, 1.84, z - 0.05, up, { emissive: new T.Color(0x1FB5A5), emissiveIntensity: glow });
+  }
+  /* ---- trash can on the right side: normal most of the time, crawling with bacteria when infested (api.setBin) ---- */
+  let binG = null, binBugs = [], binGlow = null, binInfested = false;
+  function buildBin() {
+    binG = new T.Group(); binG.position.set(8.7, 0, -2.4); binG.rotation.y = -0.35; binG.userData.bin = true; scene.add(binG);
+    // a plain 12-sided tapered bin, open at the top, with a thick rim and thin vertical slats near the bottom
+    const R0 = 0.46, R1 = 0.62, H = 1.3, wallM = mat('#A8AFAD', null, { side: T.DoubleSide });
+    const body = new T.Mesh(new T.CylinderGeometry(R1, R0, H, 12, 1, true), wallM); body.position.y = H / 2; body.castShadow = true; body.receiveShadow = true; binG.add(body);
+    const inner = new T.Mesh(new T.CylinderGeometry(R1 - 0.035, R0 - 0.035, H - 0.02, 12, 1, true), mat('#6E7775', null, { side: T.BackSide })); inner.position.y = H / 2; binG.add(inner);
+    cy(binG, R0 - 0.03, R0 - 0.03, 0.05, 12, '#4F5755', 0, 0.06, 0);
+    const lip = new T.Mesh(new T.CylinderGeometry(R1 + 0.035, R1 + 0.02, 0.09, 12, 1, true), mat('#C9CFCD', null, { side: T.DoubleSide })); lip.position.y = H - 0.02; binG.add(lip);
+    const top = new T.Mesh(new T.RingGeometry(R1 - 0.04, R1 + 0.035, 12), mat('#D6DBDA', null, { side: T.DoubleSide })); top.rotation.x = -PI / 2; top.position.y = H + 0.025; binG.add(top);
+    const foot = new T.Mesh(new T.CylinderGeometry(R0 + 0.03, R0 + 0.035, 0.1, 12, 1, true), mat('#C0C6C4', null, { side: T.DoubleSide })); foot.position.y = 0.05; binG.add(foot);
+    for (let i = 0; i < 12; i++) {
+      const a = (i + 0.5) / 12 * PI * 2, sl = new T.Group(); sl.rotation.y = -a + PI / 2; binG.add(sl);
+      const ap = (R0 + (R1 - R0) * (0.58 / H)) * Math.cos(PI / 12) + 0.006, b = bx(sl, 0.035, 0.74, 0.02, '#8F9795', 0, 0.58, ap); b.rotation.x = -Math.atan((R1 - R0) / H); b.castShadow = false;
+    }
+    bx(binG, 0.3, 0.06, 0.22, '#E9E1CE', 0.02, 1.0, 0.05).rotation.z = 0.2; bx(binG, 0.22, 0.2, 0.2, '#D7CDB4', -0.12, 1.12, -0.02).rotation.z = 0.4; bx(binG, 0.16, 0.14, 0.16, '#E9E1CE', 0.14, 1.1, -0.1).rotation.y = 0.6;
+    // bacteria: little cartoon rods and cocci with legs and eyes that walk on the floor and up and down the wall
+    const cols = ['#8BE04A', '#B26BE0', '#E8C23A', '#38C9B0', '#F0804B'];
+    for (let i = 0; i < 14; i++) {
+      const col = cols[i % cols.length], g = new T.Group(), rod = i % 3 !== 2, body2 = mat(col, null, { emissive: new T.Color(col), emissiveIntensity: 0.22 });
+      const bd = new T.Mesh(new T.IcosahedronGeometry(0.1, 1), body2); bd.scale.set(0.8, 0.8, rod ? 2.1 : 1.0); bd.position.y = 0.09; g.add(bd);
+      if (!rod) { const b2 = new T.Mesh(new T.IcosahedronGeometry(0.1, 1), body2); b2.scale.set(0.8, 0.8, 1); b2.position.set(0, 0.09, -0.17); g.add(b2); }
+      const eyeM = mat('#FFFFFF'), pupM = mat('#18202A');
+      [-1, 1].forEach(s => { const e = new T.Mesh(new T.IcosahedronGeometry(0.035, 0), eyeM); e.position.set(s * 0.05, 0.13, rod ? 0.17 : 0.07); g.add(e); const p2 = new T.Mesh(new T.IcosahedronGeometry(0.018, 0), pupM); p2.position.set(s * 0.05, 0.13, rod ? 0.2 : 0.1); g.add(p2); });
+      const legs = [];
+      for (let k = 0; k < 3; k++) [-1, 1].forEach(s => { const lg = new T.Group(); lg.position.set(s * 0.07, 0.07, (rod ? 0.1 : 0.04) - k * (rod ? 0.1 : 0.07)); const seg = new T.Mesh(new T.BoxGeometry(0.1, 0.018, 0.018), mat(col)); seg.position.x = s * 0.05; lg.add(seg); g.add(lg); legs.push({ g: lg, s, k }); });
+      const tail = new T.Mesh(new T.BoxGeometry(0.02, 0.02, 0.2), mat(col)); tail.position.set(0, 0.09, rod ? -0.3 : -0.33); g.add(tail);
+      g.visible = false; g.userData.bin = true; g.traverse(o => { o.userData.bin = true; });
+      g.scale.set(0.5, 0.5, 0.5); g.userData.bug = { mode: i % 2 ? 'wall' : 'floor', a: Math.random() * PI * 2, r: 0.85 + Math.random() * 0.7, y: 0.25 + Math.random() * 0.8, sp: 0.16 + Math.random() * 0.14, dir: Math.random() < 0.5 ? 1 : -1, ph: Math.random() * 6, turn: 0, legs, tail, vy: Math.random() < 0.5 ? 1 : -1 };
+      binG.add(g); binBugs.push(g);
+    }
+  }
+  api.setBin = function (on) { binInfested = !!on; binBugs.forEach(m => { m.visible = binInfested; }); if (binGlow) binGlow.material.opacity = 0; };
+  api.binOn = () => binInfested;
+  const binV = { p: null, o: null, n: null, d: null, x: null };
+  function animBin(dt) {
+    if (!binG || !binInfested) return;
+    const R0 = 0.46, R1 = 0.62, H = 1.3;
+    binBugs.forEach(m => {
+      const u = m.userData.bug; u.ph += dt * u.sp * 26;
+      let px, py, pz, nx = 0, ny = 1, nz = 0, dx, dy, dz;
+      if (u.mode === 'floor') {
+        u.turn += (Math.random() - 0.5) * dt * 2.2; u.turn *= 0.97; u.a += u.dir * (u.sp / u.r) * dt * (1 + 0.3 * Math.sin(u.ph * 0.15)); u.r += (Math.sin(time * 0.3 + u.ph * 0.02) * 0.08 + u.turn * 0.1) * dt;
+        u.r = clamp(u.r, 0.78, 1.7);
+        px = Math.cos(u.a) * u.r; pz = Math.sin(u.a) * u.r; py = 0.03;
+        dx = -Math.sin(u.a) * u.dir; dz = Math.cos(u.a) * u.dir; dy = 0;
+        if (Math.random() < dt * 0.06 && u.r < 0.95) { u.mode = 'wall'; u.y = 0.1; u.vy = 1; }
+      } else {
+        u.y += u.vy * u.sp * dt; u.a += u.dir * Math.sin(u.ph * 0.2) * 0.04 * dt;
+        const rr = R0 + (R1 - R0) * (u.y / H) + 0.035;
+        if (u.y > H - 0.05) u.vy = -1; if (u.y < 0.12 && u.vy < 0) { if (Math.random() < 0.5) { u.mode = 'floor'; u.r = 0.82; } else u.vy = 1; }
+        px = Math.cos(u.a) * rr; pz = Math.sin(u.a) * rr; py = u.y;
+        nx = Math.cos(u.a); ny = 0.12; nz = Math.sin(u.a); const nl = Math.hypot(nx, ny, nz); nx /= nl; ny /= nl; nz /= nl;
+        dx = 0; dy = u.vy; dz = 0; const dn = dx * nx + dy * ny + dz * nz; dx -= dn * nx; dy -= dn * ny; dz -= dn * nz;
+        if (u.y > H - 0.05 && u.vy > 0) { u.vy = -1; }
+      }
+      m.position.set(px, py, pz);
+      const dl = Math.hypot(dx, dy, dz) || 1; dx /= dl; dy /= dl; dz /= dl;
+      // orientation: local +y is the surface normal, local +z the direction of travel
+      const rx = ny * dz - nz * dy, ry = nz * dx - nx * dz, rz = nx * dy - ny * dx;
+      if (!binV.m) binV.m = new T.Matrix4();
+      binV.m.makeBasis(new T.Vector3(rx, ry, rz), new T.Vector3(nx, ny, nz), new T.Vector3(dx, dy, dz)); m.quaternion.setFromRotationMatrix(binV.m);
+      u.legs.forEach(l => { l.g.rotation.y = Math.sin(u.ph + l.k * 1.4 + (l.s > 0 ? 0 : PI)) * 0.55; l.g.rotation.z = l.s * (0.25 + Math.abs(Math.sin(u.ph + l.k)) * 0.35); });
+      u.tail.rotation.y = Math.sin(u.ph * 1.3) * 0.5; m.children[0].scale.y = 0.8 + Math.sin(u.ph * 2) * 0.04;
+    });
+    if (binGlow) binGlow.material.opacity = 0.12 + (Math.sin(time * 3) * 0.5 + 0.5) * 0.14;
   }
   function buildStatic() {
     const g = new T.Group(); scene.add(g);
@@ -672,7 +793,7 @@ const World = (function () {
       const k = Math.min(i - 5, SEATS.length - 1);
       if (!c.idl || c.idl.type !== 'sit' || c.seat !== k) { c.seat = k; c.sit = false; c.idl = { type: 'sit', seat: SEATS[k], t: 999 }; c.wp = [new T.Vector3(SEATS[k][0], 0, SEATS[k][1])]; }
       if (!c.sit && !w && !c.wp.length) c.sit = true;
-      if (c.sit) { c.idl.t = 999; P.legs[0].rotation.x = P.legs[1].rotation.x = -1.45; P.arms[0].rotation.x = P.arms[1].rotation.x = -0.6; c.g.rotation.y = lerpAngle(c.g.rotation.y, SEATS[k][2], Math.min(1, dt * 6)); }
+      if (c.sit) { c.idl.t = 999; P.legs[0].rotation.x = P.legs[1].rotation.x = -1.45; kneeFollow(P); P.arms[0].rotation.x = P.arms[1].rotation.x = -0.6; c.g.rotation.y = lerpAngle(c.g.rotation.y, SEATS[k][2], Math.min(1, dt * 6)); }
       return;
     }
     if (i === 0 || special || rushOn) { if (c.idl) { endIdle(c); c.wp = [slotPos(i, c)]; } return; }
@@ -680,7 +801,7 @@ const World = (function () {
       const d = c.idl;
       if (d.type === 'sit') {
         if (!c.sit && !w && !c.wp.length) { c.sit = true; d.t = 7 + Math.random() * 14; }
-        if (c.sit) { P.legs[0].rotation.x = P.legs[1].rotation.x = -1.45; P.arms[0].rotation.x = P.arms[1].rotation.x = -0.6; c.g.rotation.y = lerpAngle(c.g.rotation.y, d.seat[2], Math.min(1, dt * 6)); d.t -= dt; }
+        if (c.sit) { P.legs[0].rotation.x = P.legs[1].rotation.x = -1.45; kneeFollow(P); P.arms[0].rotation.x = P.arms[1].rotation.x = -0.6; c.g.rotation.y = lerpAngle(c.g.rotation.y, d.seat[2], Math.min(1, dt * 6)); d.t -= dt; }
       } else if (!w && !c.wp.length) { d.t -= dt; c.g.rotation.y = lerpAngle(c.g.rotation.y, d.yaw + Math.sin(time * 0.8 + c.phase) * 0.9, Math.min(1, dt * 3)); }
       if (d.t <= 0) { endIdle(c); c.wp = [slotPos(i, c)]; }
       return;
@@ -796,11 +917,11 @@ const World = (function () {
   /* ---- effects ---- */
   const puffs = [], drops = [], extras = [];
   function emitPuff(x, y, z) {
-    if (synOn || labOn) return;
+    if (synOn || labOn || micOn) return;
     for (const p of puffs) { if (p.life > 0) continue; p.life = 0.9; p.m.visible = true; p.m.position.set(x, y, z); p.m.scale.set(1, 1, 1); p.m.material.opacity = 0.9; p.vx = (Math.random() - 0.5) * 0.8; p.vz = (Math.random() - 0.5) * 0.8; return; }
   }
   function emitDrop(x, y, z) {
-    if (synOn || labOn) return;
+    if (synOn || labOn || micOn) return;
     for (const d of drops) { if (d.life > 0) continue; d.life = 1.1; d.m.visible = true; d.m.position.set(x, y, z); d.m.scale.set(1, 1, 1); d.m.material.opacity = 0.95; d.vy = 0.5 + Math.random(); d.vx = (Math.random() - 0.5) * 1.6; d.vz = Math.random() * 0.8; return; }
   }
   function sweatyFx(c, dt) {
@@ -1201,8 +1322,8 @@ const World = (function () {
     const r = canvas.getBoundingClientRect();
     ndc.x = ((e.clientX - r.left) / r.width) * 2 - 1; ndc.y = -((e.clientY - r.top) / r.height) * 2 + 1;
     raycaster.setFromCamera(ndc, camera);
-    const hits = raycaster.intersectObjects(synOn ? synItems.filter(g => g.visible) : labOn ? labItems : [].concat(CLICK.map(i => ug[i]), [staffGroup, custGroup, petG, pharmG], phoneG ? [phoneG] : [], capG ? [capG] : [], pillG ? [pillG] : [], brainG ? [brainG] : [], evtG ? [evtG] : []), true);
-    for (const h of hits) { let o = h.object; while (o) { if (o.userData && (o.userData.up || o.userData.cust || o.userData.pet || o.userData.pharm || o.userData.vis || o.userData.cap || o.userData.himA || o.userData.pill || o.userData.lab || o.userData.site || o.userData.brain || o.userData.evt)) { pickObj = h.object; return o.userData; } o = o.parent; } }
+    const hits = raycaster.intersectObjects(synOn ? synItems.filter(g => g.visible) : micOn ? micItems.filter(g => g.visible) : labOn ? labItems : [].concat(CLICK.map(i => ug[i]), [staffGroup, custGroup, petG, pharmG], phoneG ? [phoneG] : [], binG ? [binG] : [], capG ? [capG] : [], pillG ? [pillG] : [], brainG ? [brainG] : [], evtG ? [evtG] : []), true);
+    for (const h of hits) { let o = h.object; while (o) { if (o.userData && (o.userData.up || o.userData.cust || o.userData.pet || o.userData.pharm || o.userData.vis || o.userData.cap || o.userData.himA || o.userData.pill || o.userData.lab || o.userData.site || o.userData.brain || o.userData.evt || o.userData.bin || o.userData.micSite || o.userData.micDish || o.userData.micPaper)) { pickObj = h.object; return o.userData; } o = o.parent; } }
     return null;
   }
   function setHover(up) {
@@ -1225,7 +1346,7 @@ const World = (function () {
       if (fpT || (e.pointerType === 'mouse' && e.button !== 0)) return;
       ptrs.set(e.pointerId, { x: e.clientX, y: e.clientY });
       try { canvas.setPointerCapture(e.pointerId); } catch (_) { /* ignore */ }
-      carryCand = null; if (ptrs.size === 1 && !labOn && !synOn) { const h = pick(e); if (h && h.pet) carryCand = petOf(); }
+      carryCand = null; if (ptrs.size === 1 && !labOn && !synOn && !micOn) { const h = pick(e); if (h && h.pet) carryCand = petOf(); }
       if (ptrs.size === 1) drag = { sx: e.clientX, sy: e.clientY, lx: e.clientX, ly: e.clientY, on: false };
       else if (ptrs.size === 2) { const v = [...ptrs.values()]; pinch = { d: Math.hypot(v[0].x - v[1].x, v[0].y - v[1].y) || 1, g: grad }; if (drag) drag.on = true; canvas.classList.add('grabbing'); }
     });
@@ -1259,14 +1380,17 @@ const World = (function () {
       if (e.pointerType !== 'mouse' || (drag && drag.on)) return;
       if (fpT) { setFpHover(fpPick(e)); return; }
       const h = pick(e); setHover(h && h.up ? h.up : null);
-      if (!hovered) canvas.style.cursor = h && (h.cust || h.pet || h.pharm || h.vis || h.cap || h.himA || h.lab || h.site || h.brain || h.evt) ? 'pointer' : 'default';
+      if (!hovered) canvas.style.cursor = h && (h.cust || h.pet || h.pharm || h.vis || h.cap || h.himA || h.lab || h.site || h.brain || h.evt || h.bin || h.micSite || h.micDish || h.micPaper) ? 'pointer' : 'default';
       if (synOn) synHover = h && h.site ? h.site : null;
+      if (micOn) micHoverId = h && h.micSite ? h.micSite : null;
     });
     canvas.addEventListener('click', e => {
       if (noClick) { noClick = false; return; }
       if (fpT) { const id = fpPick(e); if (id && B.onFp) B.onFp(id); return; }
       const h = pick(e); dismissHint();
       if (synOn) { if (h && h.site && B.onSynSite) B.onSynSite(h.site); return; }
+      if (micOn) { if (h && h.micSite && B.onMicSite) B.onMicSite(h.micSite); else if (h && h.micDish && B.onMicDish) B.onMicDish(h.micDish); else if (h && h.micPaper && B.onMicPaper) { const pa = api.micPaperAt(e.clientX, e.clientY); if (pa) B.onMicPaper(pa.id, pa.row); } return; }
+      if (h && h.bin) { if (B.onBin) B.onBin(); return; }
       if (h && h.brain) { if (B.onBrain) B.onBrain(); return; }
       if (h && h.evt) { if (B.onEvt) B.onEvt(h.evt); return; }
       if (h && h.lab) { labClick(h); return; }
@@ -1597,7 +1721,7 @@ const World = (function () {
         b.vy -= 15 * dt; g.position.x += b.vx * dt; g.position.z += b.vz * dt; g.position.y += b.vy * dt;
         const k = Math.min(1, b.t / 0.6);
         g.rotation.x = -(PI / 2) * k * (2 - k); g.rotation.z = b.spin * Math.sin(Math.min(1, b.t / 0.7) * PI) * 0.7;
-        P.legs[0].rotation.x = Math.sin(b.t * 18) * 1.1; P.legs[1].rotation.x = Math.cos(b.t * 16) * 1.1;
+        P.legs[0].rotation.x = Math.sin(b.t * 18) * 1.1; P.legs[1].rotation.x = Math.cos(b.t * 16) * 1.1; kneeFollow(P);
         P.arms[0].rotation.z = -(1.4 + Math.sin(b.t * 20) * 0.4); P.arms[1].rotation.z = 1.4 + Math.cos(b.t * 19) * 0.4;
         if (g.position.y <= b.restY && b.vy < 0 && b.t > 0.2) {
           g.position.y = b.restY;
@@ -1646,7 +1770,7 @@ const World = (function () {
         j.cops.forEach((c, i) => {
           const sg = i ? -1 : 1; c.g.position.set(j.C.x + sx * 0.7 + px * sg * 0.85, 0, j.C.z + sz * 0.7 + pz * sg * 0.85);
           c.g.rotation.y = j.th; c.phase += dt; const P = c.g.userData.P;
-          P.legs[0].rotation.x = Math.sin(c.phase * 7) * 0.5; P.legs[1].rotation.x = -Math.sin(c.phase * 7) * 0.5;
+          P.legs[0].rotation.x = Math.sin(c.phase * 7) * 0.5; P.legs[1].rotation.x = -Math.sin(c.phase * 7) * 0.5; kneeFollow(P);
           P.arms[0].rotation.x = P.arms[1].rotation.x = -1.0; P.arms[0].rotation.z = sg * 0.3; P.arms[1].rotation.z = sg * 0.3;
           c.g.position.y = Math.abs(Math.sin(c.phase * 7)) * 0.04;
         });
@@ -1684,6 +1808,7 @@ const World = (function () {
     raf = requestAnimationFrame(frame);
     const dt = Math.min(0.05, (now - last) / 1000 || 0.016); last = now; time += dt;
     if (labOn) labTick(dt);
+    if (micOn) micTick(dt);
     if (synOn) synTick(dt);
     // customers
     const crowd = queue.concat(leaving, extras, pets, cops, visitor ? [visitor] : []), stf = pharm ? staff.concat([pharm]) : staff;
@@ -1712,7 +1837,7 @@ const World = (function () {
     cops.forEach(c => { if (copJob && copJob.phase === 'in') { const w = moveTo(c, c.speed, dt, crowd); c.phase += dt; walkAnim(c.g, c.phase, w, dt); } });
     ragStep(dt); copStep(dt);
     // staff
-    staffGroup.visible = !labOn && !synOn && !(fpT || fpK > 0.25);
+    staffGroup.visible = !labOn && !synOn && !micOn && !(fpT || fpK > 0.25);
     capTick(dt); pillTick(dt); brainTick(dt); evtTick(dt); holTick(dt);
     staff.forEach(s => {
       if (fpT || fpK > 0) return;
@@ -1720,6 +1845,7 @@ const World = (function () {
       const P = s.g.userData.P;
       if (!w) { s.idle -= dt; P.arms[1].rotation.x = -1.2 + Math.sin(time * 5 + s.phase) * 0.5; s.g.rotation.y = lerpAngle(s.g.rotation.y, s.g.position.z < -3 ? PI : 0, dt * 4); if (s.idle <= 0) { s.idle = 1.5 + Math.random() * 3; s.wp.push(staffTarget()); } }
     });
+    animBin(dt);
     if (phoneG) {
       if (phoneRinging) {
         phoneG.rotation.z = Math.sin(time * 42) * 0.06; phoneHS.position.y = 0.3 + Math.abs(Math.sin(time * 22)) * 0.05;
@@ -1831,6 +1957,7 @@ const World = (function () {
     const c = new T.Color(col), dark = (c.r + c.g + c.b) / 3 < 0.35;
     hemi.intensity = dark ? 0.5 : 0.85; sun.intensity = dark ? 0.55 : 0.8;
     if (synOn) { scene.background = new T.Color(SYN_BG); hemi.intensity = 0.95; sun.intensity = 0.6; }
+    else if (micOn) { scene.background = new T.Color(dark ? '#16282F' : '#DDEBF0'); hemi.intensity = dark ? 0.9 : 1.1; sun.intensity = 0.75; }
     else if (labOn) { scene.background = new T.Color(dark ? '#16282F' : '#E7F0F3'); hemi.intensity = dark ? 0.9 : 1.1; sun.intensity = 0.7; }
     else if (hol && HOLBG[hol]) { scene.background = new T.Color(HOLBG[hol][dark ? 1 : 0]); try { if (hol === 'halloween') { hemi.color.setHex(0xFFB26B); sun.color.setHex(0xFF9540); hemi.intensity = dark ? 0.7 : 0.95; } else { hemi.color.setHex(0xEAF3FF); sun.color.setHex(0xFFF2DD); } } catch (e) { /* stub */ } }
     if (!(hol && !synOn && !labOn)) { try { hemi.color.setHex(0xffffff); sun.color.setHex(0xffffff); } catch (e) { /* stub */ } }
@@ -1844,7 +1971,7 @@ const World = (function () {
     camera.updateProjectionMatrix();
     const k = 2 * Math.tan(20 * PI / 180);
     const ratio = baseRad ? grad / baseRad : 1;
-    baseRad = Math.min(58, Math.max(17 * h / vh, 21 / (k * vw / h))); grad = clamp(baseRad * ratio, baseRad * 0.55, baseRad * 1.3);
+    baseRad = Math.min(58, Math.max(17 * h / vh, 21 / (k * vw / h))); grad = clamp(baseRad * ratio, baseRad * 0.55, baseRad * 1.3); if (micZoomR) grad = micZoomR;
   }
   api.setInset = function (r, b) { insR = Math.round(r); insB = Math.round(b); if (api.ok) resize(); };
 
@@ -2045,6 +2172,383 @@ const World = (function () {
     scene.children.forEach(c => { if (c !== labG && c !== synG && c !== hemi && c !== sun && c.visible && !(c.userData && c.userData.fx)) { c.visible = false; if (labHid.indexOf(c) < 0) labHid.push(c); } });
     if (labPerson && labPerson.userData.busy <= 0) { labPerson.rotation.y = Math.sin(labT * 0.4) * 0.12; labPerson.position.y = Math.sin(labT * 1.6) * 0.01; }
   }
+  /* ---- microbe lab: a separate room with a low-poly man (brain and leg bone popping out) and labeled petri dishes ---- */
+  let micPaperMap = {}, micPaperG = null, micPaperHot = null, micRig = null, micLay = null, manBed = null, micV = null, micG = null, micOn = false, micHid = [], micSaved = null, micManG = null, micPinMap = {}, micDishMap = {}, micSel = null, micHoverId = null, micHot = null, micLabEl = null, micBench = null, micTt = 0;
+  const micItems = [];
+  const MICPOS = { cns: [0, 2.3, 0.0], ear: [0.37, 1.86, 0.02], mouth: [0, 1.68, 0.42], upper: [0, 1.5, 0.53], lower: [-0.14, 1.37, 0.6], heart: [0.07, 1.2, 0.64], intra: [-0.1, 1.03, 0.58], gi: [0.11, 1.0, 0.5], uti: [0, 0.74, 0.5], sti: [0.17, 0.66, 0.34], skin: [0.62, 1.05, 0.12], bone: [-0.15, 0.4, 0.06] };
+  function micText(txt, w, h, bg, fg) {
+    const cv = document.createElement('canvas'); cv.width = w; cv.height = h; const c = cv.getContext('2d');
+    if (c) { c.fillStyle = bg; const r = h / 2; c.beginPath(); c.moveTo(r, 4); c.lineTo(w - r, 4); c.arc(w - r, h / 2, h / 2 - 4, -PI / 2, PI / 2); c.lineTo(r, h - 4); c.arc(r, h / 2, h / 2 - 4, PI / 2, PI * 1.5); c.fill(); c.lineWidth = 5; c.strokeStyle = '#10292C'; c.stroke(); c.fillStyle = fg; c.textAlign = 'center'; c.textBaseline = 'middle'; let fs = h * 0.5; c.font = '800 ' + fs + 'px sans-serif'; while (c.measureText(txt).width > w - h && fs > 16) { fs -= 2; c.font = '800 ' + fs + 'px sans-serif'; } c.fillText(txt, w / 2, h / 2 + 2); }
+    return new T.CanvasTexture(cv);
+  }
+  const MICPOS_HIT = { cns: 0.18, ear: 0.1, mouth: 0.1, skin: 0.12, bone: 0.12, sti: 0.1 };
+  let micOrg = {};
+  /* ---- low-poly organ models: flat-shaded facets like a faceted 3D print. Used small inside the man's open chest and large on the specimen table (zoomed part). Each mesh is tagged with its body site so it can be clicked or hovered. ---- */
+  const MICSPEC_KINDS = { cns: 'brain', ear: 'ear', upper: 'upper', mouth: 'mouth', lower: 'lungs', heart: 'heart', intra: 'liver', gi: 'gut', uti: 'urinary', skin: 'skin', bone: 'femur' };
+  /* tiny .glb reader (three r128 has no loader): first mesh primitive, positions and indices only; cached per model name */
+  const glbCache = {}, micBeat = [];
+  function glbOpen(name) {
+    const bin = atob(RXMODELS[name]), u8 = new Uint8Array(bin.length); for (let i = 0; i < bin.length; i++) u8[i] = bin.charCodeAt(i);
+    const dv = new DataView(u8.buffer), jl = dv.getUint32(12, true), j = JSON.parse(new TextDecoder().decode(u8.subarray(20, 20 + jl))), off = 20 + jl + 8;
+    const rd = (ai, Cls) => { const a = j.accessors[ai], bv = j.bufferViews[a.bufferView], n = a.count * (a.type === 'VEC3' ? 3 : 1), s = off + (bv.byteOffset || 0) + (a.byteOffset || 0); return new Cls(u8.buffer.slice(s, s + n * Cls.BYTES_PER_ELEMENT)); };
+    const geoOf = (prim) => { const g = new T.BufferGeometry(); g.setAttribute('position', new T.BufferAttribute(rd(prim.attributes.POSITION, Float32Array), 3)); g.setIndex(new T.BufferAttribute(rd(prim.indices, j.accessors[prim.indices].componentType === 5125 ? Uint32Array : Uint16Array), 1)); g.computeVertexNormals(); return g; };
+    return { j, geoOf };
+  }
+  /* tiny .glb reader (three r128 has no loader): first mesh primitive, positions and indices only; cached per model name */
+  function glbGeo(name) {
+    if (glbCache[name]) return glbCache[name];
+    try { const o = glbOpen(name); return (glbCache[name] = o.geoOf(o.j.meshes[0].primitives[0])); } catch (e) { return null; }
+  }
+  /* the Blender character: named parts (Torso, Head, Hair_1, Arm_L, Arm_R, Leg_L, Leg_R) whose primitives use materials Shirt, Skin, Hair, Pants, Shoes (the game recolors by name). Returns { parts: { name: { t: [x,y,z], prims: [{ geo, mat }] } } } or null */
+  function glbChar() {
+    if (glbCache.__char !== undefined) return glbCache.__char;
+    let res = null;
+    try {
+      if (RXMODELS.character) { const o = glbOpen('character'), parts = {}; o.j.nodes.forEach(n => { if (n.mesh === undefined) return; parts[n.name] = { t: n.translation || [0, 0, 0], prims: o.j.meshes[n.mesh].primitives.map(p => ({ geo: o.geoOf(p), mat: o.j.materials[p.material].name })) }; }); if (parts.Torso && parts.Head && parts.Arm_L && parts.Leg_L && parts.Shin_L && parts.Shin_R) res = { parts }; }
+    } catch (e) { res = null; }
+    return (glbCache.__char = res);
+  }
+  function micOrganBuild(kind, parent, site, list) {
+    const cache = {}, MT = (c) => cache[c] || (cache[c] = new T.MeshStandardMaterial({ color: new T.Color(c), flatShading: true, roughness: 0.55, side: T.DoubleSide, emissive: new T.Color(0x000000) }));
+    const reg = (m) => { m.userData.micSite = site; list.push(m); parent.add(m); return m; };
+    const jig = (geo, a, f) => { try { const p = geo.attributes && geo.attributes.position; if (!p || !(p.count > 0)) return geo; for (let i = 0; i < p.count; i++) { const x = p.getX(i), y = p.getY(i), z = p.getZ(i); const n = Math.sin(x * f * 1.7 + y * f * 0.9) * Math.cos(z * f * 1.3 + x * f * 0.6) + Math.sin(y * f * 2.1 + z * f * 1.1) * 0.5; const s = 1 + a * n; p.setXYZ(i, x * s, y * s, z * s); } geo.computeVertexNormals(); } catch (e) { /* decor */ } return geo; };
+    const ico = (r, det, c, x, y, z, sx, sy, sz, j, rz, f) => { const m = reg(new T.Mesh(j ? jig(new T.IcosahedronGeometry(r, det), j, f || 5) : new T.IcosahedronGeometry(r, det), MT(c))); m.position.set(x, y, z); m.scale.set(sx || 1, sy || 1, sz || 1); m.rotation.z = rz || 0; return m; };
+    const cyl = (rt, rb, h, c, x, y, z, rx, ry, rz, seg, open) => { const m = reg(new T.Mesh(new T.CylinderGeometry(rt, rb, h, seg || 8, 1, !!open), MT(c))); m.position.set(x, y, z); m.rotation.x = rx || 0; m.rotation.y = ry || 0; m.rotation.z = rz || 0; return m; };
+    const tor = (R, r, c, x, y, z, rx, ry, rz, arc) => { const m = reg(new T.Mesh(new T.TorusGeometry(R, r, 5, 12, arc || PI * 2), MT(c))); m.position.set(x, y, z); m.rotation.x = rx || 0; m.rotation.y = ry || 0; m.rotation.z = rz || 0; return m; };
+    const box = (w, h, d, c, x, y, z, rx, ry, rz) => { const m = reg(new T.Mesh(new T.BoxGeometry(w, h, d), MT(c))); m.position.set(x, y, z); m.rotation.x = rx || 0; m.rotation.y = ry || 0; m.rotation.z = rz || 0; return m; };
+    const crv = (pts) => new T.CatmullRomCurve3(pts.map(p => new T.Vector3(p[0], p[1], p[2])));
+    const tube = (pts, r, c, seg, rs) => reg(new T.Mesh(new T.TubeGeometry(crv(pts), seg || 12, r, rs || 5, false), MT(c)));
+    const rings = (x, y0, n, step, R, r, c) => { for (let i = 0; i < n; i++) tor(R, r, c, x, y0 + i * step, 0, PI / 2); };
+    switch (kind) {
+      case 'heart': {
+        const hg = glbGeo('heart'); if (hg) { const hm = reg(new T.Mesh(hg, MT('#E0553F'))); hm.scale.set(1.5, 1.5, 1.5); hm.position.y = 0.1; hm.userData.beat = 1.5; micBeat.push(hm); break; }
+        ico(0.5, 1, '#D6503F', 0, 0, 0, 0.82, 1.1, 0.75, 0.07, 0.3); ico(0.3, 1, '#CC4536', 0.12, -0.42, 0.03, 0.8, 1.05, 0.75, 0.05, 0.3);
+        ico(0.2, 1, '#E4694F', -0.34, 0.3, 0.06, 1, 0.9, 0.9, 0.05); ico(0.15, 1, '#E8745B', 0.3, 0.36, 0.16, 1, 0.8, 0.9, 0.05);
+        tube([[0.02, 0.4, 0], [0.06, 0.72, 0], [0.2, 0.9, -0.02], [0.38, 0.78, -0.05], [0.42, 0.5, -0.08]], 0.1, '#E4604B', 14, 6);
+        cyl(0.045, 0.05, 0.26, '#E8735C', 0.06, 0.98, -0.01, 0, 0, 0.1, 6); cyl(0.045, 0.05, 0.24, '#E8735C', 0.17, 1.03, -0.02, 0, 0, 0, 6); cyl(0.04, 0.05, 0.22, '#E8735C', 0.28, 0.97, -0.04, 0, 0, -0.1, 6);
+        tube([[0, 0.3, 0.22], [-0.05, 0.58, 0.26], [-0.12, 0.82, 0.2]], 0.09, '#EE826C', 10, 6); tube([[-0.12, 0.82, 0.2], [-0.4, 0.9, 0.12]], 0.06, '#EE826C', 6, 5); tube([[-0.12, 0.82, 0.2], [0.1, 0.96, 0.16]], 0.055, '#EE826C', 6, 5);
+        cyl(0.07, 0.07, 0.5, '#C9473A', -0.36, 0.62, 0.02, 0, 0, 0, 6); cyl(0.08, 0.08, 0.28, '#B93E34', -0.38, -0.28, 0, 0, 0, 0, 6);
+        tube([[0, 0.35, 0.4], [0.1, 0.1, 0.42], [0.15, -0.15, 0.38], [0.12, -0.4, 0.3]], 0.02, '#A8322B', 10, 4); tube([[-0.3, 0.2, 0.28], [-0.28, -0.1, 0.3], [-0.2, -0.3, 0.3]], 0.02, '#A8322B', 8, 4);
+        [0.12, -0.04].forEach(y => cyl(0.035, 0.04, 0.14, '#EC7A62', 0.4, y, -0.18, 0, 0, 1.1, 6)); break;
+      }
+      case 'lungs': {
+        [-1, 1].forEach(s => {
+          ico(0.4, 1, '#E8909F', s * 0.4, 0.22, 0, 0.82, 1.15, 0.6, 0.06, -s * 0.15); ico(0.42, 1, '#DE7E93', s * 0.42, -0.3, 0, 0.92, 1, 0.62, 0.06);
+          if (s < 0) ico(0.25, 1, '#E3869A', s * 0.54, -0.02, 0.12, 1, 0.7, 0.6, 0.05);
+          tube([[0, 0.28, 0], [s * 0.14, 0.15, 0], [s * 0.28, 0, 0]], 0.05, '#E0CBAF', 8, 5); tube([[s * 0.28, 0, 0], [s * 0.42, 0.2, 0.04]], 0.035, '#E0CBAF', 6, 4); tube([[s * 0.28, 0, 0], [s * 0.42, -0.22, 0.04]], 0.035, '#E0CBAF', 6, 4);
+        });
+        cyl(0.07, 0.07, 0.7, '#EBD7BE', 0, 0.62, 0, 0, 0, 0, 8); rings(0, 0.4, 7, 0.09, 0.077, 0.016, '#D9C3A5'); break;
+      }
+      case 'upper': {
+        cyl(0.1, 0.1, 0.8, '#EBD7BE', 0, -0.5, 0, 0, 0, 0, 8); rings(0, -0.85, 8, 0.1, 0.105, 0.02, '#D6BFA0');
+        cyl(0.17, 0.15, 0.32, '#E4CFB8', 0, 0.05, 0, 0, 0, 0, 6); box(0.22, 0.2, 0.1, '#EBD9C5', 0, 0.08, 0.15);
+        cyl(0.3, 0.17, 0.6, '#D96B6B', 0, 0.5, -0.05, 0, 0, 0, 10, true); ico(0.22, 1, '#E0707F', 0, 0.28, 0.12, 1.2, 0.6, 1, 0.04);
+        [-1, 1].forEach(s => ico(0.1, 1, '#E8868E', s * 0.2, 0.55, 0.02, 1, 1.3, 0.9, 0.05)); cyl(0.0, 0.05, 0.16, '#E89AA0', 0, 0.68, 0.12, PI, 0, 0, 6);
+        break;
+      }
+      case 'brain': {
+        ico(0.5, 2, '#F08DB0', -0.27, 0.1, 0, 0.62, 0.76, 0.95, 0.11, 0, 6); ico(0.5, 2, '#EC7FA6', 0.27, 0.1, 0, 0.62, 0.76, 0.95, 0.11, 0, 6);
+        ico(0.25, 1, '#F59AB9', -0.34, -0.2, 0.34, 0.9, 0.7, 1, 0.08); ico(0.25, 1, '#F59AB9', 0.34, -0.2, 0.34, 0.9, 0.7, 1, 0.08);
+        ico(0.3, 2, '#D96B97', 0, -0.32, -0.5, 1.3, 0.6, 0.8, 0.1, 0, 6); cyl(0.1, 0.07, 0.5, '#F2A9C0', 0, -0.52, -0.18, 0.35, 0, 0, 8); tube([[0, -0.7, -0.28], [0, -0.95, -0.4], [0, -1.2, -0.45]], 0.045, '#F6D27A', 8, 5); break;
+      }
+      case 'ear': {
+        ico(0.5, 1, '#F2C9A5', -0.6, 0.2, 0, 0.2, 1.1, 0.8, 0.03); tor(0.5, 0.05, '#E8B98F', -0.58, 0.2, 0, 0, PI / 2, 0, PI * 1.5).scale.set(1, 1.25, 1); ico(0.1, 1, '#E8B98F', -0.55, -0.35, 0, 1, 1.2, 0.8, 0.03);
+        cyl(0.09, 0.09, 0.55, '#E8B98F', -0.1, 0.15, 0, 0, 0, PI / 2, 8); cyl(0.13, 0.13, 0.025, '#E8DAC4', 0.2, 0.15, 0, 0, 0, PI / 2, 10);
+        ico(0.05, 0, '#EFE6D2', 0.29, 0.15, 0); ico(0.04, 0, '#EFE6D2', 0.38, 0.2, 0.03); ico(0.035, 0, '#EFE6D2', 0.46, 0.14, 0); tube([[0.29, 0.15, 0], [0.38, 0.2, 0.03], [0.46, 0.14, 0]], 0.012, '#EFE6D2', 6, 4);
+        tor(0.17, 0.075, '#F0A0B0', 0.8, -0.1, 0, PI / 2); tor(0.11, 0.065, '#F0A0B0', 0.8, -0.1, 0.1, PI / 2); tor(0.05, 0.05, '#F0A0B0', 0.8, -0.1, 0.19, PI / 2);
+        tor(0.2, 0.03, '#E2B04A', 0.62, 0.42, 0, 0); tor(0.2, 0.03, '#E2B04A', 0.62, 0.42, 0, 0, PI / 2); tor(0.2, 0.03, '#E2B04A', 0.62, 0.42, 0, PI / 2); ico(0.08, 1, '#E8C060', 0.55, 0.22, 0);
+        tube([[0.9, -0.1, -0.02], [1.05, -0.3, -0.1], [1.2, -0.38, -0.2]], 0.03, '#F6E27A', 8, 5); break;
+      }
+      case 'mouth': {
+        [[0, 1], [0.5, -1]].forEach(a => {
+          const y0 = a[0], sg = a[1]; tor(0.55, 0.09, '#E58A94', 0, y0, 0, PI / 2, 0, 0, PI);
+          for (let i = 0; i < 10; i++) { const t = PI * i / 9, big = i < 2 || i > 7; box(big ? 0.15 : 0.1, 0.14, big ? 0.12 : 0.08, '#FBF8EE', 0.55 * Math.cos(t), y0 + sg * 0.1, 0.55 * Math.sin(t), 0, PI / 2 - t, 0); }
+        });
+        ico(0.36, 1, '#E0707F', 0, 0.12, 0.0, 1, 0.36, 1.25, 0.05); box(0.025, 0.03, 0.7, '#B5505E', 0, 0.26, 0.0); ico(0.45, 1, '#E99AA3', 0, 0.9, -0.1, 1.1, 0.3, 1.1, 0.03); cyl(0.04, 0.0, 0.15, '#E89AA0', 0, 0.7, -0.35, 0, 0, 0, 6); break;
+      }
+      case 'liver': {
+        ico(0.55, 1, '#8F3A2B', -0.15, 0.2, 0, 1.35, 0.7, 0.8, 0.05, -0.1); ico(0.3, 1, '#9C4535', 0.55, 0.12, 0.02, 1.2, 0.7, 0.7, 0.05);
+        ico(0.13, 1, '#4F9E4A', 0, -0.12, 0.28, 0.8, 1.5, 0.8); tube([[0, 0, 0.25], [0.08, 0.1, 0.2], [0.15, 0.2, 0.1]], 0.02, '#4F9E4A', 6, 4);
+        tube([[0.05, 0.15, 0.1], [0.3, 0, 0], [0.6, -0.2, 0]], 0.045, '#3A5FA8', 8, 5); tube([[0.05, 0.12, 0.14], [0.3, -0.04, 0.06], [0.55, -0.22, 0.04]], 0.03, '#C0392B', 8, 4);
+        ico(0.1, 1, '#E8C45C', 0.3, -0.58, 0.05, 3.4, 0.8, 0.8, 0.05, 0.15); ico(0.15, 1, '#E8C45C', -0.2, -0.58, 0.05, 1, 0.9, 0.9, 0.05);
+        tube([[-0.1, -0.4, 0.05], [-0.38, -0.6, 0.05], [-0.3, -0.88, 0.05], [0.1, -0.9, 0.05]], 0.06, '#E9A89A', 12, 5); break;
+      }
+      case 'gut': {
+        tube([[0.0, 1.15, -0.02], [-0.03, 0.9, -0.02], [0, 0.72, 0]], 0.05, '#E8B0A0', 8, 5);
+        ico(0.28, 1, '#E39A8C', 0.18, 0.6, -0.03, 1.15, 0.72, 0.7, 0.04, -0.5); ico(0.1, 1, '#E0907F', -0.1, 0.43, -0.03);
+        const pts = []; for (let r = 0; r < 6; r++) { const y = 0.3 - 0.14 * r, dir = r % 2 ? -1 : 1; pts.push([-0.3 * dir, y, 0.02 * (r % 3)], [0, y - 0.05, 0.04], [0.3 * dir, y, 0.02]); }
+        tube(pts, 0.055, '#EBA596', 90, 5); tube(pts.map(p => [p[0] * 0.92, p[1] - 0.03, p[2] + 0.06]), 0.045, '#E59788', 80, 5);
+        const cp = [[-0.45, -0.62, 0], [-0.46, -0.3, 0], [-0.46, 0.1, 0], [-0.44, 0.42, 0], [-0.3, 0.52, 0], [-0.1, 0.46, 0], [0.1, 0.42, 0], [0.3, 0.52, 0], [0.46, 0.42, 0], [0.47, 0.1, 0], [0.46, -0.3, 0], [0.4, -0.55, 0], [0.2, -0.6, 0], [0.1, -0.45, 0], [0, -0.55, 0], [-0.05, -0.78, 0]];
+        const cc = crv(cp); reg(new T.Mesh(new T.TubeGeometry(cc, 70, 0.075, 6, false), MT('#B98C84')));
+        for (let i = 0; i <= 28; i++) { const q = cc.getPoint(i / 28); ico(0.1, 0, '#C99B92', q.x, q.y, q.z, 1, 0.9, 1); }
+        ico(0.13, 1, '#C99B92', -0.45, -0.66, 0); tube([[-0.45, -0.66, 0], [-0.52, -0.82, 0], [-0.42, -0.9, 0]], 0.03, '#B98C84', 6, 4); break;
+      }
+      case 'urinary': {
+        [-1, 1].forEach(s => { ico(0.2, 1, '#A9402F', s * 0.36, 0.3, 0, 0.7, 1.1, 0.55, 0.04, s * 0.15); cyl(0.04, 0.04, 0.14, '#D96B5A', s * 0.18, 0.28, 0, 0, 0, PI / 2, 6); tube([[s * 0.25, 0.1, 0], [s * 0.26, -0.1, 0], [s * 0.12, -0.38, 0.02]], 0.022, '#E8C46A', 8, 4); });
+        tube([[0, 0.8, 0], [0, 0.2, 0], [0, -0.1, 0]], 0.045, '#C0392B', 8, 5); tube([[0.1, 0.8, 0], [0.1, 0.2, 0], [0.1, -0.1, 0]], 0.05, '#3A5FA8', 8, 5);
+        ico(0.24, 1, '#F0D56A', 0, -0.52, 0.04, 1, 0.85, 0.9, 0.03); tube([[0, -0.7, 0.04], [0, -0.95, 0.04]], 0.03, '#E8C46A', 5, 4); break;
+      }
+      case 'skin': {
+        box(1.4, 0.07, 0.6, '#D8A47C', 0, 0.5, 0); box(1.4, 0.1, 0.6, '#E9B98F', 0, 0.41, 0); box(1.4, 0.42, 0.6, '#F2A9A3', 0, 0.15, 0); box(1.4, 0.5, 0.6, '#F7D97C', 0, -0.31, 0); box(1.4, 0.2, 0.6, '#B84A44', 0, -0.66, 0);
+        [-0.45, 0.2, 0.55].forEach((x, i) => ico(0.14, 1, '#F9E49A', x, -0.28 - (i % 2) * 0.06, 0.3, 1.2, 0.8, 0.35, 0.03));
+        cyl(0.02, 0.02, 0.5, '#4A3524', -0.45, 0.72, 0, 0, 0, 0.12, 5); cyl(0.04, 0.04, 0.45, '#E8C4A8', -0.45, 0.22, 0.0, 0, 0, 0, 6); ico(0.07, 1, '#F5E8DC', -0.45, -0.03, 0.0); ico(0.07, 1, '#F6E39A', -0.36, 0.26, 0.05);
+        tor(0.07, 0.03, '#7FB1D6', 0.3, -0.05, 0.31, 0, 0, 0); tor(0.05, 0.03, '#7FB1D6', 0.3, 0.02, 0.31, 0, 0, 0); tube([[0.3, 0.05, 0.31], [0.33, 0.3, 0.31], [0.3, 0.55, 0.31]], 0.015, '#7FB1D6', 8, 4);
+        tube([[-0.7, 0.02, 0.31], [0, 0.07, 0.33], [0.7, 0.02, 0.31]], 0.035, '#C0392B', 12, 5); tube([[-0.7, -0.08, 0.31], [0, -0.03, 0.33], [0.7, -0.08, 0.31]], 0.04, '#3A5FA8', 12, 5);
+        ico(0.04, 0, '#FFE27A', 0.62, 0.4, 0.3); ico(0.04, 0, '#FFE27A', -0.1, 0.4, 0.3); break;
+      }
+      case 'femur': {
+        const shell = reg(new T.Mesh(new T.CylinderGeometry(0.14, 0.15, 1.3, 12, 1, true, 0.6, PI * 1.5), MT('#F1E8D0'))); shell.position.set(0, 0, 0);
+        cyl(0.095, 0.1, 1.28, '#E8C65A', 0, 0, 0, 0, 0, 0, 10); cyl(0.1, 0.1, 0.22, '#C8453B', 0, 0.5, 0, 0, 0, 0, 10); cyl(0.1, 0.1, 0.22, '#C8453B', 0, -0.5, 0, 0, 0, 0, 10);
+        ico(0.2, 1, '#F1E8D0', -0.18, 0.78, 0, 1, 0.9, 1, 0.03); ico(0.19, 1, '#E8E0C6', -0.12, 0.6, 0, 1, 1, 1, 0.03); tube([[-0.18, 0.78, 0], [-0.05, 0.68, 0], [0.04, 0.62, 0]], 0.1, '#F1E8D0', 6, 6); ico(0.12, 1, '#E8DEC2', 0.18, 0.72, 0, 1, 1.2, 1, 0.03);
+        ico(0.14, 1, '#9EC9E3', -0.3, 0.92, 0.0, 0.9, 0.9, 0.9, 0.02);
+        [-1, 1].forEach(s => { ico(0.17, 1, '#F1E8D0', s * 0.15, -0.74, 0, 1, 0.9, 1.15, 0.03); ico(0.12, 1, '#9EC9E3', s * 0.15, -0.9, 0.04, 1, 0.5, 1.1, 0.02); }); break;
+      }
+    }
+  }
+  function buildMic() {
+    micG = new T.Group(); micG.visible = false; scene.add(micG); const g = micG;
+    bx(g, 30, 0.7, 20, '#BFCACE', 0, -0.35, -1);
+    for (let i = 0; i < 13; i++) for (let j = 0; j < 8; j++) bx(g, 1.98, 0.06, 1.98, (i + j) % 2 ? '#FFFFFF' : '#E4EEF1', -12 + i * 2, 0.03, -8 + j * 2);
+    bx(g, 30, 8, 0.4, '#EAF4F6', 0, 4, -8.4); bx(g, 30, 1.4, 0.05, '#C9DDE3', 0, 0.7, -8.18); bx(g, 30, 0.1, 0.07, '#5FB3CE', 0, 1.45, -8.15);
+    // back bench with a few lab props
+    bx(g, 11, 1.2, 1.3, '#0A6F66', 0, 0.6, -7.2); bx(g, 11.4, 0.14, 1.6, '#F4F9F9', 0, 1.27, -7.2);
+    for (let i = 0; i < 5; i++) { const tx = -3.6 + i * 1.8; cy(g, 0.14, 0.14, 0.6, 8, ['#8BE04A', '#B26BE0', '#E8C23A', '#38C9B0', '#F0804B'][i], tx, 1.64, -7.1, null, { transparent: true, opacity: 0.8 }); cy(g, 0.17, 0.17, 0.06, 8, '#6B7F85', tx, 1.97, -7.1); }
+    const mc = bx(g, 0.5, 0.9, 0.5, '#2A3B4D', 4.1, 1.8, -7.1); cy(g, 0.12, 0.12, 0.5, 8, '#2A3B4D', 4.1, 2.4, -7.1).rotation.x = 0.4; cy(g, 0.3, 0.3, 0.06, 10, '#6B7F85', 4.1, 1.38, -7.1);
+    const sg = new T.Mesh(new T.PlaneGeometry(5.6, 1.1), new T.MeshBasicMaterial({ map: micText('MICROBE LAB', 640, 126, '#F4F9F9', '#07514B') })); sg.position.set(0, 6.6, -8.15); g.add(sg);
+    micBench = new T.Group(); micBench.visible = false; g.add(micBench); bx(micBench, 11, 0.5, 7.4, '#1E5C68', 0, 0.25, 0.0); bx(micBench, 11.2, 0.08, 7.6, '#D8CCAA', 0, 0.54, 0.0);
+    { const cv = document.createElement('canvas'); cv.width = 1024; cv.height = 700; const c = cv.getContext('2d');
+      if (c) { c.fillStyle = '#E9DFC2'; c.fillRect(0, 0, 1024, 700); let sd = 7; const rn = () => { sd = (sd * 16807) % 2147483647; return sd / 2147483647; };
+        for (let i = 0; i < 2600; i++) { c.fillStyle = rn() < 0.5 ? 'rgba(170,150,105,0.16)' : 'rgba(255,252,236,0.4)'; c.fillRect(rn() * 1024, rn() * 700, 1 + rn() * 5, 1 + rn() * 1.6); }
+        c.strokeStyle = 'rgba(120,150,170,0.28)'; c.lineWidth = 1.5; for (let x = 0; x <= 1024; x += 46) { c.beginPath(); c.moveTo(x, 0); c.lineTo(x, 700); c.stroke(); } for (let y = 0; y <= 700; y += 46) { c.beginPath(); c.moveTo(0, y); c.lineTo(1024, y); c.stroke(); }
+        c.strokeStyle = 'rgba(150,125,80,0.6)'; c.lineWidth = 8; c.strokeRect(4, 4, 1016, 692); }
+      const dt = new T.CanvasTexture(cv), dm = new T.Mesh(new T.PlaneGeometry(11.1, 7.5), new T.MeshBasicMaterial({ map: dt })); dm.rotation.x = -PI / 2; dm.position.set(0, 0.585, 0); micBench.add(dm); }
+    // a hospital bed, and the man lying on his back on it: head lid lifted to show the brain, thigh opened to show the femur from hip to knee
+    const rig = new T.Group(); rig.scale.set(1.55, 1.55, 1.55); rig.position.set(0, 0, 0.2); g.add(rig); micRig = rig;
+    manBed = new T.Group(); rig.add(manBed);
+    const frame = '#C3CED3', dark = '#5E6F78';
+    bx(manBed, 5.8, 0.18, 2.5, frame, 0, 1.28, 0); bx(manBed, 5.6, 0.34, 2.4, '#8EC9E3', 0, 1.54, 0); bx(manBed, 5.6, 0.04, 2.4, '#A9DAEE', 0, 1.73, 0);
+    [[-2.6, -1.05], [-2.6, 1.05], [2.6, -1.05], [2.6, 1.05]].forEach(q => { cy(manBed, 0.07, 0.07, 1.2, 6, dark, q[0], 0.62, q[1]); cy(manBed, 0.16, 0.16, 0.14, 8, '#2A3B4D', q[0], 0.08, q[1]); });
+    bx(manBed, 0.16, 1.5, 2.4, frame, -3.0, 1.9, 0); bx(manBed, 0.16, 0.9, 2.4, frame, 3.0, 1.65, 0);
+    [-1.2, 0.4, 1.4].forEach(x => bx(manBed, 0.08, 0.5, 0.08, dark, x, 2.1, -1.22)); bx(manBed, 3.2, 0.07, 0.07, dark, 0.1, 2.28, -1.22); bx(manBed, 3.2, 0.07, 0.07, dark, 0.1, 1.98, -1.22);
+    bx(manBed, 1.2, 0.28, 1.5, '#FFFFFF', -2.3, 1.93, 0);
+    const lay = new T.Group(); lay.rotation.y = PI / 2; lay.position.set(2.15, 2.5, 0); rig.add(lay); micLay = lay;
+    micManG = new T.Group(); micManG.scale.set(2.0, 2.0, 2.0); micManG.rotation.x = -PI / 2; lay.add(micManG);
+    const man = person(5, false, false, false, undefined, { skin: '#F2C9A5', hair: '#6B4A2E', shirt: '#2BB5A5', hairStyle: 8, gender: 'm', scrub: '#3F5F8C', tag: { micMan: true }, openHead: true }); micManG.add(man); micManG.userData.micMan = true;
+    const P = man.userData.P, hd = P && P.head;
+    if (hd) hd.traverse(o => { if (o.userData && o.userData.micMan) o.userData.micSite = 'cns'; });
+    // the near leg is bone only: pants, thigh, calf and shoe are hidden and one connected skeleton (hip ball, femur, knee, tibia, foot) shows instead
+    const bleg = P && P.legs && P.legs.find(l => l.position.x < 0);
+    if (bleg) bleg.children.forEach(c => { c.visible = false; });
+    const bone = new T.Group(); bone.position.set(-0.15, 0.68, 0.0); micManG.add(bone);
+    micOrg = {};
+    const bmk = (geo, c, x, y, z, rz, sx, sy, sz) => { const m = new T.Mesh(geo, new T.MeshStandardMaterial({ color: new T.Color(c), flatShading: true, roughness: 0.6, emissive: new T.Color(0x000000) })); m.position.set(x, y, z); if (rz) m.rotation.z = rz; m.scale.set(sx || 1, sy || 1, sz || 1); bone.add(m); (micOrg.bone = micOrg.bone || []).push(m); return m; };
+    const BC = '#F4F0E2', KC = '#E8E2CE';
+    bmk(new T.IcosahedronGeometry(0.065, 1), BC, -0.03, -0.015, 0);
+    bmk(new T.CylinderGeometry(0.028, 0.032, 0.1, 6), BC, -0.01, -0.05, 0, 0.5);
+    bmk(new T.IcosahedronGeometry(0.042, 0), KC, 0.045, -0.06, 0);
+    bmk(new T.CylinderGeometry(0.036, 0.044, 0.3, 8), BC, 0, -0.2, 0);
+    [-1, 1].forEach(s2 => bmk(new T.IcosahedronGeometry(0.05, 1), KC, s2 * 0.03, -0.37, 0));
+    bmk(new T.CylinderGeometry(0.03, 0.036, 0.27, 8), BC, 0, -0.5, 0);
+    bmk(new T.CylinderGeometry(0.014, 0.016, 0.25, 6), BC, 0.045, -0.5, 0);
+    bmk(new T.IcosahedronGeometry(0.04, 1), KC, 0, -0.65, 0);
+    bmk(new T.BoxGeometry(0.1, 0.035, 0.2), BC, 0, -0.68, 0.06);
+    bone.userData.micSite = 'bone'; bone.traverse(o => { o.userData.micSite = 'bone'; });
+    // open chest and belly: a cut window with the organs sitting in it (no genitalia); each organ is clickable for its site
+    const cav = new T.Group(); cav.position.z = 0.03; micManG.add(cav);
+    const cb = (w, h, d, c, x, y, z) => { const m = new T.Mesh(new T.BoxGeometry(w, h, d), mat(c)); m.position.set(x, y, z); cav.add(m); return m; };
+    cb(0.54, 0.9, 0.03, '#5A1E22', 0, 1.1, 0.305); cb(0.58, 0.04, 0.05, '#B84A44', 0, 1.56, 0.31); cb(0.58, 0.04, 0.05, '#B84A44', 0, 0.64, 0.31); cb(0.04, 0.9, 0.05, '#B84A44', -0.28, 1.1, 0.31); cb(0.04, 0.9, 0.05, '#B84A44', 0.28, 1.1, 0.31);
+    [1.46, 1.38, 1.3].forEach(y => cb(0.5, 0.022, 0.03, '#F1E8D4', 0, y, 0.325));
+    cb(0.03, 0.2, 0.03, '#F1E8D4', 0, 1.35, 0.325);
+    const place = (kind, id, x, y, z, sc, rz) => { const gg = new T.Group(); gg.position.set(x, y, z); gg.scale.set(sc, sc, sc * 1.1); gg.rotation.z = rz || 0; cav.add(gg); micOrganBuild(kind, gg, id, micOrg[id] = micOrg[id] || []); };
+    place('upper', 'upper', 0, 1.46, 0.36, 0.17); place('lungs', 'lower', 0, 1.31, 0.37, 0.25); place('heart', 'heart', 0.06, 1.2, 0.5, 0.25, -0.1);
+    place('gut', 'gi', 0.02, 0.9, 0.36, 0.2); place('liver', 'intra', -0.09, 1.04, 0.42, 0.19); place('urinary', 'uti', 0, 0.76, 0.46, 0.15);
+    // site markers, always drawn on top, with a bigger invisible touch target
+    Object.keys(MICPOS).forEach(id => {
+      const p = MICPOS[id], pg = new T.Group(); pg.position.set(p[0], p[1], p[2]); micManG.add(pg);
+      const dot = new T.Mesh(new T.IcosahedronGeometry(0.026, 1), new T.MeshBasicMaterial({ color: 0xF1A20E, depthTest: false, transparent: true })); dot.renderOrder = 20; pg.add(dot);
+      const ring = new T.Mesh(new T.TorusGeometry(0.05, 0.008, 5, 14), new T.MeshBasicMaterial({ color: 0xFFFFFF, depthTest: false, transparent: true })); ring.renderOrder = 21; ring.visible = false; pg.add(ring);
+      const hit = new T.Mesh(new T.SphereGeometry(MICPOS_HIT[id] || 0.06, 6, 5), new T.MeshBasicMaterial({ visible: false })); pg.add(hit);
+      pg.traverse(o => { o.userData.micSite = id; }); micPinMap[id] = { g: pg, dot, ring, st: 0, ster: false, name: id };
+    });
+    micItems.push(micManG);
+  }
+  function micDishMake(id, label, x, z) {
+    const g = new T.Group(); g.position.set(x, 0.56, z); micBench.add(g);
+    const glass = new T.Mesh(new T.CylinderGeometry(1.1, 1.05, 0.26, 12), new T.MeshStandardMaterial({ color: 0xF2FAFD, flatShading: true, transparent: true, opacity: 0.85, roughness: 0.3 })); glass.position.y = 0.1; g.add(glass);
+    const agar = new T.Mesh(new T.CylinderGeometry(0.97, 0.97, 0.2, 12), new T.MeshStandardMaterial({ color: 0xF6C94E, flatShading: true, roughness: 0.7, emissive: new T.Color(0x000000) })); agar.position.y = 0.13; g.add(agar); const rim = new T.Mesh(new T.TorusGeometry(1.08, 0.05, 5, 16), new T.MeshStandardMaterial({ color: 0xFFFFFF, flatShading: true })); rim.rotation.x = PI / 2; rim.position.y = 0.26; g.add(rim);
+    const ring = new T.Mesh(new T.TorusGeometry(1.25, 0.07, 5, 18), new T.MeshBasicMaterial({ color: 0x0E9A8E, transparent: true, opacity: 0.95, depthTest: false })); ring.rotation.x = PI / 2; ring.position.y = 0.3; ring.visible = false; ring.renderOrder = 18; g.add(ring);
+    const lab = new T.Mesh(new T.PlaneGeometry(2.5, 0.62), new T.MeshBasicMaterial({ map: micText(label, 512, 124, '#FFFFFF', '#10292C'), transparent: true })); lab.position.set(0, 0.85, 1.4); lab.rotation.x = -0.95; g.add(lab);
+    const hit = new T.Mesh(new T.CylinderGeometry(1.15, 1.15, 1.6, 8), new T.MeshBasicMaterial({ visible: false })); hit.position.y = 0.5; g.add(hit);
+    g.traverse(o => { o.userData.micDish = id; }); micItems.push(g);
+    return { id, label, g, agar, ring, n: 0, flash: 0, flashOk: true };
+  }
+  api.setMic = function (on) {
+    if (!api.ok || !scene) return false;
+    on = !!on; if (on === micOn) return on;
+    if (on) {
+      if (!micG) buildMic();
+      micHid = []; scene.children.forEach(c => { if (c !== micG && c !== hemi && c !== sun && c.visible && !(c.userData && c.userData.fx)) { c.visible = false; micHid.push(c); } });
+      micG.visible = true; micOn = true; micSaved = { TX, TY, TZ, gth, gph, grad }; gth = 0; gph = 0.85; grad = baseRad * 0.62; micAim();
+      if (!micLabEl) { micLabEl = document.createElement('div'); micLabEl.className = 'miclab'; micLabEl.style.display = 'none'; host.appendChild(micLabEl); }
+    } else {
+      micOn = false; micHid.forEach(c => { c.visible = true; }); micHid = []; if (micG) micG.visible = false;
+      if (micSaved) { TX = micSaved.TX; TY = micSaved.TY; TZ = micSaved.TZ; gth = micSaved.gth; gph = micSaved.gph; grad = micSaved.grad; micSaved = null; }
+      if (micLabEl) micLabEl.style.display = 'none';
+    }
+    document.body.classList.toggle('mic', on); applyTheme(); return on;
+  };
+  api.micOn = () => micOn;
+  function micAim() { TX = 0; TY = 3.2; TZ = 0.2; }
+  /* markers: [{id, st (0 to 2 stars), ster, name}]; the man is shown for the body map, the dishes for sorting rounds */
+  api.micPins = function (list) { if (!micG) return; (list || []).forEach(p => { const m = micPinMap[p.id]; if (!m) return; m.st = p.st || 0; m.ster = !!p.ster; m.name = p.name || p.id; m.ring.visible = m.ster; m.dot.material.color.setHex(m.st >= 2 ? 0x0E9A8E : m.st === 1 ? 0x8ED9BC : 0xF1A20E); }); };
+  api.micSelect = function (id) { micSel = id || null; };
+  let micManWant = true;
+  /* zoom the camera onto a body part of the man (the organs stay inside him); null goes back to the full view */
+  let micZoomId = null;
+  const MICZOOM_RAD = { cns: 4.2, ear: 3.6, mouth: 3.6, upper: 4.2, lower: 5.0, heart: 4.2, intra: 4.6, gi: 4.6, uti: 4.2, sti: 4.2, skin: 4.6, bone: 5.2 };
+  api.micZoom = function (id) {
+    micZoomId = id && micPinMap[id] ? id : null; micZoomR = 0; Object.keys(micPinMap).forEach(k => { const pg = micPinMap[k].g; pg.visible = !micZoomId || k === micZoomId; pg.scale.set(1, 1, 1); if (micZoomId && k === micZoomId) pg.scale.set(0.2, 0.2, 0.2); }); if (!micOn) return;
+    if (!micZoomId) { micAim(); gph = 0.85; gth = 0; grad = baseRad * 0.62; return; }
+    try { micG.updateMatrixWorld(true); const v = new T.Vector3(); micPinMap[micZoomId].g.getWorldPosition(v); TX = v.x; TY = v.y - 0.3; TZ = v.z; gth = 0; gph = 0.7; grad = micZoomR = MICZOOM_RAD[micZoomId] || 4.5; } catch (e) { /* decor */ }
+  };
+  api.micMan = function (v) { micManWant = !!v; micItemsFix(); };
+  function micClearDishes() { Object.keys(micDishMap).forEach(id => { const d = micDishMap[id], i = micItems.indexOf(d.g); if (i >= 0) micItems.splice(i, 1); micBench.remove(d.g); }); micDishMap = {}; micHot = null; }
+  api.micDishes = function (list) {
+    if (!micG) return; micClearDishes(); list = list || []; if (!list.length) { micItemsFix(); return; }
+    const n = list.length, cols = n > 3 ? 3 : n, rows = Math.ceil(n / cols);
+    list.forEach((d, i) => { const r = Math.floor(i / cols), inRow = r === rows - 1 ? n - r * cols : cols, c = i - r * cols; const x = (c - (inRow - 1) / 2) * 3.2, z = rows === 1 ? 0.2 : (-1.5 + r * 3.0); micDishMap[d.id] = micDishMake(d.id, d.label, x, z); });
+    micItemsFix();
+  };
+  /* papers on the lab table: category sheets for the gram tree, handout boxes and answer lists. spec: {edges:[[x1,z1,x2,z2]], nodes:[{id,title,x,z,w,h,kind:'paper'|'label'|'note',rows,off}]} */
+  const micTb = (H) => Math.min(60, Math.round(H * 0.34));
+  function micPaperDraw(p) {
+    const s = p.spec, st = p.st, cv = p.cv, c = cv.getContext && cv.getContext('2d'); if (!c) return; const W = cv.width, H = cv.height;
+    c.clearRect(0, 0, W, H);
+    const lab = s.kind === 'label', note = s.kind === 'note';
+    if (note) { c.fillStyle = 'rgba(255,255,255,0.75)'; c.fillRect(0, 0, W, H); c.fillStyle = '#4A5E63'; c.textAlign = 'center'; c.textBaseline = 'middle'; c.font = 'italic 700 ' + Math.round(H * 0.3) + 'px sans-serif'; const ws = String(s.title).split(' / '); ws.forEach((t, i) => c.fillText(t, W / 2, H / 2 + (i - (ws.length - 1) / 2) * H * 0.36)); p.tex.needsUpdate = true; return; }
+    c.fillStyle = lab ? '#10292C' : s.off ? '#CBD5D8' : '#FFFDF5'; c.fillRect(0, 0, W, H);
+    if (!lab && !s.off && !s.rows) { c.strokeStyle = '#D3E2EA'; c.lineWidth = 2; for (let y = Math.round(H * 0.24); y < H - 8; y += 30) { c.beginPath(); c.moveTo(8, y); c.lineTo(W - 8, y); c.stroke(); } c.strokeStyle = '#EBA9A5'; c.beginPath(); c.moveTo(34, 0); c.lineTo(34, H); c.stroke(); }
+    if (st.flash) { c.fillStyle = st.flash === 'ok' ? 'rgba(80,210,120,0.45)' : 'rgba(235,70,60,0.5)'; c.fillRect(0, 0, W, H); }
+    c.lineWidth = st.hot ? 12 : lab ? 6 : 4; c.strokeStyle = st.hot ? '#0E9A8E' : lab ? '#10292C' : '#BDB39B'; c.strokeRect(c.lineWidth / 2, c.lineWidth / 2, W - c.lineWidth, H - c.lineWidth);
+    const fit = (t, w, fs, wt) => { let f = fs; c.font = (wt || 800) + ' ' + f + 'px sans-serif'; while (c.measureText(t).width > w && f > 12) { f -= 2; c.font = (wt || 800) + ' ' + f + 'px sans-serif'; } return f; };
+    c.textAlign = 'center'; c.textBaseline = 'middle';
+    if (lab) { c.fillStyle = '#FFFFFF'; fit(s.title, W - 24, Math.round(H * 0.5)); c.fillText(s.title, W / 2, H / 2 + 2); p.tex.needsUpdate = true; return; }
+    const tb = micTb(H); c.fillStyle = s.off ? '#7E9196' : '#0E9A8E'; c.fillRect(3, 3, W - 6, tb); c.fillStyle = '#FFFFFF'; fit(s.title, W - 20, Math.round(tb * 0.68)); c.fillText(s.title, W / 2, 3 + tb / 2 + 1);
+    c.textAlign = 'left';
+    if (s.rows) {
+      const n = s.rows, rh = (H - tb - 14) / n;
+      for (let i = 0; i < n; i++) {
+        const y0 = tb + 8 + i * rh, r = (st.rows && st.rows[i]) || {};
+        if (r.sel) { c.fillStyle = 'rgba(255,214,90,0.75)'; c.fillRect(6, y0, W - 12, rh); }
+        c.strokeStyle = '#C9D3D6'; c.lineWidth = 2; c.beginPath(); c.moveTo(10, y0 + rh); c.lineTo(W - 10, y0 + rh); c.stroke();
+        c.fillStyle = '#8A9BA0'; c.font = '700 ' + Math.round(Math.min(rh * 0.6, 30)) + 'px sans-serif'; c.fillText(String(i + 1), 14, y0 + rh / 2 + 1);
+        if (r.t) { c.fillStyle = r.bad ? '#C0392B' : r.ok ? '#1B7F4A' : '#18202A'; fit(r.t, W - 70, Math.round(Math.min(rh * 0.62, 40)), 700); c.fillText(r.t, 56, y0 + rh / 2 + 1); }
+      }
+    } else if (st.lines && st.lines.length) {
+      const n = st.lines.length, pitch = Math.max(14, Math.min(32, (H - tb - 12) / n)), fs = Math.round(pitch * 0.82);
+      c.fillStyle = '#18202A';
+      st.lines.forEach((t, i) => { fit(t, W - 28, fs, 700); c.fillText(t, 14, tb + 10 + pitch * (i + 0.5)); });
+    }
+    p.tex.needsUpdate = true;
+  }
+  function micClearPapers() { if (micPaperG) { const i = micItems.indexOf(micPaperG); if (i >= 0) micItems.splice(i, 1); micBench.remove(micPaperG); } micPaperG = null; micPaperMap = {}; micPaperHot = null; }
+  /* small 3D logos that stand behind a paper: a clock (time), a beaker with a rising arrow (concentration), a kidney with a no sign (not renally adjusted) */
+  function micIcon(kind) {
+    const g = new T.Group(), M = (c, e) => new T.MeshStandardMaterial({ color: new T.Color(c), flatShading: true, roughness: 0.5, emissive: new T.Color(e || 0x000000) });
+    const add = (geo, c, x, y, z, rx, ry, rz, e) => { const m = new T.Mesh(geo, M(c, e)); m.position.set(x, y, z); m.rotation.x = rx || 0; m.rotation.y = ry || 0; m.rotation.z = rz || 0; g.add(m); return m; };
+    if (kind === 'clock') {
+      add(new T.CylinderGeometry(0.62, 0.62, 0.16, 20), '#FFFFFF', 0, 0, 0, PI / 2);
+      add(new T.TorusGeometry(0.62, 0.08, 6, 20), '#F28A1E', 0, 0, 0);
+      [[0, 0.5], [0.5, 0], [0, -0.5], [-0.5, 0]].forEach(q => add(new T.BoxGeometry(0.06, 0.06, 0.04), '#10292C', q[0], q[1], 0.1));
+      add(new T.BoxGeometry(0.06, 0.4, 0.04), '#10292C', 0, 0.18, 0.11); const mh = add(new T.BoxGeometry(0.05, 0.28, 0.04), '#C0392B', 0.1, -0.02, 0.12, 0, 0, -1.0);
+      add(new T.IcosahedronGeometry(0.06, 0), '#10292C', 0, 0, 0.12);
+      [-1, 1].forEach(s2 => add(new T.SphereGeometry(0.13, 7, 5), '#F28A1E', s2 * 0.5, 0.58, 0, 0, 0, 0));
+    } else if (kind === 'conc') {
+      add(new T.CylinderGeometry(0.4, 0.4, 0.95, 12, 1, true), '#CFEFF5', 0, 0, 0);
+      add(new T.CylinderGeometry(0.38, 0.38, 0.62, 12), '#F2B233', 0, -0.16, 0);
+      add(new T.CylinderGeometry(0.43, 0.43, 0.05, 12), '#9DBFC8', 0, 0.48, 0);
+      add(new T.CylinderGeometry(0.1, 0.1, 0.5, 8), '#D93A2F', 0.0, 0.85, 0.0); add(new T.ConeGeometry(0.26, 0.34, 8), '#D93A2F', 0, 1.3, 0);
+      [[-0.1, -0.2], [0.14, 0.0], [-0.04, 0.12]].forEach(q => add(new T.IcosahedronGeometry(0.05, 0), '#FFFFFF', q[0], q[1], 0.38));
+    } else if (kind === 'kidney') {
+      add(new T.TorusGeometry(0.32, 0.2, 7, 12, PI * 1.45), '#B5473C', 0, 0, 0, 0, 0, 0.9);
+      add(new T.CylinderGeometry(0.05, 0.05, 0.3, 6), '#E58A7E', -0.08, -0.38, 0, 0, 0, 0.3);
+      add(new T.TorusGeometry(0.72, 0.07, 6, 20), '#D93A2F', 0, 0, 0.05); add(new T.BoxGeometry(1.4, 0.1, 0.07), '#D93A2F', 0, 0, 0.08, 0, 0, -0.78);
+    }
+    g.traverse(o => { o.castShadow = false; });
+    return g;
+  }
+  api.micPapers = function (spec) {
+    if (!micG) return; micClearPapers(); if (!spec || !spec.nodes || !spec.nodes.length) { micItemsFix(); return; }
+    const G = new T.Group(); micPaperG = G; micBench.add(G); micItems.push(G);
+    (spec.edges || []).forEach(e => {
+      const zm = (e[1] + e[3]) / 2, seg = (x1, z1, x2, z2) => { const w = Math.abs(x2 - x1) + 0.05, d = Math.abs(z2 - z1) + 0.05; bx(G, w, 0.03, d, '#5C5038', (x1 + x2) / 2, 0.6, (z1 + z2) / 2); };
+      seg(e[0], e[1], e[0], zm); seg(e[0], zm, e[2], zm); seg(e[2], zm, e[2], e[3]);
+    });
+    spec.nodes.forEach((n, i) => {
+      const W = Math.round(n.w * 150), H = Math.round(n.h * 150), cv = document.createElement('canvas'); cv.width = W; cv.height = H;
+      const tex = new T.CanvasTexture(cv), grp = new T.Group(); grp.position.set(n.x, 0.62, n.z); grp.rotation.y = n.kind === 'label' ? 0 : (((i * 37) % 11) - 5) * 0.006; G.add(grp);
+      const sh = new T.Mesh(new T.PlaneGeometry(n.w + 0.1, n.h + 0.1), new T.MeshBasicMaterial({ color: 0x0B3038, transparent: true, opacity: 0.45 })); sh.rotation.x = -PI / 2; sh.position.set(0.05, -0.03, 0.06); if (n.kind !== 'note') grp.add(sh);
+      const m = new T.Mesh(new T.PlaneGeometry(n.w, n.h), new T.MeshBasicMaterial({ map: tex, transparent: n.kind === 'note' })); m.rotation.x = -PI / 2; grp.add(m);
+      const p = { id: n.id, spec: n, st: {}, cv, tex, g: grp, mesh: m, t: -i * 0.035, flash: 0 };
+      if (n.kind !== 'label' && n.kind !== 'note' && !n.off) m.userData.micPaper = n.id;
+      if (n.icon) { const ic = micIcon(n.icon); ic.position.set(0, 0.8, -n.h / 2 - 0.1); grp.add(ic); p.icon = ic; }
+      grp.scale.set(0.001, 0.001, 0.001); micPaperMap[n.id] = p; micPaperDraw(p);
+    });
+    micItemsFix();
+  };
+  api.micPaperSet = function (id, patch) { const p = micPaperMap[id]; if (!p) return; const a = JSON.stringify(p.st); Object.assign(p.st, patch); if (JSON.stringify(p.st) !== a) micPaperDraw(p); };
+  api.micPaperHot = function (id) { if (micPaperHot === id) return; const o = micPaperMap[micPaperHot]; if (o) api.micPaperSet(micPaperHot, { hot: false }); micPaperHot = id || null; if (id) api.micPaperSet(id, { hot: true }); };
+  api.micPaperFill = function (id, ok) { const p = micPaperMap[id]; if (!p) return; p.flash = 0.6; api.micPaperSet(id, { flash: ok ? 'ok' : 'bad' }); };
+  api.micPaperAt = function (cx, cy) {
+    if (!micOn || !micPaperG || !micPaperG.visible) return null; const r = canvas.getBoundingClientRect(); if (cx < r.left || cx > r.right || cy < r.top || cy > r.bottom) return null;
+    ndc.x = ((cx - r.left) / r.width) * 2 - 1; ndc.y = -((cy - r.top) / r.height) * 2 + 1; raycaster.setFromCamera(ndc, camera);
+    const ms = Object.keys(micPaperMap).map(k => micPaperMap[k].mesh).filter(m => m.userData.micPaper), hits = raycaster.intersectObjects(ms, false);
+    for (const h of hits) { const id = h.object.userData.micPaper, p = micPaperMap[id]; let row = -1; if (p && p.spec.rows && h.uv) { const H = p.cv.height, tb = micTb(H), v = (1 - h.uv.y) * H, rh = (H - tb - 14) / p.spec.rows; row = v < tb + 8 ? -1 : Math.min(p.spec.rows - 1, Math.floor((v - tb - 8) / rh)); } return { id, row }; }
+    return null;
+  };
+  function micItemsFix() { if (!micManG) return; const hp = !!micPaperG, has = Object.keys(micDishMap).length > 0 || hp; micManG.visible = micManWant && !has; if (manBed) manBed.visible = micManG.visible; micBench.visible = has; if (micOn) { if (hp) { gph = 0.62; TY = 0.4; TZ = 0.2; } else if (has) { gph = 0.9; TY = 0.5; TZ = 0.1; } else if (!micZoomId) { gph = 0.85; TY = 3.2; TZ = 0.2; } } }
+  api.micDishAt = function (cx, cy) {
+    if (!micOn) return null; const r = canvas.getBoundingClientRect(); if (cx < r.left || cx > r.right || cy < r.top || cy > r.bottom) return null;
+    ndc.x = ((cx - r.left) / r.width) * 2 - 1; ndc.y = -((cy - r.top) / r.height) * 2 + 1; raycaster.setFromCamera(ndc, camera);
+    const hits = raycaster.intersectObjects(micItems.filter(g => g.visible && g !== micManG), true);
+    for (const h of hits) { let o = h.object; while (o) { if (o.userData && o.userData.micDish) return o.userData.micDish; o = o.parent; } }
+    return null;
+  };
+  api.micSiteAt = function (cx, cy) {
+    if (!micOn || !micManG || !micManG.visible) return null; const r = canvas.getBoundingClientRect(); if (cx < r.left || cx > r.right || cy < r.top || cy > r.bottom) return null;
+    ndc.x = ((cx - r.left) / r.width) * 2 - 1; ndc.y = -((cy - r.top) / r.height) * 2 + 1; raycaster.setFromCamera(ndc, camera);
+    const hits = raycaster.intersectObjects([micManG], true);
+    for (const h of hits) { let o = h.object; while (o) { if (o.userData && o.userData.micSite) return o.userData.micSite; o = o.parent; } }
+    return null;
+  };
+  api.micSiteHot = function (id) { micHoverId = id || null; };
+  api.micSiteFill = function (id, ok) {
+    const m = micPinMap[id]; if (!m) return; m.flash = 0.8; m.flashOk = !!ok;
+    if (ok) { const cols = ['#8BE04A', '#B26BE0', '#E8C23A', '#38C9B0', '#F0804B']; const c = new T.Mesh(new T.IcosahedronGeometry(0.05, 0), mat(cols[Math.floor(Math.random() * 5)], null, { emissive: new T.Color(0x224400), emissiveIntensity: 0.3 })); c.position.set((Math.random() - 0.5) * 0.12, (Math.random() - 0.5) * 0.12, 0.06); if (micZoomId) { c.scale.set(2.6, 2.6, 2.6); c.position.set((Math.random() - 0.5) * 0.5, (Math.random() - 0.5) * 0.5, 0.1); } m.g.add(c); }
+  };
+  api.micDishHot = function (id) { micHot = id || null; };
+  api.micDishFill = function (id, ok) {
+    const d = micDishMap[id]; if (!d) return;
+    d.flash = 0.7; d.flashOk = !!ok;
+    if (ok) { d.n++; const cols = ['#8BE04A', '#B26BE0', '#E8C23A', '#38C9B0', '#F0804B']; for (let k = 0; k < 3; k++) { const a = Math.random() * PI * 2, rr = Math.random() * 0.55, c = new T.Mesh(new T.IcosahedronGeometry(0.13 + Math.random() * 0.06, 0), mat(cols[(d.n + k) % 5], null, { emissive: new T.Color(cols[(d.n + k) % 5]), emissiveIntensity: 0.25 })); c.position.set(Math.cos(a) * rr, 0.26, Math.sin(a) * rr); c.scale.y = 0.6; d.g.add(c); } }
+  };
+  api.devCam = function (x, y, z, th, ph, rad) { TX = x; TY = y; TZ = z; gth = th; gph = ph; grad = rad; };
+  function micTick(dt) {
+    micTt += dt;
+    scene.children.forEach(c => { if (c !== micG && c !== hemi && c !== sun && c.visible && !(c.userData && c.userData.fx)) { c.visible = false; if (micHid.indexOf(c) < 0) micHid.push(c); } });
+    Object.keys(micPinMap).forEach(id => { const m = micPinMap[id], on = id === micSel, hv = id === micHoverId, s = (on ? 1.5 + Math.sin(micTt * 6) * 0.15 : hv ? 1.3 : 1) * (m.ster ? 1 : 1); m.g.scale.set(s, s, s); if (on) m.dot.material.color.setHex(0xE04F3A); if (m.flash > 0) { m.flash -= dt; m.dot.material.color.setHex(m.flashOk ? 0x2FD07F : 0xE23B2E); m.g.scale.set(s * 1.6, s * 1.6, s * 1.6); } });
+    Object.keys(micPaperMap).forEach(id => { const p = micPaperMap[id]; if (p.t < 0.4) { p.t += dt; const k = Math.max(0.001, Math.min(1, p.t / 0.35)), e = 1 - Math.pow(1 - k, 3) * (1 + (1 - k) * 0.4); p.g.scale.set(e, e, e); } if (p.flash > 0) { p.flash -= dt; if (p.flash <= 0) api.micPaperSet(id, { flash: null }); } });
+    Object.keys(micPaperMap).forEach(k => { const ic = micPaperMap[k].icon; if (ic) { ic.rotation.y = Math.sin(micTt * 1.1) * 0.55; ic.position.y = 0.8 + Math.sin(micTt * 2) * 0.05; } });
+    /* heartbeat: lub-dub pulse about 70 bpm, squeezes a little sideways like a real beat */
+    micBeat.forEach(m => { const ph = (micTt % 0.86) / 0.86, bump = (c, w) => Math.exp(-Math.pow((ph - c) / w, 2)), p = bump(0.08, 0.045) * 1 + bump(0.3, 0.05) * 0.7, b = m.userData.beat; m.scale.set(b * (1 + 0.07 * p), b * (1 + 0.1 * p), b * (1 + 0.07 * p)); });
+    Object.keys(micOrg).forEach(id => { const k = id === micSel ? 0.5 + Math.sin(micTt * 6) * 0.15 : id === micHoverId ? 0.35 : 0; micOrg[id].forEach(m => m.material.emissive.setRGB(k * 0.6, k * 0.5, k * 0.2)); });
+    Object.keys(micDishMap).forEach(id => { const d = micDishMap[id]; d.ring.visible = micHot === id; d.g.scale.y = 1; if (d.flash > 0) { d.flash -= dt; const k = Math.max(0, d.flash) / 0.7; d.agar.material.emissive.setRGB(d.flashOk ? 0.1 * k : 0.55 * k, d.flashOk ? 0.5 * k : 0.05 * k, d.flashOk ? 0.1 * k : 0.05 * k); } });
+    if (micLabEl) {
+      const id = micHoverId || micSel, m = id && micPinMap[id];
+      if (m && micManG.visible) { if (!micV) micV = new T.Vector3(); const v = micV; m.g.getWorldPosition(v); v.y += 0.28; v.project(camera); const r = canvas.getBoundingClientRect(), hr = host.getBoundingClientRect(); micLabEl.textContent = m.name; micLabEl.style.display = 'block'; micLabEl.style.transform = 'translate(' + Math.round((v.x * 0.5 + 0.5) * r.width + r.left - hr.left) + 'px,' + Math.round((-v.y * 0.5 + 0.5) * r.height + r.top - hr.top) + 'px) translate(-50%,-100%)'; }
+      else micLabEl.style.display = 'none';
+    }
+  }
   api.setLab = function (on) {
     if (!api.ok || !scene) return false;
     on = !!on; if (on === labOn) return on;
@@ -2079,7 +2583,7 @@ const World = (function () {
   }
   function capTick(dt) {
     if (!capG) return;
-    const ok = !labOn && !synOn && !paused && !fpT && (!B.capsuleOk || B.capsuleOk());
+    const ok = !labOn && !synOn && !micOn && !paused && !fpT && (!B.capsuleOk || B.capsuleOk());
     if (!capObj) {
       if (!ok) return;
       capT -= dt; plantT -= dt;
@@ -2348,7 +2852,7 @@ const World = (function () {
   function himTick(dt) {
     if (himAsc) ascTick(dt);
     if (himA) angelTick(dt);
-    else if (!himH && !himAsc && B.himOk && B.himOk() && !labOn && !synOn && !paused && !fpT) { himT -= dt; if (himT <= 0) { himT = 600; spawnAngel(); } }
+    else if (!himH && !himAsc && B.himOk && B.himOk() && !labOn && !synOn && !micOn && !paused && !fpT) { himT -= dt; if (himT <= 0) { himT = 600; spawnAngel(); } }
     if (himH) heroTick(dt);
     if (!himH && !himAsc) hcam.want = 0;
     // someone else is talking: pull the camera back out until they are done
@@ -2413,7 +2917,7 @@ const World = (function () {
   function pillRemove(o) { pillG.remove(o.g); const i = pills.indexOf(o); if (i >= 0) pills.splice(i, 1); }
   function pillTick(dt) {
     if (!pillG) return;
-    const ok = !labOn && !synOn && !paused && !fpT && (!B.pillOk || B.pillOk());
+    const ok = !labOn && !synOn && !micOn && !paused && !fpT && (!B.pillOk || B.pillOk());
     if (ok && pills.length < 2) { pillT -= dt; if (pillT <= 0) { pillT = (480 + Math.random() * 120) / (1 + (B.pillBoost ? B.pillBoost() : 0)); spawnPill(); } }
     for (let i = pills.length - 1; i >= 0; i--) {
       const o = pills[i], g = o.g, body = g.userData.body; o.t += dt;
@@ -2711,7 +3215,7 @@ const World = (function () {
   }
   function evtTick(dt) {
     Object.keys(evtO).forEach(k => {
-      const e = evtO[k], show = !labOn && !synOn;
+      const e = evtO[k], show = !labOn && !synOn && !micOn;
       e.t += dt; e.g.visible = show; e.tag.hidden = !show;
       if (!show) return;
       // due: bounce and wiggle so it is easy to spot; otherwise sit calmly on the table
@@ -2773,7 +3277,7 @@ const World = (function () {
   function holShow() { holItems.forEach((g, i) => { g.visible = i < holN; }); }
   function holTick(dt) {
     if (!holG) return;
-    holG.visible = !labOn && !synOn;
+    holG.visible = !labOn && !synOn && !micOn;
     holAnim.forEach(f => f(dt));
     holFlakes.forEach(f => { const p = f.m.position; p.y -= f.v * dt; p.x += Math.sin(time * 0.8 + f.s) * 0.4 * dt; if (p.y < 0) { p.y = 11; p.x = -12 + Math.random() * 24; } });
   }
@@ -2809,7 +3313,7 @@ const World = (function () {
       hemi = new T.HemisphereLight(0xffffff, 0x88aaaa, 0.85); scene.add(hemi);
       sun = new T.DirectionalLight(0xffffff, 0.8); sun.position.set(8, 16, 9); sun.castShadow = true;
       sun.shadow.mapSize.set(1024, 1024); const sc = sun.shadow.camera; sc.left = -16; sc.right = 16; sc.top = 14; sc.bottom = -14; sc.near = 1; sc.far = 50; scene.add(sun);
-      buildStatic();
+      buildStatic(); try { buildBin(); } catch (e) { /* decor */ }
       CLICK.forEach(id => { const b = document.createElement('button'); b.type = 'button'; b.className = 'tag3d'; b.dataset.up = id; tagsEl.appendChild(b); tags[id] = b; });
       applyTheme(); bind();
       if (window.ResizeObserver) new ResizeObserver(resize).observe(host); else window.addEventListener('resize', resize);

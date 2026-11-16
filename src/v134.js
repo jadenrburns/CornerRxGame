@@ -1,0 +1,15 @@
+const {chromium}=require('playwright');
+(async()=>{const b=await chromium.launch({args:['--use-angle=swiftshader','--use-gl=angle','--enable-unsafe-swiftshader','--ignore-gpu-blocklist']});
+const p=await b.newPage({viewport:{width:1200,height:800}});const errs=[];p.on('pageerror',e=>errs.push(e.message));p.on('console',m=>{if(m.type()==='error')console.log('C',m.text().slice(0,200))});
+await p.route('**/three.min.js',r=>r.fulfill({path:process.env.THREE_JS,contentType:'text/javascript'}));
+await p.addInitScript(()=>{localStorage.setItem('cornerRx.v1',JSON.stringify({me:{done:true,name:'T',look:{}},served:30,correct:25,tutDone:true,playSec:999,boardAsked:true,set:{topics:{}},mic:{st:{},mode:'drag',set:'body'}}));localStorage.setItem('rxNet','{"off":1}')});
+await p.goto('file://'+process.cwd()+'/corner-rx.html?noconf=1');await p.waitForTimeout(3500);
+await p.evaluate(()=>document.querySelectorAll('.tour,.unlock').forEach(e=>e.remove()));
+await p.evaluate(()=>{document.querySelector('#menu [data-act="mic"]').click()});await p.waitForTimeout(1500);
+const D=process.argv[2];
+await p.evaluate(()=>{World.devCam(3.2,2.8,0.2,0.0,1.25,7)});await p.waitForTimeout(1200);await p.screenshot({path:D+'/m1.png'});
+await p.evaluate(()=>{World.devCam(3.4,2.6,0.2,0.9,0.5,6)});await p.waitForTimeout(1200);await p.screenshot({path:D+'/m2.png'});
+await p.evaluate(()=>{document.querySelector('[data-act="mic-set"][data-v="pk"]').click()});await p.waitForTimeout(5000);await p.screenshot({path:D+'/pk.png'});
+await p.evaluate(()=>{document.querySelector('[data-act="mic-set"][data-v="gram"]').click()});await p.waitForTimeout(800);await p.screenshot({path:D+'/gmenu.png'});
+console.log(await p.evaluate(()=>[World.ok,!!World.setMic]));await p.evaluate(()=>{document.querySelector('[data-act="mic-go"][data-v="sort-gb"]').click()});await p.waitForTimeout(5000);await p.screenshot({path:D+'/gb.png'});
+console.log('x');console.log('errs',JSON.stringify(errs));await b.close()})();

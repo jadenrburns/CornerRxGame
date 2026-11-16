@@ -1,0 +1,17 @@
+const {chromium}=require('playwright');
+(async()=>{const b=await chromium.launch({args:['--use-angle=swiftshader','--use-gl=angle','--enable-unsafe-swiftshader','--ignore-gpu-blocklist']});
+const p=await b.newPage({viewport:{width:1200,height:800}});const errs=[];p.on('pageerror',e=>errs.push(e.message));
+await p.route('**/three.min.js',r=>r.fulfill({path:process.env.THREE_JS,contentType:'text/javascript'}));
+await p.addInitScript(()=>{localStorage.setItem('cornerRx.v1',JSON.stringify({me:{done:true,name:'T',look:{}},served:30,correct:25,tutDone:true,playSec:999,boardAsked:true,set:{topics:{}},mic:{st:{},mode:'drag',set:'body'}}));localStorage.setItem('rxNet','{"off":1}')});
+await p.goto('file://'+process.cwd()+'/corner-rx.html?noconf=1');await p.waitForTimeout(3500);
+await p.evaluate(()=>document.querySelectorAll('.tour,.unlock').forEach(e=>e.remove()));
+await p.evaluate(()=>{document.querySelector('#menu [data-act="mic"]').click()});await p.waitForTimeout(800);
+await p.evaluate(()=>{document.querySelector('[data-act="mic-set"][data-v="res"]').click()});await p.waitForTimeout(2200);
+await p.screenshot({path:process.argv[2]+'/tab-res.png'});
+await p.evaluate(()=>{window.__rxDbg().micDbg().startSort('sort-all')});await p.waitForTimeout(1500);
+const c=await p.evaluate(()=>{const R=window.__rxDbg().micDbg().R;const k=R.chips.find(x=>x.valid.length);return {id:k.id,v:k.valid[0]}});
+const bx=await p.evaluate(id=>{const r=document.querySelector('.petri[data-chip="'+id+'"]').getBoundingClientRect();return{x:r.x+r.width/2,y:r.y+r.height/2}},c.id);
+const tg=await p.evaluate(v=>{const r=document.querySelector('.bcell[data-cell="'+v+'"]').getBoundingClientRect();return{x:r.x+r.width/2,y:r.y+r.height/2}},c.v);
+await p.mouse.move(bx.x,bx.y);await p.mouse.down();await p.mouse.move(tg.x,tg.y,{steps:8});await p.mouse.up();await p.waitForTimeout(500);
+await p.screenshot({path:process.argv[2]+'/board.png'});
+console.log('placed',JSON.stringify(await p.evaluate(()=>window.__rxDbg().micDbg().R.placed)),'errs',JSON.stringify(errs));await b.close()})();
