@@ -150,6 +150,7 @@ const World = (function () {
     if (o.skin) skin = o.skin; if (o.hair) hair = o.hair; if (o.shirt) shirt = o.shirt; if (o.hairStyle !== undefined) style = o.hairStyle;
     const varied = !karen && !sweaty && !o.elder && !o.inspector && !o.driver && !o.cap && o.hairStyle === undefined;
     const rnd = (n) => (Math.imul((seed | 0) + 977 * n + 13, 2654435761) >>> 8) % 1000 / 1000;
+    if (varied && !isStaff && !o.coat && body !== 'slim' && !o.openHead && !o.him && !hol && RXC.ready()) return RXC.person(seed, Object.assign({ body }, o), rnd);
     let costume = null;
     if (varied && !isStaff && hol) {
       const cr = rnd(12);
@@ -3347,6 +3348,7 @@ const World = (function () {
     if (brainTag) place(brainTag, brainG.position.x, brainG.position.y + 1.1, brainG.position.z);
   }
   api.init = function (opts) {
+    if (typeof RXC !== "undefined") RXC.load();
     B = opts; host = opts.host;
     if (typeof THREE === 'undefined') return false;
     T = THREE;
