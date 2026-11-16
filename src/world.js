@@ -2582,7 +2582,7 @@ const World = (function () {
     return n;
   };
   /* dev: add any object to the pharmacy scene, or hide the code-built customers, to try imported characters in place (char_test.js) */
-  api.devAdd = function (o) { if (scene) scene.add(o); return o; };
+  const devObjs = []; api.devAdd = function (o) { if (scene) { scene.add(o); devObjs.push(o); } return o; }; api.devClear = function () { devObjs.splice(0).forEach(o => scene.remove(o)); };
   api.devHideCust = function (v) { if (custGroup) custGroup.visible = !v; };
   api.devCam = function (x, y, z, th, ph, rad) { TX = x; TY = y; TZ = z; gth = th; gph = ph; grad = rad; };
   function micTick(dt) {
@@ -3348,7 +3348,7 @@ const World = (function () {
     if (brainTag) place(brainTag, brainG.position.x, brainG.position.y + 1.1, brainG.position.z);
   }
   api.init = function (opts) {
-    if (typeof RXC !== "undefined") RXC.load();
+    if (typeof RXC !== "undefined") RXC.load(); if (typeof RXM !== "undefined") RXM.load();
     B = opts; host = opts.host;
     if (typeof THREE === 'undefined') return false;
     T = THREE;

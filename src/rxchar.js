@@ -76,3 +76,31 @@ const RXC = (function () {
   }
   return { load, ready, person, get db() { return DB; } };
 })();
+/* Medical Pack props (assets/med.bin, med.json; tools/packmed.py): RXM.make(name, scale) -> Group (pivot at the item's own origin, +y up, metres) */
+const RXM = (function () {
+  let DB = null, BIN = null, TEX = null, st = 0; const M = {}, cache = {};
+  function load(cb) {
+    if (st) return; st = 1;
+    Promise.all([fetch('assets/med.json').then(r => r.json()), fetch('assets/med.bin').then(r => r.arrayBuffer()), new Promise((ok, no) => { const im = new Image(); im.onload = () => ok(im); im.onerror = no; im.src = 'assets/atlas.png'; })])
+      .then(a => { DB = a[0]; BIN = a[1]; TEX = new THREE.Texture(a[2]); TEX.flipY = false; TEX.magFilter = THREE.NearestFilter; TEX.minFilter = THREE.NearestFilter; TEX.generateMipmaps = false; TEX.needsUpdate = true; DB.items.forEach(e => { M[e.name] = e; }); st = 2; if (cb) cb(); }).catch(() => { st = -1; });
+  }
+  const mat = (k) => {
+    if (cache[k]) return cache[k];
+    const o = { map: TEX }; if (k === 'Glass' || k === 'Glass_CAR') { o.transparent = true; o.opacity = 0.35; o.depthWrite = false; }
+    const m = k === 'Metal' ? new THREE.MeshStandardMaterial(Object.assign(o, { metalness: 0.3, roughness: 0.45 })) : new THREE.MeshLambertMaterial(o); m.side = THREE.DoubleSide;
+    if (k === 'Emission') { m.emissive = new THREE.Color(0xFF9500); m.emissiveMap = TEX; m.emissiveIntensity = 0.9; } return (cache[k] = m);
+  };
+  function make(name, scale) {
+    const e = M[name]; if (!e) return null; const g = new THREE.Group(); g.name = name;
+    e.parts.forEach(p => {
+      const nv = p.nv, q = new Int16Array(BIN, p.p, nv * 3), pos = new Float32Array(nv * 3); for (let i = 0; i < nv; i++) for (let k = 0; k < 3; k++) pos[i * 3 + k] = e.ctr[k] + q[i * 3 + k] / 32767 * e.half[k];
+      const n8 = new Int8Array(BIN, p.n, nv * 4), nor = new Float32Array(nv * 3); for (let i = 0; i < nv; i++) for (let k = 0; k < 3; k++) nor[i * 3 + k] = n8[i * 4 + k] / 127;
+      const u16 = new Uint16Array(BIN, p.u, nv * 2), uv = new Float32Array(nv * 2); for (let i = 0; i < nv * 2; i++) uv[i] = u16[i] / 65535;
+      const geo = new THREE.BufferGeometry(); geo.setAttribute('position', new THREE.BufferAttribute(pos, 3)); geo.setAttribute('normal', new THREE.BufferAttribute(nor, 3)); geo.setAttribute('uv', new THREE.BufferAttribute(uv, 2));
+      geo.setIndex(new THREE.BufferAttribute(p.i32 ? new Uint32Array(BIN, p.i, p.ni) : new Uint16Array(BIN, p.i, p.ni), 1));
+      const m = new THREE.Mesh(geo, mat(p.mat)); m.castShadow = true; g.add(m);
+    });
+    if (scale) g.scale.setScalar(scale); return g;
+  }
+  return { load, make, ready: () => st === 2, names: () => Object.keys(M) };
+})();
