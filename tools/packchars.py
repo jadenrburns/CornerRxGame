@@ -17,7 +17,7 @@ def acc(j,b,i):
         return np.ascontiguousarray(raw).view(dt).reshape(a['count'],n)
     return np.frombuffer(b,dtype=dt,count=a['count']*n,offset=o).reshape(a['count'],n)
 def pad4(x): return x+b'\0'*((-len(x))%4)
-src,out=sys.argv[1],sys.argv[2];ids=sys.argv[3:]
+src,out=sys.argv[1],sys.argv[2];ids=sys.argv[3:];NAME=os.environ.get('NAME','chars')
 os.makedirs(out,exist_ok=True)
 blob=bytearray();index=[];atlas_done=False
 for cid in ids:
@@ -58,8 +58,8 @@ for cid in ids:
     o=off;secs={}
     for k,a in (('p',q),('n',nq),('u',uq),('j',J),('w',wq),('i',I.astype('<u2'))):
         secs[k]=o;o+=len(a.tobytes())+(-len(a.tobytes()))%4
-    index.append(dict(id=int(cid),file=f,meshes=names,nv=int(len(P)),ni=int(len(I)),off=secs,ctr=[float(x) for x in ctr],half=[float(x) for x in half],par=par,trs=[[round(float(x),6) for x in t] for t in trs],ibm=[[round(float(x),6) for x in m] for m in ibm],bounds=[[float(x) for x in mn],[float(x) for x in mx]]))
+    index.append(dict(id=int(cid),label=(f[:-4].split('_',2)[2] if f.count('_')>1 else ''),pro=(NAME!='chars'),file=f,meshes=names,nv=int(len(P)),ni=int(len(I)),off=secs,ctr=[float(x) for x in ctr],half=[float(x) for x in half],par=par,trs=[[round(float(x),6) for x in t] for t in trs],ibm=[[round(float(x),6) for x in m] for m in ibm],bounds=[[float(x) for x in mn],[float(x) for x in mx]]))
     print(cid,f,len(P),len(I)//3,round(len(blob)/1e6,2),'MB')
-open(os.path.join(out,'chars.bin'),'wb').write(blob)
-json.dump(dict(joints=[j['nodes'][n]['name'] for n in jn],chars=index),open(os.path.join(out,'chars.json'),'w'),separators=(',',':'))
-print('bin',len(blob),'json',os.path.getsize(os.path.join(out,'chars.json')),'atlas',os.path.getsize(os.path.join(out,'atlas.png')))
+open(os.path.join(out,NAME+'.bin'),'wb').write(blob)
+json.dump(dict(joints=[j['nodes'][n]['name'] for n in jn],chars=index),open(os.path.join(out,NAME+'.json'),'w'),separators=(',',':'))
+print('bin',len(blob),'json',os.path.getsize(os.path.join(out,NAME+'.json')),'atlas',os.path.getsize(os.path.join(out,'atlas.png')))

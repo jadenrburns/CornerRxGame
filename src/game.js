@@ -1076,7 +1076,7 @@
   const ME_BODIES = [['slim', 'Slim'], ['normal', 'Average'], ['jacked', 'Jacked'], ['obese', 'Round']];
   const ME_GENDERS = [['f', 'Woman'], ['m', 'Man'], ['n', 'Nonbinary']];
   const ME_HAIRS = ['Short', 'Bob', 'Long', 'Bun', 'Curly', 'Spiky', 'Bald'];
-  function meSpec() { const m = S.me; return { body: m.body, gender: m.gender, hair: m.hair, skin: ME_SKIN[m.skin], hairCol: ME_HAIR[m.hairColor], scrub: ME_SCRUB[m.scrub], shirtCol: (ME_SHIRT[m.shirt | 0] || ME_SHIRT[0])[0], shoes: (ME_SHOES[m.shoes === undefined ? 3 : m.shoes] || ME_SHOES[3])[0], acc: S.acc || 0, accOn: accOnList(), cosm: cosmSpec() }; }
+  function meSpec() { const m = S.me; return { outfit: m.outfit || 0, body: m.body, gender: m.gender, hair: m.hair, skin: ME_SKIN[m.skin], hairCol: ME_HAIR[m.hairColor], scrub: ME_SCRUB[m.scrub], shirtCol: (ME_SHIRT[m.shirt | 0] || ME_SHIRT[0])[0], shoes: (ME_SHOES[m.shoes === undefined ? 3 : m.shoes] || ME_SHOES[3])[0], acc: S.acc || 0, accOn: accOnList(), cosm: cosmSpec() }; }
   function meSVG() {
     const m = S.me, skin = ME_SKIN[m.skin], hair = ME_HAIR[m.hairColor], scrub = ME_SCRUB[m.scrub];
     const w = ({ slim: 24, normal: 32, jacked: 46, obese: 50 }[m.body] || 32) * (m.gender === 'f' ? 0.92 : m.gender === 'm' ? 1.06 : 1);
@@ -1208,6 +1208,12 @@
     const fish = S.awards.pets.indexOf('fish') >= 0;
     return `<p class="note">Pets wander the floor. Press and hold one, then drag to carry it; let go to set it down. ${fish ? 'The goldfish tank stays put.' : ''}</p><div class="awpl">${rows}</div>`;
   }
+  /* pack outfits (City Characters) for the pharmacist: pick one and the 3D pharmacist wears it */
+  function outfitPicker() {
+    if (typeof RXC === 'undefined' || !RXC.ready()) return '';
+    const cur = S.me.outfit || 46, list = RXC.outfits();
+    return `<div class="grp"><b>Outfit</b><p class="note">Pick who you work as. Your whole look comes from the character.</p><div class="btnrow" style="flex-wrap:wrap;gap:6px">${list.map(c => `<button type="button" class="btn${c.id === cur ? ' go' : ''}" data-act="outfit" data-v="${c.id}">${esc(c.label)} ${c.sex === 'f' ? '\u2640' : '\u2642'}${c.cat === 'PlusSize' ? ' +' : c.cat === 'Senior' ? ' (sr)' : ''}</button>`).join('')}</div></div>`;
+  }
   function createHTML() {
     const seg = (id, label) => `<button type="button" role="tab" aria-selected="${cTab === id}" data-act="ctab" data-v="${id}">${label}</button>`;
     const tabs = S.me.done ? `<div class="hubtabs" role="tablist" aria-label="Character screen">${seg('me', 'Wardrobe')}${seg('shop', 'Shop')}${seg('pets', 'Pets')}</div>` : '';
@@ -1219,6 +1225,7 @@
       ${m.done ? outfitHTML() : ''}
       <div class="grp"><b>Name your pharmacy</b><input id="shopname" class="field" type="text" maxlength="24" autocomplete="off" placeholder="Corner Rx" value="${esc(S.shop || '')}" aria-label="Pharmacy name"><p class="note">It goes on the sign above your shelves.</p></div>
       <p class="note">Use the arrows on each row to flip through what you own. Gear comes from capsules in the lost pills vial (top bar), the Shop tab and rank promotions, and each piece carries a small bonus for your pharmacy.</p>
+      ${outfitPicker()}
       <div class="crows">${rows}</div>
       <div class="btnrow"><button type="button" class="btn go" data-act="me-done">${m.done ? 'Done' : 'Start working'}</button></div></div>`;
   }
@@ -2042,6 +2049,7 @@
         const row = document.querySelector('.crow[data-k="' + k + '"]'), nr = crows().find(x => x.k === k); if (row && nr) { row.outerHTML = crowHTML(nr); const nb = document.querySelector('.crow[data-k="' + k + '"] [data-d="' + d + '"]'); if (nb) nb.focus(); } const pv = document.querySelector('.mepv'); if (pv) pv.innerHTML = mePreview(); return; }
       case 'create': openView(view === 'create' ? 'q' : 'create'); if (view === 'q') { resumeTimers(); renderPanel(); } return;
       case 'awards': openView(view === 'awards' ? 'q' : 'awards'); if (view === 'q') { resumeTimers(); renderPanel(); } return;
+      case 'outfit': { S.me.outfit = +t.dataset.v; save(); World.setPharmacist(meSpec()); renderPanel(); return; }
       case 'me': { readShop(); const k = t.dataset.k, v = t.dataset.v; S.me[k] = (k === 'hair' || k === 'hairColor' || k === 'skin' || k === 'scrub') ? +v : v; save(); World.setPharmacist(meSpec()); renderPanel(); return; }
       case 'ctab': readShop(); cTab = v === 'shop' || v === 'pets' ? v : 'me'; renderPanel(); return;
       case 'shop-buy': shopBuy(t.dataset.k, t.dataset.id); if (view === 'create') renderPanel(); return;

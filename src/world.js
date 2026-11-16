@@ -150,6 +150,7 @@ const World = (function () {
     if (o.skin) skin = o.skin; if (o.hair) hair = o.hair; if (o.shirt) shirt = o.shirt; if (o.hairStyle !== undefined) style = o.hairStyle;
     const varied = !karen && !sweaty && !o.elder && !o.inspector && !o.driver && !o.cap && o.hairStyle === undefined;
     const rnd = (n) => (Math.imul((seed | 0) + 977 * n + 13, 2654435761) >>> 8) % 1000 / 1000;
+    if ((isStaff || o.me) && !o.him && !o.openHead && RXC.ready()) return RXC.person(seed, { body, gender: o.gender, outfit: o.outfit || (isStaff ? [46, 47, 48, 49, 50, 51][seed % 6] : 46), fixed: true }, rnd);
     if (varied && !isStaff && !o.coat && body !== 'slim' && !o.openHead && !o.him && !hol && RXC.ready()) return RXC.person(seed, Object.assign({ body }, o), rnd);
     let costume = null;
     if (varied && !isStaff && hol) {
@@ -1031,7 +1032,7 @@ const World = (function () {
   api.setPharmacist = function (me) {
     if (!api.ok || !pharmG) return;
     if (pharm) pharmG.remove(pharm.g);
-    const g = person(1, false, false, false, me.body === 'normal' ? undefined : me.body, { skin: me.skin, hair: me.hairCol, shirt: me.shirtCol || '#F7FBFB', shoes: me.shoes || null, hairStyle: HAIR_MAP[me.hair] === undefined ? 0 : HAIR_MAP[me.hair], gender: me.gender, coat: true, scrub: me.scrub, acc: me.acc, accOn: me.accOn || 0, cosm: me.cosm || null, tag: { pharm: true } });
+    const g = person(1, false, false, false, me.body === 'normal' ? undefined : me.body, { skin: me.skin, hair: me.hairCol, shirt: me.shirtCol || '#F7FBFB', shoes: me.shoes || null, hairStyle: HAIR_MAP[me.hair] === undefined ? 0 : HAIR_MAP[me.hair], gender: me.gender, coat: true, me: true, outfit: me.outfit, scrub: me.scrub, acc: me.acc, accOn: me.accOn || 0, cosm: me.cosm || null, tag: { pharm: true } });
     g.position.set(-1.5, 0, -1.85); pharmG.add(g);
     lastMe = me; if (labOn) buildLabPerson();
     pharm = { g, wp: [], r: 0.5, phase: 0, dy: 3.1 };
@@ -1670,7 +1671,7 @@ const World = (function () {
     try {
       const W = 240, H = 300, ps = new T.Scene(), pc = new T.PerspectiveCamera(27, W / H, 0.1, 40);
       ps.add(new T.HemisphereLight(0xffffff, 0x8899aa, 0.95)); const dl = new T.DirectionalLight(0xffffff, 0.75); dl.position.set(2.5, 4, 5); ps.add(dl);
-      p = person(1, false, false, false, me.body === 'normal' ? undefined : me.body, { skin: me.skin, hair: me.hairCol, shirt: me.shirtCol || '#F7FBFB', shoes: me.shoes || null, hairStyle: HAIR_MAP[me.hair] === undefined ? 0 : HAIR_MAP[me.hair], gender: me.gender, coat: true, scrub: me.scrub, acc: me.acc, accOn: me.accOn || 0, cosm: me.cosm || null, tag: { pharm: true } });
+      p = person(1, false, false, false, me.body === 'normal' ? undefined : me.body, { skin: me.skin, hair: me.hairCol, shirt: me.shirtCol || '#F7FBFB', shoes: me.shoes || null, hairStyle: HAIR_MAP[me.hair] === undefined ? 0 : HAIR_MAP[me.hair], gender: me.gender, coat: true, me: true, outfit: me.outfit, scrub: me.scrub, acc: me.acc, accOn: me.accOn || 0, cosm: me.cosm || null, tag: { pharm: true } });
       p.rotation.y = -0.35; ps.add(p); pc.position.set(0, 1.35, 6.6); pc.lookAt(0, 1.2, 0);
       rt = new T.WebGLRenderTarget(W, H, { samples: 4 });
       const oldRT = renderer.getRenderTarget(), oc = renderer.getClearColor(new T.Color()), oa = renderer.getClearAlpha();
@@ -2125,7 +2126,7 @@ const World = (function () {
     if (!lastMe || !labG) return;
     if (labPerson) { labG.remove(labPerson); const i = labItems.indexOf(labPerson); if (i >= 0) labItems.splice(i, 1); labPerson = null; }
     const me = lastMe;
-    const g = person(1, false, false, false, me.body === 'normal' ? undefined : me.body, { skin: me.skin, hair: me.hairCol, shirt: me.shirtCol || '#F7FBFB', shoes: me.shoes || null, hairStyle: HAIR_MAP[me.hair] === undefined ? 0 : HAIR_MAP[me.hair], gender: me.gender, coat: true, scrub: me.scrub, acc: me.acc, accOn: me.accOn || 0, cosm: me.cosm || null, tag: { pharm: true } });
+    const g = person(1, false, false, false, me.body === 'normal' ? undefined : me.body, { skin: me.skin, hair: me.hairCol, shirt: me.shirtCol || '#F7FBFB', shoes: me.shoes || null, hairStyle: HAIR_MAP[me.hair] === undefined ? 0 : HAIR_MAP[me.hair], gender: me.gender, coat: true, me: true, outfit: me.outfit, scrub: me.scrub, acc: me.acc, accOn: me.accOn || 0, cosm: me.cosm || null, tag: { pharm: true } });
     g.position.set(0.5, 0, -1.9); labG.add(g); labPerson = g; g.userData.lab = 'pharm'; g.userData.g = g; g.userData.busy = 0; labItems.push(g);
   }
   function wpos(G) { let x = 0, y = 0, z = 0, o = G; while (o && o !== scene) { x = o.position.x + o.scale.x * x; y = o.position.y + o.scale.y * y; z = o.position.z + o.scale.z * z; o = o.parent; } return { x, y, z }; }

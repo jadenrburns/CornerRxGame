@@ -2,19 +2,19 @@
    RXC.person(seed, o, rnd) returns a Group whose userData.P has the same proxies the game animates (legs, arms, knees, eyes, skinM, shirtM),
    and a skinned mesh whose bones follow those proxies. Without the files (offline, file://) ready() stays false and the old bodies are used. */
 const RXC = (function () {
-  let DB = null, BIN = null, TEX = null, state = 0, byKind = null;
+  let DB = null, BINS = null, TEX = null, state = 0, byKind = null, byId = {};
   const ATL = 'assets/';
   function load(cb) {
     if (state) return; state = 1;
-    Promise.all([fetch(ATL + 'chars.json').then(r => r.json()), fetch(ATL + 'chars.bin').then(r => r.arrayBuffer()), new Promise((ok, no) => { const im = new Image(); im.onload = () => ok(im); im.onerror = no; im.src = ATL + 'atlas.png'; })])
-      .then(a => { DB = a[0]; BIN = a[1]; TEX = new THREE.Texture(a[2]); TEX.flipY = false; TEX.magFilter = THREE.NearestFilter; TEX.minFilter = THREE.NearestFilter; TEX.generateMipmaps = false; TEX.needsUpdate = true; index(); state = 2; if (cb) cb(); })
+    Promise.all([Promise.all([fetch(ATL + 'chars.json').then(r => r.json()), fetch(ATL + 'outfits.json').then(r => r.json())]).then(a => { a[0].chars.forEach(c => { c.b = 0; }); a[1].chars.forEach(c => { c.b = 1; }); a[0].chars = a[0].chars.concat(a[1].chars); return a[0]; }), Promise.all([fetch(ATL + 'chars.bin').then(r => r.arrayBuffer()), fetch(ATL + 'outfits.bin').then(r => r.arrayBuffer())]), new Promise((ok, no) => { const im = new Image(); im.onload = () => ok(im); im.onerror = no; im.src = ATL + 'atlas.png'; })])
+      .then(a => { DB = a[0]; BINS = a[1]; TEX = new THREE.Texture(a[2]); TEX.flipY = false; TEX.magFilter = THREE.NearestFilter; TEX.minFilter = THREE.NearestFilter; TEX.generateMipmaps = false; TEX.needsUpdate = true; index(); state = 2; if (cb) cb(); })
       .catch(() => { state = -1; });
   }
   function index() {
     byKind = {};
     DB.chars.forEach(c => {
-      const m = c.meshes[0], k = /^(Adult|PlusSize|Pumped|Senior|Teen|Child)_(Male|Female)/.exec(m); if (!k) return;
-      c.cat = k[1]; c.sex = k[2] === 'Male' ? 'm' : 'f'; (byKind[c.cat + c.sex] = byKind[c.cat + c.sex] || []).push(c);
+      byId[c.id] = c; const m = c.meshes[0], k = /^(Adult|PlusSize|Pumped|Senior|Teen|Child)_(Male|Female)/.exec(m); if (!k) return;
+      c.cat = k[1]; c.sex = k[2] === 'Male' ? 'm' : 'f'; if (c.pro) return; (byKind[c.cat + c.sex] = byKind[c.cat + c.sex] || []).push(c);
     });
   }
   const ready = () => state === 2;
@@ -28,7 +28,7 @@ const RXC = (function () {
   }
   function geo(c) {
     if (c._geo) return c._geo;
-    const nv = c.nv, o = c.off, g = new THREE.BufferGeometry();
+    const nv = c.nv, o = c.off, g = new THREE.BufferGeometry(), BIN = BINS[c.b || 0];
     const p16 = new Int16Array(BIN, o.p, nv * 3), pos = new Float32Array(nv * 3);
     for (let i = 0; i < nv; i++) for (let k = 0; k < 3; k++) pos[i * 3 + k] = c.ctr[k] + p16[i * 3 + k] / 32767 * c.half[k];
     const n8 = new Int8Array(BIN, o.n, nv * 4), nor = new Float32Array(nv * 3); for (let i = 0; i < nv; i++) { nor[i * 3] = n8[i * 4] / 127; nor[i * 3 + 1] = n8[i * 4 + 1] / 127; nor[i * 3 + 2] = n8[i * 4 + 2] / 127; }
@@ -71,10 +71,10 @@ const RXC = (function () {
     const set = [[L.leg, P.legs, false], [L.knee, P.knees, false], [L.arm, P.arms, true]];
     mesh.onBeforeRender = () => { set.forEach(s => { for (let i = 0; i < 2; i++) drive(idx[s[0][i]], s[1][i], s[2]); }); };
     drive(idx.RightArm, P.arms[0], true); drive(idx.LeftArm, P.arms[1], true);
-    const gs = 0.92 + 0.16 * rnd(9); g.scale.set(gs, gs, gs);
+    const gs = o.fixed ? 1 : 0.92 + 0.16 * rnd(9); g.scale.set(gs, gs, gs);
     g.userData.P = P; g.rotation.order = 'YXZ'; return g;
   }
-  return { load, ready, person, get db() { return DB; } };
+  return { load, ready, person, get db() { return DB; }, outfits: () => DB ? DB.chars.filter(c => c.pro) : [], byId: (id) => byId[id] };
 })();
 /* Medical Pack props (assets/med.bin, med.json; tools/packmed.py): RXM.make(name, scale) -> Group (pivot at the item's own origin, +y up, metres) */
 const RXM = (function () {
@@ -82,7 +82,7 @@ const RXM = (function () {
   function load(cb) {
     if (st) return; st = 1;
     Promise.all([fetch('assets/med.json').then(r => r.json()), fetch('assets/med.bin').then(r => r.arrayBuffer()), new Promise((ok, no) => { const im = new Image(); im.onload = () => ok(im); im.onerror = no; im.src = 'assets/atlas.png'; })])
-      .then(a => { DB = a[0]; BIN = a[1]; TEX = new THREE.Texture(a[2]); TEX.flipY = false; TEX.magFilter = THREE.NearestFilter; TEX.minFilter = THREE.NearestFilter; TEX.generateMipmaps = false; TEX.needsUpdate = true; DB.items.forEach(e => { M[e.name] = e; }); st = 2; if (cb) cb(); }).catch(() => { st = -1; });
+      .then(a => { DB = a[0]; BINS = a[1]; TEX = new THREE.Texture(a[2]); TEX.flipY = false; TEX.magFilter = THREE.NearestFilter; TEX.minFilter = THREE.NearestFilter; TEX.generateMipmaps = false; TEX.needsUpdate = true; DB.items.forEach(e => { M[e.name] = e; }); st = 2; if (cb) cb(); }).catch(() => { st = -1; });
   }
   const mat = (k) => {
     if (cache[k]) return cache[k];
