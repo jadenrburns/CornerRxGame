@@ -437,7 +437,7 @@ const World = (function () {
     return bx(p, 0.72, 0.44, 0.03, '#2CCDBB', x, 1.84, z - 0.05, up, { emissive: new T.Color(0x1FB5A5), emissiveIntensity: glow });
   }
   /* ---- trash can on the right side: normal most of the time, crawling with bacteria when infested (api.setBin) ---- */
-  let binG = null, binBugs = [], binGlow = null, binInfested = false;
+  let binBody = null, binPacked = false, binG = null, binBugs = [], binGlow = null, binInfested = false;
   function buildBin() {
     binG = new T.Group(); binG.position.set(8.7, 0, -2.4); binG.rotation.y = -0.35; binG.userData.bin = true; scene.add(binG);
     // a plain 12-sided tapered bin, open at the top, with a thick rim and thin vertical slats near the bottom
@@ -445,6 +445,7 @@ const World = (function () {
     const body = new T.Mesh(new T.CylinderGeometry(R1, R0, H, 12, 1, true), wallM); body.position.y = H / 2; body.castShadow = true; body.receiveShadow = true; binG.add(body);
     const inner = new T.Mesh(new T.CylinderGeometry(R1 - 0.035, R0 - 0.035, H - 0.02, 12, 1, true), mat('#6E7775', null, { side: T.BackSide })); inner.position.y = H / 2; binG.add(inner);
     cy(binG, R0 - 0.03, R0 - 0.03, 0.05, 12, '#4F5755', 0, 0.06, 0);
+    binBody = [body, inner, binG.children[binG.children.length - 1]];
     const lip = new T.Mesh(new T.CylinderGeometry(R1 + 0.035, R1 + 0.02, 0.09, 12, 1, true), mat('#C9CFCD', null, { side: T.DoubleSide })); lip.position.y = H - 0.02; binG.add(lip);
     const top = new T.Mesh(new T.RingGeometry(R1 - 0.04, R1 + 0.035, 12), mat('#D6DBDA', null, { side: T.DoubleSide })); top.rotation.x = -PI / 2; top.position.y = H + 0.025; binG.add(top);
     const foot = new T.Mesh(new T.CylinderGeometry(R0 + 0.03, R0 + 0.035, 0.1, 12, 1, true), mat('#C0C6C4', null, { side: T.DoubleSide })); foot.position.y = 0.05; binG.add(foot);
@@ -504,8 +505,9 @@ const World = (function () {
     });
     if (binGlow) binGlow.material.opacity = 0.12 + (Math.sin(time * 3) * 0.5 + 0.5) * 0.14;
   }
+  let statG = null, wallDone = false;
   function buildStatic() {
-    const g = new T.Group(); scene.add(g);
+    const g = new T.Group(); scene.add(g); statG = g;
     bx(g, 20, 0.7, 14.2, '#2F5256', 0, -0.35, -0.6);
     bx(g, 3.6, 0.5, 4, '#2F5256', 5, -0.25, 7.6);
     for (let i = 0; i < 9; i++) for (let j = 0; j < 7; j++) shopSurf[(i + j) % 2 ? 'fa' : 'fb'].push(bx(g, 2, 0.06, 2, (i + j) % 2 ? '#E4F1F0' : '#D2E7E5', -8 + i * 2, 0.03, -6.2 + j * 2));
@@ -528,10 +530,12 @@ const World = (function () {
     // counter: runs wall to wall, with computer stations along it
     const c = new T.Group(); c.position.set(-2.725, 0, 0); g.add(c);
     const cx = (w) => w + 2.725;
+    cB0 = c.children.length;
     bx(c, 13.25, 1.1, 1.3, '#0A6F66', 0, 0.55, -0.1);
     bx(c, 13.75, 0.16, 1.9, '#F4F9F9', 0, 1.18, 0);
     bx(c, 13.75, 0.1, 0.12, '#F2A516', 0, 1.2, 0.93);
     for (let i = 0; i < 11; i++) bx(c, 0.9, 0.7, 0.05, '#0E9A8E', -6 + i * 1.2, 0.55, 0.57);
+    cB1 = c.children.length;
     counterRoot = c; cN0 = c.children.length;
     station(c, cx(2.2), -0.25, null, 0.5); station(c, cx(3.5), -0.25, null, 0.5);
     cN1 = c.children.length;
@@ -600,12 +604,20 @@ const World = (function () {
     sign.tex.needsUpdate = true;
   }
 
+  const PLEDGE = [1.78, 2.55, 3.35];
   function buildShelves(lv) {
     const G = ug.shelf; clear(G); shelfBottles = [];
     const n = 2 + Math.min(2, Math.floor(lv / 6)), ys = [0.35, 1.3, 2.25, 3.2]; shelfN = n;
     const slots = [];
     for (let u = 0; u < n; u++) {
       const cx = -(n - 1) * 1.5 + u * 3;
+      const cl = (typeof RXM !== 'undefined' && RXM.ready()) ? RXM.make('Сloset_02', 1) : null;
+      if (cl) {
+        /* Medical Pack glass cabinet with its doors off, three stocked ledges */
+        if (cl.children[1]) cl.children[1].visible = false; cl.scale.set(2.6, 2.15, 1.6); cl.position.set(cx, 0, -0.5); cl.traverse(o => { o.userData.up = 'shelf'; }); G.add(cl);
+        PLEDGE.forEach(y => { for (let i = 0; i < 6; i++) slots.push([cx - 1.05 + i * 0.42, y, -0.12]); });
+        continue;
+      }
       bx(G, 3.0, 4.1, 0.1, '#CBE5E2', cx, 2.05, -0.4, 'shelf');
       bx(G, 0.14, 4.1, 0.9, '#F1F6F6', cx - 1.5, 2.05, 0, 'shelf'); bx(G, 0.14, 4.1, 0.9, '#F1F6F6', cx + 1.5, 2.05, 0, 'shelf');
       bx(G, 3.1, 0.14, 0.9, '#F1F6F6', cx, 4.1, 0, 'shelf');
@@ -650,10 +662,14 @@ const World = (function () {
     bx(G, 0.08, 0.34, 1.1, '#0E9A8E', 1.0, 2.5, 0.35, 'counsel', { emissive: new T.Color(0x1FB5A5), emissiveIntensity: 0.5 });
     bx(G, 0.9, 0.03, 1.5, '#E04F3A', 1.5, 0.07, 0.35, 'counsel');
     bx(G, 3.3, 0.12, 3.3, '#0E9A8E', 0, 2.82, 0, 'counsel', { transparent: true, opacity: 0.35 });
+    const pkC = (name, h, x, z, ry) => { const o = pk(name, h, ry); if (!o) return false; o.position.set(x, 0, z); o.traverse(m => { m.userData.up = 'counsel'; }); G.add(o); return true; };
+    if (typeof RXM !== 'undefined' && RXM.ready() && pkC('Table_02', 0.85, -0.2, -1.0, PI)) { pkC('Chair_02', 1.0, -0.5, 0.3, PI / 2); pkC('Chair_02', 1.0, -0.5, 1.0, PI / 2); pkC('Plants_15', 1.1, -1.2, -1.2, 0); pkC('Screen_01', 1.9, -1.45, 0.65, PI / 2); }
+    else {
     bx(G, 1.3, 0.7, 0.7, '#F1F6F6', -0.2, 0.38, -1.0, 'counsel');
     bx(G, 0.7, 0.14, 0.7, '#F2A516', -0.5, 0.55, 0.3, 'counsel'); bx(G, 0.12, 0.8, 0.7, '#F2A516', -0.9, 0.95, 0.3, 'counsel');
     bx(G, 0.7, 0.14, 0.7, '#E04F3A', -0.5, 0.55, 1.0, 'counsel'); bx(G, 0.12, 0.8, 0.7, '#E04F3A', -0.9, 0.95, 1.0, 'counsel');
     cy(G, 0.22, 0.17, 0.35, 6, '#E04F3A', -1.2, 0.18, -1.2, 'counsel'); ico(G, 0.4, '#3E8E41', -1.2, 0.65, -1.2, 'counsel');
+    }
     for (let i = 0; i < Math.min(lv, 6); i++) bx(G, 0.14, 0.14, 0.14, '#F2A516', 0.6 - i * 0.25, 1.4, -1.45, 'counsel', { emissive: new T.Color(0xF2A516), emissiveIntensity: 0.8 });
   }
   /* mastery shelf: one jar per fully mastered week, on the left wall. Empty slots stay as faint outlines. */
@@ -682,6 +698,15 @@ const World = (function () {
     const G = ug.robot; clear(G); robotRef = null;
     if (lv < 1) { ghostBox(G, 2.4, 3.6, 2.4, 'robot'); return; }
     const R = new T.Group(); R.scale.set(1 + lv * 0.05, 1 + lv * 0.05, 1 + lv * 0.05); G.add(R);
+    if (typeof RXM !== 'undefined' && RXM.ready() && RXM.make('Utility_Cart_12', 1)) {
+      /* Medical Pack dispensing unit: a drawer cart body, a monitor head that turns, two hanging grab bars as arms */
+      const tag = (o) => { o.traverse(m => { m.userData.up = 'robot'; }); return o; };
+      const body = tag(RXM.make('Utility_Cart_12', 1)); body.scale.set(3.3, 2.9, 2.5); R.add(body);
+      const head = new T.Group(); head.position.y = 2.45; R.add(head);
+      const mon = tag(RXM.make('Monitor_04', 1)); mon.scale.set(3.0, 3.0, 3.0); mon.position.y = -0.1; head.add(mon);
+      const arms = [-1, 1].map(s => { const a = new T.Group(); a.position.set(s * 1.0, 1.7, 0); R.add(a); return a; });
+      robotRef = { head, arms }; return;
+    }
     cy(R, 1.0, 1.2, 0.3, 8, '#27384F', 0, 0.15, 0, 'robot');
     bx(R, 1.3, 1.5, 1.0, '#0E9A8E', 0, 1.2, 0, 'robot'); bx(R, 0.9, 0.5, 0.05, '#FDEBC4', 0, 1.3, 0.52, 'robot', { emissive: new T.Color(0xF2A516), emissiveIntensity: 0.3 });
     const head = new T.Group(); head.position.y = 2.4; R.add(head);
@@ -2371,7 +2396,7 @@ const World = (function () {
     }
   }
   /* Cute Furniture (RXM, assets/furn.*): the waiting-room bench, chairs and side table keep their spots; the hand-built ones hide once the pack has loaded */
-  let seatRoot = null, seatN0 = 0, seatN1 = 0, seatDone = false, counterRoot = null, cN0 = 0, cN1 = 0, cDone = false, plantRoot = null, plantN0 = 0, plantN1 = 0, miscDone = false;
+  let seatRoot = null, seatN0 = 0, seatN1 = 0, seatDone = false, counterRoot = null, cN0 = 0, cN1 = 0, cB0 = 0, cB1 = 0, cDone = false, plantRoot = null, plantN0 = 0, plantN1 = 0, miscDone = false;
   /* Medical Pack prop scaled to a target height (m); null when the pack is not loaded */
   function pk(name, h, ry) { if (typeof RXM === 'undefined' || !RXM.ready()) return null; const o = RXM.make(name, 1); if (!o) return null; const bb = new T.Box3().setFromObject(o), hh = Math.max(0.01, bb.max.y - bb.min.y); const w = new T.Group(); o.scale.setScalar(h / hh); o.position.y = -bb.min.y * h / hh; w.add(o); w.rotation.y = ry || 0; return w; }
   /* counter: computers, keyboard and mouse, plus small pharmacy props on the worktop (Medical Pack) */
@@ -2379,6 +2404,12 @@ const World = (function () {
     if (cDone || !counterRoot || typeof RXM === 'undefined' || !RXM.ready()) return; cDone = true;
     try {
       for (let i = cN0; i < cN1; i++) counterRoot.children[i].visible = false;
+      for (let i = cB0; i < cB1; i++) counterRoot.children[i].visible = false;
+      { /* the worktop is a run of Medical Pack reception desk modules: straight pieces with a rounded end piece on each side */
+        const N = 13, W = 13.0 / N, Z0 = -0.85, SZ = 2.0;
+        for (let i = 0; i < N; i++) { const d = RXM.make('Reception_Desk_02', 1); if (!d) break; d.scale.set(W / 1.0, 1.26, SZ); d.position.set(-6.5 + W * (i + 0.5) - 0.2 * W, 0, Z0); counterRoot.add(d); }
+        [[-1, -6.5], [1, 6.5]].forEach(q => { const d = RXM.make('Reception_Desk_01', 1); if (!d) return; d.scale.set(1.0 * q[0] * 0.9, 1.26, SZ); d.position.set(q[1] + (q[0] < 0 ? -0.05 : 0.05), 0, Z0); counterRoot.add(d); });
+      }
       const put = (name, h, x, z, ry) => { const o = pk(name, h, ry); if (o) { o.position.set(x, 1.26, z); counterRoot.add(o); } return o; };
       [2.2, 3.5].forEach(w => { const x = w + 2.725; put('Computer_01', 0.95, x, -0.25, PI); put('Keyboard_01', 0.07, x, -0.6, PI); put('Mouse_01', 0.05, x + 0.5, -0.6, PI); });
       put('Sanitizer_01', 0.6, 5.9, 0.55, 0); put('Clock_01', 0.28, 8.6, -0.55, PI); put('Aid_Kit_01', 0.22, -1.0, 0.45, 0.3); put('Mask_Box_01', 0.3, 7.0, 0.5, 0.2);
@@ -2403,9 +2434,23 @@ const World = (function () {
       });
     } catch (e) { miscDone = false; }
   }
+  /* wall dressing from the Medical Pack: handrails, gas panels, posters, clock, exit sign, dispensers */
+  function packWalls() {
+    if (wallDone || !statG || typeof RXM === 'undefined' || !RXM.ready()) return; wallDone = true;
+    try {
+      const put = (name, h, x, y, z, ry, sx) => { const o = pk(name, h, ry); if (!o) return null; o.position.set(x, y, z); if (sx) o.scale.x *= sx; statG.add(o); return o; };
+      const BZ = -7.28, LX = -9.58;
+      [-8.2, -6.6, 5.6, 7.2, 8.6].forEach((x, i) => put('Wall_Panel_01', 0.5, x, 2.3, BZ, 0));
+      put('Clock_01', 0.5, 4.3, 5.2, BZ, 0); put('Signal_Door_01', 0.55, 9.0, 4.6, BZ, 0); put('Sanitizer_01', 0.8, -4.2, 1.6, BZ, 0); put('Hand_Dryer_01', 0.6, 4.2, 1.8, BZ, 0);
+    } catch (e) { wallDone = false; }
+  }
+  function packBin() {
+    if (binPacked || !binG || !binBody || typeof RXM === 'undefined' || !RXM.ready()) return; binPacked = true;
+    try { const b = RXM.make('Waste_Bucket_01', 1); if (!b) { binPacked = false; return; } binBody.forEach(m => { m.visible = false; }); const bb = new T.Box3().setFromObject(b); b.scale.set(1.25 / Math.max(0.01, bb.max.x - bb.min.x), 1.3 / Math.max(0.01, bb.max.y - bb.min.y), 1.25 / Math.max(0.01, bb.max.z - bb.min.z)); b.position.y = -bb.min.y * b.scale.y; binG.add(b); } catch (e) { binPacked = false; }
+  }
   api.packDecor = function () {
-    packCounter(); packMisc();
-    try { if (built.shelf !== undefined) BUILD.shelf(built.shelf); if (built.tech !== undefined) BUILD.tech(built.tech); } catch (e) { /* rebuild is cosmetic */ }
+    packCounter(); packMisc(); packWalls(); packBin();
+    try { ['shelf', 'tech', 'counsel', 'robot'].forEach(k => { if (built[k] !== undefined) BUILD[k](built[k]); }); } catch (e) { /* rebuild is cosmetic */ }
     if (seatDone || !seatRoot || typeof RXM === 'undefined' || !RXM.ready()) return; seatDone = true;
     try {
       for (let i = seatN0; i < seatN1; i++) seatRoot.children[i].visible = false;
@@ -3467,8 +3512,8 @@ const World = (function () {
       host.insertBefore(canvas, host.firstChild);
       tagsEl = host.querySelector('.tags'); bubEl = host.querySelector('.bub3d'); lineEl = host.querySelector('.line3d');
       scene = new T.Scene(); camera = new T.PerspectiveCamera(40, 2, 0.5, 120); raycaster = new T.Raycaster(); tmp = new T.Vector3();
-      hemi = new T.HemisphereLight(0xffffff, 0x88aaaa, 0.85); scene.add(hemi);
-      sun = new T.DirectionalLight(0xffffff, 0.8); sun.position.set(8, 16, 9); sun.castShadow = true;
+      hemi = new T.HemisphereLight(0xffffff, 0x88aaaa, 0.72); scene.add(hemi);
+      sun = new T.DirectionalLight(0xffffff, 0.68); sun.position.set(8, 16, 9); sun.castShadow = true;
       sun.shadow.mapSize.set(1024, 1024); const sc = sun.shadow.camera; sc.left = -16; sc.right = 16; sc.top = 14; sc.bottom = -14; sc.near = 1; sc.far = 50; scene.add(sun);
       buildStatic(); try { buildBin(); } catch (e) { /* decor */ }
       CLICK.forEach(id => { const b = document.createElement('button'); b.type = 'button'; b.className = 'tag3d'; b.dataset.up = id; tagsEl.appendChild(b); tags[id] = b; });

@@ -14,7 +14,7 @@ const SHOP_WALLS = [
 ];
 /* floor tiles: [id, name, tile A, tile B, price] */
 const SHOP_FLOORS = [
-  ['f0', 'Classic white', '#E4F1F0', '#D2E7E5', 0],
+  ['f0', 'Classic white', '#D3E3E6', '#C1D5DA', 0],
   ['f1', 'Warm wood', '#D8B58A', '#C9A175', 200],
   ['f2', 'Pink tile', '#F8DCE5', '#F1C6D4', 200],
   ['f3', 'Mint tile', '#CFEFDF', '#B8E3CE', 250],

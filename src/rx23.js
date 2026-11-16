@@ -1,0 +1,18 @@
+// contact sheet of Medical Pack props: THREE_JS=... node rx5.js <outdir>
+const {chromium}=require('playwright'),http=require('http'),fs=require('fs'),path=require('path');
+const root=path.resolve(__dirname,'..');
+const srv=http.createServer((q,r)=>{let f=q.url.split('?')[0];f=f==='/'?'/src/corner-rx.html':f;const p=path.join(root,f);if(!fs.existsSync(p)){r.statusCode=404;return r.end()}r.setHeader('content-type',/html/.test(p)?'text/html':/png/.test(p)?'image/png':'application/octet-stream');r.end(fs.readFileSync(p))}).listen(0);
+(async()=>{const port=srv.address().port;const b=await chromium.launch({args:['--use-angle=swiftshader','--use-gl=angle','--enable-unsafe-swiftshader','--ignore-gpu-blocklist']});
+const p=await b.newPage({viewport:{width:1100,height:800}});const errs=[];p.on('pageerror',e=>errs.push(e.message));
+await p.route('**/three.min.js',r=>r.fulfill({path:process.env.THREE_JS,contentType:'text/javascript'}));
+await p.addInitScript(()=>{localStorage.setItem('cornerRx.v1',JSON.stringify({me:{done:true,name:'T',look:{}},served:30,correct:25,tutDone:true,playSec:999,boardAsked:true,set:{topics:{}}}));localStorage.setItem('rxNet','{"off":1}')});
+await p.goto('http://localhost:'+port+'/?noconf=1&dev=1');await p.waitForTimeout(5000);
+await p.evaluate(()=>{document.querySelectorAll('.tour,.unlock').forEach(e=>e.remove());const m=document.getElementById('panel');if(m)m.style.display='none'});
+const want='Wall_Panel_01 Handrail_01 Handrail_02 Handrail_03 Handrail_04 Handrail_05 Handrail_06 Poster_01 Poster_02 Poster_03 Poster_04 Poster_05 Signal_Door_01 Caution_Sign_01 Hand_Dryer_01 Towel_Dispenser_01 Sink_01 Waste_Bucket_01 Screen_01 Screen_02 Bench_01 Bench_02 Chair_01 Chair_02 Exam_Stool_01 Utility_Stool_01 Table_01 Table_02 Table_03 Table_04 Bed_Table_01 Stand_01 Stand_02 Utility_Cart_01 Utility_Cart_02 Utility_Cart_03 Utility_Cart_04 Utility_Cart_05 Utility_Cart_06 Utility_Cart_07 Utility_Cart_09 Utility_Cart_10 Utility_Cart_11 Utility_Cart_12 Utility_Cart_13 Trolley_01 Surgery_Cart_01 Basin_Stand_01 Cosmetic_Cart_01 Stretchers_01 WheelChair_01 Oxygen_Tanks_01 Packaging_Machine_01 Control_Panel_01 Monitor_03 Monitor_04 Monitor_05 Monitor_06 Monitor_07 PC_Monitor_01 Life_Support_01 Ventilator_01 IV_Drip_01 Disinfection_Lamp_01 Scale_01 Reception_Desk_01 Reception_Desk_02 Reception_Desk_03 Сloset_01 Сloset_02 Сloset_03 Bassinette_01 Incubator_01 Computer_01 Autoclave_01'.split(' ');
+const names=(await p.evaluate(()=>RXM.names())).filter(n=>want.includes(n));
+const per=24;
+for(let pg=0;pg*per<names.length;pg++){
+ await p.evaluate(([nm,pg,per])=>{World.devHideCust(true);const cols=6;nm.slice(pg*per,pg*per+per).forEach((n,i)=>{const g=RXM.make(n,1);const bb=new THREE.Box3().setFromObject(g);const h=Math.max(bb.max.y-bb.min.y,bb.max.x-bb.min.x,bb.max.z-bb.min.z);const s=1.5/h;g.scale.setScalar(s);const X=(i%cols-2.5)*2.0,Y=41.3+(3-Math.floor(i/cols))*2.0;g.position.set(X,Y,0);g.rotation.y=-0.6;World.devAdd(g);const cv=document.createElement('canvas');cv.width=256;cv.height=48;const c=cv.getContext('2d');c.fillStyle='#000';c.font='bold 26px sans-serif';c.textAlign='center';c.fillText(n+' '+h.toFixed(1)+'m',128,34);const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:new THREE.CanvasTexture(cv),depthTest:false}));sp.scale.set(2,0.375,1);sp.position.set(X,Y-0.1,0.8);World.devAdd(sp)});World.devCam(0,41.3+3.2,0,0,1.5,15)},[names,pg,per]);
+ await p.waitForTimeout(1500);await p.screenshot({path:process.argv[2]+'/cand_'+pg+'.png',clip:{x:0,y:60,width:760,height:620}});
+ await p.evaluate(()=>{World.devClear&&World.devClear()});}
+console.log('errs',JSON.stringify(errs));await b.close();srv.close()})();

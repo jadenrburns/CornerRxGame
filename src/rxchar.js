@@ -105,7 +105,7 @@ const RXM = (function () {
     });
     if (scale) g.scale.setScalar(scale); return g;
   }
-  return { load, make, ready: () => st === 2, names: () => Object.keys(M) };
+  return { load, make, ready: () => st === 2, names: () => Object.keys(M), info: (n) => M[n] };
 })();
 /* Animals (assets/animals.*; tools/packanimals.py): skinned dog and kitty with idle, walk and run clips. RXA.make('dog'|'cat', orange) -> Group that plays walk while it moves and idle when it stands */
 const RXA = (function () {
