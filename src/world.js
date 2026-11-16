@@ -351,7 +351,7 @@ const World = (function () {
           const ch = legL * 0.5 - 0.09, cf = put(new T.CylinderGeometry(legW * 0.54, legW * 0.4, ch, 12), pants, 0, -legL * 0.5 - ch / 2, 0, leg); cf.scale.z = 1.1; put(new T.IcosahedronGeometry(legW * 0.5, 1), pants, 0, -legL * 0.58, -0.015, leg).scale.set(1, 1.5, 0.9); }
         { const sm = own(o.shoes || '#2A2A34'), sh = put(new T.IcosahedronGeometry(0.1, 1), sm, 0, -legL + 0.06, 0.07, leg); sh.scale.set(legW * 6.4, 0.9, 2.4); }
       }
-      if (GC) { leg.children.forEach(c => { c.visible = false; }); gadd(s < 0 ? 'Leg_R' : 'Leg_L', leg, false); }
+      if (GC) { leg.children.forEach(c => { c.visible = false; }); gadd(s < 0 ? 'Leg_R' : 'Leg_L', leg, false); const kn = new T.Group(); kn.position.y = -legL / 2; leg.add(kn); (P.knees = P.knees || []).push(kn); gadd(s < 0 ? 'Shin_R' : 'Shin_L', kn, false); P.kneeFollow = true; }
       P.legs.push(leg);
       const arm = new T.Group(); arm.position.set(s * (jacked ? 0.86 : obese ? 0.78 : slim ? (o.him ? 0.37 : 0.38) : 0.46), 1.5, 0); up.add(arm);
       if (jacked) arm.scale.set(2.3, 1.15, 2.3); else if (obese) arm.scale.set(1.6, 1, 1.6); else if (slim) arm.scale.set(0.8, 1, 0.8);
@@ -386,6 +386,8 @@ const World = (function () {
     if (varied && !o.elder) { const gs = 0.9 + 0.24 * rnd(9); g.scale.set(gs, gs, gs); }
     P.waddle = obese; g.rotation.order = 'YXZ'; g.userData.P = P; return g;
   }
+  /* knees of the Blender characters follow the thigh: a leg swung forward (negative x) bends the shin back, so sitting and walking both read right */
+  function kneeFollow(P) { if (!P.kneeFollow) return; for (let i = 0; i < 2; i++) { const th = P.legs[i].rotation.x; P.knees[i].rotation.x = Math.max(0, -th) * 0.95 + (th > 0 ? th * 0.35 : 0); } }
   function walkAnim(p, t, walking, dt) {
     const P = p.userData.P, k = Math.min(1, dt * 10);
     if (P.him) {
@@ -399,7 +401,7 @@ const World = (function () {
       return;
     }
     const a = walking ? Math.sin(t * 9) * 0.7 : 0;
-    P.legs[0].rotation.x = lerp(P.legs[0].rotation.x, a, k); P.legs[1].rotation.x = lerp(P.legs[1].rotation.x, -a, k);
+    P.legs[0].rotation.x = lerp(P.legs[0].rotation.x, a, k); P.legs[1].rotation.x = lerp(P.legs[1].rotation.x, -a, k); kneeFollow(P);
     P.arms[0].rotation.x = lerp(P.arms[0].rotation.x, -a * 0.8, k); P.arms[1].rotation.x = lerp(P.arms[1].rotation.x, a * 0.8, k);
     if (P.waddle) p.rotation.z = lerp(p.rotation.z, walking ? Math.sin(t * 9) * 0.07 : 0, k);
   }
@@ -791,7 +793,7 @@ const World = (function () {
       const k = Math.min(i - 5, SEATS.length - 1);
       if (!c.idl || c.idl.type !== 'sit' || c.seat !== k) { c.seat = k; c.sit = false; c.idl = { type: 'sit', seat: SEATS[k], t: 999 }; c.wp = [new T.Vector3(SEATS[k][0], 0, SEATS[k][1])]; }
       if (!c.sit && !w && !c.wp.length) c.sit = true;
-      if (c.sit) { c.idl.t = 999; P.legs[0].rotation.x = P.legs[1].rotation.x = -1.45; P.arms[0].rotation.x = P.arms[1].rotation.x = -0.6; c.g.rotation.y = lerpAngle(c.g.rotation.y, SEATS[k][2], Math.min(1, dt * 6)); }
+      if (c.sit) { c.idl.t = 999; P.legs[0].rotation.x = P.legs[1].rotation.x = -1.45; kneeFollow(P); P.arms[0].rotation.x = P.arms[1].rotation.x = -0.6; c.g.rotation.y = lerpAngle(c.g.rotation.y, SEATS[k][2], Math.min(1, dt * 6)); }
       return;
     }
     if (i === 0 || special || rushOn) { if (c.idl) { endIdle(c); c.wp = [slotPos(i, c)]; } return; }
@@ -799,7 +801,7 @@ const World = (function () {
       const d = c.idl;
       if (d.type === 'sit') {
         if (!c.sit && !w && !c.wp.length) { c.sit = true; d.t = 7 + Math.random() * 14; }
-        if (c.sit) { P.legs[0].rotation.x = P.legs[1].rotation.x = -1.45; P.arms[0].rotation.x = P.arms[1].rotation.x = -0.6; c.g.rotation.y = lerpAngle(c.g.rotation.y, d.seat[2], Math.min(1, dt * 6)); d.t -= dt; }
+        if (c.sit) { P.legs[0].rotation.x = P.legs[1].rotation.x = -1.45; kneeFollow(P); P.arms[0].rotation.x = P.arms[1].rotation.x = -0.6; c.g.rotation.y = lerpAngle(c.g.rotation.y, d.seat[2], Math.min(1, dt * 6)); d.t -= dt; }
       } else if (!w && !c.wp.length) { d.t -= dt; c.g.rotation.y = lerpAngle(c.g.rotation.y, d.yaw + Math.sin(time * 0.8 + c.phase) * 0.9, Math.min(1, dt * 3)); }
       if (d.t <= 0) { endIdle(c); c.wp = [slotPos(i, c)]; }
       return;
@@ -1719,7 +1721,7 @@ const World = (function () {
         b.vy -= 15 * dt; g.position.x += b.vx * dt; g.position.z += b.vz * dt; g.position.y += b.vy * dt;
         const k = Math.min(1, b.t / 0.6);
         g.rotation.x = -(PI / 2) * k * (2 - k); g.rotation.z = b.spin * Math.sin(Math.min(1, b.t / 0.7) * PI) * 0.7;
-        P.legs[0].rotation.x = Math.sin(b.t * 18) * 1.1; P.legs[1].rotation.x = Math.cos(b.t * 16) * 1.1;
+        P.legs[0].rotation.x = Math.sin(b.t * 18) * 1.1; P.legs[1].rotation.x = Math.cos(b.t * 16) * 1.1; kneeFollow(P);
         P.arms[0].rotation.z = -(1.4 + Math.sin(b.t * 20) * 0.4); P.arms[1].rotation.z = 1.4 + Math.cos(b.t * 19) * 0.4;
         if (g.position.y <= b.restY && b.vy < 0 && b.t > 0.2) {
           g.position.y = b.restY;
@@ -1768,7 +1770,7 @@ const World = (function () {
         j.cops.forEach((c, i) => {
           const sg = i ? -1 : 1; c.g.position.set(j.C.x + sx * 0.7 + px * sg * 0.85, 0, j.C.z + sz * 0.7 + pz * sg * 0.85);
           c.g.rotation.y = j.th; c.phase += dt; const P = c.g.userData.P;
-          P.legs[0].rotation.x = Math.sin(c.phase * 7) * 0.5; P.legs[1].rotation.x = -Math.sin(c.phase * 7) * 0.5;
+          P.legs[0].rotation.x = Math.sin(c.phase * 7) * 0.5; P.legs[1].rotation.x = -Math.sin(c.phase * 7) * 0.5; kneeFollow(P);
           P.arms[0].rotation.x = P.arms[1].rotation.x = -1.0; P.arms[0].rotation.z = sg * 0.3; P.arms[1].rotation.z = sg * 0.3;
           c.g.position.y = Math.abs(Math.sin(c.phase * 7)) * 0.04;
         });
@@ -2202,7 +2204,7 @@ const World = (function () {
     if (glbCache.__char !== undefined) return glbCache.__char;
     let res = null;
     try {
-      if (RXMODELS.character) { const o = glbOpen('character'), parts = {}; o.j.nodes.forEach(n => { if (n.mesh === undefined) return; parts[n.name] = { t: n.translation || [0, 0, 0], prims: o.j.meshes[n.mesh].primitives.map(p => ({ geo: o.geoOf(p), mat: o.j.materials[p.material].name })) }; }); if (parts.Torso && parts.Head && parts.Arm_L && parts.Leg_L) res = { parts }; }
+      if (RXMODELS.character) { const o = glbOpen('character'), parts = {}; o.j.nodes.forEach(n => { if (n.mesh === undefined) return; parts[n.name] = { t: n.translation || [0, 0, 0], prims: o.j.meshes[n.mesh].primitives.map(p => ({ geo: o.geoOf(p), mat: o.j.materials[p.material].name })) }; }); if (parts.Torso && parts.Head && parts.Arm_L && parts.Leg_L && parts.Shin_L && parts.Shin_R) res = { parts }; }
     } catch (e) { res = null; }
     return (glbCache.__char = res);
   }
