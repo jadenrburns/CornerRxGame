@@ -2580,6 +2580,9 @@ const World = (function () {
     specs.forEach((s, i) => { const p = person(s.seed || i + 1, false, false, false, s.body || 'normal', { gsel: s.gsel }); p.position.set(((i % c) - (c - 1) / 2) * sp, 0, (Math.floor(i / c) - (rows - 1) / 2) * sp * 1.4); lineG.add(p); });
     return n;
   };
+  /* dev: add any object to the pharmacy scene, or hide the code-built customers, to try imported characters in place (char_test.js) */
+  api.devAdd = function (o) { if (scene) scene.add(o); return o; };
+  api.devHideCust = function (v) { if (custGroup) custGroup.visible = !v; };
   api.devCam = function (x, y, z, th, ph, rad) { TX = x; TY = y; TZ = z; gth = th; gph = ph; grad = rad; };
   function micTick(dt) {
     micTt += dt;
