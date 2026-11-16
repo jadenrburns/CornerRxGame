@@ -167,11 +167,13 @@ const World = (function () {
     const GBUILD = jacked ? 'Muscular' : obese ? 'Overweight' : rnd(30) < 0.22 ? 'Skinny' : 'Default';
     let hn0 = 0;
     const GC = (varied && !isStaff && !o.coat && !slim && !o.openHead && !o.him && glbReady()) ? (() => {
-      const bd = (o.gsel && o.gsel.build) || GBUILD, pk = (a, k) => a[Math.floor(rnd(k) * a.length) % a.length], torso = pk(GTORSO[bd], 31), bulky = bd === 'Muscular' && (torso === 'Tank' || torso === 'TShirt' || torso === 'BigTee');
-      return Object.assign({ build: bd, torso, arms: bulky ? 'Muscular' : pk(GARMS[torso], 32), legs: pk(GLEGS, 33), hair: pk(GHAIR, 34), sm: null, wm: null }, o.gsel || {});
+      const sx = (o.gsel && o.gsel.sex) || o.gender || (jacked ? 'm' : rnd(36) < 0.5 ? 'f' : 'm'), SX = GSEX[sx], bd = (o.gsel && o.gsel.build) || (SX.build.indexOf(GBUILD) >= 0 ? GBUILD : 'Default'), pk = (a, k) => a[Math.floor(rnd(k) * a.length) % a.length], tl = GTORSO[bd].filter(t => SX.noTorso.indexOf(t) < 0), torso = pk(tl.length ? tl : GTORSO[bd], 31), bulky = bd === 'Muscular' && (torso === 'Tank' || torso === 'TShirt' || torso === 'BigTee');
+      return Object.assign({ build: bd, torso, arms: bulky ? 'Muscular' : pk(GARMS[torso], 32), legs: pk(GLEGS, 33), hair: pk(SX.hair, 34), sex: sx, sm: null, wm: null }, o.gsel || {});
     })() : null;
     const gmat = (n) => n === 'Shirt' ? P.shirtM : n === 'Skin' ? P.skinM : n === 'Hair' ? hairM : n === 'Pants' ? pants : n === 'White' ? (GC.wm || (GC.wm = own('#FFFFFF'))) : (GC.sm || (GC.sm = own(o.shoes || '#2A2A34')));
-    const gadd = (name, parent, usePos, sc) => { const pt = GC && glbPart(name); if (!pt) return; pt.prims.forEach(pr => { const m = put(pr.geo, gmat(pr.mat), usePos ? pt.t[0] : 0, usePos ? pt.t[1] : 0, usePos ? pt.t[2] : 0, parent); if (sc) m.scale.set(sc, 1, sc); }); };
+    const gadd = (name, parent, usePos, sc) => { const pt = GC && glbPart(name); if (!pt) return; pt.prims.forEach(pr => { const m = put(pr.geo, gmat(pr.mat), usePos ? pt.t[0] : 0, usePos ? pt.t[1] : 0, usePos ? pt.t[2] : 0, parent); if (sc) m.scale.set(sc[0], sc[1], sc[2]); }); };
+    if (GC && !o.gender) o.gender = GC.sex;
+    const FW = GC ? Math.min(1, GHX[GC.build] * 1.04) : 1;
     const tr = o.gender === 'f' ? [0.3, 0.43] : o.gender === 'm' ? [0.42, 0.35] : [0.34, 0.4];
     const legL = o.him ? 1.12 : GC ? 0.68 : jacked ? 0.5 + 0.2 * rnd(7) : 0.68, legW = jacked || obese ? 0.3 : slim ? 0.15 : 0.2, headS = GC ? 1 : jacked ? 0.82 : obese ? 1.12 : 1;
     const up = new T.Group(); up.position.y = legL - 0.68; g.add(up);
@@ -242,7 +244,7 @@ const World = (function () {
       put(new T.SphereGeometry(0.35, 10, 6, 0, PI * 2, 0, PI / 2), hairM, 0, 1.9, 0);
       if (style === 1) put(new T.IcosahedronGeometry(0.15, 0), hairM, 0, 2.28, -0.12);
     }
-    if (GC) { for (let i = hn0; i < hd.children.length; i++) hd.children[i].visible = false; gadd('Hair_' + GC.hair, hd, true, GHW[GC.build] / 0.34); }
+    if (GC) { for (let i = hn0; i < hd.children.length; i++) hd.children[i].visible = false; gadd('Hair_' + GC.hair, hd, true, GHS[GC.build]); }
     if (!karen && !sweaty) { const wh = own('#FFFFFF'); put(new T.BoxGeometry(0.105, 0.085, 0.03), wh, -0.11, 1.88, GC ? 0.315 : 0.283); put(new T.BoxGeometry(0.105, 0.085, 0.03), wh, 0.11, 1.88, GC ? 0.315 : 0.283); }
     if (costume) {
       if (costume === 'witch') { put(new T.CylinderGeometry(0.52, 0.52, 0.04, 9), own('#1F1B2E'), 0, 2.06, 0); const wc = put(new T.ConeGeometry(0.27, 0.72, 7), own('#1F1B2E'), 0, 2.42, 0); wc.rotation.z = 0.12; put(new T.CylinderGeometry(0.285, 0.3, 0.08, 7), own('#7B3FA0'), 0, 2.12, 0); put(new T.BoxGeometry(0.1, 0.09, 0.03), own('#F2C94C'), 0, 2.12, 0.29); put(new T.ConeGeometry(0.06, 0.16, 4), skin ? own('#6FA051') : dark, 0, 1.78, 0.37).rotation.x = PI / 2; }
@@ -272,8 +274,8 @@ const World = (function () {
           if (fh < 0.1) put(new T.BoxGeometry(0.3, 0.15, 0.04), own('#8A7466'), 0, 1.66, 0.25);
           else if (fh < 0.22) put(new T.BoxGeometry(0.24, 0.05, 0.06), hairM, 0, 1.765, 0.315);
           else if (fh < 0.3) { put(new T.BoxGeometry(0.24, 0.05, 0.06), hairM, 0, 1.765, 0.315); put(new T.BoxGeometry(0.1, 0.15, 0.07), hairM, 0, 1.63, 0.27); }
-          else if (fh < 0.43) { put(new T.BoxGeometry(0.38, 0.2, 0.14), hairM, 0, 1.64, 0.18); put(new T.BoxGeometry(0.24, 0.05, 0.06), hairM, 0, 1.765, 0.31); }
-          else { put(new T.BoxGeometry(0.06, 0.2, 0.1), hairM, -0.3, 1.74, 0.08); put(new T.BoxGeometry(0.06, 0.2, 0.1), hairM, 0.3, 1.74, 0.08); put(new T.BoxGeometry(0.24, 0.05, 0.06), hairM, 0, 1.765, 0.315); }
+          else if (fh < 0.43) { put(new T.BoxGeometry(0.38 * FW, 0.2, 0.14), hairM, 0, 1.64, 0.18); put(new T.BoxGeometry(0.24, 0.05, 0.06), hairM, 0, 1.765, 0.31); }
+          else { put(new T.BoxGeometry(0.06, 0.2, 0.1), hairM, -0.3 * FW, 1.74, 0.08); put(new T.BoxGeometry(0.06, 0.2, 0.1), hairM, 0.3 * FW, 1.74, 0.08); put(new T.BoxGeometry(0.24, 0.05, 0.06), hairM, 0, 1.765, 0.315); }
         }
         const sc = rnd(5);
         if (sc < 0.22) {
@@ -2211,7 +2213,11 @@ const World = (function () {
   const GARMS = { Default: ['Default'], TShirt: ['ShortSleeve', 'Bare'], BigTee: ['ShortSleeve'], Tank: ['Bare'], Hoodie: ['Default'], Sweater: ['Default'], Jacket: ['Default', 'Puffy'] };
   const GLEGS = ['Default', 'Jeans', 'Cargo', 'Joggers', 'Shorts'];
   const GHAIR = ['Default', 'Afro', 'Bob', 'Bun', 'FlatTop', 'LongSwept', 'Mohawk', 'Ponytail', 'Quiff', 'ShortPart', 'Spiky'];
-  const GHW = { Default: 0.34, Muscular: 0.29, Overweight: 0.3, Skinny: 0.24 };
+  /* hairs are modelled around the Default head (half width 0.34, depth 0.67, crown 0.44); each build's head is a different size, so a hair is scaled per axis by the ratio of that head to the Default one and keeps its own thickness over the scalp */
+  const GHS = { Default: [1, 1, 1], Skinny: [0.74, 1.12, 0.9], Muscular: [0.89, 1.07, 0.93], Overweight: [0.92, 1.03, 0.96] };
+  const GHX = { Default: 1, Skinny: 0.74, Muscular: 0.89, Overweight: 0.92 };
+  /* masculine and feminine lists never share a build, torso or hair, except the two unisex hairs (Default, Afro) which both list */
+  const GSEX = { f: { build: ['Default', 'Skinny', 'Overweight'], hair: ['Default', 'Afro', 'Bob', 'Bun', 'LongSwept', 'Ponytail'], noTorso: ['Tank'] }, m: { build: ['Default', 'Skinny', 'Muscular', 'Overweight'], hair: ['Default', 'Afro', 'FlatTop', 'Mohawk', 'Quiff', 'ShortPart', 'Spiky'], noTorso: [] } };
   function glbPart(name) {
     if (partCache[name] !== undefined) return partCache[name];
     let r = null;
