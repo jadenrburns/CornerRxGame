@@ -46,9 +46,10 @@ const RXC = (function () {
     const body = o.body, sex = (o.gender === 'm' || o.gender === 'f') ? o.gender : (rnd(36) < 0.5 ? 'f' : 'm');
     const r = rnd(41);
     let cat = body === 'jacked' ? 'Pumped' : body === 'obese' ? 'PlusSize' : r < 0.12 ? 'Teen' : r < 0.2 ? 'Senior' : r < 0.33 ? 'PlusSize' : 'Adult';
+    if (o.cat) cat = o.cat;
     let list = byKind[cat + sex]; if (!list || !list.length) { cat = 'Adult'; list = byKind['Adult' + sex] || byKind.Adultm; }
     if (!list || !list.length) list = DB.chars;
-    const hx = (Math.imul((seed | 0) ^ 0x9E3779B9, 2246822519) >>> 0) / 4294967296, c = list[Math.floor(hx * list.length) % list.length], R = rest(c);
+    const hx = (Math.imul((seed | 0) ^ 0x9E3779B9, 2246822519) >>> 0) / 4294967296, c = (o.id && byId[o.id]) || list[Math.floor(hx * list.length) % list.length], R = rest(c);
     const g = new THREE.Group(), root = new THREE.Group(); g.add(root); root.scale.setScalar(Sx);
     const bones = c.par.map((p, i) => { const b = new THREE.Bone(); b.name = J[i]; b.position.set(c.trs[i][0], c.trs[i][1], c.trs[i][2]); b.quaternion.copy(R.q[i]); b.scale.set(c.trs[i][7], c.trs[i][8], c.trs[i][9]); return b; });
     bones.forEach((b, i) => { if (c.par[i] >= 0) bones[c.par[i]].add(b); }); root.add(bones[0]);
@@ -59,6 +60,7 @@ const RXC = (function () {
     /* proxies the game animates: rotation.x (and y, z) on each limb is a rotation of that limb about its own joint, in character space */
     const px = () => ({ rotation: new THREE.Euler(0, 0, 0, 'XYZ') });
     const P = { legs: [px(), px()], arms: [px(), px()], knees: [px(), px()], shirtM: mat, skinM: mat, eyes: [{ scale: new THREE.Vector3(1, 1, 1), visible: true }, { scale: new THREE.Vector3(1, 1, 1), visible: true }], kneeFollow: true, rx: c.id };
+    P.up = px(); P.head = { rotation: new THREE.Euler(0, 0, 0, 'XYZ'), position: new THREE.Vector3() };
     const L = { leg: ['RightUpLeg', 'LeftUpLeg'], knee: ['RightLeg', 'LeftLeg'], arm: ['RightArm', 'LeftArm'] };
     /* hanging arms: swing each arm chain from the rest (T) direction down along -y, tilted a little outward */
     const down = (bi, ci, side) => { const d = R.pos[ci].clone().sub(R.pos[bi]).normalize(), to = new THREE.Vector3(side * 0.1, -1, 0).normalize(); return new THREE.Quaternion().setFromUnitVectors(d, to); };
@@ -69,7 +71,7 @@ const RXC = (function () {
       const pi = c.par[bi]; Wp.copy(R.W[pi]); E.copy(Wp).invert().multiply(D).multiply(Wp).multiply(R.q[bi]); bones[bi].quaternion.copy(E);
     };
     const set = [[L.leg, P.legs, false], [L.knee, P.knees, false], [L.arm, P.arms, true]];
-    mesh.onBeforeRender = () => { set.forEach(s => { for (let i = 0; i < 2; i++) drive(idx[s[0][i]], s[1][i], s[2]); }); };
+    mesh.onBeforeRender = () => { set.forEach(s => { for (let i = 0; i < 2; i++) drive(idx[s[0][i]], s[1][i], s[2]); }); drive(idx.Spine, P.up, false); drive(idx.Head, P.head, false); };
     drive(idx.RightArm, P.arms[0], true); drive(idx.LeftArm, P.arms[1], true);
     const gs = o.fixed ? 1 : 0.92 + 0.16 * rnd(9); g.scale.set(gs, gs, gs);
     g.userData.P = P; g.rotation.order = 'YXZ'; return g;

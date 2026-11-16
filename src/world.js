@@ -151,6 +151,16 @@ const World = (function () {
     const varied = !karen && !sweaty && !o.elder && !o.inspector && !o.driver && !o.cap && o.hairStyle === undefined;
     const rnd = (n) => (Math.imul((seed | 0) + 977 * n + 13, 2654435761) >>> 8) % 1000 / 1000;
     if ((isStaff || o.me) && !o.him && !o.openHead && RXC.ready()) return RXC.person(seed, { body, gender: o.gender, outfit: o.outfit || (isStaff ? [46, 47, 48, 49, 50, 51][seed % 6] : 46), fixed: true }, rnd);
+    /* event characters from the City Characters pack (same rig and animation proxies as customers) */
+    if (RXC.ready() && !o.openHead && !o.coat && (karen || sweaty || o.elder || o.inspector || o.driver || o.cap || o.him)) {
+      const ro = { fixed: true, gender: o.gender, body: 'normal' }, f2 = o.gender === 'f';
+      if (karen) { ro.id = 140; ro.gender = 'f'; } else if (sweaty) { ro.id = 93; ro.gender = 'm'; } else if (o.elder) { ro.cat = 'Senior'; ro.fixed = false; }
+      else if (o.inspector) ro.outfit = f2 ? 26 : 23; else if (o.driver) ro.outfit = 41; else if (o.cap) ro.outfit = 77; else if (o.him) { ro.id = 121; ro.gender = 'm'; }
+      const pg = RXC.person(seed, ro, rnd), P2 = pg.userData.P;
+      if (o.him) { P2.him = true; pg.scale.multiplyScalar(1.06); } if (karen) pg.scale.multiplyScalar(1.08); if (sweaty) pg.scale.set(0.8, 1.02, 0.8); if (o.cap && body === 'jacked') pg.scale.multiplyScalar(1.12);
+      if (o.tag) { Object.assign(pg.userData, o.tag); pg.traverse(m => { Object.assign(m.userData, o.tag); }); }
+      return pg;
+    }
     if (varied && !isStaff && !o.coat && body !== 'slim' && !o.openHead && !o.him && !hol && RXC.ready()) return RXC.person(seed, Object.assign({ body }, o), rnd);
     let costume = null;
     if (varied && !isStaff && hol) {
