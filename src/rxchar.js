@@ -126,12 +126,23 @@ const RXA = (function () {
     g.computeBoundingSphere(); g.boundingSphere.radius *= 2; return (c._geo = g);
   }
   const ready = () => st === 2;
+  /* orange cat: a copy of the animal palette with the kitty's grey and black body colors repainted orange (eyes, nose and white paws stay) */
+  let ORT = null;
+  function orangeTex() {
+    if (ORT) return ORT;
+    try {
+      const im = TEX.image, cv = document.createElement('canvas'); cv.width = im.width; cv.height = im.height; const cx = cv.getContext('2d'); cx.drawImage(im, 0, 0); const id = cx.getImageData(0, 0, cv.width, cv.height), d = id.data;
+      for (let i = 0; i < d.length; i += 4) { const mx = Math.max(d[i], d[i + 1], d[i + 2]), mn = Math.min(d[i], d[i + 1], d[i + 2]); if (mx - mn < 40 && mx < 215) { const k = mx / 215; d[i] = 190 + 50 * k; d[i + 1] = 95 + 55 * k; d[i + 2] = 25 + 30 * k; } }
+      cx.putImageData(id, 0, 0); ORT = new THREE.CanvasTexture(cv); ORT.flipY = false; ORT.magFilter = THREE.NearestFilter; ORT.minFilter = THREE.NearestFilter; ORT.generateMipmaps = false;
+    } catch (e) { ORT = TEX; }
+    return ORT;
+  }
   function make(kind, orange) {
     const c = by[kind === 'dog' ? 'Dog_001' : 'Kitty_001']; if (!c) return null;
     const g = new THREE.Group(), root = new THREE.Group(); g.add(root);
     const bones = c.par.map((p, i) => { const b = new THREE.Bone(); b.name = c.joints[i]; b.position.set(c.trs[i][0], c.trs[i][1], c.trs[i][2]); b.quaternion.set(c.trs[i][3], c.trs[i][4], c.trs[i][5], c.trs[i][6]); b.scale.set(c.trs[i][7], c.trs[i][8], c.trs[i][9]); return b; });
     bones.forEach((b, i) => { if (c.par[i] >= 0) bones[c.par[i]].add(b); }); root.add(bones[0]);
-    const mat = new THREE.MeshLambertMaterial({ map: TEX, skinning: true, side: THREE.DoubleSide }); if (orange) mat.color.setHex(0xFFB060);
+    const mat = new THREE.MeshLambertMaterial({ map: orange ? orangeTex() : TEX, skinning: true, side: THREE.DoubleSide }); 
     const mesh = new THREE.SkinnedMesh(geo(c), mat); mesh.frustumCulled = false; mesh.castShadow = true; root.add(mesh);
     mesh.bind(new THREE.Skeleton(bones, c.ibm.map(m => new THREE.Matrix4().fromArray(m))), new THREE.Matrix4());
     const mx = new THREE.AnimationMixer(root), act = {};

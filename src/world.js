@@ -545,7 +545,9 @@ const World = (function () {
     // porch rug, plants
     bx(g, 2.4, 0.04, 3.6, '#F2A516', 5, 0.08, 6.9);
     bx(g, 2.9, 0.12, 0.2, '#0E9A8E', 5, 0.18, 5.2);
+    plantN0 = g.children.length;
     [[8.4, 4.5], [-8.6, 6.2]].forEach((p, pi) => { cy(g, 0.4, 0.3, 0.6, 6, '#E04F3A', p[0], 0.3, p[1]); const l1 = ico(g, 0.65, '#3E8E41', p[0], 1.1, p[1]), l2 = ico(g, 0.45, '#56A85A', p[0] + 0.2, 1.6, p[1]); if (pi === 1) { l1.userData.x0 = l1.position.x; l2.userData.x0 = l2.position.x; plantL = [l1, l2]; } });
+    plantN1 = g.children.length; plantRoot = g;
     // waiting room seating: a bench along the right wall and two chairs near the door
     seatRoot = g; seatN0 = g.children.length;
     bx(g, 0.75, 0.12, 2.7, '#8A5A3B', 9.0, 0.5, 2.2); bx(g, 0.6, 0.1, 2.55, '#0E9A8E', 8.98, 0.6, 2.2); bx(g, 0.12, 0.8, 2.7, '#8A5A3B', 9.4, 0.95, 2.2);
@@ -2369,7 +2371,7 @@ const World = (function () {
     }
   }
   /* Cute Furniture (RXM, assets/furn.*): the waiting-room bench, chairs and side table keep their spots; the hand-built ones hide once the pack has loaded */
-  let seatRoot = null, seatN0 = 0, seatN1 = 0, seatDone = false, counterRoot = null, cN0 = 0, cN1 = 0, cDone = false;
+  let seatRoot = null, seatN0 = 0, seatN1 = 0, seatDone = false, counterRoot = null, cN0 = 0, cN1 = 0, cDone = false, plantRoot = null, plantN0 = 0, plantN1 = 0, miscDone = false;
   /* Medical Pack prop scaled to a target height (m); null when the pack is not loaded */
   function pk(name, h, ry) { if (typeof RXM === 'undefined' || !RXM.ready()) return null; const o = RXM.make(name, 1); if (!o) return null; const bb = new T.Box3().setFromObject(o), hh = Math.max(0.01, bb.max.y - bb.min.y); const w = new T.Group(); o.scale.setScalar(h / hh); o.position.y = -bb.min.y * h / hh; w.add(o); w.rotation.y = ry || 0; return w; }
   /* counter: computers, keyboard and mouse, plus small pharmacy props on the worktop (Medical Pack) */
@@ -2384,8 +2386,25 @@ const World = (function () {
       put('Bottle_09', 0.5, 4.2, 0.55, 0); put('Bottle_02', 0.5, 4.5, 0.6, 0.5);
     } catch (e) { cDone = false; }
   }
+  /* plants and the event-table boxes (Cute Furniture plants, Medical Pack boxes) */
+  function packMisc() {
+    if (miscDone || !plantRoot || typeof RXM === 'undefined' || !RXM.ready()) return; miscDone = true;
+    try {
+      for (let i = plantN0; i < plantN1; i++) plantRoot.children[i].visible = false;
+      const a = pk('Plants_15', 1.7), b = pk('Plants_19', 2.3);
+      if (a) { a.position.set(8.4, 0, 4.5); plantRoot.add(a); }
+      if (b) { b.position.set(-8.6, 0, 6.2); plantRoot.add(b); b.userData.x0 = b.position.x; plantL = [b]; }
+      if (evtG) evtG.children.forEach(o => {
+        const k = o.userData.evt; if (!k) return; const kids = o.children.slice(); let w = null;
+        if (k === 'shelve') { w = new T.Group(); const b1 = pk('Box_06', 0.62, 0.2), b2 = pk('Box_04', 0.4, -0.3); if (b1) w.add(b1); if (b2) { b2.position.y = 0.62; w.add(b2); } }
+        else if (k === 'prior') { w = new T.Group(); const f = pk('Folder_02', 0.8, 0), f2 = pk('Folder_01', 0.8, 0); if (f) { f.rotation.x = -PI / 2; f.position.set(0.1, 0.1, 0); w.add(f); } if (f2) { f2.rotation.x = -PI / 2; f2.position.set(-0.15, 0.04, 0.05); w.add(f2); } }
+        else { w = pk('Bottle_09', 0.8, 0); }
+        if (w) { kids.forEach(c => { c.visible = false; }); o.add(w); }
+      });
+    } catch (e) { miscDone = false; }
+  }
   api.packDecor = function () {
-    packCounter();
+    packCounter(); packMisc();
     try { if (built.shelf !== undefined) BUILD.shelf(built.shelf); if (built.tech !== undefined) BUILD.tech(built.tech); } catch (e) { /* rebuild is cosmetic */ }
     if (seatDone || !seatRoot || typeof RXM === 'undefined' || !RXM.ready()) return; seatDone = true;
     try {
