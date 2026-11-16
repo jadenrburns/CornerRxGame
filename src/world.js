@@ -163,21 +163,26 @@ const World = (function () {
     const tag = o.tag || (isStaff ? { up: 'tech' } : { cust: true });
     // Body types: normal, jacked (huge upper body, tiny legs), obese. Upper body and head live in their own groups.
     const jacked = body === 'jacked', obese = body === 'obese', slim = body === 'slim';
+    /* Blender parts (parts.js): plain customers are assembled from a library by build, torso, arms, legs and hair; every part shares the game's pivots, so any mix hangs together */
+    const GBUILD = jacked ? 'Muscular' : obese ? 'Overweight' : rnd(30) < 0.22 ? 'Skinny' : 'Default';
+    let hn0 = 0;
+    const GC = (varied && !isStaff && !o.coat && !slim && !o.openHead && !o.him && glbReady()) ? (() => {
+      const bd = (o.gsel && o.gsel.build) || GBUILD, pk = (a, k) => a[Math.floor(rnd(k) * a.length) % a.length], torso = pk(GTORSO[bd], 31), bulky = bd === 'Muscular' && (torso === 'Tank' || torso === 'TShirt' || torso === 'BigTee');
+      return Object.assign({ build: bd, torso, arms: bulky ? 'Muscular' : pk(GARMS[torso], 32), legs: pk(GLEGS, 33), hair: pk(GHAIR, 34), sm: null, wm: null }, o.gsel || {});
+    })() : null;
+    const gmat = (n) => n === 'Shirt' ? P.shirtM : n === 'Skin' ? P.skinM : n === 'Hair' ? hairM : n === 'Pants' ? pants : n === 'White' ? (GC.wm || (GC.wm = own('#FFFFFF'))) : (GC.sm || (GC.sm = own(o.shoes || '#2A2A34')));
+    const gadd = (name, parent, usePos, sc) => { const pt = GC && glbPart(name); if (!pt) return; pt.prims.forEach(pr => { const m = put(pr.geo, gmat(pr.mat), usePos ? pt.t[0] : 0, usePos ? pt.t[1] : 0, usePos ? pt.t[2] : 0, parent); if (sc) m.scale.set(sc, 1, sc); }); };
     const tr = o.gender === 'f' ? [0.3, 0.43] : o.gender === 'm' ? [0.42, 0.35] : [0.34, 0.4];
-    const legL = o.him ? 1.12 : jacked ? 0.5 + 0.2 * rnd(7) : 0.68, legW = jacked || obese ? 0.3 : slim ? 0.15 : 0.2, headS = jacked ? 0.82 : obese ? 1.12 : 1;
+    const legL = o.him ? 1.12 : GC ? 0.68 : jacked ? 0.5 + 0.2 * rnd(7) : 0.68, legW = jacked || obese ? 0.3 : slim ? 0.15 : 0.2, headS = GC ? 1 : jacked ? 0.82 : obese ? 1.12 : 1;
     const up = new T.Group(); up.position.y = legL - 0.68; g.add(up);
     const hd = new T.Group(); hd.position.y = 1.85 * (1 - headS); hd.scale.set(headS, headS, headS); up.add(hd); P.head = hd; P.up = up; P.him = !!o.him;
     let par = up;
     const put = (geo, m, x, y, z, parent) => { const o = new T.Mesh(geo, m); o.position.set(x, y, z); o.castShadow = true; Object.assign(o.userData, tag); (parent || par).add(o); return o; };
-    /* Blender character parts replace the code-built body for plain customers (normal build, no coat, no costume); hair styles other than the first keep the code-built hair */
-    const GCb = (varied && !isStaff && !o.coat && !jacked && !obese && !slim && !o.openHead && !o.him) ? glbChar() : null, GC = GCb ? { parts: GCb.parts, sm: null } : null;
-    const gmat = (n) => n === 'Shirt' ? P.shirtM : n === 'Skin' ? P.skinM : n === 'Hair' ? hairM : n === 'Pants' ? pants : (GC.sm || (GC.sm = own(o.shoes || '#2A2A34')));
-    const gadd = (name, parent, usePos) => { const pt = GC && GC.parts[name]; if (!pt) return; pt.prims.forEach(pr => { if (name === 'Hair_1' && style !== 0) return; put(pr.geo, gmat(pr.mat), usePos ? pt.t[0] : 0, usePos ? pt.t[1] : 0, usePos ? pt.t[2] : 0, parent); }); };
     const tor = put(jacked ? new T.CylinderGeometry(0.46, 0.15, 0.95, 14) : new T.CylinderGeometry(tr[0], tr[1], 0.95, 14), P.shirtM, 0, 1.12, 0);
     if (slim) tor.scale.set(o.him ? 0.6 : 0.8, 1, o.him ? 0.6 : 0.8);
     if (jacked) tor.scale.set(2.0, 1.12, 1.5);
-    if (obese) { tor.scale.set(1.8, 1, 1.75); const belly = put(new T.IcosahedronGeometry(0.62, 0), P.shirtM, 0, 0.95, 0.3); belly.scale.set(1.25, 1, 1.05); }
-    if (GC) { tor.visible = false; gadd('Torso', up, true); }
+    if (obese && !GC) { tor.scale.set(1.8, 1, 1.75); const belly = put(new T.IcosahedronGeometry(0.62, 0), P.shirtM, 0, 0.95, 0.3); belly.scale.set(1.25, 1, 1.05); }
+    if (GC) { tor.visible = false; gadd('Torso_' + GC.torso, up, true); gadd('Neck_' + GC.build, up, true); }
     if (o.coat) put(new T.BoxGeometry(0.2, 0.62, 0.03), own(o.scrub), 0, 1.22, Math.max(tr[0], tr[1]) * tor.scale.z + 0.005);
     // separate lab coat (pharmacist and technicians): open front over a colored shirt, collar, lapels, pockets, pen and leaf badge
     const labCoat = (o.coat || isStaff) && !(o.cosm && o.cosm.coat) && !o.him && !o.inspector && !o.driver && !o.cap && !o.elder;
@@ -197,7 +202,7 @@ const World = (function () {
       [['#2E9E5B', 0.17], ['#2B5FB5', 0.2], ['#C0392B', 0.23]].forEach(pn => { const pe = onC(1.4, pn[1]); const pen = put(new T.BoxGeometry(0.014, 0.08, 0.014), own(pn[0]), pe[0], 1.37, pe[2] + 0.004); pen.rotation.y = -pe[3]; });
       const lf = onC(1.42, -0.15); const leaf = put(new T.OctahedronGeometry(0.03, 0), own('#2E9E5B'), lf[0], 1.42, lf[2] + 0.012); leaf.scale.set(1, 1.3, 0.4); leaf.rotation.z = 0.5;
     }
-    if (varied && !isStaff && !o.coat) {
+    if (varied && !isStaff && !o.coat && !GC) {
       const rt = jacked ? 0.46 : tr[0], rb = jacked ? 0.15 : tr[1], sz = tor.scale.z, fz = (y) => (rb + (rt - rb) * (y - 0.645) / 0.95) * sz + 0.012, cl = Math.floor(rnd(8) * 6);
       if (cl === 1) { const bc = own('#F4FAFA'); [0.85, 1.07, 1.29].forEach(y => put(new T.BoxGeometry(0.44, 0.07, 0.03), bc, 0, y, fz(y))); }
       else if (cl === 2) { const hc = own(shirt); const hood = put(new T.TorusGeometry(0.2, 0.09, 5, 8), hc, 0, 1.6, -0.1); hood.rotation.x = PI / 2 - 0.4; put(new T.BoxGeometry(0.38, 0.2, 0.03), own('#3A4658'), 0, 0.85, fz(0.85)); [-0.08, 0.08].forEach(x => put(new T.BoxGeometry(0.02, 0.2, 0.02), own('#FFFFFF'), x, 1.4, fz(1.4))); }
@@ -220,7 +225,7 @@ const World = (function () {
     { const sk = P.skinM;
       [-1, 1].forEach(s => { const ear = put(new T.IcosahedronGeometry(0.07, 1), sk, s * 0.318, 1.85, 0.0); ear.scale.set(0.45, 1, 0.8); const cb = put(new T.IcosahedronGeometry(0.055, 0), sk, s * 0.17, 1.8, 0.27); cb.scale.set(1, 0.8, 0.7); });
       const ch = put(new T.IcosahedronGeometry(0.085, 1), sk, 0, 1.6, 0.215); ch.scale.set(1.25, 0.75, 0.9); }
-    if (GC) { hd.children.forEach(c => { c.visible = false; }); gadd('Head', hd, true); gadd('Hair_1', hd, true); }
+    if (GC) { hd.children.forEach(c => { c.visible = false; }); gadd('Head_' + GC.build, hd, true); hn0 = hd.children.length; }
     if (style === 3) { put(new T.SphereGeometry(0.37, 10, 6, 0, PI * 2, 0, PI / 2), hairM, 0, 1.9, 0); put(new T.BoxGeometry(0.14, 0.55, 0.42), hairM, -0.31, 1.68, -0.02); put(new T.BoxGeometry(0.14, 0.55, 0.42), hairM, 0.31, 1.68, -0.02); put(new T.BoxGeometry(0.64, 0.5, 0.14), hairM, 0, 1.7, -0.28); }
     else if (style === 4) { put(new T.SphereGeometry(0.34, 10, 6, 0, PI * 2, 0, PI / 2), hairM, 0, 1.9, 0); [[-0.2, 0.25], [0, 0.32], [0.2, 0.25], [0.1, 0.18]].forEach((q, i) => { const sp = put(new T.ConeGeometry(0.08, 0.3, 4), hairM, q[0], 2.2 + (i % 2) * 0.03, 0.05 - i * 0.05); sp.rotation.z = -q[0] * 2.4; }); }
     else if (style === 5) { put(new T.SphereGeometry(0.35, 10, 6, 0, PI * 2, 0, PI / 2), hairM, 0, 1.9, 0); put(new T.BoxGeometry(0.7, 0.95, 0.16), hairM, 0, 1.45, -0.28); put(new T.BoxGeometry(0.14, 0.7, 0.32), hairM, -0.34, 1.58, -0.06); put(new T.BoxGeometry(0.14, 0.7, 0.32), hairM, 0.34, 1.58, -0.06); }
@@ -233,10 +238,11 @@ const World = (function () {
     else if (style === 13) { put(new T.SphereGeometry(0.35, 10, 6, 0, PI * 2, 0, PI / 2), hairM, 0, 1.9, 0); [-1, 1].forEach(sd => put(new T.IcosahedronGeometry(0.17, 0), hairM, sd * 0.27, 2.2, -0.04)); }
     else if (style === 8) { /* bald */ }
     else if (style === 2) put(new T.CylinderGeometry(0.34, 0.34, 0.14, 6), hairM, 0, 2.08, 0);
-    else if (!(GC && style === 0)) {
+    else {
       put(new T.SphereGeometry(0.35, 10, 6, 0, PI * 2, 0, PI / 2), hairM, 0, 1.9, 0);
       if (style === 1) put(new T.IcosahedronGeometry(0.15, 0), hairM, 0, 2.28, -0.12);
     }
+    if (GC) { for (let i = hn0; i < hd.children.length; i++) hd.children[i].visible = false; gadd('Hair_' + GC.hair, hd, true, GHW[GC.build] / 0.34); }
     if (!karen && !sweaty) { const wh = own('#FFFFFF'); put(new T.BoxGeometry(0.105, 0.085, 0.03), wh, -0.11, 1.88, GC ? 0.315 : 0.283); put(new T.BoxGeometry(0.105, 0.085, 0.03), wh, 0.11, 1.88, GC ? 0.315 : 0.283); }
     if (costume) {
       if (costume === 'witch') { put(new T.CylinderGeometry(0.52, 0.52, 0.04, 9), own('#1F1B2E'), 0, 2.06, 0); const wc = put(new T.ConeGeometry(0.27, 0.72, 7), own('#1F1B2E'), 0, 2.42, 0); wc.rotation.z = 0.12; put(new T.CylinderGeometry(0.285, 0.3, 0.08, 7), own('#7B3FA0'), 0, 2.12, 0); put(new T.BoxGeometry(0.1, 0.09, 0.03), own('#F2C94C'), 0, 2.12, 0.29); put(new T.ConeGeometry(0.06, 0.16, 4), skin ? own('#6FA051') : dark, 0, 1.78, 0.37).rotation.x = PI / 2; }
@@ -340,7 +346,7 @@ const World = (function () {
     }
     if (on(1)) { const ch = put(new T.TorusGeometry(on(7) ? 0.5 : 0.31, 0.03, 5, 10), goldM, 0, on(7) ? 1.66 : 1.56, 0.02); ch.rotation.x = PI / 2; if (!on(7)) ch.scale.set(tor.scale.x, tor.scale.z, 1); put(new T.BoxGeometry(0.11, 0.11, 0.03), goldM, 0, on(7) ? 1.3 : 1.26, on(7) ? 0.56 : 0.4); }
     [-1, 1].forEach(s => {
-      const leg = new T.Group(); leg.position.set(s * (jacked ? 0.2 : obese ? 0.24 : slim ? 0.12 : 0.15), legL, 0); g.add(leg);
+      const leg = new T.Group(); leg.position.set(s * (GC ? 0.15 : jacked ? 0.2 : obese ? 0.24 : slim ? 0.12 : 0.15), legL, 0); g.add(leg);
       if (o.him) {
         { const lc = put(new T.CylinderGeometry(legW * 0.62, legW * 0.55, legL / 2, 9), pants, 0, -legL / 4, 0, leg); lc.scale.z = 1.15; }
         const sh = new T.Group(); sh.position.y = -legL / 2; leg.add(sh); (P.knees = P.knees || []).push(sh);
@@ -351,14 +357,14 @@ const World = (function () {
           const ch = legL * 0.5 - 0.09, cf = put(new T.CylinderGeometry(legW * 0.54, legW * 0.4, ch, 12), pants, 0, -legL * 0.5 - ch / 2, 0, leg); cf.scale.z = 1.1; put(new T.IcosahedronGeometry(legW * 0.5, 1), pants, 0, -legL * 0.58, -0.015, leg).scale.set(1, 1.5, 0.9); }
         { const sm = own(o.shoes || '#2A2A34'), sh = put(new T.IcosahedronGeometry(0.1, 1), sm, 0, -legL + 0.06, 0.07, leg); sh.scale.set(legW * 6.4, 0.9, 2.4); }
       }
-      if (GC) { leg.children.forEach(c => { c.visible = false; }); gadd(s < 0 ? 'Leg_R' : 'Leg_L', leg, false); const kn = new T.Group(); kn.position.y = -legL / 2; leg.add(kn); (P.knees = P.knees || []).push(kn); gadd(s < 0 ? 'Shin_R' : 'Shin_L', kn, false); P.kneeFollow = true; }
+      if (GC) { leg.children.forEach(c => { c.visible = false; }); gadd((s < 0 ? 'Leg_R_' : 'Leg_L_') + GC.legs, leg, false); const kn = new T.Group(); kn.position.y = -legL / 2; leg.add(kn); (P.knees = P.knees || []).push(kn); gadd((s < 0 ? 'Shin_R_' : 'Shin_L_') + GC.legs, kn, false); P.kneeFollow = true; }
       P.legs.push(leg);
-      const arm = new T.Group(); arm.position.set(s * (jacked ? 0.86 : obese ? 0.78 : slim ? (o.him ? 0.37 : 0.38) : 0.46), 1.5, 0); up.add(arm);
-      if (jacked) arm.scale.set(2.3, 1.15, 2.3); else if (obese) arm.scale.set(1.6, 1, 1.6); else if (slim) arm.scale.set(0.8, 1, 0.8);
+      const arm = new T.Group(); arm.position.set(s * (GC ? 0.46 : jacked ? 0.86 : obese ? 0.78 : slim ? (o.him ? 0.37 : 0.38) : 0.46), 1.5, 0); up.add(arm);
+      if (GC) { /* parts carry the build */ } else if (jacked) arm.scale.set(2.3, 1.15, 2.3); else if (obese) arm.scale.set(1.6, 1, 1.6); else if (slim) arm.scale.set(0.8, 1, 0.8);
       { const am = jacked ? P.skinM : P.shirtM; const ua = put(new T.CylinderGeometry(0.094, 0.076, 0.33, 12), am, 0, -0.165, 0, arm); ua.scale.z = 1.05; put(new T.IcosahedronGeometry(0.08, 1), am, 0, -0.33, 0, arm);
         const fa = put(new T.CylinderGeometry(0.078, 0.058, 0.3, 12), am, 0, -0.48, 0, arm); fa.scale.z = 1.05; put(new T.IcosahedronGeometry(0.092, 1), am, 0, 0.0, 0, arm);
         if (labCoat) put(new T.CylinderGeometry(0.066, 0.066, 0.05, 12), own('#FFFFFF'), 0, -0.625, 0, arm); }
-      { const hd2 = put(new T.IcosahedronGeometry(0.072, 1), P.skinM, 0, -0.69, 0.005, arm); hd2.scale.set(1, 1.15, 0.9); put(new T.IcosahedronGeometry(0.03, 0), P.skinM, -s * 0.06, -0.66, 0.05, arm); } if (GC) { arm.children.forEach(c => { c.visible = false; }); gadd(s < 0 ? 'Arm_R' : 'Arm_L', arm, false); } P.arms.push(arm);
+      { const hd2 = put(new T.IcosahedronGeometry(0.072, 1), P.skinM, 0, -0.69, 0.005, arm); hd2.scale.set(1, 1.15, 0.9); put(new T.IcosahedronGeometry(0.03, 0), P.skinM, -s * 0.06, -0.66, 0.05, arm); } if (GC) { arm.children.forEach(c => { c.visible = false; }); gadd((s < 0 ? 'Arm_R_' : 'Arm_L_') + GC.arms, arm, false); } P.arms.push(arm);
       if (o.coat && s === -1) { const cb = own('#7A4A27'); put(new T.BoxGeometry(0.27, 0.35, 0.03), cb, 0.0, -0.55, 0.13, arm); put(new T.BoxGeometry(0.23, 0.3, 0.02), own('#FFFFFF'), 0, -0.56, 0.148, arm); put(new T.BoxGeometry(0.1, 0.04, 0.05), own('#B9C4CC'), 0, -0.38, 0.15, arm); const cr = own('#D8C9A6'); put(new T.BoxGeometry(0.1, 0.03, 0.02), cr, 0, -0.56, 0.162, arm); put(new T.BoxGeometry(0.03, 0.1, 0.02), cr, 0, -0.56, 0.162, arm); }
       if (o.coat && s === 1 && !(o.cosm && o.cosm.hands)) {
         const gl = own('#CFEFF5'); gl.transparent = true; gl.opacity = 0.45; const liq = own('#38E0D0'); if (liq.emissive && liq.emissive.setHex) { liq.emissive.setHex(0x14B8A6); liq.emissiveIntensity = 0.8; }
@@ -2199,14 +2205,35 @@ const World = (function () {
     if (glbCache[name]) return glbCache[name];
     try { const o = glbOpen(name); return (glbCache[name] = o.geoOf(o.j.meshes[0].primitives[0])); } catch (e) { return null; }
   }
-  /* the Blender character: named parts (Torso, Head, Hair_1, Arm_L, Arm_R, Leg_L, Leg_R) whose primitives use materials Shirt, Skin, Hair, Pants, Shoes (the game recolors by name). Returns { parts: { name: { t: [x,y,z], prims: [{ geo, mat }] } } } or null */
-  function glbChar() {
-    if (glbCache.__char !== undefined) return glbCache.__char;
-    let res = null;
+  /* the Blender character parts library (parts.js, RXPARTS): glbPart(name) decodes one named part into { t: [x,y,z] pivot, prims: [{ geo, mat }] }, cached. Customers are assembled from these in person() */
+  const partCache = {};
+  const GTORSO = { Default: ['Default', 'TShirt', 'Hoodie', 'Jacket', 'Sweater', 'Tank'], Skinny: ['Default', 'TShirt', 'Hoodie', 'Jacket'], Muscular: ['Tank', 'TShirt', 'BigTee'], Overweight: ['BigTee', 'Sweater', 'Hoodie'] };
+  const GARMS = { Default: ['Default'], TShirt: ['ShortSleeve', 'Bare'], BigTee: ['ShortSleeve'], Tank: ['Bare'], Hoodie: ['Default'], Sweater: ['Default'], Jacket: ['Default', 'Puffy'] };
+  const GLEGS = ['Default', 'Jeans', 'Cargo', 'Joggers', 'Shorts'];
+  const GHAIR = ['Default', 'Afro', 'Bob', 'Bun', 'FlatTop', 'LongSwept', 'Mohawk', 'Ponytail', 'Quiff', 'ShortPart', 'Spiky'];
+  const GHW = { Default: 0.34, Muscular: 0.29, Overweight: 0.3, Skinny: 0.24 };
+  function glbPart(name) {
+    if (partCache[name] !== undefined) return partCache[name];
+    let r = null;
     try {
-      if (RXMODELS.character) { const o = glbOpen('character'), parts = {}; o.j.nodes.forEach(n => { if (n.mesh === undefined) return; parts[n.name] = { t: n.translation || [0, 0, 0], prims: o.j.meshes[n.mesh].primitives.map(p => ({ geo: o.geoOf(p), mat: o.j.materials[p.material].name })) }; }); if (parts.Torso && parts.Head && parts.Arm_L && parts.Leg_L && parts.Shin_L && parts.Shin_R) res = { parts }; }
-    } catch (e) { res = null; }
-    return (glbCache.__char = res);
+      const s = RXPARTS.parts[name];
+      if (s) {
+        const buf = (x) => { const b = atob(x), u = new Uint8Array(b.length); for (let i = 0; i < b.length; i++) u[i] = b.charCodeAt(i); return u.buffer; };
+        r = { t: s.t, prims: s.p.map(p => { const v = new Int16Array(buf(p.v)), pos = new Float32Array(v.length); for (let i = 0; i < v.length; i++) pos[i] = v[i] / RXPARTS.q; const g = new T.BufferGeometry(); g.setAttribute('position', new T.BufferAttribute(pos, 3)); g.setIndex(new T.BufferAttribute(new Uint16Array(buf(p.i)), 1)); g.computeVertexNormals(); return { geo: g, mat: RXPARTS.mats[p.m] }; }) };
+      }
+    } catch (e) { r = null; }
+    return (partCache[name] = r);
+  }
+  /* true only when every part the assembly can pick exists, so a half-finished library never produces a broken person */
+  let partsOk = null;
+  function glbReady() {
+    if (partsOk !== null) return partsOk;
+    try {
+      const need = []; Object.keys(GTORSO).forEach(b => { need.push('Head_' + b, 'Neck_' + b); }); Object.keys(GARMS).forEach(t => { need.push('Torso_' + t); GARMS[t].forEach(a => { need.push('Arm_L_' + a, 'Arm_R_' + a); }); }); need.push('Arm_L_Muscular', 'Arm_R_Muscular');
+      GLEGS.forEach(l => { ['L', 'R'].forEach(s => { need.push('Leg_' + s + '_' + l, 'Shin_' + s + '_' + l); }); }); GHAIR.forEach(h => { need.push('Hair_' + h); });
+      partsOk = typeof RXPARTS !== 'undefined' && need.every(n => !!glbPart(n));
+    } catch (e) { partsOk = false; }
+    return partsOk;
   }
   function micOrganBuild(kind, parent, site, list) {
     const cache = {}, MT = (c) => cache[c] || (cache[c] = new T.MeshStandardMaterial({ color: new T.Color(c), flatShading: true, roughness: 0.55, side: T.DoubleSide, emissive: new T.Color(0x000000) }));
@@ -2531,6 +2558,17 @@ const World = (function () {
     const d = micDishMap[id]; if (!d) return;
     d.flash = 0.7; d.flashOk = !!ok;
     if (ok) { d.n++; const cols = ['#8BE04A', '#B26BE0', '#E8C23A', '#38C9B0', '#F0804B']; for (let k = 0; k < 3; k++) { const a = Math.random() * PI * 2, rr = Math.random() * 0.55, c = new T.Mesh(new T.IcosahedronGeometry(0.13 + Math.random() * 0.06, 0), mat(cols[(d.n + k) % 5], null, { emissive: new T.Color(cols[(d.n + k) % 5]), emissiveIntensity: 0.25 })); c.position.set(Math.cos(a) * rr, 0.26, Math.sin(a) * rr); c.scale.y = 0.6; d.g.add(c); } }
+  };
+  /* dev: floating lineup of people for checking part combinations; specs are { seed, body, gsel: { build, torso, arms, legs, hair } }; returns their count */
+  let lineG = null;
+  api.devLineup = function (specs, cols) {
+    if (!api.ok || !scene) return 0;
+    if (lineG) scene.remove(lineG);
+    lineG = new T.Group(); lineG.position.set(0, 40, 0); scene.add(lineG);
+    const n = specs.length, c = cols || 10, rows = Math.ceil(n / c), sp = 1.5;
+    const fl = new T.Mesh(new T.BoxGeometry(c * sp + 2, 0.2, rows * sp * 1.4 + 2), new T.MeshStandardMaterial({ color: 0xF4F7F7 })); fl.position.set(0, -0.1, 0); lineG.add(fl);
+    specs.forEach((s, i) => { const p = person(s.seed || i + 1, false, false, false, s.body || 'normal', { gsel: s.gsel }); p.position.set(((i % c) - (c - 1) / 2) * sp, 0, (Math.floor(i / c) - (rows - 1) / 2) * sp * 1.4); lineG.add(p); });
+    return n;
   };
   api.devCam = function (x, y, z, th, ph, rad) { TX = x; TY = y; TZ = z; gth = th; gph = ph; grad = rad; };
   function micTick(dt) {
