@@ -245,6 +245,7 @@ const World = (function () {
       if (style === 1) put(new T.IcosahedronGeometry(0.15, 0), hairM, 0, 2.28, -0.12);
     }
     if (GC) { for (let i = hn0; i < hd.children.length; i++) hd.children[i].visible = false; gadd('Hair_' + GC.hair, hd, true, GHS[GC.build]); }
+    const fc0 = hd.children.length;
     if (!karen && !sweaty) { const wh = own('#FFFFFF'); put(new T.BoxGeometry(0.105, 0.085, 0.03), wh, -0.11, 1.88, GC ? 0.315 : 0.283); put(new T.BoxGeometry(0.105, 0.085, 0.03), wh, 0.11, 1.88, GC ? 0.315 : 0.283); }
     if (costume) {
       if (costume === 'witch') { put(new T.CylinderGeometry(0.52, 0.52, 0.04, 9), own('#1F1B2E'), 0, 2.06, 0); const wc = put(new T.ConeGeometry(0.27, 0.72, 7), own('#1F1B2E'), 0, 2.42, 0); wc.rotation.z = 0.12; put(new T.CylinderGeometry(0.285, 0.3, 0.08, 7), own('#7B3FA0'), 0, 2.12, 0); put(new T.BoxGeometry(0.1, 0.09, 0.03), own('#F2C94C'), 0, 2.12, 0.29); put(new T.ConeGeometry(0.06, 0.16, 4), skin ? own('#6FA051') : dark, 0, 1.78, 0.37).rotation.x = PI / 2; }
@@ -257,8 +258,8 @@ const World = (function () {
     P.dark = dark; P.eyes = [put(new T.BoxGeometry(0.06, 0.065, 0.04), dark, -0.11, 1.88, GC ? 0.327 : 0.295), put(new T.BoxGeometry(0.06, 0.065, 0.04), dark, 0.11, 1.88, GC ? 0.327 : 0.295)];
     {
       const DSK = { '#F2C9A5': '#D9A883', '#E0A97E': '#C48A60', '#C48A5E': '#A8704A', '#8D5A3B': '#74472C', '#F6D7BD': '#DDB596', '#6F4429': '#59351F' }, noseM = own(DSK[skin] || skin);
-      put(new T.BoxGeometry(0.055, 0.1, 0.07), noseM, 0, 1.835, 0.322); put(new T.IcosahedronGeometry(0.047, 1), noseM, 0, 1.775, 0.34);
-      [-1, 1].forEach(s => put(new T.IcosahedronGeometry(0.03, 0), noseM, s * 0.04, 1.772, 0.322));
+      if (!GC) { put(new T.BoxGeometry(0.055, 0.1, 0.07), noseM, 0, 1.835, 0.322); put(new T.IcosahedronGeometry(0.047, 1), noseM, 0, 1.775, 0.34);
+      [-1, 1].forEach(s => put(new T.IcosahedronGeometry(0.03, 0), noseM, s * 0.04, 1.772, 0.322)); }
       put(new T.BoxGeometry(0.27, 0.035, 0.05), noseM, 0, 1.935, 0.288);
       if (!karen && !sweaty) { put(new T.BoxGeometry(0.1, 0.022, 0.035), own(o.gender === 'f' ? '#D9677A' : '#B5605A'), 0, 1.7, 0.305); put(new T.BoxGeometry(0.085, 0.026, 0.035), own(o.gender === 'f' ? '#D9677A' : '#C47A6E'), 0, 1.672, 0.3); }
       if (!karen && !sweaty && o.gender !== 'f') {
@@ -310,6 +311,7 @@ const World = (function () {
       put(new T.CylinderGeometry(0.36, 0.4, 0.17, 8), capM, 0, 2.12, 0); put(new T.BoxGeometry(0.52, 0.04, 0.3), own('#0E1A36'), 0, 2.03, 0.3); put(new T.BoxGeometry(0.1, 0.1, 0.03), gold, 0, 2.12, 0.4);
     }
     if (o.gender === 'f') { put(new T.BoxGeometry(0.12, 0.04, 0.03), own('#D9677A'), 0, 1.74, 0.3); put(new T.BoxGeometry(0.1, 0.025, 0.03), dark, -0.11, 1.94, 0.29); put(new T.BoxGeometry(0.1, 0.025, 0.03), dark, 0.11, 1.94, 0.29); }
+    if (GC) { const fz = GFZ[GC.build]; for (let i = fc0; i < hd.children.length; i++) { const c = hd.children[i]; if (c.position.z > 0.17 && c.position.y > 1.6 && c.position.y < 2.05) c.position.z += c.position.y >= 1.8 ? fz[0] : fz[1]; } }
     if (karen) {
       const b1 = put(new T.BoxGeometry(0.2, 0.05, 0.05), dark, -0.11, 1.99, 0.3); b1.rotation.z = -0.5;
       const b2 = put(new T.BoxGeometry(0.2, 0.05, 0.05), dark, 0.11, 1.99, 0.3); b2.rotation.z = 0.5;
@@ -2215,6 +2217,8 @@ const World = (function () {
   const GHAIR = ['Default', 'Afro', 'Bob', 'Bun', 'FlatTop', 'LongSwept', 'Mohawk', 'Ponytail', 'Quiff', 'ShortPart', 'Spiky'];
   /* hairs are modelled around the Default head (half width 0.34, depth 0.67, crown 0.44); each build's head is a different size, so a hair is scaled per axis by the ratio of that head to the Default one and keeps its own thickness over the scalp */
   const GHS = { Default: [1, 1, 1], Skinny: [0.74, 1.12, 0.9], Muscular: [0.89, 1.07, 0.93], Overweight: [0.92, 1.03, 0.96] };
+  /* the library heads already model a nose and have their own face depth; the face boxes (eyes, brows, lips, mustache, beard) are moved back by the measured gap between the Default head and each build's head at eye level (first number) and mouth level (second) */
+  const GFZ = { Default: [-0.036, -0.03], Skinny: [-0.092, -0.062], Muscular: [-0.079, -0.025], Overweight: [-0.06, -0.01] };
   const GHX = { Default: 1, Skinny: 0.74, Muscular: 0.89, Overweight: 0.92 };
   /* masculine and feminine lists never share a build, torso or hair, except the two unisex hairs (Default, Afro) which both list */
   const GSEX = { f: { build: ['Default', 'Skinny', 'Overweight'], hair: ['Default', 'Afro', 'Bob', 'Bun', 'LongSwept', 'Ponytail'], noTorso: ['Tank'] }, m: { build: ['Default', 'Skinny', 'Muscular', 'Overweight'], hair: ['Default', 'Afro', 'FlatTop', 'Mohawk', 'Quiff', 'ShortPart', 'Spiky'], noTorso: [] } };
