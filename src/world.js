@@ -521,7 +521,9 @@ const World = (function () {
     bx(c, 13.75, 0.16, 1.9, '#F4F9F9', 0, 1.18, 0);
     bx(c, 13.75, 0.1, 0.12, '#F2A516', 0, 1.2, 0.93);
     for (let i = 0; i < 11; i++) bx(c, 0.9, 0.7, 0.05, '#0E9A8E', -6 + i * 1.2, 0.55, 0.57);
+    counterRoot = c; cN0 = c.children.length;
     station(c, cx(2.2), -0.25, null, 0.5); station(c, cx(3.5), -0.25, null, 0.5);
+    cN1 = c.children.length;
     cy(c, 0.25, 0.3, 0.5, 6, '#F2A516', cx(-2.8), 1.5, 0.1);
     // desk phone (clickable while it rings)
     phoneG = new T.Group(); phoneG.position.set(0.9, 1.26, 0.3); g.add(phoneG);
@@ -601,6 +603,9 @@ const World = (function () {
     for (let k = 0; k < nb; k++) {
       const s = slots[order[k]], col = BOT[(order[k] * 5 + 2) % 6];
       const b = new T.Group(); b.position.set(s[0], s[1], s[2]); G.add(b);
+      const PB = ['Bottle_04', 'Bottle_02', 'Bottle_03', 'Bottle_05', 'Bottle_09', 'Box_06', 'Bottle_01', 'Mask_Box_01', 'Box_07', 'Bottle_08'], PH = [0.5, 0.6, 0.5, 0.45, 0.55, 0.32, 0.3, 0.34, 0.38, 0.34];
+      const pi = (order[k] * 7 + 3) % PB.length, po = pk(PB[pi], PH[pi], ((order[k] * 13) % 7 - 3) * 0.12);
+      if (po) { po.userData.up = 'shelf'; po.traverse(o => { o.userData.up = 'shelf'; }); b.add(po); shelfBottles.push(b); continue; }
       cy(b, 0.17, 0.17, 0.42, 6, col, 0, 0.21, 0, 'shelf'); cy(b, 0.175, 0.175, 0.14, 6, '#FFFFFF', 0, 0.2, 0, 'shelf'); cy(b, 0.12, 0.12, 0.12, 6, '#27384F', 0, 0.48, 0, 'shelf');
       shelfBottles.push(b);
     }
@@ -609,7 +614,8 @@ const World = (function () {
     const G = ug.tech; clear(G);
     if (lv < 1) { ghostBox(G, 4.8, 2.5, 1.6, 'tech'); return; }
     [-1.5, 0, 1.5].forEach((x, i) => {
-      station(G, x, -0.25, 'tech', i < lv ? 0.8 : 0.08);
+      const pc = i < lv ? pk('Computer_01', 0.95, PI) : null;
+      if (pc) { pc.position.set(x, 1.26, -0.25); pc.userData.up = 'tech'; pc.traverse(o => { o.userData.up = 'tech'; }); G.add(pc); const kb = pk('Keyboard_01', 0.07, PI); if (kb) { kb.position.set(x, 1.26, -0.6); kb.traverse(o => { o.userData.up = 'tech'; }); G.add(kb); } } else station(G, x, -0.25, 'tech', i < lv ? 0.8 : 0.08);
       if (i < lv) bx(G, 0.1, 0.1, 0.1, '#3FD07F', x + 0.5, 1.36, -0.28, 'tech', { emissive: new T.Color(0x3FD07F), emissiveIntensity: 1 });
     });
     for (let i = 0; i < Math.min(lv, 5); i++) cy(G, 0.15, 0.15, 0.3, 6, BOT[i], -1.9 + i * 0.95, 1.4, 0.55, 'tech');
@@ -2352,8 +2358,24 @@ const World = (function () {
     }
   }
   /* Cute Furniture (RXM, assets/furn.*): the waiting-room bench, chairs and side table keep their spots; the hand-built ones hide once the pack has loaded */
-  let seatRoot = null, seatN0 = 0, seatN1 = 0, seatDone = false;
+  let seatRoot = null, seatN0 = 0, seatN1 = 0, seatDone = false, counterRoot = null, cN0 = 0, cN1 = 0, cDone = false;
+  /* Medical Pack prop scaled to a target height (m); null when the pack is not loaded */
+  function pk(name, h, ry) { if (typeof RXM === 'undefined' || !RXM.ready()) return null; const o = RXM.make(name, 1); if (!o) return null; const bb = new T.Box3().setFromObject(o), hh = Math.max(0.01, bb.max.y - bb.min.y); const w = new T.Group(); o.scale.setScalar(h / hh); o.position.y = -bb.min.y * h / hh; w.add(o); w.rotation.y = ry || 0; return w; }
+  /* counter: computers, keyboard and mouse, plus small pharmacy props on the worktop (Medical Pack) */
+  function packCounter() {
+    if (cDone || !counterRoot || typeof RXM === 'undefined' || !RXM.ready()) return; cDone = true;
+    try {
+      for (let i = cN0; i < cN1; i++) counterRoot.children[i].visible = false;
+      const put = (name, h, x, z, ry) => { const o = pk(name, h, ry); if (o) { o.position.set(x, 1.26, z); counterRoot.add(o); } return o; };
+      [2.2, 3.5].forEach(w => { const x = w + 2.725; put('Computer_01', 0.95, x, -0.25, PI); put('Keyboard_01', 0.07, x, -0.6, PI); put('Mouse_01', 0.05, x + 0.5, -0.6, PI); });
+      put('Sanitizer_01', 0.6, 5.9, 0.55, 0); put('Clock_01', 0.28, 8.6, -0.55, PI); put('Aid_Kit_01', 0.22, -1.0, 0.45, 0.3); put('Mask_Box_01', 0.3, 7.0, 0.5, 0.2);
+      put('Folder_01', 0.55, 1.6, 0.0, 0.5); put('Folder_02', 0.55, 1.95, -0.05, 0.3); put('Box_06', 0.3, 0.3, 0.55, -0.2); put('Box_04', 0.25, 0.8, 0.5, 0.1);
+      put('Bottle_09', 0.5, 4.2, 0.55, 0); put('Bottle_02', 0.5, 4.5, 0.6, 0.5);
+    } catch (e) { cDone = false; }
+  }
   api.packDecor = function () {
+    packCounter();
+    try { if (built.shelf !== undefined) BUILD.shelf(built.shelf); if (built.tech !== undefined) BUILD.tech(built.tech); } catch (e) { /* rebuild is cosmetic */ }
     if (seatDone || !seatRoot || typeof RXM === 'undefined' || !RXM.ready()) return; seatDone = true;
     try {
       for (let i = seatN0; i < seatN1; i++) seatRoot.children[i].visible = false;
