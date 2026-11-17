@@ -1,0 +1,23 @@
+// te60: entry rug (color, pattern, remove), saved decoration positions, old saves without rug/pos
+const {chromium}=require('playwright');
+(async()=>{const b=await chromium.launch();const p=await b.newPage({viewport:{width:1000,height:900}});const errs=[];p.on('pageerror',e=>errs.push(e.message));
+await p.route('**/three.min.js',r=>r.fulfill({path:'three-stub2.js',contentType:'text/javascript'}));
+await p.addInitScript(()=>{if(!localStorage.getItem('cornerRx.v1'))localStorage.setItem('cornerRx.v1',JSON.stringify({cash:900,me:{done:true,name:'T',look:{}},served:30,correct:25,tutDone:true,playSec:999,set:{},store:{own:['cactus'],walls:'w0',floor:'f0',uni:'',deco:['cactus']}}))});
+await p.goto('file://'+process.cwd()+'/corner-rx.html?noconf=1&dev=1');await p.waitForTimeout(900);
+await p.evaluate(()=>document.querySelectorAll('.tour,.unlock').forEach(e=>e.remove()));
+const fail=[];const click=sel=>p.evaluate(s=>{const e=document.querySelector(s);if(e&&!e.disabled)e.click();return !!e&&!e.disabled},sel);
+const R=()=>p.evaluate(()=>{const s=window.__rxDbg().S.store;return {rug:s.rug,pos:s.pos}});
+let r=await R();console.log('old save',JSON.stringify(r));
+if(!r.rug||r.rug.off!==false||r.rug.p!=='solid'||!r.pos)fail.push('old save defaults '+JSON.stringify(r));
+await click('[data-act="create"]');await click('[data-act="ctab"][data-v="shop"]');
+const has=await p.evaluate(()=>!!document.querySelector('[data-act="rug-p"]')||!!document.querySelector('details[data-shop="rug"]'));if(!has)fail.push('rug section missing');
+await p.evaluate(()=>{const d=document.querySelector('details[data-shop="rug"]');if(d)d.open=true});
+await click('[data-act="rug-p"][data-v="checks"]');await click('[data-act="rug-c"][data-v="#4C7BD9"]');
+r=await R();console.log('set',JSON.stringify(r.rug));if(r.rug.p!=='checks'||r.rug.c!=='#4C7BD9')fail.push('rug set '+JSON.stringify(r.rug));
+await p.evaluate(()=>{const d=document.querySelector('details[data-shop="rug"]');if(d)d.open=true});
+await click('[data-act="rug-off"]');r=await R();if(!r.rug.off)fail.push('rug not removed');
+await click('[data-act="rug-off"]');r=await R();if(r.rug.off)fail.push('rug not put back');
+await p.evaluate(()=>{const s=window.__rxDbg().S;s.store.pos={cactus:[1,1.26,0.5]}});
+await click('[data-act="deco-reset"]');r=await R();if(Object.keys(r.pos).length)fail.push('positions not reset '+JSON.stringify(r.pos));
+await p.waitForTimeout(2500);await p.reload();await p.waitForTimeout(900);r=await R();console.log('after reload',JSON.stringify(r.rug));if(!r.rug||r.rug.p!=='checks')fail.push('rug not saved '+JSON.stringify(r.rug));
+console.log('fail',fail);console.log('errs',errs);await b.close()})();
