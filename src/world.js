@@ -1946,7 +1946,7 @@ const World = (function () {
     const cs = getComputedStyle(host), col = (cs.getPropertyValue('--stage') || '#CFE7E9').trim();
     scene.background = new T.Color(col);
     const c = new T.Color(col), dark = (c.r + c.g + c.b) / 3 < 0.35;
-    hemi.intensity = dark ? 0.3 : 0.44; sun.intensity = dark ? 0.75 : 1.0;
+    hemi.intensity = dark ? 0.42 : 0.64; sun.intensity = dark ? 0.62 : 0.82;
     if (synOn) { scene.background = new T.Color(SYN_BG); hemi.intensity = 0.95; sun.intensity = 0.6; }
     else if (micOn) { scene.background = new T.Color(dark ? '#16282F' : '#DDEBF0'); hemi.intensity = dark ? 0.9 : 1.1; sun.intensity = 0.75; }
     else if (labOn) { scene.background = new T.Color(dark ? '#16282F' : '#E7F0F3'); hemi.intensity = dark ? 0.9 : 1.1; sun.intensity = 0.7; }
@@ -3275,9 +3275,9 @@ const World = (function () {
       host.insertBefore(canvas, host.firstChild);
       tagsEl = host.querySelector('.tags'); bubEl = host.querySelector('.bub3d'); lineEl = host.querySelector('.line3d');
       scene = new T.Scene(); camera = new T.PerspectiveCamera(40, 2, 0.5, 120); raycaster = new T.Raycaster(); tmp = new T.Vector3();
-      hemi = new T.HemisphereLight(0xffffff, 0x88aaaa, 0.44); scene.add(hemi);
-      sun = new T.DirectionalLight(0xffffff, 1.0); sun.position.set(9, 13, 6); sun.castShadow = true;
-      sun.shadow.mapSize.set(2048, 2048); sun.shadow.bias = -0.0004; sun.shadow.normalBias = 0.03; sun.shadow.radius = 2; const sc = sun.shadow.camera; sc.left = -16; sc.right = 16; sc.top = 14; sc.bottom = -14; sc.near = 1; sc.far = 50; scene.add(sun);
+      hemi = new T.HemisphereLight(0xffffff, 0x88aaaa, 0.64); scene.add(hemi);
+      sun = new T.DirectionalLight(0xffffff, 0.82); sun.position.set(9, 13, 6); sun.castShadow = true;
+      sun.shadow.mapSize.set(2048, 2048); sun.shadow.bias = -0.0004; sun.shadow.normalBias = 0.03; sun.shadow.radius = 5; const sc = sun.shadow.camera; sc.left = -16; sc.right = 16; sc.top = 14; sc.bottom = -14; sc.near = 1; sc.far = 50; scene.add(sun);
       buildStatic(); try { buildBin(); } catch (e) { /* decor */ }
       CLICK.forEach(id => { const b = document.createElement('button'); b.type = 'button'; b.className = 'tag3d'; b.dataset.up = id; tagsEl.appendChild(b); tags[id] = b; });
       applyTheme(); bind();

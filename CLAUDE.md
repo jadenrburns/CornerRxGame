@@ -137,4 +137,4 @@ No login. `src/net.js` holds `RX_NET = { url, key }` (a Supabase project URL and
 - te59 runs a part round for every body site (decoy miss, finish, star).
 
 ## Lighting (v142)
-Main scene (`world.js`, init and `applyTheme`): hemisphere light 0.44 (dark theme 0.3) plus a sun 1.0 (dark 0.75) at (9, 13, 6) with a 2048 shadow map, bias and normal bias set. Lower fill and a stronger sun give darker cast shadows and shaded sides. The lab, microbe room, synapse and holiday scenes set their own intensities in `applyTheme`. The Part Maker jacked body (PR #9, v141) was undone at the user's request.
+Main scene (`world.js`, init and `applyTheme`): hemisphere light 0.64 (dark theme 0.42) plus a sun 0.82 (dark 0.62), softened in a second pass at (9, 13, 6) with a 2048 shadow map, bias and normal bias set. Lower fill and a stronger sun give darker cast shadows and shaded sides. The lab, microbe room, synapse and holiday scenes set their own intensities in `applyTheme`. The Part Maker jacked body (PR #9, v141) was undone at the user's request.
