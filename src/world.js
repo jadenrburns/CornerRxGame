@@ -164,7 +164,8 @@ const World = (function () {
     // Body types: normal, jacked (huge upper body, tiny legs), obese. Upper body and head live in their own groups.
     const jacked = body === 'jacked', obese = body === 'obese', slim = body === 'slim';
     const tr = o.gender === 'f' ? [0.3, 0.43] : o.gender === 'm' ? [0.42, 0.35] : [0.34, 0.4];
-    const legL = o.him ? 1.12 : jacked ? 0.5 + 0.2 * rnd(7) : 0.68, legW = jacked || obese ? 0.3 : slim ? 0.15 : 0.2, headS = jacked ? 0.82 : obese ? 1.12 : 1;
+    const nj = jacked && !o.him; // nj: the Part Maker jacked body (jacked.js)
+    const legL = o.him ? 1.12 : nj ? 0.68 : jacked ? 0.5 + 0.2 * rnd(7) : 0.68, legW = jacked || obese ? 0.3 : slim ? 0.15 : 0.2, headS = nj ? 0.92 : jacked ? 0.82 : obese ? 1.12 : 1;
     const up = new T.Group(); up.position.y = legL - 0.68; g.add(up);
     const hd = new T.Group(); hd.position.y = 1.85 * (1 - headS); hd.scale.set(headS, headS, headS); up.add(hd); P.head = hd; P.up = up; P.him = !!o.him;
     let par = up;
@@ -172,6 +173,7 @@ const World = (function () {
     const tor = put(jacked ? new T.CylinderGeometry(0.46, 0.15, 0.95, 14) : new T.CylinderGeometry(tr[0], tr[1], 0.95, 14), P.shirtM, 0, 1.12, 0);
     if (slim) tor.scale.set(o.him ? 0.6 : 0.8, 1, o.him ? 0.6 : 0.8);
     if (jacked) tor.scale.set(2.0, 1.12, 1.5);
+    if (nj) { tor.visible = false; tor.castShadow = false; const tg = new T.Group(); tg.position.set(0, 1.12, 0); up.add(tg); JK.parts('Torso', false, tg, { Shirt: P.shirtM, Pants: pants, Skin: P.skinM, Hair: hairM, Shoes: own(o.shoes || '#2A2A34'), White: own('#FFFFFF') }, tag); }
     if (obese) { tor.scale.set(1.8, 1, 1.75); const belly = put(new T.IcosahedronGeometry(0.62, 0), P.shirtM, 0, 0.95, 0.3); belly.scale.set(1.25, 1, 1.05); }
     if (o.coat) put(new T.BoxGeometry(0.2, 0.62, 0.03), own(o.scrub), 0, 1.22, Math.max(tr[0], tr[1]) * tor.scale.z + 0.005);
     // separate lab coat (pharmacist and technicians): open front over a colored shirt, collar, lapels, pockets, pen and leaf badge
@@ -192,7 +194,7 @@ const World = (function () {
       [['#2E9E5B', 0.17], ['#2B5FB5', 0.2], ['#C0392B', 0.23]].forEach(pn => { const pe = onC(1.4, pn[1]); const pen = put(new T.BoxGeometry(0.014, 0.08, 0.014), own(pn[0]), pe[0], 1.37, pe[2] + 0.004); pen.rotation.y = -pe[3]; });
       const lf = onC(1.42, -0.15); const leaf = put(new T.OctahedronGeometry(0.03, 0), own('#2E9E5B'), lf[0], 1.42, lf[2] + 0.012); leaf.scale.set(1, 1.3, 0.4); leaf.rotation.z = 0.5;
     }
-    if (varied && !isStaff && !o.coat) {
+    if (varied && !isStaff && !o.coat && !nj) {
       const rt = jacked ? 0.46 : tr[0], rb = jacked ? 0.15 : tr[1], sz = tor.scale.z, fz = (y) => (rb + (rt - rb) * (y - 0.645) / 0.95) * sz + 0.012, cl = Math.floor(rnd(8) * 6);
       if (cl === 1) { const bc = own('#F4FAFA'); [0.85, 1.07, 1.29].forEach(y => put(new T.BoxGeometry(0.44, 0.07, 0.03), bc, 0, y, fz(y))); }
       else if (cl === 2) { const hc = own(shirt); const hood = put(new T.TorusGeometry(0.2, 0.09, 5, 8), hc, 0, 1.6, -0.1); hood.rotation.x = PI / 2 - 0.4; put(new T.BoxGeometry(0.38, 0.2, 0.03), own('#3A4658'), 0, 0.85, fz(0.85)); [-0.08, 0.08].forEach(x => put(new T.BoxGeometry(0.02, 0.2, 0.02), own('#FFFFFF'), x, 1.4, fz(1.4))); }
@@ -334,24 +336,26 @@ const World = (function () {
     }
     if (on(1)) { const ch = put(new T.TorusGeometry(on(7) ? 0.5 : 0.31, 0.03, 5, 10), goldM, 0, on(7) ? 1.66 : 1.56, 0.02); ch.rotation.x = PI / 2; if (!on(7)) ch.scale.set(tor.scale.x, tor.scale.z, 1); put(new T.BoxGeometry(0.11, 0.11, 0.03), goldM, 0, on(7) ? 1.3 : 1.26, on(7) ? 0.56 : 0.4); }
     [-1, 1].forEach(s => {
-      const leg = new T.Group(); leg.position.set(s * (jacked ? 0.2 : obese ? 0.24 : slim ? 0.12 : 0.15), legL, 0); g.add(leg);
-      if (o.him) {
+      const leg = new T.Group(); leg.position.set(s * (nj ? 0.15 : jacked ? 0.2 : obese ? 0.24 : slim ? 0.12 : 0.15), legL, 0); g.add(leg);
+      const jm = nj ? { Shirt: P.shirtM, Pants: pants, Skin: P.skinM, Hair: hairM, Shoes: own(o.shoes || '#2A2A34'), White: own('#FFFFFF') } : null;
+      if (nj) { JK.parts('Leg_L', s < 0, leg, jm, tag); const kn = new T.Group(); kn.position.y = -0.34; leg.add(kn); JK.parts('Shin_L', s < 0, kn, jm, tag); (P.knees = P.knees || []).push(kn); }
+      else if (o.him) {
         { const lc = put(new T.CylinderGeometry(legW * 0.62, legW * 0.55, legL / 2, 9), pants, 0, -legL / 4, 0, leg); lc.scale.z = 1.15; }
         const sh = new T.Group(); sh.position.y = -legL / 2; leg.add(sh); (P.knees = P.knees || []).push(sh);
         { const lc = put(new T.CylinderGeometry(legW * 0.55, legW * 0.5, legL / 2, 9), pants, 0, -legL / 4, 0, sh); lc.scale.z = 1.15; }
         put(new T.BoxGeometry(legW + 0.06, 0.1, legW + 0.22), own(o.shoes), 0, -legL / 2 + 0.05, 0.07, sh);
-      } else {
+      } else if (!nj) {
         { const th = put(new T.CylinderGeometry(legW * 0.66, legW * 0.54, legL * 0.5, 12), pants, 0, -legL / 4, 0, leg); th.scale.z = 1.15; put(new T.IcosahedronGeometry(legW * 0.56, 1), pants, 0, -legL / 2, 0.01, leg);
           const ch = legL * 0.5 - 0.09, cf = put(new T.CylinderGeometry(legW * 0.54, legW * 0.4, ch, 12), pants, 0, -legL * 0.5 - ch / 2, 0, leg); cf.scale.z = 1.1; put(new T.IcosahedronGeometry(legW * 0.5, 1), pants, 0, -legL * 0.58, -0.015, leg).scale.set(1, 1.5, 0.9); }
         { const sm = own(o.shoes || '#2A2A34'), sh = put(new T.IcosahedronGeometry(0.1, 1), sm, 0, -legL + 0.06, 0.07, leg); sh.scale.set(legW * 6.4, 0.9, 2.4); }
       }
       P.legs.push(leg);
-      const arm = new T.Group(); arm.position.set(s * (jacked ? 0.86 : obese ? 0.78 : slim ? (o.him ? 0.37 : 0.38) : 0.46), 1.5, 0); up.add(arm);
-      if (jacked) arm.scale.set(2.3, 1.15, 2.3); else if (obese) arm.scale.set(1.6, 1, 1.6); else if (slim) arm.scale.set(0.8, 1, 0.8);
-      { const am = jacked ? P.skinM : P.shirtM; const ua = put(new T.CylinderGeometry(0.094, 0.076, 0.33, 12), am, 0, -0.165, 0, arm); ua.scale.z = 1.05; put(new T.IcosahedronGeometry(0.08, 1), am, 0, -0.33, 0, arm);
+      const arm = new T.Group(); arm.position.set(s * (nj ? 0.46 : jacked ? 0.86 : obese ? 0.78 : slim ? (o.him ? 0.37 : 0.38) : 0.46), 1.5, 0); up.add(arm);
+      if (nj) JK.parts('Arm_L', s < 0, arm, jm, tag); else if (jacked) arm.scale.set(2.3, 1.15, 2.3); else if (obese) arm.scale.set(1.6, 1, 1.6); else if (slim) arm.scale.set(0.8, 1, 0.8);
+      if (!nj) { const am = jacked ? P.skinM : P.shirtM; const ua = put(new T.CylinderGeometry(0.094, 0.076, 0.33, 12), am, 0, -0.165, 0, arm); ua.scale.z = 1.05; put(new T.IcosahedronGeometry(0.08, 1), am, 0, -0.33, 0, arm);
         const fa = put(new T.CylinderGeometry(0.078, 0.058, 0.3, 12), am, 0, -0.48, 0, arm); fa.scale.z = 1.05; put(new T.IcosahedronGeometry(0.092, 1), am, 0, 0.0, 0, arm);
         if (labCoat) put(new T.CylinderGeometry(0.066, 0.066, 0.05, 12), own('#FFFFFF'), 0, -0.625, 0, arm); }
-      { const hd2 = put(new T.IcosahedronGeometry(0.072, 1), P.skinM, 0, -0.69, 0.005, arm); hd2.scale.set(1, 1.15, 0.9); put(new T.IcosahedronGeometry(0.03, 0), P.skinM, -s * 0.06, -0.66, 0.05, arm); } P.arms.push(arm);
+      if (!nj) { const hd2 = put(new T.IcosahedronGeometry(0.072, 1), P.skinM, 0, -0.69, 0.005, arm); hd2.scale.set(1, 1.15, 0.9); put(new T.IcosahedronGeometry(0.03, 0), P.skinM, -s * 0.06, -0.66, 0.05, arm); } P.arms.push(arm);
       if (o.coat && s === -1) { const cb = own('#7A4A27'); put(new T.BoxGeometry(0.27, 0.35, 0.03), cb, 0.0, -0.55, 0.13, arm); put(new T.BoxGeometry(0.23, 0.3, 0.02), own('#FFFFFF'), 0, -0.56, 0.148, arm); put(new T.BoxGeometry(0.1, 0.04, 0.05), own('#B9C4CC'), 0, -0.38, 0.15, arm); const cr = own('#D8C9A6'); put(new T.BoxGeometry(0.1, 0.03, 0.02), cr, 0, -0.56, 0.162, arm); put(new T.BoxGeometry(0.03, 0.1, 0.02), cr, 0, -0.56, 0.162, arm); }
       if (o.coat && s === 1 && !(o.cosm && o.cosm.hands)) {
         const gl = own('#CFEFF5'); gl.transparent = true; gl.opacity = 0.45; const liq = own('#38E0D0'); if (liq.emissive && liq.emissive.setHex) { liq.emissive.setHex(0x14B8A6); liq.emissiveIntensity = 0.8; }
