@@ -1951,8 +1951,9 @@ const World = (function () {
     else if (micOn) { scene.background = new T.Color(dark ? '#16282F' : '#DDEBF0'); hemi.intensity = dark ? 0.9 : 1.1; sun.intensity = 0.75; }
     else if (labOn) { scene.background = new T.Color(dark ? '#16282F' : '#E7F0F3'); hemi.intensity = dark ? 0.9 : 1.1; sun.intensity = 0.7; }
     else if (hol && HOLBG[hol]) { scene.background = new T.Color(HOLBG[hol][dark ? 1 : 0]); try { if (hol === 'halloween') { hemi.color.setHex(0xFFB26B); sun.color.setHex(0xFF9540); hemi.intensity = dark ? 0.7 : 0.95; } else { hemi.color.setHex(0xEAF3FF); sun.color.setHex(0xFFF2DD); } } catch (e) { /* stub */ } }
-    if (!(hol && !synOn && !labOn)) { try { hemi.color.setHex(0xffffff); sun.color.setHex(0xffffff); } catch (e) { /* stub */ } }
+    if (!(hol && !synOn && !labOn)) { try { if (synOn || micOn || labOn) { hemi.color.setHex(0xffffff); sun.color.setHex(0xffffff); } else { hemi.color.setHex(dark ? 0x9FB4E8 : 0xE2EDFF); hemi.groundColor.setHex(dark ? 0x4A4458 : 0x9A8268); sun.color.setHex(dark ? 0xFFB878 : 0xFFDDB0); } if (lamps) lamps.forEach(l => { l.visible = !synOn && !micOn && !labOn; l.intensity = dark ? 0.9 : 0.55; }); } catch (e) { /* stub */ } }
   }
+  let lamps = null;
   let insR = 0, insB = 0;
   function resize() {
     const w = host.clientWidth, h = host.clientHeight; if (!w || !h) return;
@@ -3276,8 +3277,9 @@ const World = (function () {
       tagsEl = host.querySelector('.tags'); bubEl = host.querySelector('.bub3d'); lineEl = host.querySelector('.line3d');
       scene = new T.Scene(); camera = new T.PerspectiveCamera(40, 2, 0.5, 120); raycaster = new T.Raycaster(); tmp = new T.Vector3();
       hemi = new T.HemisphereLight(0xffffff, 0x88aaaa, 0.64); scene.add(hemi);
-      sun = new T.DirectionalLight(0xffffff, 0.82); sun.position.set(9, 13, 6); sun.castShadow = true;
+      sun = new T.DirectionalLight(0xffffff, 0.82); sun.position.set(10, 9.5, 6); sun.castShadow = true;
       sun.shadow.mapSize.set(2048, 2048); sun.shadow.bias = -0.0004; sun.shadow.normalBias = 0.03; sun.shadow.radius = 5; const sc = sun.shadow.camera; sc.left = -16; sc.right = 16; sc.top = 14; sc.bottom = -14; sc.near = 1; sc.far = 50; scene.add(sun);
+      lamps = [[-1.2, 0.9], [3.2, 0.9]].map(q => { const l = new T.PointLight(0xFFC27A, 0.55, 11, 2); l.position.set(q[0], 3.3, q[1]); scene.add(l); return l; });
       buildStatic(); try { buildBin(); } catch (e) { /* decor */ }
       CLICK.forEach(id => { const b = document.createElement('button'); b.type = 'button'; b.className = 'tag3d'; b.dataset.up = id; tagsEl.appendChild(b); tags[id] = b; });
       applyTheme(); bind();
