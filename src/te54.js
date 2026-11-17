@@ -17,7 +17,7 @@ const { chromium } = require('playwright');
   if (tabs.join() !== 'Topics,Settings,My studies') fail.push('tabs ' + tabs);
   const cards = await p.evaluate(() => [...document.querySelectorAll('.crs')].map(e => e.dataset.crs + ':' + e.querySelector('.crsst').textContent));
   console.log('cards', cards);
-  if (cards.length !== 3 || !/p443:3 of 4 on/.test(cards.join()) || !/core:all 10 on/.test(cards.join())) fail.push('P2 cards ' + cards);
+  if (cards.length !== 4 || !/p443:3 of 4 on/.test(cards.join()) || !/core:all 10 on/.test(cards.join())) fail.push('P2 cards ' + cards);
   let c;
   // year tabs
   await act('year', 'P3');
@@ -57,7 +57,7 @@ const { chromium } = require('playwright');
   if (!(f2.cards.join() === 'p451' && f2.chips.join() === 'TH3F')) fail.push('find ibs ' + JSON.stringify(f2));
   await p.fill('#tfind', ''); await p.waitForTimeout(200);
   const f3 = await p.evaluate(() => ({ cards: document.querySelectorAll('.crs:not([hidden])').length, wkbody: document.querySelector('.crs[data-crs=p443] .wkbody').hidden }));
-  if (!(f3.cards === 3 && f3.wkbody === true)) fail.push('find clear ' + JSON.stringify(f3));
+  if (!(f3.cards === 4 && f3.wkbody === true)) fail.push('find clear ' + JSON.stringify(f3));
   // collapse persists across a re-render and reload
   await p.evaluate(() => { document.querySelector('.crs[data-crs=core]').open = false; }); await p.waitForTimeout(100);
   await act('topic', 'BG');
