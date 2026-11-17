@@ -1234,6 +1234,9 @@ table.board tbody tr:nth-child(-n+3) td:first-child { font-weight: 800; color: v
 .bcell i { font: 700 10.5px/1.15 var(--f-body); font-style: normal; background: var(--teal-soft); border-radius: 4px; padding: 1px 5px; }
 .bcell.over, .bcell:hover:not(:disabled) { background: var(--teal-soft); outline: 2px solid var(--teal); outline-offset: -2px; }
 .bcell.off { background: repeating-linear-gradient(45deg, var(--surface2), var(--surface2) 6px, transparent 6px, transparent 12px); cursor: default; }
+.rugrow { display: flex; flex-wrap: wrap; gap: 8px; margin: 10px 0 2px; }
+.rugsw { width: 30px; height: 30px; border-radius: 9px; border: 2px solid var(--ink); cursor: pointer; padding: 0; }
+.rugsw.on { outline: 3px solid var(--teal); outline-offset: 2px; }
 </style>
 
 <div class="shell">

@@ -79,7 +79,7 @@
       pw: { hint: 0, second: 0, binder: 0 }, daily: null, recall: [], reg: {}, calcOK: 0, mastery: {}, missed: [], karenCd: 0, karenWin: 0, karenLoss: 0, sweatyCd: 0, jimWin: 0, jimLoss: 0, phoneOK: 0, phoneBad: 0, phoneMiss: 0, lastShelve: 0, retired: 0, shelveOK: 0, shelveBad: 0, priorN: 0, decks: [],
       me: { done: false, body: 'normal', gender: 'n', hair: 0, hairColor: 0, skin: 1, scrub: 0, shirt: 0, shoes: 3 }, awards: { frames: [], pets: [] },
       set: { topics: topics, diffs: [1, 2, 3], mode: 'mixed', timer: true, focus: false, conf: true, p2fold: true, p3fold: true },
-      vial: [], cosm: [], cosmOn: {}, pillN: 0, store: { own: [], walls: 'w0', floor: 'f0', uni: '', deco: [] },
+      vial: [], cosm: [], cosmOn: {}, pillN: 0, store: { own: [], walls: 'w0', floor: 'f0', uni: '', deco: [], rug: { off: false, c: '#F2A516', p: 'solid' }, pos: {} },
       up: { shelf: 0, tech: 0, train: 0, counsel: 0, robot: 0 } };
   }
   let S = load();
@@ -98,7 +98,7 @@
         if (!o.pw && o.hintsLeft) f.pw.hint = Math.min(9, o.hintsLeft);
         if (f.up.library) { let r = 0; for (let l = 0; l < f.up.library; l++) r += Math.round(150 * Math.pow(1.9, l)); f.cash = (f.cash || 0) + r; f.libRefund = (f.libRefund || 0) + r; }
         delete f.up.library; delete f.hintsLeft; delete f.sinceHint;
-        f.store = Object.assign(defaults().store, o.store || {}); f.store.own = (f.store.own || []).slice(); f.store.deco = (f.store.deco || []).slice();
+        f.store = Object.assign(defaults().store, o.store || {}); f.store.own = (f.store.own || []).slice(); f.store.deco = (f.store.deco || []).slice(); f.store.rug = Object.assign({ off: false, c: '#F2A516', p: 'solid' }, f.store.rug || {}); f.store.pos = Object.assign({}, f.store.pos || {});
         f.awards = { frames: ((o.awards || {}).frames || []).slice(), pets: ((o.awards || {}).pets || []).slice(), calW: (o.awards || {}).calW || 0, wkDone: (o.awards || {}).wkDone ? o.awards.wkDone.slice() : null };
         const d = defaults().set, os = o.set || {};
         f.set = Object.assign(d, os); f.set.topics = Object.assign(defaults().set.topics, os.topics || {});
@@ -1174,7 +1174,10 @@
       const note = c[0] === 'uni' ? `<p class="note">${hasT ? (bf ? 'Your techs are earning bonuses: ' + bf + '.' : 'Pick a uniform to give your techs a bonus.') : 'Hire a Pharmacy Technician first. Uniform bonuses work once you have at least one tech.'}</p>` : c[0] === 'wear' ? '<p class="note">Bought gear lands in the matching slider on the Character tab, with its bonus.</p>' : '';
       return `<details class="crs" data-shop="${c[0]}"${shopOpen[c[0]] ? ' open' : ''}><summary><i class="caret" aria-hidden="true"></i><span class="crsn"><b>${c[1]}</b><small>${c[0] === 'pow' ? rows.reduce((a, r) => a + r.count, 0) + ' in stock' : ownN + ' of ' + rows.length + ' owned'}</small></span></summary><div class="crsb">${note}<div class="spgrid">${cards}</div></div></details>`;
     }).join('');
-    return `<div class="spcash">Cash <b>${money(cash)}</b></div><div class="crsl">${secs}</div>`;
+    const rg = Object.assign({ off: false, c: '#F2A516', p: 'solid' }, S.store.rug || {}), RUGC = ['#F2A516', '#0E9A8E', '#D9374A', '#4C7BD9', '#3E8E41', '#8A63C9', '#F29BC1', '#7C8A93', '#27384F', '#E8D9A8'], RUGP = [['solid', 'Plain'], ['stripes', 'Stripes'], ['checks', 'Checks'], ['diamonds', 'Diamonds'], ['border', 'Border']];
+    const rugSec = `<details class="crs" data-shop="rug"${shopOpen.rug ? ' open' : ''}><summary><i class="caret" aria-hidden="true"></i><span class="crsn"><b>Entry rug</b><small>${rg.off ? 'removed' : 'color and pattern'}</small></span></summary><div class="crsb"><div class="spcard${rg.off ? '' : ' on'}"><span class="spem" aria-hidden="true">🟫</span><div class="sptx"><b>Rug at the front door</b><small>Free. Pick a color and a pattern, or take it away.</small></div><button type="button" class="btn" data-act="rug-off" aria-pressed="${!rg.off}">${rg.off ? 'Put back' : 'Remove'}</button></div>${rg.off ? '' : `<div class="rugrow">${RUGP.map(q => `<button type="button" class="chip" data-act="rug-p" data-v="${q[0]}" aria-pressed="${rg.p === q[0]}">${q[1]}</button>`).join('')}</div><div class="rugrow">${RUGC.map(c => `<button type="button" class="rugsw${rg.c === c ? ' on' : ''}" data-act="rug-c" data-v="${c}" style="background:${c}" aria-label="Rug color ${c}"></button>`).join('')}</div>`}</div></details>`;
+    const mvNote = `<p class="note">Tip: press and hold a decoration in the pharmacy, then drag it where you want it. <button type="button" class="btn" data-act="deco-reset">Put decorations back</button></p>`;
+    return `<div class="spcash">Cash <b>${money(cash)}</b></div><div class="crsl">${secs}${rugSec}</div>${mvNote}`;
   }
   function shopBuy(kind, id) {
     if (kind === 'pow') {
@@ -1982,7 +1985,7 @@
   /* ---- save code: the whole save as one long code, to move progress between devices or keep a backup ---- */
 /*@EXT@*/
 /*@MIC@*/
-  const GAME_VERSION = 142;
+  const GAME_VERSION = 143;
   const b64u = (u8) => { let s = ''; for (let i = 0; i < u8.length; i += 0x8000) s += String.fromCharCode.apply(null, u8.subarray(i, i + 0x8000)); return btoa(s).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); };
   const unb64u = (t) => { const s = atob(t.replace(/-/g, '+').replace(/_/g, '/')), u = new Uint8Array(s.length); for (let i = 0; i < s.length; i++) u[i] = s.charCodeAt(i); return u; };
   const chk = (t) => { let h = 2166136261; for (let i = 0; i < t.length; i++) { h ^= t.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36); };
@@ -2046,6 +2049,9 @@
       case 'ctab': readShop(); cTab = v === 'shop' || v === 'pets' ? v : 'me'; renderPanel(); return;
       case 'shop-buy': shopBuy(t.dataset.k, t.dataset.id); if (view === 'create') renderPanel(); return;
       case 'shop-use': shopUse(t.dataset.k, t.dataset.id); return;
+      case 'rug-off': S.store.rug = Object.assign({ off: false, c: '#F2A516', p: 'solid' }, S.store.rug || {}); S.store.rug.off = !S.store.rug.off; save(); applyShop(); if (view === 'create') renderPanel(); return;
+      case 'rug-p': case 'rug-c': S.store.rug = Object.assign({ off: false, c: '#F2A516', p: 'solid' }, S.store.rug || {}); S.store.rug[t.dataset.act === 'rug-p' ? 'p' : 'c'] = t.dataset.v; S.store.rug.off = false; save(); applyShop(); if (view === 'create') renderPanel(); return;
+      case 'deco-reset': S.store.pos = {}; save(); applyShop(); toast('Decorations are back in their spots.'); return;
       case 'pwshop': cTab = 'shop'; Object.keys(shopOpen).forEach(k => { shopOpen[k] = false; }); shopOpen.pow = true; openView('create'); return;
       case 'me-done': readShop(); S.me.done = true; save(); syncBrand(); backToQ(); maybeTour(); return;
       case 'back': if (view === 'syn') synExit(); if (view === 'shift') return shiftNext(false); readDraft(); const wasC = view === 'create' && !S.me.done; if (view === 'create') readShop(); if (wasC) { S.me.done = true; save(); } backToQ(); if (wasC) maybeTour(); return;
@@ -2254,7 +2260,7 @@
   setInterval(() => { if (window.__rxLoading) return; try { localStorage.setItem(SAVE_KEY, JSON.stringify(S)); } catch (e) { /* ignore */ } }, 5000);
 
   { const sc = $('#savecard'); if (sc) sc.innerHTML = saveBoxHTML(); }
-  World.init({ host: $('#stage'), getS: () => S, specialRoll: specialRoll, tagInfo: tagInfo, onBuy: buyUp, onNotes: () => openView('studies'), onBin: () => { micR = null; openView('mic'); }, onMicSite: (id) => micSiteClick(id), onMicDish: (id) => micDishClick(id), onMicPaper: (id, row) => micPaperClick(id, row), notesInfo: customCount, karenRoll: karenRoll, sweatyRoll: sweatyRoll, elderRoll: elderRoll, eventRoll: eventRoll, onVisitor: visitClick, onVisitorArrive: visitArrive, capsuleOk: capsuleOk, onCapsule: onCapsule, onBrain: synEnter, onSynSite: onSynSite, onEvt: onEvt, pillOk: pillOk, onPill: onPill, pillBoost: () => gearBuff().pills, onPhone: openPhone, onPolice: policeCome, himOk: himOk, onHimSpawn: onHimSpawn, onHimAngel: himAngelOk, onHimLand: himLand, onHimBless: onHimBless, onFp: fpClick, sign: () => shopName() + '|' + tierName() + ' #' + (S.franchises + 1) });
+  World.init({ host: $('#stage'), getS: () => S, onDecorMove: (id, p) => { S.store.pos = S.store.pos || {}; S.store.pos[id] = p.map(v => Math.round(v * 100) / 100); save(); }, specialRoll: specialRoll, tagInfo: tagInfo, onBuy: buyUp, onNotes: () => openView('studies'), onBin: () => { micR = null; openView('mic'); }, onMicSite: (id) => micSiteClick(id), onMicDish: (id) => micDishClick(id), onMicPaper: (id, row) => micPaperClick(id, row), notesInfo: customCount, karenRoll: karenRoll, sweatyRoll: sweatyRoll, elderRoll: elderRoll, eventRoll: eventRoll, onVisitor: visitClick, onVisitorArrive: visitArrive, capsuleOk: capsuleOk, onCapsule: onCapsule, onBrain: synEnter, onSynSite: onSynSite, onEvt: onEvt, pillOk: pillOk, onPill: onPill, pillBoost: () => gearBuff().pills, onPhone: openPhone, onPolice: policeCome, himOk: himOk, onHimSpawn: onHimSpawn, onHimAngel: himAngelOk, onHimLand: himLand, onHimBless: onHimBless, onFp: fpClick, sign: () => shopName() + '|' + tierName() + ' #' + (S.franchises + 1) });
   window.__rxDbg = () => ({ micDbg: () => ({ get R() { return micR; }, get inLab() { return micIn; }, drop: micDrop, paper: micPaperClick, part: micStartPart, startSort: micStartSort, sel: id => { micSelG = id; renderPanel(); } }), sr: srUpdate, nc: newCard, sp: specialRoll, fp: fp, S: S, view: view, rush: rush, phoneR: phone.ringing, TOPQ: TOPQ, pool: poolQs, cur: cur, synQ: () => (typeof SYN !== 'undefined' ? SYN.q : null), synTap: id => onSynSite(id), offer: k => offerEvt(k, 'test'), onEvt: onEvt, holiday: () => holNow(), holN: () => holCount(), renderStats: renderStats, passive: passive, techRate: techRate, buyUp: buyUp, openVial: openVial, tabletTake: tabletTake, capsuleOpen: capsuleOpen, buffOn: buffOn, GEAR: GEAR, gearBuff: gearBuff, gearHave: gearHave });
   if (!World.ok) $('#stage').classList.add('flat');
   else { document.body.classList.add('fx'); try { World.setBin(!!S.binBug); } catch (e) { /* decor */ } World.setPharmacist(meSpec()); World.setStore(S.store); World.setStaffLook(uniSpec()); World.setAwards(S.awards); World.setCalendar(Math.min(4, S.awards.calW || 0), false, S.awards.calW || 0); }

@@ -138,3 +138,9 @@ No login. `src/net.js` holds `RX_NET = { url, key }` (a Supabase project URL and
 
 ## Lighting (v142)
 Main scene (`world.js`, init and `applyTheme`): hemisphere light 0.64 (dark theme 0.42) plus a sun 0.82 (dark 0.62), softened in a second pass at (9, 13, 6) with a 2048 shadow map, bias and normal bias set. Lower fill and a stronger sun give darker cast shadows and shaded sides. The lab, microbe room, synapse and holiday scenes set their own intensities in `applyTheme`. The Part Maker jacked body (PR #9, v141) was undone at the user's request.
+
+## Room layout, entry rug and movable decorations (v143)
+- The front door / entry is at `EX = 3.7` in `world.js` (was x 5; spawns, exit paths, cops, the porch platform and the rug all use `EX`). The right-front corner has a bench against the front edge (seats in `SEATS`, z 6.05); the old yellow chairs and the little white table are gone.
+- Entry rug: `S.store.rug = { off, c, p }` (color hex, pattern `solid | stripes | checks | diamonds | border`), free, set in the Shop tab section "Entry rug" (acts `rug-off`, `rug-p`, `rug-c`). `world.js` `setEntryRug` / `api.setRug` draw it (canvas texture on a plane); `applyStore` calls it. Old saves get the defaults in `load()`.
+- Decorations are movable: press and hold ~0.25 s, then drag (`decorHit`, `decorTo` in `bind()`). Floor items (rug, cooler, vending machine) move on the floor, counter items (bell, cactus, lava lamp, fish tank) along the counter, the neon sign along the left wall. The position is saved in `S.store.pos[id] = [x, y, z]` through `B.onDecorMove`; "Put decorations back" (`deco-reset`) clears it. Cooler and vending machine obstacles follow the item (`decorObstFor`). Pets were already draggable. Test: `te60`.
+- `te38` now loads with `noconf=1`; `te54` expects 4 P2 cards (the Medicinal Chemistry card was added in v127).
