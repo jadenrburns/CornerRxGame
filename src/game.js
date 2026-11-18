@@ -6,7 +6,7 @@
   const CATS = [
     ['BG', 'Brand / Generic'], ['CL', 'Drug classes'], ['MOA', 'Mechanisms'], ['AE', 'Adverse effects'],
     ['DDI', 'Interactions'], ['CN', 'Counseling'], ['AD', 'Antidotes'], ['SIG', 'Sig & law'],
-    ['TOP', 'Weekly drugs'], ['TP3', 'Weekly drugs \u00B7 P3'], ['CALC', 'Calculations'], ['PT3', 'PharmTox \u00B7 Exam 3 questions'], ['PT3G', 'PharmTox \u00B7 Exam 3 drug practice'], ['PT4', 'PharmTox \u00B7 Exam 4 drug practice'], ['TH3', 'Therapeutics \u00B7 Exam 3'], ['ASD', 'Med Chem \u00B7 Exam 3 antiseizure drugs'], ['CHO', 'Med Chem \u00B7 Exam 3 cholinergic drugs'], ['MET3', 'Med Chem \u00B7 Exam 3 metabolism (tap the site)'], ['TH3F', 'Therapeutics \u00B7 IBS, constipation, diarrhea'], ['TH3C', 'Therapeutics \u00B7 Contraceptives'], ['GER', 'Therapeutics \u00B7 Geriatrics'], ['T553', 'Therapeutics III \u00B7 Syllabus topics'], ['HIM', 'Andy \u00B7 Heart failure'], ['MY', 'My studies']
+    ['TOP', 'Weekly drugs'], ['TP3', 'Weekly drugs \u00B7 P3'], ['CALC', 'Calculations'], ['PT3', 'PharmTox \u00B7 Exam 3 questions'], ['PT3G', 'PharmTox \u00B7 Exam 3 drug practice'], ['PT4', 'PharmTox \u00B7 Exam 4 drug practice'], ['TH3', 'Therapeutics \u00B7 Exam 3'], ['ASD', 'Med Chem \u00B7 Exam 3 antiseizure drugs'], ['CHO', 'Med Chem \u00B7 Exam 3 cholinergic drugs'], ['MET3', 'Med Chem \u00B7 Exam 3 metabolism (tap the site)'], ['EX3', 'Med Chem \u00B7 Exam 3 cram (professor review)'], ['TH3F', 'Therapeutics \u00B7 IBS, constipation, diarrhea'], ['TH3C', 'Therapeutics \u00B7 Contraceptives'], ['GER', 'Therapeutics \u00B7 Geriatrics'], ['T553', 'Therapeutics III \u00B7 Syllabus topics'], ['HIM', 'Andy \u00B7 Heart failure'], ['MY', 'My studies']
   ];
   const CATNAME = {}; CATS.forEach(c => CATNAME[c[0]] = c[1]);
   /* The Topics menu is built from this table. A new category needs a CATS entry above and a slot in one course here
@@ -15,18 +15,19 @@
     { id: 'core', name: 'Core skills', tag: 'Every year', year: 'all', cats: ['BG', 'CL', 'MOA', 'AE', 'DDI', 'CN', 'AD', 'SIG', 'CALC', 'HIM'], note: 'The everyday counter questions: names, classes, mechanisms, side effects, interactions, counseling, antidotes, sig and law, calculations, and Andy’s heart failure questions.' },
     { id: 'p443', name: 'PharmTox', code: 'PHAR 443', tag: 'P2', year: 'P2', cats: ['TOP', 'PT3', 'PT3G', 'PT4'], sched: 'p2', note: 'Weekly drug sheets plus the exam question sets.' },
     { id: 'p451', name: 'Therapeutics', code: 'PHAR 451', tag: 'P2', year: 'P2', cats: ['TH3F', 'TH3C', 'TH3', 'GER'], note: 'Exam 3 GI and contraception topics, and geriatrics.' },
-    { id: 'p421', name: 'Medicinal Chemistry', code: 'PHAR 421', tag: 'P2', year: 'P2', cats: ['ASD', 'CHO', 'MET3'], note: 'Exam 3: antiseizure and cholinergic drugs, plus tap-the-site metabolism questions.' },
+    { id: 'p421', name: 'Medicinal Chemistry', code: 'PHAR 421', tag: 'P2', year: 'P2', cats: ['EX3', 'ASD', 'CHO', 'MET3'], note: 'Exam 3: start with the cram tab (built from the professor\u2019s study guide), then antiseizure, cholinergic and tap-the-site metabolism.' },
     { id: 'p3top', name: 'Top 300 weekly drugs', short: 'Top 300', tag: 'P3', year: 'P3', cats: ['TP3'], sched: 'p3', note: 'Drug list sheets by system, one set per week.' },
     { id: 'p553', name: 'Therapeutics III', code: 'PHAR 553', tag: 'P3', year: 'P3', cats: ['T553'], note: 'Syllabus topics: asthma, COPD, renal, diabetes, gout, migraine, RA and SLE, thyroid, liver, hepatitis, blood pressure, lipids, pain, nutrition, fluids and electrolytes.' },
     { id: 'my', name: 'My studies', tag: 'Yours', year: 'all', cats: ['MY'], note: 'Decks you wrote or imported from Quizlet. Add and manage them on the My studies tab.' }
   ];
-  const CHIP = { ASD: 'Exam 3: antiseizure drugs', CHO: 'Exam 3: cholinergic drugs', MET3: 'Exam 3: metabolism (tap the site)', TOP: 'Weekly drugs', PT3: 'Exam 3: your exam questions', PT3G: 'Exam 3: drug-list practice', PT4: 'Exam 4: mania and psychosis drugs', TH3: 'Exam 3: IBD, ulcers, hemorrhoids and the rest', TH3F: 'Exam 3: IBS, constipation, diarrhea', TH3C: 'Exam 3: contraceptives', GER: 'Geriatrics: aging, polypharmacy, deprescribing', HIM: 'Heart failure: Andy’s questions', T553: 'Therapeutics III topics', TP3: 'Top 300 weekly drugs', MY: 'My studies' };
+  const CHIP = { EX3: 'Exam 3 cram: professor\u2019s review (all three topics)', ASD: 'Exam 3: antiseizure drugs', CHO: 'Exam 3: cholinergic drugs', MET3: 'Exam 3: metabolism (tap the site)', TOP: 'Weekly drugs', PT3: 'Exam 3: your exam questions', PT3G: 'Exam 3: drug-list practice', PT4: 'Exam 4: mania and psychosis drugs', TH3: 'Exam 3: IBD, ulcers, hemorrhoids and the rest', TH3F: 'Exam 3: IBS, constipation, diarrhea', TH3C: 'Exam 3: contraceptives', GER: 'Geriatrics: aging, polypharmacy, deprescribing', HIM: 'Heart failure: Andy’s questions', T553: 'Therapeutics III topics', TP3: 'Top 300 weekly drugs', MY: 'My studies' };
   const courseCats = (c) => c.cats.filter(k => k !== 'MY' || S.decks.length);
   const YEARS = ['P1', 'P2', 'P3'];
   const curYear = () => YEARS.indexOf(S.set.year) >= 0 ? S.set.year : 'P2';
   const inYear = (c, y) => c.year === 'all' || c.year === y;
   const yearCats = (y) => { const o = []; COURSES.forEach(c => { if (inYear(c, y)) o.push.apply(o, courseCats(c)); }); return o; };
   const FLAVOR = {
+    EX3: ['I have a test coming up on my medicines. Can you quiz me?', 'Can you help me understand how my sleep and seizure medicines work?', 'Quick question about how this drug acts.'],
     ASD: ['My neurologist changed my seizure medicine, can you explain it?', 'I want to understand how my seizure drug is handled by the body.', 'Quick question about my antiseizure prescription.'],
     CHO: ['My doctor said this one acts on acetylcholine. What does that mean?', 'Can you explain how this nerve and muscle drug works?', 'I keep hearing about cholinergic drugs. Help?'],
     MET3: ['Can you show me where my medicine is broken down?', 'I was told my liver changes this drug. Where on the molecule?', 'Show me what the liver does to it.'],
@@ -69,7 +70,7 @@
   const ICON_BOOK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2z"/><path d="M4 21V5M9 7h6"/></svg>';
 
   function hash(s) { let h = 5381; for (let i = 0; i < s.length; i++) h = ((h << 5) + h + s.charCodeAt(i)) | 0; return 'q' + (h >>> 0).toString(36); }
-  BANK.forEach(q => { q.k = hash(q.q); });
+  BANK.forEach(q => { q.k = hash((q.kx || '') + q.q); });
   let BYKEY = {};
 
   /* ---- state ---- */
@@ -1985,7 +1986,7 @@
   /* ---- save code: the whole save as one long code, to move progress between devices or keep a backup ---- */
 /*@EXT@*/
 /*@MIC@*/
-  const GAME_VERSION = 143;
+  const GAME_VERSION = 144;
   const b64u = (u8) => { let s = ''; for (let i = 0; i < u8.length; i += 0x8000) s += String.fromCharCode.apply(null, u8.subarray(i, i + 0x8000)); return btoa(s).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); };
   const unb64u = (t) => { const s = atob(t.replace(/-/g, '+').replace(/_/g, '/')), u = new Uint8Array(s.length); for (let i = 0; i < s.length; i++) u[i] = s.charCodeAt(i); return u; };
   const chk = (t) => { let h = 2166136261; for (let i = 0; i < t.length; i++) { h ^= t.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36); };

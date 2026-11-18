@@ -524,7 +524,6 @@ const World = (function () {
     bx(c, 13.75, 0.16, 1.9, '#F4F9F9', 0, 1.18, 0);
     bx(c, 13.75, 0.1, 0.12, '#F2A516', 0, 1.2, 0.93);
     for (let i = 0; i < 11; i++) bx(c, 0.9, 0.7, 0.05, '#0E9A8E', -6 + i * 1.2, 0.55, 0.57);
-    station(c, cx(2.2), -0.25, null, 0.5); station(c, cx(3.5), -0.25, null, 0.5);
     cy(c, 0.25, 0.3, 0.5, 6, '#F2A516', cx(-2.8), 1.5, 0.1);
     // desk phone (clickable while it rings)
     phoneG = new T.Group(); phoneG.position.set(0.9, 1.26, 0.3); g.add(phoneG);
@@ -609,12 +608,9 @@ const World = (function () {
   }
   function buildTech(lv) {
     const G = ug.tech; clear(G);
-    if (lv < 1) { ghostBox(G, 4.8, 2.5, 1.6, 'tech'); return; }
-    [-1.5, 0, 1.5].forEach((x, i) => {
-      station(G, x, -0.25, 'tech', i < lv ? 0.8 : 0.08);
-      if (i < lv) bx(G, 0.1, 0.1, 0.1, '#3FD07F', x + 0.5, 1.36, -0.28, 'tech', { emissive: new T.Color(0x3FD07F), emissiveIntensity: 1 });
-    });
-    for (let i = 0; i < Math.min(lv, 5); i++) cy(G, 0.15, 0.15, 0.3, 6, BOT[i], -1.9 + i * 0.95, 1.4, 0.55, 'tech');
+    // the one computer on the left is the base technician station (and the prior authorization terminal); the upgrade adds staff only
+    station(G, 0, -0.25, 'tech', 0.8);
+    if (lv < 1) ghostBox(G, 4.8, 2.5, 1.6, 'tech');
   }
   function buildCounsel(lv) {
     const G = ug.counsel; clear(G);
@@ -1711,7 +1707,7 @@ const World = (function () {
   };
   api.fpPrior = function () {
     if (!api.ok) return;
-    fpBegin({ x: 2.2, y: 1.84, z: -1.05 }, { x: 2.2, y: 1.84, z: -0.3 }, 36);
+    fpBegin({ x: BASE.tech[0], y: 1.84, z: -1.05 }, { x: BASE.tech[0], y: 1.84, z: -0.3 }, 36);
     fpScreen = true; fpqEl = host.querySelector('#fpq'); if (fpqEl) fpqEl.style.opacity = '0';
   };
   api.fpEnd = function () { fpT = 0; fpScreen = false; if (pharm) pharm.g.visible = true; setFpHover(null); };

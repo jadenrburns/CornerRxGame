@@ -27,8 +27,8 @@ const { chromium } = require('playwright');
     for (const mode of ['right', 'wrongsite', 'wrongopt']) {
       const info = await p.evaluate(([k, mode]) => {
         const d = window.__rxDbg(); const q = BANK.find(x => x.k === k);
-        d.S.set.topics = {}; BANK.forEach(x => { d.S.set.topics[x.c] = false; }); ['TOP','TP3','MY'].forEach(c => { d.S.set.topics[c] = false; }); d.S.set.topics.MET3 = true; d.S.set.mode = 'new'; d.S.set.focus = true;
-        BANK.forEach(x => { delete d.S.mastery[x.k]; if (x.c === 'MET3' && x.k !== k) d.S.mastery[x.k] = { box: 3, seen: 3, ok: 3, n: 5, d: 30, ef: 2.5, due: Date.now() + 9e9, lt: Date.now() }; });
+        d.S.set.topics = {}; BANK.forEach(x => { d.S.set.topics[x.c] = false; }); ['TOP','TP3','MY'].forEach(c => { d.S.set.topics[c] = false; }); d.S.set.topics[q.c] = true; d.S.set.mode = 'new'; d.S.set.focus = true;
+        BANK.forEach(x => { delete d.S.mastery[x.k]; if (x.c === q.c && x.k !== k) d.S.mastery[x.k] = { box: 3, seen: 3, ok: 3, n: 5, d: 30, ef: 2.5, due: Date.now() + 9e9, lt: Date.now() }; });
         d.nc(); const c = window.__rxDbg().cur; return { got: c && c.q && c.q.k === k, sites: document.querySelectorAll('.molsvg .site').length };
       }, [k, mode]);
       if (!info.got) { fail.push('card not forced ' + k); continue; }
