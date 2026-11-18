@@ -1123,7 +1123,11 @@ table.board th { text-align: left; font: 700 10.5px/1.2 var(--f-mono); letter-sp
 table.board th.num, table.board td.num { text-align: right; }
 table.board td { padding: 8px 10px; border-bottom: 1px solid var(--line); font-variant-numeric: tabular-nums; }
 table.board tr:last-child td { border-bottom: 0; }
-table.board td:nth-child(2) { font-weight: 700; overflow-wrap: anywhere; }
+table.board { display: table; table-layout: fixed; margin: 0; }
+table.board th:nth-child(1) { width: 40px; }
+table.board th:nth-child(3) { width: 118px; }
+table.board td:nth-child(2) { font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+table.board td.num { white-space: nowrap; }
 table.board tr.me td { background: var(--teal-soft); }
 table.board tbody tr:nth-child(-n+3) td:first-child { font-weight: 800; color: var(--teal-ink); }
 .flagform { display: grid; gap: 8px; margin-top: 10px; padding: 12px; border: 1px solid var(--line); border-radius: 14px; background: var(--surface2); }

@@ -751,7 +751,7 @@
     const nameBox = `<div class="grp"><b>Your nickname</b><div class="namerow"><input id="nickbox" class="field" type="text" maxlength="24" autocomplete="off" placeholder="e.g. RxRanger" value="${esc(S.nick || '')}" aria-label="Nickname"><button type="button" class="btn go" data-act="board-join">${S.boardOn ? 'Update' : 'Join the board'}</button>${S.boardOn ? '<button type="button" class="btn" data-act="board-leave">Leave</button>' : ''}</div><p class="note">${S.boardOn ? 'You are on the board as ' + esc(S.nick) + '. Only your nickname and your total money made are shared.' : 'Opt in with a nickname. No account, no email. You can leave any time.'}</p></div>`;
     if (!Net.on()) return `<div class="pane"><h3>Leaderboard</h3><p class="sub">Not connected yet.</p><p class="note">The online leaderboard switches on once the game has a database configured (see net.js). Until then your progress stays in this browser.</p><div class="btnrow"><button type="button" class="btn go" data-act="back">Back to counter</button></div></div>`;
     const rows = boardRows, sorted = rows ? rows.slice().sort((a, b) => b.earned - a.earned) : null;
-    const tbl = !rows ? '<p class="note">Loading…</p>' : !rows.length ? '<p class="note">Nobody is on the board yet. Be the first.</p>' : `<div class="boardwrap"><table class="board"><thead><tr><th>#</th><th>Pharmacist</th><th class="num">Total money made</th></tr></thead><tbody>${sorted.map((r, i) => `<tr${r.pid === me ? ' class="me"' : ''}><td>${i + 1}</td><td>${esc(r.name)}</td><td class="num">${money(r.earned)}</td></tr>`).join('')}</tbody></table></div>`;
+    const tbl = !rows ? '<p class="note">Loading…</p>' : !rows.length ? '<p class="note">Nobody is on the board yet. Be the first.</p>' : `<div class="boardwrap"><table class="board"><thead><tr><th>#</th><th>Pharmacist</th><th class="num">Money made</th></tr></thead><tbody>${sorted.map((r, i) => `<tr${r.pid === me ? ' class="me"' : ''}><td>${i + 1}</td><td title="${esc(r.name)}">${esc(r.name)}</td><td class="num">${money(r.earned)}</td></tr>`).join('')}</tbody></table></div>`;
     return `<div class="pane boardpane"><h3>Leaderboard</h3><p class="sub">Ranked by total money made, all time. Spending it or retiring never lowers your total. Refreshes every 30 seconds.</p>${nameBox}${boardErr ? '<p class="note">Could not reach the board: ' + esc(boardErr) + '</p>' : ''}${tbl}<div class="btnrow"><button type="button" class="btn go" data-act="back">Back to counter</button><button type="button" class="btn" data-act="board-refresh">Refresh</button></div></div>`;
   }
   /* ---- flags page: live list for the question author (?flags=1 or the dev menu) ---- */
@@ -1986,7 +1986,7 @@
   /* ---- save code: the whole save as one long code, to move progress between devices or keep a backup ---- */
 /*@EXT@*/
 /*@MIC@*/
-  const GAME_VERSION = 145;
+  const GAME_VERSION = 146;
   const b64u = (u8) => { let s = ''; for (let i = 0; i < u8.length; i += 0x8000) s += String.fromCharCode.apply(null, u8.subarray(i, i + 0x8000)); return btoa(s).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); };
   const unb64u = (t) => { const s = atob(t.replace(/-/g, '+').replace(/_/g, '/')), u = new Uint8Array(s.length); for (let i = 0; i < s.length; i++) u[i] = s.charCodeAt(i); return u; };
   const chk = (t) => { let h = 2166136261; for (let i = 0; i < t.length; i++) { h ^= t.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36); };
