@@ -1241,6 +1241,9 @@ table.board tbody tr:nth-child(-n+3) td:first-child { font-weight: 800; color: v
 .rugrow { display: flex; flex-wrap: wrap; gap: 8px; margin: 10px 0 2px; }
 .rugsw { width: 30px; height: 30px; border-radius: 9px; border: 2px solid var(--ink); cursor: pointer; padding: 0; }
 .rugsw.on { outline: 3px solid var(--teal); outline-offset: 2px; }
+.rotrow { display: flex; align-items: center; gap: 8px; padding: 4px 0; }
+.rotrow span { flex: 1; min-width: 0; font-weight: 700; }
+.rotrow .btn { padding: 4px 12px; font-size: 18px; line-height: 1; }
 </style>
 
 <div class="shell">
@@ -3526,7 +3529,9 @@ const SHOP_DECOR = [
   ['lava', 'Lava lamp', 250, 'Glows on the counter.', '🪔'],
   ['fish', 'Fish tank', 450, 'Soothing for waiting patients.', '🐠'],
   ['cooler', 'Water cooler', 500, 'Hydration station by the counter.', '🚰'],
-  ['neon', 'Neon sign', 700, 'An OPEN sign for the side wall.', '💡'],
+  ['photo', 'Framed photo', 220, 'A sunny landscape for the side wall.', '🖼️'],
+  ['poster', 'Health poster', 260, 'Ask your pharmacist. Goes on the side wall.', '📋'],
+  ['clock', 'Wall clock', 320, 'Keeps real time. Goes on the side wall.', '🕒'],
   ['vend', 'Vending machine', 900, 'Snacks by the counter.', '🥤']
 ];
 /* extra pharmacist hairstyles: [id, name, style number in world.js, price] */
@@ -4389,10 +4394,10 @@ const World = (function () {
     const t = new T.CanvasTexture(cv); return t;
   }
   function setEntryRug(spec) {
-    if (spec) rugSpec = { off: !!spec.off, c: spec.c || '#F2A516', p: spec.p || 'solid' };
+    if (spec) rugSpec = { off: !!spec.off, c: spec.c || '#F2A516', p: spec.p || 'solid', rot: spec.rot || 0 };
     if (!entryRugG) return;
     while (entryRugG.children.length) entryRugG.remove(entryRugG.children[0]);
-    entryRugG.visible = !rugSpec.off; if (rugSpec.off) return;
+    entryRugG.visible = !rugSpec.off; entryRugG.rotation.y = rugSpec.rot || 0; if (rugSpec.off) return;
     const base = bx(entryRugG, 2.4, 0.04, 3.6, shadeHex(rugSpec.c, -0.28), 0, 0.08, 0);
     const top = new T.Mesh(new T.PlaneGeometry(2.36, 3.56), new T.MeshStandardMaterial({ map: rugTex(rugSpec.c, rugSpec.p), flatShading: true, roughness: 0.95 })); top.rotation.x = -PI / 2; top.position.set(0, 0.102, 0); top.receiveShadow = true; entryRugG.add(top);
   }
@@ -4946,9 +4951,13 @@ const World = (function () {
   const decorBuilt = {}, decorObst = {}, decorAnim = [];
   function surfMat(list) { if (!list.length) return null; const m = list[0].material.clone ? list[0].material.clone() : list[0].material; list.forEach(x => { x.material = m; }); return m; }
   const DECOR_OBST = { cooler: { x0: -9.45, x1: -8.7, z0: 2.65, z1: 3.35 }, vend: { x0: -9.5, x1: -8.5, z0: 1.35, z1: 2.45 } };
-  const DECOR_MODE = { rug: 'floor', cooler: 'floor', vend: 'floor', bell: 'counter', cactus: 'counter', lava: 'counter', fish: 'counter', neon: 'wall' };
+  const DECOR_MODE = { rug: 'floor', cooler: 'floor', vend: 'floor', bell: 'counter', cactus: 'counter', lava: 'counter', fish: 'counter', photo: 'wall', poster: 'wall', clock: 'wall' };
   const decorDef = {}; // default position of every decor item, so a saved position can shift its obstacle
-  function decorObstFor(id, g) { const b = DECOR_OBST[id], d = decorDef[id]; if (!b || !d) return null; const dx = g.position.x - d[0], dz = g.position.z - d[2]; return { x0: b.x0 + dx, x1: b.x1 + dx, z0: b.z0 + dz, z1: b.z1 + dz }; }
+  function decorObstFor(id, g) {
+    const b = DECOR_OBST[id], d = decorDef[id]; if (!b || !d) return null; const dx = g.position.x - d[0], dz = g.position.z - d[2];
+    const cx = (b.x0 + b.x1) / 2 + dx, cz = (b.z0 + b.z1) / 2 + dz, hx = (b.x1 - b.x0) / 2, hz = (b.z1 - b.z0) / 2, a = g.userData.rotA || 0, c = Math.abs(Math.cos(a)), s = Math.abs(Math.sin(a));
+    const ex = c * hx + s * hz, ez = s * hx + c * hz; return { x0: cx - ex, x1: cx + ex, z0: cz - ez, z1: cz + ez };
+  }
   function buildDecor(id) {
     const g = new T.Group();
     if (id === 'rug') {
@@ -4980,12 +4989,31 @@ const World = (function () {
       for (let r = 0; r < 4; r++) for (let c = 0; c < 4; c++) bx(g, 0.14, 0.2, 0.1, cols[(r + c) % 5], -0.31 + c * 0.17, 0.78 + r * 0.28, 0.4);
       bx(g, 0.2, 0.5, 0.04, '#27384F', 0.39, 1.2, 0.44); [0, 1, 2].forEach(i => bx(g, 0.1, 0.06, 0.03, '#F4F9F9', 0.39, 1.35 - i * 0.12, 0.47)); bx(g, 0.7, 0.2, 0.04, '#27384F', -0.1, 0.32, 0.44);
       bx(g, 0.9, 0.18, 0.03, '#F2C94C', 0, 1.8, 0.44);
-    } else if (id === 'neon') {
-      g.position.set(-9.55, 3.55, 2.2); g.rotation.y = PI / 2;
-      const cv = document.createElement('canvas'); cv.width = 256; cv.height = 96; const cx = cv.getContext('2d');
-      cx.fillStyle = '#101018'; cx.fillRect(0, 0, 256, 96); cx.strokeStyle = '#FF5FA2'; cx.lineWidth = 4; cx.strokeRect(6, 6, 244, 84);
-      cx.font = '800 54px sans-serif'; cx.textAlign = 'center'; cx.textBaseline = 'middle'; cx.shadowColor = '#FF5FA2'; cx.shadowBlur = 14; cx.fillStyle = '#FFD6E8'; cx.fillText('OPEN', 128, 52);
-      const tx = new T.CanvasTexture(cv), pl = new T.Mesh(new T.PlaneGeometry(1.3, 0.49), new T.MeshBasicMaterial({ map: tx })); pl.position.z = 0.03; g.add(pl); bx(g, 1.36, 0.55, 0.05, '#101018', 0, 0, 0);
+    } else if (id === 'photo') {
+      g.position.set(-9.55, 3.55, -1.4); g.rotation.y = PI / 2;
+      const cv = document.createElement('canvas'); cv.width = 200; cv.height = 150; const cx = cv.getContext('2d');
+      const sk = cx.createLinearGradient(0, 0, 0, 150); sk.addColorStop(0, '#8FD3F4'); sk.addColorStop(1, '#FFE9B8'); cx.fillStyle = sk; cx.fillRect(0, 0, 200, 150);
+      cx.fillStyle = '#FFD23F'; cx.beginPath(); cx.arc(150, 42, 18, 0, 7); cx.fill();
+      cx.fillStyle = '#6FA8A0'; cx.beginPath(); cx.moveTo(0, 110); cx.lineTo(55, 55); cx.lineTo(105, 105); cx.lineTo(140, 75); cx.lineTo(200, 118); cx.lineTo(200, 150); cx.lineTo(0, 150); cx.fill();
+      cx.fillStyle = '#3E8E41'; cx.fillRect(0, 122, 200, 28);
+      bx(g, 0.98, 0.78, 0.06, '#7A4E2D', 0, 0, 0); bx(g, 0.86, 0.66, 0.03, '#F4F9F9', 0, 0, 0.03);
+      const pl = new T.Mesh(new T.PlaneGeometry(0.74, 0.55), new T.MeshBasicMaterial({ map: new T.CanvasTexture(cv) })); pl.position.z = 0.05; g.add(pl);
+    } else if (id === 'poster') {
+      g.position.set(-9.55, 3.45, -3.0); g.rotation.y = PI / 2;
+      const cv = document.createElement('canvas'); cv.width = 160; cv.height = 220; const cx = cv.getContext('2d');
+      cx.fillStyle = '#E7F5F2'; cx.fillRect(0, 0, 160, 220); cx.fillStyle = '#0E9A8E'; cx.fillRect(0, 0, 160, 38);
+      cx.fillStyle = '#fff'; cx.font = '800 20px sans-serif'; cx.textAlign = 'center'; cx.textBaseline = 'middle'; cx.fillText('ASK YOUR', 80, 14); cx.fillText('PHARMACIST', 80, 30);
+      cx.fillStyle = '#2FAE66'; cx.fillRect(66, 62, 28, 88); cx.fillRect(36, 92, 88, 28);
+      cx.fillStyle = '#27384F'; cx.font = '700 15px sans-serif'; cx.fillText('Know your meds', 80, 180); cx.fillText('Take as directed', 80, 202);
+      bx(g, 0.74, 1.0, 0.04, '#27384F', 0, 0, 0);
+      const pl = new T.Mesh(new T.PlaneGeometry(0.68, 0.94), new T.MeshBasicMaterial({ map: new T.CanvasTexture(cv) })); pl.position.z = 0.03; g.add(pl);
+    } else if (id === 'clock') {
+      g.position.set(-9.55, 4.35, 0.9); g.rotation.y = PI / 2;
+      cy(g, 0.36, 0.36, 0.06, 18, '#27384F', 0, 0, 0).rotation.x = PI / 2; cy(g, 0.31, 0.31, 0.07, 18, '#F4F9F9', 0, 0, 0).rotation.x = PI / 2;
+      for (let i = 0; i < 12; i++) { const a = i / 12 * PI * 2; bx(g, 0.03, i % 3 === 0 ? 0.09 : 0.05, 0.02, '#27384F', Math.sin(a) * 0.26, Math.cos(a) * 0.26, 0.05).rotation.z = -a; }
+      const hh = new T.Group(), mh = new T.Group(); hh.position.z = 0.06; mh.position.z = 0.07; g.add(hh); g.add(mh);
+      bx(hh, 0.04, 0.17, 0.02, '#27384F', 0, 0.085, 0); bx(mh, 0.025, 0.25, 0.02, '#D9374A', 0, 0.125, 0);
+      const tick = () => { const d = new Date(), m = d.getMinutes() + d.getSeconds() / 60; mh.rotation.z = -m / 60 * PI * 2; hh.rotation.z = -((d.getHours() % 12) + m / 60) / 12 * PI * 2; }; tick(); decorAnim.push(tick);
     } else return null;
     decorDef[id] = [g.position.x, g.position.y, g.position.z]; g.userData.decorId = id;
     decorG.add(g); return g;
@@ -5000,7 +5028,7 @@ const World = (function () {
     const want = {}; (st.deco || []).forEach(id => { want[id] = true; });
     decorAnim.length = 0;
     Object.keys(decorBuilt).forEach(id => { decorG.remove(decorBuilt[id]); delete decorBuilt[id]; const o = decorObst[id]; if (o) { const i = OBST.indexOf(o); if (i >= 0) OBST.splice(i, 1); delete decorObst[id]; } });
-    SHOP_DECOR.forEach(d => { const id = d[0]; if (!want[id]) return; const g = buildDecor(id); if (!g) return; const ps = (st.pos || {})[id]; if (ps && ps.length === 3) g.position.set(ps[0], ps[1], ps[2]); decorBuilt[id] = g; const ob = decorObstFor(id, g); if (ob) { decorObst[id] = ob; OBST.push(ob); } });
+    SHOP_DECOR.forEach(d => { const id = d[0]; if (!want[id]) return; const g = buildDecor(id); if (!g) return; const ps = (st.pos || {})[id]; if (ps && ps.length === 3) g.position.set(ps[0], ps[1], ps[2]); if ((DECOR_MODE[id] || 'floor') !== 'wall') g.rotation.y += (((st.rot || {})[id]) || 0); g.userData.rotA = (((st.rot || {})[id]) || 0); decorBuilt[id] = g; const ob = decorObstFor(id, g); if (ob) { decorObst[id] = ob; OBST.push(ob); } });
     setEntryRug(st.rug || null);
   }
   function decorTick(t) { for (let i = 0; i < decorAnim.length; i++) decorAnim[i](t); }
@@ -5178,6 +5206,7 @@ const World = (function () {
     g.position.set(animate ? 5 : t.x, 0, animate ? 8.6 : t.z);
     const p = { g, kind, pet: true, r: 0.32, dy: 1.15, wp: [t], idle: 1 + Math.random() * 2, phase: Math.random() * 6, speed: (kind === 'bunny' ? 1.9 : kind === 'cat' ? 1.5 : kind === 'orange' ? 1.6 : 1.7) * (/x$/.test(kind) ? 0.7 : 1), hopH: 0.3, onStuck: pp => { pp.wp = [petTarget()]; } };
     g.userData.P = { arms: [{ rotation: { x: 0 } }, { rotation: { x: 0 } }], legs: [], shirtM: { emissive: { setHex() { } } } };
+    try { const sv = ((B.getS && B.getS().store) || {}).petOn; if (sv && sv[kind]) { g.position.set(sv[kind][0], 1.26, sv[kind][1]); p.counter = true; p.wp = []; } } catch (_) { /* optional */ }
     pets.push(p); return p;
   }
   const PET_SAY = { bunny: ['🐰', 'Boing!'], cat: ['Meow!', '😺'], dog: ['Woof!', '🐶'], bunnyx: ['🐰', 'Hmph.', 'Snack?'], catx: ['Mrrp.', '😽', 'Nap time.'], dogx: ['Woof.', '🐶', 'Treat?'], orange: ['✨', 'Mrow!', '🧡', 'Zoomies!'] };
@@ -5261,6 +5290,7 @@ const World = (function () {
     const floorAt = (e) => { const r = canvas.getBoundingClientRect(); ndc.x = ((e.clientX - r.left) / r.width) * 2 - 1; ndc.y = -((e.clientY - r.top) / r.height) * 2 + 1; raycaster.setFromCamera(ndc, camera); const o = raycaster.ray.origin, d = raycaster.ray.direction; if (Math.abs(d.y) < 1e-4) return null; const t = -o.y / d.y; if (t < 0) return null; return { x: clamp(o.x + d.x * t, -3.4, 8.0), z: clamp(o.z + d.z * t, 1.9, 6.0) }; };
     // hold a decoration for a moment, then drag it: floor items on the floor, counter items along the counter, the neon sign along the left wall
     let decCand = null, dcarry = null;
+    const counterAt = (e) => { const r = canvas.getBoundingClientRect(); ndc.x = ((e.clientX - r.left) / r.width) * 2 - 1; ndc.y = -((e.clientY - r.top) / r.height) * 2 + 1; raycaster.setFromCamera(ndc, camera); const o = raycaster.ray.origin, d = raycaster.ray.direction; if (Math.abs(d.y) < 1e-4) return null; const t = (1.26 - o.y) / d.y; if (t < 0) return null; const x = o.x + d.x * t, z = o.z + d.z * t; return x > -8.9 && x < 3.9 && z > -0.5 && z < 0.95 ? { x, z } : null; };
     const decorHit = (e) => { if (!decorG || !decorG.children.length) return null; const r = canvas.getBoundingClientRect(); ndc.x = ((e.clientX - r.left) / r.width) * 2 - 1; ndc.y = -((e.clientY - r.top) / r.height) * 2 + 1; raycaster.setFromCamera(ndc, camera); const hs = raycaster.intersectObjects(decorG.children, true); if (!hs.length) return null; let o = hs[0].object; while (o && o.parent !== decorG) o = o.parent; return o && o.userData.decorId ? o : null; };
     const decorTo = (g, e) => {
       const id = g.userData.decorId, md = DECOR_MODE[id] || 'floor', r = canvas.getBoundingClientRect(); ndc.x = ((e.clientX - r.left) / r.width) * 2 - 1; ndc.y = -((e.clientY - r.top) / r.height) * 2 + 1; raycaster.setFromCamera(ndc, camera); const o = raycaster.ray.origin, d = raycaster.ray.direction;
@@ -5270,7 +5300,7 @@ const World = (function () {
       if (md === 'counter') g.position.set(clamp(x, -9.0, 4.0), 1.26, clamp(z, -0.4, 0.85)); else g.position.set(clamp(x, -8.8, 9.0), 0, clamp(z, -6.0, 6.2));
       const ob = decorObst[id], nb = decorObstFor(id, g); if (ob && nb) { ob.x0 = nb.x0; ob.x1 = nb.x1; ob.z0 = nb.z0; ob.z1 = nb.z1; }
     };
-    const setDown = () => { if (!carry) return; const p = carry; carry = null; p.carried = false; p.g.position.y = 0; p.g.rotation.z = 0; p.wp = []; p.idle = 2 + Math.random() * 2; say(p, p.kind === 'orange' ? '✨' : '❤️', 'emo'); canvas.classList.remove('carrying'); if (B.onPetMove) B.onPetMove(p.kind); };
+    const setDown = () => { if (!carry) return; const p = carry; carry = null; p.carried = false; p.g.rotation.z = 0; p.wp = []; p.idle = 2 + Math.random() * 2; p.counter = !!p.cy; if (p.counter) { p.g.position.y = 1.26; } else p.g.position.y = 0; p.cy = 0; say(p, p.kind === 'orange' ? '✨' : '❤️', 'emo'); canvas.classList.remove('carrying'); if (B.onPetMove) B.onPetMove(p.kind, p.counter ? [Math.round(p.g.position.x * 100) / 100, Math.round(p.g.position.z * 100) / 100] : null); };
     canvas.addEventListener('pointerdown', e => {
       if (fpT || (e.pointerType === 'mouse' && e.button !== 0)) return;
       ptrs.set(e.pointerId, { x: e.clientX, y: e.clientY });
@@ -5289,7 +5319,7 @@ const World = (function () {
       if (!drag) return;
       if (dcarry) { decorTo(dcarry, e); noClick = true; return; }
       if (decCand && !drag.on && Math.hypot(e.clientX - drag.sx, e.clientY - drag.sy) > 8) { if (Date.now() - decCand.t >= 260) { dcarry = decCand.g; decCand = null; drag.on = true; canvas.classList.add('carrying'); dismissHint(); setHover(null); decorTo(dcarry, e); noClick = true; return; } decCand = null; }
-      if (carry) { const f = floorAt(e); if (f) { carry.g.position.x = f.x; carry.g.position.z = f.z; } noClick = true; return; }
+      if (carry) { const c = counterAt(e); if (c) { carry.cy = 1.26; carry.g.position.x = c.x; carry.g.position.z = c.z; } else { carry.cy = 0; const f = floorAt(e); if (f) { carry.g.position.x = f.x; carry.g.position.z = f.z; } } noClick = true; return; }
       if (!drag.on && carryCand && Math.hypot(e.clientX - drag.sx, e.clientY - drag.sy) > 8) { carry = carryCand; carryCand = null; carry.carried = true; carry.wp = []; carry.fx = null; drag.on = true; canvas.classList.add('carrying'); dismissHint(); setHover(null); say(carry, '!', ''); return; }
       if (!drag.on && Math.hypot(e.clientX - drag.sx, e.clientY - drag.sy) > 8) { drag.on = true; canvas.classList.add('grabbing'); dismissHint(); setHover(null); }
       if (drag.on) {
@@ -5796,7 +5826,7 @@ const World = (function () {
       if (e.leaving && !e.wp.length) { custGroup.remove(e.g); extras.splice(i, 1); }
     }
     if (queue.length) { arriveT -= dt; if (arriveT <= 0) { arriveT = rushOn ? 5 + Math.random() * 4 : (15 + Math.random() * 9) * (slowOn ? 2.4 : 1); arrive(); } }
-    const all = queue.concat(leaving, extras, pets.filter(p => !p.carried), cops.filter(c => copJob && copJob.phase === 'in'), visitor ? [visitor] : [], himH ? [himH] : []);
+    const all = queue.concat(leaving, extras, pets.filter(p => !p.carried && !p.counter), cops.filter(c => copJob && copJob.phase === 'in'), visitor ? [visitor] : [], himH ? [himH] : []);
     if (lineEl && queue.length !== lineN) { lineN = queue.length; lineEl.textContent = 'Line ' + lineN + '/' + maxq(); lineEl.className = 'line3d' + (lineN >= maxq() ? ' full' : lineN >= maxq() - 2 ? ' busy' : ''); }
     Crowd.separate(all, 1.15, onBump); Crowd.separate(stf, 1.0, onBump);
     Crowd.pushOut(all, 0.55); Crowd.pushOut(stf, 0.5);
@@ -5809,7 +5839,8 @@ const World = (function () {
     visitorTick(dt); himTick(dt);
     pets.forEach(pt => {
       pt.phase += dt;
-      if (pt.carried) { pt.g.position.y = 0.55 + Math.sin(pt.phase * 6) * 0.04; pt.g.rotation.z = Math.sin(pt.phase * 3) * 0.12; return; }
+      if (pt.carried) { pt.g.position.y = (pt.cy || 0) + 0.55 + Math.sin(pt.phase * 6) * 0.04; pt.g.rotation.z = Math.sin(pt.phase * 3) * 0.12; return; }
+      if (pt.counter) { pt.g.position.y = 1.26 + Math.abs(Math.sin(pt.phase * 1.3)) * 0.015; pt.g.rotation.z = 0; if (Math.random() < dt * 0.08) say(pt, '❤️', 'emo'); return; }
       if (pt.kind === 'orange' && Math.random() < dt * 0.35) burst(new T.Vector3(pt.g.position.x + (Math.random() - 0.5) * 0.4, 0.6 + Math.random() * 0.4, pt.g.position.z + (Math.random() - 0.5) * 0.4), 1, 0xF2C94C, 0.25);
       const w = moveTo(pt, pt.speed, dt, crowd);
       if (!pt.fx) { pt.g.position.y = w ? Math.abs(Math.sin(pt.phase * (pt.kind === 'bunny' ? 10 : 13))) * (pt.kind === 'bunny' ? 0.16 : 0.05) : 0; pt.g.rotation.z = w ? Math.sin(pt.phase * 9) * 0.05 : 0; }
@@ -7346,7 +7377,7 @@ const World = (function () {
         if (!o.pw && o.hintsLeft) f.pw.hint = Math.min(9, o.hintsLeft);
         if (f.up.library) { let r = 0; for (let l = 0; l < f.up.library; l++) r += Math.round(150 * Math.pow(1.9, l)); f.cash = (f.cash || 0) + r; f.libRefund = (f.libRefund || 0) + r; }
         delete f.up.library; delete f.hintsLeft; delete f.sinceHint;
-        f.store = Object.assign(defaults().store, o.store || {}); f.store.own = (f.store.own || []).slice(); f.store.deco = (f.store.deco || []).slice(); f.store.rug = Object.assign({ off: false, c: '#F2A516', p: 'solid' }, f.store.rug || {}); f.store.pos = Object.assign({}, f.store.pos || {});
+        f.store = Object.assign(defaults().store, o.store || {}); f.store.own = (f.store.own || []).slice(); f.store.deco = (f.store.deco || []).slice(); f.store.rug = Object.assign({ off: false, c: '#F2A516', p: 'solid' }, f.store.rug || {}); f.store.pos = Object.assign({}, f.store.pos || {}); f.store.rot = Object.assign({}, f.store.rot || {}); f.store.petOn = Object.assign({}, f.store.petOn || {}); if (f.store.own.indexOf('neon') >= 0) { f.store.own = f.store.own.filter(x => x !== 'neon'); f.store.deco = f.store.deco.filter(x => x !== 'neon'); f.cash = (f.cash || 0) + 700; delete f.store.pos.neon; f.neonRefund = 700; }
         f.awards = { frames: ((o.awards || {}).frames || []).slice(), pets: ((o.awards || {}).pets || []).slice(), calW: (o.awards || {}).calW || 0, wkDone: (o.awards || {}).wkDone ? o.awards.wkDone.slice() : null };
         const d = defaults().set, os = o.set || {};
         f.set = Object.assign(d, os); f.set.topics = Object.assign(defaults().set.topics, os.topics || {});
@@ -8425,7 +8456,9 @@ const World = (function () {
     const rg = Object.assign({ off: false, c: '#F2A516', p: 'solid' }, S.store.rug || {}), RUGC = ['#F2A516', '#0E9A8E', '#D9374A', '#4C7BD9', '#3E8E41', '#8A63C9', '#F29BC1', '#7C8A93', '#27384F', '#E8D9A8'], RUGP = [['solid', 'Plain'], ['stripes', 'Stripes'], ['checks', 'Checks'], ['diamonds', 'Diamonds'], ['border', 'Border']];
     const rugSec = `<details class="crs" data-shop="rug"${shopOpen.rug ? ' open' : ''}><summary><i class="caret" aria-hidden="true"></i><span class="crsn"><b>Entry rug</b><small>${rg.off ? 'removed' : 'color and pattern'}</small></span></summary><div class="crsb"><div class="spcard${rg.off ? '' : ' on'}"><span class="spem" aria-hidden="true">🟫</span><div class="sptx"><b>Rug at the front door</b><small>Free. Pick a color and a pattern, or take it away.</small></div><button type="button" class="btn" data-act="rug-off" aria-pressed="${!rg.off}">${rg.off ? 'Put back' : 'Remove'}</button></div>${rg.off ? '' : `<div class="rugrow">${RUGP.map(q => `<button type="button" class="chip" data-act="rug-p" data-v="${q[0]}" aria-pressed="${rg.p === q[0]}">${q[1]}</button>`).join('')}</div><div class="rugrow">${RUGC.map(c => `<button type="button" class="rugsw${rg.c === c ? ' on' : ''}" data-act="rug-c" data-v="${c}" style="background:${c}" aria-label="Rug color ${c}"></button>`).join('')}</div>`}</div></details>`;
     const mvNote = `<p class="note">Tip: press and hold a decoration in the pharmacy, then drag it where you want it. <button type="button" class="btn" data-act="deco-reset">Put decorations back</button></p>`;
-    return `<div class="spcash">Cash <b>${money(cash)}</b></div><div class="crsl">${secs}${rugSec}</div>${mvNote}`;
+    const rotIds = SHOP_DECOR.filter(d => S.store.deco.indexOf(d[0]) >= 0 && ['bell', 'cactus', 'lava', 'fish', 'cooler', 'vend', 'rug'].indexOf(d[0]) >= 0).map(d => [d[0], d[1]]); if (!rg.off) rotIds.push(['erug', 'Entry rug']);
+    const rotSec = `<details class="crs" data-shop="rot"${shopOpen.rot ? ' open' : ''}><summary><i class="caret" aria-hidden="true"></i><span class="crsn"><b>Rotate decorations</b><small>turn floor and counter items</small></span></summary><div class="crsb">${rotIds.map(r => `<div class="rotrow"><span>${esc(r[1])}</span><button type="button" class="btn" data-act="deco-rot" data-v="${r[0]}" data-d="-1" aria-label="Turn ${esc(r[1])} left">⟲</button><button type="button" class="btn" data-act="deco-rot" data-v="${r[0]}" data-d="1" aria-label="Turn ${esc(r[1])} right">⟳</button></div>`).join('') || '<p class="note">Buy a decoration to turn it.</p>'}</div></details>`;
+    return `<div class="spcash">Cash <b>${money(cash)}</b></div><div class="crsl">${secs}${rugSec}${rotSec}</div>${mvNote}`;
   }
   function shopBuy(kind, id) {
     if (kind === 'pow') {
@@ -10795,7 +10828,7 @@ const micLab3 = () => !!(World.ok && World.setMic);
   }
   setInterval(micTick, 25000);
 
-  const GAME_VERSION = 147;
+  const GAME_VERSION = 148;
   const b64u = (u8) => { let s = ''; for (let i = 0; i < u8.length; i += 0x8000) s += String.fromCharCode.apply(null, u8.subarray(i, i + 0x8000)); return btoa(s).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); };
   const unb64u = (t) => { const s = atob(t.replace(/-/g, '+').replace(/_/g, '/')), u = new Uint8Array(s.length); for (let i = 0; i < s.length; i++) u[i] = s.charCodeAt(i); return u; };
   const chk = (t) => { let h = 2166136261; for (let i = 0; i < t.length; i++) { h ^= t.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36); };
@@ -10861,7 +10894,8 @@ const micLab3 = () => !!(World.ok && World.setMic);
       case 'shop-use': shopUse(t.dataset.k, t.dataset.id); return;
       case 'rug-off': S.store.rug = Object.assign({ off: false, c: '#F2A516', p: 'solid' }, S.store.rug || {}); S.store.rug.off = !S.store.rug.off; save(); applyShop(); if (view === 'create') renderPanel(); return;
       case 'rug-p': case 'rug-c': S.store.rug = Object.assign({ off: false, c: '#F2A516', p: 'solid' }, S.store.rug || {}); S.store.rug[t.dataset.act === 'rug-p' ? 'p' : 'c'] = t.dataset.v; S.store.rug.off = false; save(); applyShop(); if (view === 'create') renderPanel(); return;
-      case 'deco-reset': S.store.pos = {}; save(); applyShop(); toast('Decorations are back in their spots.'); return;
+      case 'deco-rot': { const id = t.dataset.v, d = Number(t.dataset.d) || 1, st = Math.PI / 4; if (id === 'erug') { S.store.rug = Object.assign({ off: false, c: '#F2A516', p: 'solid' }, S.store.rug || {}); S.store.rug.rot = (((S.store.rug.rot || 0) + d * st) % (Math.PI * 2)); } else { S.store.rot = S.store.rot || {}; S.store.rot[id] = (((S.store.rot[id] || 0) + d * st) % (Math.PI * 2)); } save(); applyShop(); if (view === 'create') renderPanel(); return; }
+      case 'deco-reset': S.store.pos = {}; S.store.rot = {}; if (S.store.rug) S.store.rug.rot = 0; save(); applyShop(); toast('Decorations are back in their spots.'); return;
       case 'pwshop': cTab = 'shop'; Object.keys(shopOpen).forEach(k => { shopOpen[k] = false; }); shopOpen.pow = true; openView('create'); return;
       case 'me-done': readShop(); S.me.done = true; save(); syncBrand(); backToQ(); maybeTour(); return;
       case 'back': if (view === 'syn') synExit(); if (view === 'shift') return shiftNext(false); readDraft(); const wasC = view === 'create' && !S.me.done; if (view === 'create') readShop(); if (wasC) { S.me.done = true; save(); } backToQ(); if (wasC) maybeTour(); return;
@@ -11071,7 +11105,7 @@ const micLab3 = () => !!(World.ok && World.setMic);
   setInterval(() => { if (window.__rxLoading) return; try { localStorage.setItem(SAVE_KEY, JSON.stringify(S)); } catch (e) { /* ignore */ } }, 5000);
 
   { const sc = $('#savecard'); if (sc) sc.innerHTML = saveBoxHTML(); }
-  World.init({ host: $('#stage'), getS: () => S, onDecorMove: (id, p) => { S.store.pos = S.store.pos || {}; S.store.pos[id] = p.map(v => Math.round(v * 100) / 100); save(); }, specialRoll: specialRoll, tagInfo: tagInfo, onBuy: buyUp, onNotes: () => openView('studies'), onBin: () => { micR = null; openView('mic'); }, onMicSite: (id) => micSiteClick(id), onMicDish: (id) => micDishClick(id), onMicPaper: (id, row) => micPaperClick(id, row), notesInfo: customCount, karenRoll: karenRoll, sweatyRoll: sweatyRoll, elderRoll: elderRoll, eventRoll: eventRoll, onVisitor: visitClick, onVisitorArrive: visitArrive, capsuleOk: capsuleOk, onCapsule: onCapsule, onBrain: synEnter, onSynSite: onSynSite, onEvt: onEvt, pillOk: pillOk, onPill: onPill, pillBoost: () => gearBuff().pills, onPhone: openPhone, onPolice: policeCome, himOk: himOk, onHimSpawn: onHimSpawn, onHimAngel: himAngelOk, onHimLand: himLand, onHimBless: onHimBless, onFp: fpClick, sign: () => shopName() + '|' + tierName() + ' #' + (S.franchises + 1) });
+  World.init({ host: $('#stage'), getS: () => S, onPetMove: (k, pos) => { S.store.petOn = S.store.petOn || {}; if (pos) S.store.petOn[k] = pos; else delete S.store.petOn[k]; save(); }, onDecorMove: (id, p) => { S.store.pos = S.store.pos || {}; S.store.pos[id] = p.map(v => Math.round(v * 100) / 100); save(); }, specialRoll: specialRoll, tagInfo: tagInfo, onBuy: buyUp, onNotes: () => openView('studies'), onBin: () => { micR = null; openView('mic'); }, onMicSite: (id) => micSiteClick(id), onMicDish: (id) => micDishClick(id), onMicPaper: (id, row) => micPaperClick(id, row), notesInfo: customCount, karenRoll: karenRoll, sweatyRoll: sweatyRoll, elderRoll: elderRoll, eventRoll: eventRoll, onVisitor: visitClick, onVisitorArrive: visitArrive, capsuleOk: capsuleOk, onCapsule: onCapsule, onBrain: synEnter, onSynSite: onSynSite, onEvt: onEvt, pillOk: pillOk, onPill: onPill, pillBoost: () => gearBuff().pills, onPhone: openPhone, onPolice: policeCome, himOk: himOk, onHimSpawn: onHimSpawn, onHimAngel: himAngelOk, onHimLand: himLand, onHimBless: onHimBless, onFp: fpClick, sign: () => shopName() + '|' + tierName() + ' #' + (S.franchises + 1) });
   window.__rxDbg = () => ({ micDbg: () => ({ get R() { return micR; }, get inLab() { return micIn; }, drop: micDrop, paper: micPaperClick, part: micStartPart, startSort: micStartSort, sel: id => { micSelG = id; renderPanel(); } }), sr: srUpdate, nc: newCard, sp: specialRoll, fp: fp, S: S, view: view, rush: rush, phoneR: phone.ringing, TOPQ: TOPQ, pool: poolQs, cur: cur, synQ: () => (typeof SYN !== 'undefined' ? SYN.q : null), synTap: id => onSynSite(id), offer: k => offerEvt(k, 'test'), onEvt: onEvt, holiday: () => holNow(), holN: () => holCount(), renderStats: renderStats, passive: passive, techRate: techRate, buyUp: buyUp, openVial: openVial, tabletTake: tabletTake, capsuleOpen: capsuleOpen, buffOn: buffOn, GEAR: GEAR, gearBuff: gearBuff, gearHave: gearHave });
   if (!World.ok) $('#stage').classList.add('flat');
   else { document.body.classList.add('fx'); try { World.setBin(!!S.binBug); } catch (e) { /* decor */ } World.setPharmacist(meSpec()); World.setStore(S.store); World.setStaffLook(uniSpec()); World.setAwards(S.awards); World.setCalendar(Math.min(4, S.awards.calW || 0), false, S.awards.calW || 0); }

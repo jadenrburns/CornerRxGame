@@ -488,10 +488,10 @@ const World = (function () {
     const t = new T.CanvasTexture(cv); return t;
   }
   function setEntryRug(spec) {
-    if (spec) rugSpec = { off: !!spec.off, c: spec.c || '#F2A516', p: spec.p || 'solid' };
+    if (spec) rugSpec = { off: !!spec.off, c: spec.c || '#F2A516', p: spec.p || 'solid', rot: spec.rot || 0 };
     if (!entryRugG) return;
     while (entryRugG.children.length) entryRugG.remove(entryRugG.children[0]);
-    entryRugG.visible = !rugSpec.off; if (rugSpec.off) return;
+    entryRugG.visible = !rugSpec.off; entryRugG.rotation.y = rugSpec.rot || 0; if (rugSpec.off) return;
     const base = bx(entryRugG, 2.4, 0.04, 3.6, shadeHex(rugSpec.c, -0.28), 0, 0.08, 0);
     const top = new T.Mesh(new T.PlaneGeometry(2.36, 3.56), new T.MeshStandardMaterial({ map: rugTex(rugSpec.c, rugSpec.p), flatShading: true, roughness: 0.95 })); top.rotation.x = -PI / 2; top.position.set(0, 0.102, 0); top.receiveShadow = true; entryRugG.add(top);
   }
@@ -1045,9 +1045,13 @@ const World = (function () {
   const decorBuilt = {}, decorObst = {}, decorAnim = [];
   function surfMat(list) { if (!list.length) return null; const m = list[0].material.clone ? list[0].material.clone() : list[0].material; list.forEach(x => { x.material = m; }); return m; }
   const DECOR_OBST = { cooler: { x0: -9.45, x1: -8.7, z0: 2.65, z1: 3.35 }, vend: { x0: -9.5, x1: -8.5, z0: 1.35, z1: 2.45 } };
-  const DECOR_MODE = { rug: 'floor', cooler: 'floor', vend: 'floor', bell: 'counter', cactus: 'counter', lava: 'counter', fish: 'counter', neon: 'wall' };
+  const DECOR_MODE = { rug: 'floor', cooler: 'floor', vend: 'floor', bell: 'counter', cactus: 'counter', lava: 'counter', fish: 'counter', photo: 'wall', poster: 'wall', clock: 'wall' };
   const decorDef = {}; // default position of every decor item, so a saved position can shift its obstacle
-  function decorObstFor(id, g) { const b = DECOR_OBST[id], d = decorDef[id]; if (!b || !d) return null; const dx = g.position.x - d[0], dz = g.position.z - d[2]; return { x0: b.x0 + dx, x1: b.x1 + dx, z0: b.z0 + dz, z1: b.z1 + dz }; }
+  function decorObstFor(id, g) {
+    const b = DECOR_OBST[id], d = decorDef[id]; if (!b || !d) return null; const dx = g.position.x - d[0], dz = g.position.z - d[2];
+    const cx = (b.x0 + b.x1) / 2 + dx, cz = (b.z0 + b.z1) / 2 + dz, hx = (b.x1 - b.x0) / 2, hz = (b.z1 - b.z0) / 2, a = g.userData.rotA || 0, c = Math.abs(Math.cos(a)), s = Math.abs(Math.sin(a));
+    const ex = c * hx + s * hz, ez = s * hx + c * hz; return { x0: cx - ex, x1: cx + ex, z0: cz - ez, z1: cz + ez };
+  }
   function buildDecor(id) {
     const g = new T.Group();
     if (id === 'rug') {
@@ -1079,12 +1083,31 @@ const World = (function () {
       for (let r = 0; r < 4; r++) for (let c = 0; c < 4; c++) bx(g, 0.14, 0.2, 0.1, cols[(r + c) % 5], -0.31 + c * 0.17, 0.78 + r * 0.28, 0.4);
       bx(g, 0.2, 0.5, 0.04, '#27384F', 0.39, 1.2, 0.44); [0, 1, 2].forEach(i => bx(g, 0.1, 0.06, 0.03, '#F4F9F9', 0.39, 1.35 - i * 0.12, 0.47)); bx(g, 0.7, 0.2, 0.04, '#27384F', -0.1, 0.32, 0.44);
       bx(g, 0.9, 0.18, 0.03, '#F2C94C', 0, 1.8, 0.44);
-    } else if (id === 'neon') {
-      g.position.set(-9.55, 3.55, 2.2); g.rotation.y = PI / 2;
-      const cv = document.createElement('canvas'); cv.width = 256; cv.height = 96; const cx = cv.getContext('2d');
-      cx.fillStyle = '#101018'; cx.fillRect(0, 0, 256, 96); cx.strokeStyle = '#FF5FA2'; cx.lineWidth = 4; cx.strokeRect(6, 6, 244, 84);
-      cx.font = '800 54px sans-serif'; cx.textAlign = 'center'; cx.textBaseline = 'middle'; cx.shadowColor = '#FF5FA2'; cx.shadowBlur = 14; cx.fillStyle = '#FFD6E8'; cx.fillText('OPEN', 128, 52);
-      const tx = new T.CanvasTexture(cv), pl = new T.Mesh(new T.PlaneGeometry(1.3, 0.49), new T.MeshBasicMaterial({ map: tx })); pl.position.z = 0.03; g.add(pl); bx(g, 1.36, 0.55, 0.05, '#101018', 0, 0, 0);
+    } else if (id === 'photo') {
+      g.position.set(-9.55, 3.55, -1.4); g.rotation.y = PI / 2;
+      const cv = document.createElement('canvas'); cv.width = 200; cv.height = 150; const cx = cv.getContext('2d');
+      const sk = cx.createLinearGradient(0, 0, 0, 150); sk.addColorStop(0, '#8FD3F4'); sk.addColorStop(1, '#FFE9B8'); cx.fillStyle = sk; cx.fillRect(0, 0, 200, 150);
+      cx.fillStyle = '#FFD23F'; cx.beginPath(); cx.arc(150, 42, 18, 0, 7); cx.fill();
+      cx.fillStyle = '#6FA8A0'; cx.beginPath(); cx.moveTo(0, 110); cx.lineTo(55, 55); cx.lineTo(105, 105); cx.lineTo(140, 75); cx.lineTo(200, 118); cx.lineTo(200, 150); cx.lineTo(0, 150); cx.fill();
+      cx.fillStyle = '#3E8E41'; cx.fillRect(0, 122, 200, 28);
+      bx(g, 0.98, 0.78, 0.06, '#7A4E2D', 0, 0, 0); bx(g, 0.86, 0.66, 0.03, '#F4F9F9', 0, 0, 0.03);
+      const pl = new T.Mesh(new T.PlaneGeometry(0.74, 0.55), new T.MeshBasicMaterial({ map: new T.CanvasTexture(cv) })); pl.position.z = 0.05; g.add(pl);
+    } else if (id === 'poster') {
+      g.position.set(-9.55, 3.45, -3.0); g.rotation.y = PI / 2;
+      const cv = document.createElement('canvas'); cv.width = 160; cv.height = 220; const cx = cv.getContext('2d');
+      cx.fillStyle = '#E7F5F2'; cx.fillRect(0, 0, 160, 220); cx.fillStyle = '#0E9A8E'; cx.fillRect(0, 0, 160, 38);
+      cx.fillStyle = '#fff'; cx.font = '800 20px sans-serif'; cx.textAlign = 'center'; cx.textBaseline = 'middle'; cx.fillText('ASK YOUR', 80, 14); cx.fillText('PHARMACIST', 80, 30);
+      cx.fillStyle = '#2FAE66'; cx.fillRect(66, 62, 28, 88); cx.fillRect(36, 92, 88, 28);
+      cx.fillStyle = '#27384F'; cx.font = '700 15px sans-serif'; cx.fillText('Know your meds', 80, 180); cx.fillText('Take as directed', 80, 202);
+      bx(g, 0.74, 1.0, 0.04, '#27384F', 0, 0, 0);
+      const pl = new T.Mesh(new T.PlaneGeometry(0.68, 0.94), new T.MeshBasicMaterial({ map: new T.CanvasTexture(cv) })); pl.position.z = 0.03; g.add(pl);
+    } else if (id === 'clock') {
+      g.position.set(-9.55, 4.35, 0.9); g.rotation.y = PI / 2;
+      cy(g, 0.36, 0.36, 0.06, 18, '#27384F', 0, 0, 0).rotation.x = PI / 2; cy(g, 0.31, 0.31, 0.07, 18, '#F4F9F9', 0, 0, 0).rotation.x = PI / 2;
+      for (let i = 0; i < 12; i++) { const a = i / 12 * PI * 2; bx(g, 0.03, i % 3 === 0 ? 0.09 : 0.05, 0.02, '#27384F', Math.sin(a) * 0.26, Math.cos(a) * 0.26, 0.05).rotation.z = -a; }
+      const hh = new T.Group(), mh = new T.Group(); hh.position.z = 0.06; mh.position.z = 0.07; g.add(hh); g.add(mh);
+      bx(hh, 0.04, 0.17, 0.02, '#27384F', 0, 0.085, 0); bx(mh, 0.025, 0.25, 0.02, '#D9374A', 0, 0.125, 0);
+      const tick = () => { const d = new Date(), m = d.getMinutes() + d.getSeconds() / 60; mh.rotation.z = -m / 60 * PI * 2; hh.rotation.z = -((d.getHours() % 12) + m / 60) / 12 * PI * 2; }; tick(); decorAnim.push(tick);
     } else return null;
     decorDef[id] = [g.position.x, g.position.y, g.position.z]; g.userData.decorId = id;
     decorG.add(g); return g;
@@ -1099,7 +1122,7 @@ const World = (function () {
     const want = {}; (st.deco || []).forEach(id => { want[id] = true; });
     decorAnim.length = 0;
     Object.keys(decorBuilt).forEach(id => { decorG.remove(decorBuilt[id]); delete decorBuilt[id]; const o = decorObst[id]; if (o) { const i = OBST.indexOf(o); if (i >= 0) OBST.splice(i, 1); delete decorObst[id]; } });
-    SHOP_DECOR.forEach(d => { const id = d[0]; if (!want[id]) return; const g = buildDecor(id); if (!g) return; const ps = (st.pos || {})[id]; if (ps && ps.length === 3) g.position.set(ps[0], ps[1], ps[2]); decorBuilt[id] = g; const ob = decorObstFor(id, g); if (ob) { decorObst[id] = ob; OBST.push(ob); } });
+    SHOP_DECOR.forEach(d => { const id = d[0]; if (!want[id]) return; const g = buildDecor(id); if (!g) return; const ps = (st.pos || {})[id]; if (ps && ps.length === 3) g.position.set(ps[0], ps[1], ps[2]); if ((DECOR_MODE[id] || 'floor') !== 'wall') g.rotation.y += (((st.rot || {})[id]) || 0); g.userData.rotA = (((st.rot || {})[id]) || 0); decorBuilt[id] = g; const ob = decorObstFor(id, g); if (ob) { decorObst[id] = ob; OBST.push(ob); } });
     setEntryRug(st.rug || null);
   }
   function decorTick(t) { for (let i = 0; i < decorAnim.length; i++) decorAnim[i](t); }
@@ -1277,6 +1300,7 @@ const World = (function () {
     g.position.set(animate ? 5 : t.x, 0, animate ? 8.6 : t.z);
     const p = { g, kind, pet: true, r: 0.32, dy: 1.15, wp: [t], idle: 1 + Math.random() * 2, phase: Math.random() * 6, speed: (kind === 'bunny' ? 1.9 : kind === 'cat' ? 1.5 : kind === 'orange' ? 1.6 : 1.7) * (/x$/.test(kind) ? 0.7 : 1), hopH: 0.3, onStuck: pp => { pp.wp = [petTarget()]; } };
     g.userData.P = { arms: [{ rotation: { x: 0 } }, { rotation: { x: 0 } }], legs: [], shirtM: { emissive: { setHex() { } } } };
+    try { const sv = ((B.getS && B.getS().store) || {}).petOn; if (sv && sv[kind]) { g.position.set(sv[kind][0], 1.26, sv[kind][1]); p.counter = true; p.wp = []; } } catch (_) { /* optional */ }
     pets.push(p); return p;
   }
   const PET_SAY = { bunny: ['🐰', 'Boing!'], cat: ['Meow!', '😺'], dog: ['Woof!', '🐶'], bunnyx: ['🐰', 'Hmph.', 'Snack?'], catx: ['Mrrp.', '😽', 'Nap time.'], dogx: ['Woof.', '🐶', 'Treat?'], orange: ['✨', 'Mrow!', '🧡', 'Zoomies!'] };
@@ -1360,6 +1384,7 @@ const World = (function () {
     const floorAt = (e) => { const r = canvas.getBoundingClientRect(); ndc.x = ((e.clientX - r.left) / r.width) * 2 - 1; ndc.y = -((e.clientY - r.top) / r.height) * 2 + 1; raycaster.setFromCamera(ndc, camera); const o = raycaster.ray.origin, d = raycaster.ray.direction; if (Math.abs(d.y) < 1e-4) return null; const t = -o.y / d.y; if (t < 0) return null; return { x: clamp(o.x + d.x * t, -3.4, 8.0), z: clamp(o.z + d.z * t, 1.9, 6.0) }; };
     // hold a decoration for a moment, then drag it: floor items on the floor, counter items along the counter, the neon sign along the left wall
     let decCand = null, dcarry = null;
+    const counterAt = (e) => { const r = canvas.getBoundingClientRect(); ndc.x = ((e.clientX - r.left) / r.width) * 2 - 1; ndc.y = -((e.clientY - r.top) / r.height) * 2 + 1; raycaster.setFromCamera(ndc, camera); const o = raycaster.ray.origin, d = raycaster.ray.direction; if (Math.abs(d.y) < 1e-4) return null; const t = (1.26 - o.y) / d.y; if (t < 0) return null; const x = o.x + d.x * t, z = o.z + d.z * t; return x > -8.9 && x < 3.9 && z > -0.5 && z < 0.95 ? { x, z } : null; };
     const decorHit = (e) => { if (!decorG || !decorG.children.length) return null; const r = canvas.getBoundingClientRect(); ndc.x = ((e.clientX - r.left) / r.width) * 2 - 1; ndc.y = -((e.clientY - r.top) / r.height) * 2 + 1; raycaster.setFromCamera(ndc, camera); const hs = raycaster.intersectObjects(decorG.children, true); if (!hs.length) return null; let o = hs[0].object; while (o && o.parent !== decorG) o = o.parent; return o && o.userData.decorId ? o : null; };
     const decorTo = (g, e) => {
       const id = g.userData.decorId, md = DECOR_MODE[id] || 'floor', r = canvas.getBoundingClientRect(); ndc.x = ((e.clientX - r.left) / r.width) * 2 - 1; ndc.y = -((e.clientY - r.top) / r.height) * 2 + 1; raycaster.setFromCamera(ndc, camera); const o = raycaster.ray.origin, d = raycaster.ray.direction;
@@ -1369,7 +1394,7 @@ const World = (function () {
       if (md === 'counter') g.position.set(clamp(x, -9.0, 4.0), 1.26, clamp(z, -0.4, 0.85)); else g.position.set(clamp(x, -8.8, 9.0), 0, clamp(z, -6.0, 6.2));
       const ob = decorObst[id], nb = decorObstFor(id, g); if (ob && nb) { ob.x0 = nb.x0; ob.x1 = nb.x1; ob.z0 = nb.z0; ob.z1 = nb.z1; }
     };
-    const setDown = () => { if (!carry) return; const p = carry; carry = null; p.carried = false; p.g.position.y = 0; p.g.rotation.z = 0; p.wp = []; p.idle = 2 + Math.random() * 2; say(p, p.kind === 'orange' ? '✨' : '❤️', 'emo'); canvas.classList.remove('carrying'); if (B.onPetMove) B.onPetMove(p.kind); };
+    const setDown = () => { if (!carry) return; const p = carry; carry = null; p.carried = false; p.g.rotation.z = 0; p.wp = []; p.idle = 2 + Math.random() * 2; p.counter = !!p.cy; if (p.counter) { p.g.position.y = 1.26; } else p.g.position.y = 0; p.cy = 0; say(p, p.kind === 'orange' ? '✨' : '❤️', 'emo'); canvas.classList.remove('carrying'); if (B.onPetMove) B.onPetMove(p.kind, p.counter ? [Math.round(p.g.position.x * 100) / 100, Math.round(p.g.position.z * 100) / 100] : null); };
     canvas.addEventListener('pointerdown', e => {
       if (fpT || (e.pointerType === 'mouse' && e.button !== 0)) return;
       ptrs.set(e.pointerId, { x: e.clientX, y: e.clientY });
@@ -1388,7 +1413,7 @@ const World = (function () {
       if (!drag) return;
       if (dcarry) { decorTo(dcarry, e); noClick = true; return; }
       if (decCand && !drag.on && Math.hypot(e.clientX - drag.sx, e.clientY - drag.sy) > 8) { if (Date.now() - decCand.t >= 260) { dcarry = decCand.g; decCand = null; drag.on = true; canvas.classList.add('carrying'); dismissHint(); setHover(null); decorTo(dcarry, e); noClick = true; return; } decCand = null; }
-      if (carry) { const f = floorAt(e); if (f) { carry.g.position.x = f.x; carry.g.position.z = f.z; } noClick = true; return; }
+      if (carry) { const c = counterAt(e); if (c) { carry.cy = 1.26; carry.g.position.x = c.x; carry.g.position.z = c.z; } else { carry.cy = 0; const f = floorAt(e); if (f) { carry.g.position.x = f.x; carry.g.position.z = f.z; } } noClick = true; return; }
       if (!drag.on && carryCand && Math.hypot(e.clientX - drag.sx, e.clientY - drag.sy) > 8) { carry = carryCand; carryCand = null; carry.carried = true; carry.wp = []; carry.fx = null; drag.on = true; canvas.classList.add('carrying'); dismissHint(); setHover(null); say(carry, '!', ''); return; }
       if (!drag.on && Math.hypot(e.clientX - drag.sx, e.clientY - drag.sy) > 8) { drag.on = true; canvas.classList.add('grabbing'); dismissHint(); setHover(null); }
       if (drag.on) {
@@ -1895,7 +1920,7 @@ const World = (function () {
       if (e.leaving && !e.wp.length) { custGroup.remove(e.g); extras.splice(i, 1); }
     }
     if (queue.length) { arriveT -= dt; if (arriveT <= 0) { arriveT = rushOn ? 5 + Math.random() * 4 : (15 + Math.random() * 9) * (slowOn ? 2.4 : 1); arrive(); } }
-    const all = queue.concat(leaving, extras, pets.filter(p => !p.carried), cops.filter(c => copJob && copJob.phase === 'in'), visitor ? [visitor] : [], himH ? [himH] : []);
+    const all = queue.concat(leaving, extras, pets.filter(p => !p.carried && !p.counter), cops.filter(c => copJob && copJob.phase === 'in'), visitor ? [visitor] : [], himH ? [himH] : []);
     if (lineEl && queue.length !== lineN) { lineN = queue.length; lineEl.textContent = 'Line ' + lineN + '/' + maxq(); lineEl.className = 'line3d' + (lineN >= maxq() ? ' full' : lineN >= maxq() - 2 ? ' busy' : ''); }
     Crowd.separate(all, 1.15, onBump); Crowd.separate(stf, 1.0, onBump);
     Crowd.pushOut(all, 0.55); Crowd.pushOut(stf, 0.5);
@@ -1908,7 +1933,8 @@ const World = (function () {
     visitorTick(dt); himTick(dt);
     pets.forEach(pt => {
       pt.phase += dt;
-      if (pt.carried) { pt.g.position.y = 0.55 + Math.sin(pt.phase * 6) * 0.04; pt.g.rotation.z = Math.sin(pt.phase * 3) * 0.12; return; }
+      if (pt.carried) { pt.g.position.y = (pt.cy || 0) + 0.55 + Math.sin(pt.phase * 6) * 0.04; pt.g.rotation.z = Math.sin(pt.phase * 3) * 0.12; return; }
+      if (pt.counter) { pt.g.position.y = 1.26 + Math.abs(Math.sin(pt.phase * 1.3)) * 0.015; pt.g.rotation.z = 0; if (Math.random() < dt * 0.08) say(pt, '❤️', 'emo'); return; }
       if (pt.kind === 'orange' && Math.random() < dt * 0.35) burst(new T.Vector3(pt.g.position.x + (Math.random() - 0.5) * 0.4, 0.6 + Math.random() * 0.4, pt.g.position.z + (Math.random() - 0.5) * 0.4), 1, 0xF2C94C, 0.25);
       const w = moveTo(pt, pt.speed, dt, crowd);
       if (!pt.fx) { pt.g.position.y = w ? Math.abs(Math.sin(pt.phase * (pt.kind === 'bunny' ? 10 : 13))) * (pt.kind === 'bunny' ? 0.16 : 0.05) : 0; pt.g.rotation.z = w ? Math.sin(pt.phase * 9) * 0.05 : 0; }

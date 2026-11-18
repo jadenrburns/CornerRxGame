@@ -35,7 +35,7 @@ const { chromium } = require('playwright');
   // 3. shop: sections, buy a scrub cap, it lands in the hat slider
   await act('ctab', 'shop');
   const secs = await p.$$eval('.crs[data-shop]', e => e.map(x => x.dataset.shop));
-  if (secs.join() !== 'walls,floors,uni,deco,wear,pow,rug') fail.push('shop sections ' + secs);
+  if (secs.join() !== 'walls,floors,uni,deco,wear,pow,rug,rot') fail.push('shop sections ' + secs);
   if (await p.$$eval('.cpane .chips', e => e.length)) fail.push('chips in shop');
   await p.evaluate(() => { document.querySelector('.crs[data-shop=wear]').open = true; });
   await act('shop-buy', 'surgcap'); s = await S();

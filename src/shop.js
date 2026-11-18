@@ -40,7 +40,9 @@ const SHOP_DECOR = [
   ['lava', 'Lava lamp', 250, 'Glows on the counter.', '🪔'],
   ['fish', 'Fish tank', 450, 'Soothing for waiting patients.', '🐠'],
   ['cooler', 'Water cooler', 500, 'Hydration station by the counter.', '🚰'],
-  ['neon', 'Neon sign', 700, 'An OPEN sign for the side wall.', '💡'],
+  ['photo', 'Framed photo', 220, 'A sunny landscape for the side wall.', '🖼️'],
+  ['poster', 'Health poster', 260, 'Ask your pharmacist. Goes on the side wall.', '📋'],
+  ['clock', 'Wall clock', 320, 'Keeps real time. Goes on the side wall.', '🕒'],
   ['vend', 'Vending machine', 900, 'Snacks by the counter.', '🥤']
 ];
 /* extra pharmacist hairstyles: [id, name, style number in world.js, price] */
