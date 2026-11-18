@@ -2359,6 +2359,14 @@ X("Cholinergic structure", 1, "Which enzyme makes acetylcholine, and from what?"
 X("Cholinergic structure", 1, "Which receptors couple to Gq (M1, M3, M5) and which to Gi (M2, M4)?", "M1, M3, M5 raise IP3 and DAG; M2, M4 lower cAMP and open GIRK K+ channels", ["M1, M3, M5 lower cAMP and open K+ channels; M2, M4 raise IP3 and DAG", "All muscarinic receptors are ligand-gated channels that pass Na+ and K+", "M2 and M3 are both Gq-coupled, so both raise IP3 and DAG in the heart"], "Nicotinic receptors are the pentameric ligand-gated channels. In the heart M2 slows the rate.", GD(3));
 X("Cholinergic structure", 2, "Pilocarpine and cevimeline differ from ACh in which way?", "They are not choline esters, so cholinesterases do not destroy them", ["They are quaternary choline esters that cholinesterases break down even faster than ACh", "They act only at nicotinic receptors, so cholinesterases never see them as substrates", "They are carbamates, which cholinesterases hydrolyze slowly like bethanechol"], "Cevimeline prefers M1/M3 (dry mouth in Sjogren syndrome), and pilocarpine is a partial muscarinic agonist.", GD(3));
 X("Cholinergic structure", 2, "Smoking affects which drug-metabolizing enzyme?", "It induces CYP1A2, lowering clozapine, olanzapine and theophylline", ["It inhibits CYP3A4, so levels of clozapine, olanzapine and theophylline rise", "It induces CYP2D6, so levels of codeine and tamoxifen metabolites rise", "It inhibits UGT1A4, so lamotrigine levels rise and its dose must be lowered"], "Nicotine itself acts at nicotinic receptors. The induction comes from smoke.", GD(3));
+
+/* ---------- Organophosphate poisoning: match the drug to its antidotal effect (four linked cards, same four drugs) ---------- */
+const OPD = ["Atropine", "Pralidoxime", "Diazepam", "Glycopyrrolate"];
+const OPM = (n, q, a, e) => X("Organophosphate match", 2, "Organophosphate poisoning match (" + n + " of 4). Which drug " + q, a, OPD.filter(d => d !== a), e, GD(3));
+OPM(1, "blocks the muscarinic signs (salivation, bradycardia, bronchial secretions) by crossing into the CNS, but does not fix nicotinic muscle weakness?", "Atropine", "Atropine is a tertiary amine antimuscarinic. It treats muscarinic signs and the central muscarinic effects, but it has no effect on nicotinic weakness or paralysis.");
+OPM(2, "reactivates the phosphorylated serine on acetylcholinesterase, and only works if given before the enzyme ages?", "Pralidoxime", "Pralidoxime is an oxime that removes the phosphate from the enzyme. After aging (loss of an alkyl or alkoxy group) the anionic phosphoryl enzyme cannot be reactivated, so it must be given early.");
+OPM(3, "controls the seizures by enhancing GABA-A receptor opening?", "Diazepam", "A benzodiazepine such as diazepam stops organophosphate-induced seizures. Atropine and pralidoxime do not treat the seizures directly.");
+OPM(4, "is a quaternary antimuscarinic that blunts peripheral muscarinic effects but does not reach the CNS?", "Glycopyrrolate", "Glycopyrrolate carries a permanent charge, so it stays peripheral. It can add to atropine for peripheral secretions but cannot treat central effects.");
 /* Microbe lab data (trash can menu): the "human body microbes" map and the "Resistant organisms and important antibiotics 2026" handout.
    MICSETS: sets of groups. A group is a list of items to place (drag mode) or type (fill-in mode).
    Helpers (global, no game state): micNorm, micAliases, micMatch, micTags, micDecoys. */
@@ -10736,7 +10744,7 @@ const micLab3 = () => !!(World.ok && World.setMic);
   }
   setInterval(micTick, 25000);
 
-  const GAME_VERSION = 144;
+  const GAME_VERSION = 145;
   const b64u = (u8) => { let s = ''; for (let i = 0; i < u8.length; i += 0x8000) s += String.fromCharCode.apply(null, u8.subarray(i, i + 0x8000)); return btoa(s).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); };
   const unb64u = (t) => { const s = atob(t.replace(/-/g, '+').replace(/_/g, '/')), u = new Uint8Array(s.length); for (let i = 0; i < s.length; i++) u[i] = s.charCodeAt(i); return u; };
   const chk = (t) => { let h = 2166136261; for (let i = 0; i < t.length; i++) { h ^= t.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36); };
