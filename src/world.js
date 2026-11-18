@@ -3090,7 +3090,15 @@ const World = (function () {
       const U = g.userData, vis = SSITES[id][1].indexOf(synCat) >= 0; if (g.visible !== vis) g.visible = vis; if (!vis) return;
       const fx = synDrug && synDrug.docked && synDrug.sites.indexOf(id) >= 0 ? ((synDrug.acts && synDrug.acts[id]) || synDrug.act) : null;
       if (U.fx !== fx) { U.fx = fx; U.e = -1; }
-      if (U.ion) {
+      if (id === 'gabaa' && !synGMode && U.gm) { U.gm = false; U.e = -1; }
+      if (U.ion && id === 'gabaa' && synGMode) {
+        U.gm = true;
+        // demo: IPSP = Cl- streams in; shunt = the channel is open but ions only jiggle (no net transport)
+        U.ion.visible = true; if (U.ion2) U.ion2.visible = true;
+        if (synGMode === 'ipsp') { U.pp = (U.pp === undefined ? U.ph : U.pp) + dt * 1.3; const p = U.pp % 1, p2 = (U.pp + 0.5) % 1; U.ion.position.set(0, 0.55 - p * 1.0, 0); U.ion2.position.set(0, 0.55 - p2 * 1.0, 0); }
+        else { const s = Math.sin(synT * 7) * 0.32; U.ion.position.set(0, 0.1 + s, 0); U.ion2.position.set(0, 0.1 - s, 0); }
+        const k = 0.45 + Math.sin(synT * 8) * 0.25; g.traverse(o => { if (o.material && o.material.emissive && o !== U.blk && o !== U.blk2) o.material.emissive.setRGB(0.05, k, 0.15); });
+      } else if (U.ion) {
         const f = fx === 'inh' ? 0 : fx === 'act' ? 2.4 : 1; U.pp = (U.pp === undefined ? U.ph : U.pp) + dt * 0.55 * f;
         if (fx === 'inh') { U.ion.position.set(Math.sin(synT * 18) * 0.04, 0.62, 0); U.ion.visible = true; } else { const p = U.pp % 1; U.ion.position.set(0, 0.55 - p * 1.0, 0); U.ion.visible = p > 0.05 && p < 0.95; }
         if (U.ion2) { const on2 = fx === 'act'; U.ion2.visible = false; if (on2) { const p2 = (U.pp + 0.5) % 1; U.ion2.position.set(0, 0.55 - p2 * 1.0, 0); U.ion2.visible = p2 > 0.05 && p2 < 0.95; } }
@@ -3156,6 +3164,8 @@ const World = (function () {
   };
   api.synOn = () => synOn;
   api.synCat = function (c) { synCat = c; synRetro = 0.3; synParts.forEach(p => { p.life = 0; p.m.visible = false; }); };
+  let synGMode = null;
+  api.synGaba = function (m) { synGMode = m || null; };
   api.synLabels = function (on) { synLabelsOn = !!on; };
   api.synDrug = function (d) {
     if (!d) { synDrug = null; return; }

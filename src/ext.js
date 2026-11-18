@@ -1005,7 +1005,7 @@
     SD('cbd', 'URB597', 'experimental', 'inh', ['faah'], 'FAAH inhibitor that raises anandamide.'),
     SD('cbd', 'JZL184', 'experimental', 'inh', ['magl'], 'MAGL inhibitor that raises 2-AG.')
   ];
-  const SYN = { cat: 'epi', labels: true, q: null, last: '', sel: null };
+  const SYN = { cat: 'epi', labels: true, q: null, last: '', sel: null, gaba: null };
   function synSitesFor(cat) { return Object.keys(SYN_SITES).filter(id => SYN_SITES[id].c.indexOf(cat) >= 0); }
   function synNewQ() {
     const pool = SYN_DRUGS.filter(d => d.cat === SYN.cat && (d.name + d.ctx) !== SYN.last), d = pick(pool.length ? pool : SYN_DRUGS.filter(x => x.cat === SYN.cat));
@@ -1032,7 +1032,7 @@
     if (!SYN.q) synNewQ();
     synSet(); renderPanel(); SFX.play('bell');
   }
-  function synExit() { if (World.ok && World.synOn && World.synOn()) World.setSyn(false); }
+  function synExit() { gabaStop(); if (World.ok && World.synOn && World.synOn()) World.setSyn(false); }
   function onSynSite(id) {
     const q = SYN.q;
     if (q && !q.done && !q.d.multi && synSitesFor(SYN.cat).indexOf(id) >= 0) { if (!q.act) { SYN.sel = id; if (World.ok) World.synHighlight([id]); toast('Choose inhibitor or activator first, then tap the site.'); if (view === 'syn') renderPanel(); return; } return synAnswerSite(id); }
@@ -1074,6 +1074,42 @@
     if (q.ok) { S.synOK = (S.synOK || 0) + 1; S.synStreak = (S.synStreak || 0) + 1; q.pay = Math.round(14 * (1 + 0.25 * S.up.shelf) * (1 + Math.min(S.synStreak, 10) * 0.05) * franchiseMult()); S.cash += q.pay; S.earned += q.pay; SFX.play('ok'); SFX.play('coin'); } else { S.synStreak = 0; SFX.play('bad'); }
     save(); if (World.ok) { World.synHighlight(q.d.sites); if (World.synReveal) World.synReveal(); } renderStats(); renderPanel();
   }
+
+  /* ---- GABA-A demo: hyperpolarizing IPSP vs shunting inhibition (voltage trace in the panel, Cl- channel in the 3D synapse) ---- */
+  const GB = { t0: 0, timer: null, mode: null, last3d: null }, GB_LEN = 9, GB_REST = -70, GB_ECL = -75, GB_THR = -55;
+  const gbEpsp = (t, t0, A) => { const x = t - t0; return x <= 0 ? 0 : A * 1.87 * (Math.exp(-x / 0.5) - Math.exp(-x / 0.1)); };
+  function gbV(t, mode) {
+    // GABA-A channels are open from 3 s to 7 s; a test EPSP arrives at 1 s (control) and at 5 s (during GABA)
+    let base = GB_REST;
+    if (mode === 'ipsp') { const d = GB_ECL - GB_REST; if (t >= 3 && t < 7) base += d * (1 - Math.exp(-(t - 3) / 0.25)); else if (t >= 7) base += d * (1 - Math.exp(-4 / 0.25)) * Math.exp(-(t - 7) / 0.3); }
+    return base + gbEpsp(t, 1, 14) + gbEpsp(t, 5, mode === 'shunt' ? 5 : 14);
+  }
+  function gbDraw() {
+    const cv = document.getElementById('gabacv'); if (!cv || !SYN.gaba) return;
+    const W = cv.width, H = cv.height, c = cv.getContext('2d'), mode = SYN.gaba, t = ((performance.now() - GB.t0) / 1000) % GB_LEN;
+    const css = getComputedStyle(document.documentElement), ink = css.getPropertyValue('--ink').trim() || '#123', mut = css.getPropertyValue('--muted').trim() || '#678';
+    const X = s => 44 + s / GB_LEN * (W - 56), Y = v => 14 + (-52 - v) / 28 * (H - 34);
+    c.clearRect(0, 0, W, H); c.font = '11px ui-monospace, monospace'; c.textBaseline = 'middle';
+    c.fillStyle = 'rgba(95,224,138,.18)'; c.fillRect(X(3), 8, X(7) - X(3), H - 22); c.fillStyle = mut; c.fillText('GABA-A open', X(3) + 4, 16);
+    [[GB_THR, 'threshold −55', '#E04F3A', 1], [GB_REST, 'rest −70', mut, 0], [GB_ECL, 'E(Cl⁻) −75', '#2BB673', 0]].forEach(l => { const y = Y(l[0]); c.strokeStyle = l[2]; c.lineWidth = 1; c.setLineDash(l[3] ? [5, 4] : [2, 4]); c.beginPath(); c.moveTo(40, y); c.lineTo(W - 8, y); c.stroke(); c.setLineDash([]); c.fillStyle = l[2]; c.textAlign = 'left'; c.fillText(String(l[0]), 2, y); });
+    c.strokeStyle = ink; c.lineWidth = 2.4; c.beginPath(); for (let s = 0; s <= t; s += 0.03) { const x = X(s), y = Y(gbV(s, mode)); if (s === 0) c.moveTo(x, y); else c.lineTo(x, y); } c.stroke();
+    c.fillStyle = ink; c.beginPath(); c.arc(X(t), Y(gbV(t, mode)), 4, 0, 7); c.fill();
+    c.fillStyle = mut; c.textAlign = 'center'; c.fillText('EPSP (control)', X(1.4), H - 6); c.fillText('same EPSP, GABA open', X(5.4), H - 6);
+    const want = t >= 3 && t < 7 ? mode : null; if (GB.last3d !== want) { GB.last3d = want; if (World.ok && World.synGaba) World.synGaba(want); }
+    const rd = document.getElementById('gabard'); if (rd) { const p1 = Math.round(gbV(1.2, mode) * 10) / 10, p2 = Math.round(gbV(5.2, mode) * 10) / 10; rd.textContent = mode === 'ipsp' ? 'Baseline falls toward −75 mV, so the same EPSP peaks at about ' + Math.round(gbV(5.2, 'ipsp')) + ' mV instead of ' + Math.round(p1) + ' mV: farther from threshold.' : 'Baseline stays at −70 mV, but conductance is up, so the EPSP is only ' + Math.round(gbV(5.2, 'shunt') + 70) + ' mV instead of ' + Math.round(gbV(1.2, 'shunt') + 70) + ' mV.'; }
+  }
+  function gabaStop() { if (GB.timer) { clearInterval(GB.timer); GB.timer = null; } SYN.gaba = null; GB.last3d = null; if (World.ok && World.synGaba) { World.synGaba(null); if (World.synHighlight) World.synHighlight(null); } }
+  function gabaStart(m) {
+    if (!m || SYN.gaba === m) return gabaStop();
+    SYN.gaba = m; GB.t0 = performance.now(); GB.last3d = undefined;
+    if (SYN.cat !== 'epi' && SYN.cat !== 'cbd') { SYN.cat = 'epi'; SYN.q = null; synNewQ(); synSet(); }
+    if (World.ok && World.synHighlight) World.synHighlight(['gabaa']);
+    if (!GB.timer) GB.timer = setInterval(() => { if (view !== 'syn' || !SYN.gaba) { gabaStop(); return; } gbDraw(); }, 33);
+  }
+  function gabaHTML() {
+    const m = SYN.gaba, b = (k, t) => `<button type="button" class="chip" data-act="syn-gaba" data-v="${k}" aria-pressed="${m === k}">${t}</button>`;
+    return `<div class="syncard gabacard"><div class="synq"><b>GABA-A: two ways to inhibit</b></div><p class="note">Watch the voltage trace and the Cl⁻ channel on the postsynaptic spine at the same time.</p><div class="chips">${b('ipsp', 'Hyperpolarizing IPSP')}${b('shunt', 'Shunting inhibition')}</div>${m ? `<canvas id="gabacv" width="420" height="190" style="width:100%;max-width:520px;height:auto" role="img" aria-label="Membrane potential over time with an EPSP before and during GABA-A opening"></canvas><p class="note" id="gabard"></p><p class="note">${m === 'ipsp' ? 'Cl⁻ flows in toward E(Cl⁻) near −75 mV, so the membrane moves away from threshold.' : 'No net Cl⁻ transport is needed. The open channel is a short circuit: conductance rises, resistance falls, and an EPSP gets smaller.'}</p>` : ''}</div>`;
+  }
   function synHTML() {
     const q = SYN.q || (synNewQ(), SYN.q), cat = SYN.cat;
     const tabs = SYN_CATS.map(c => `<button type="button" class="chip" data-act="syn-cat" data-v="${c[0]}" aria-pressed="${cat === c[0]}">${c[1]}</button>`).join('');
@@ -1090,6 +1126,7 @@
       <div class="chips">${tabs}${lab}</div>
       <div class="syncard"><div class="synq"><b>${esc(q.d.name)}</b>${q.d.ctx ? '<small> (' + esc(q.d.ctx) + ')</small>' : ''}</div>
         ${multi ? '' : actB}${q.done ? '' : '<p class="note">' + (multi ? (q.stage ? '' : in3d ? 'Tap EVERY site it acts on in the 3D view (tap again to undo), then submit.' : 'Select EVERY site it acts on, then submit.') : in3d ? 'Then tap the site of action in the 3D view.' : 'Then choose the site of action.') + '</p>'}${siteB}${res}</div>
+      ${gabaHTML()}
       <details class="grp"><summary><b>Site guide</b> <small>tap a name to see what it does</small></summary><ul class="synguide">${guide}</ul></details>
       <div class="btnrow"><button type="button" class="btn go" data-act="back">Back to the pharmacy</button></div></div>`;
   }
