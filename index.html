@@ -1072,6 +1072,12 @@ body.trip .stats .stat { animation: tripbob 1.4s ease-in-out infinite; }
 .pwide { display: grid; gap: 10px; }
 .pmain, .paside { display: grid; gap: 10px; min-width: 0; align-content: start; }
 .qpanel.wide, body.fx .qpanel.wide { left: 12px; right: 12px; width: auto; max-height: none; top: calc(var(--tb, 0px) + 8px); bottom: 12px; }
+body.fx .qpanel.wide .qgrab, .qpanel.wide .qgrab { display: flex; position: sticky; top: 0; z-index: 5; width: 100%; justify-content: center; align-items: center; border: 0; border-bottom: 1.5px solid var(--line); background: var(--surface2); padding: 9px 10px; font: 700 12px/1 var(--f-mono); letter-spacing: .06em; text-transform: uppercase; color: var(--muted); flex: none; cursor: pointer; }
+.qpanel.wide .qgrab span::before { content: '\25BE  '; }
+.qpanel.wide.min .qgrab span::before { content: '\25B4  '; }
+.qpanel.wide.min, body.fx .qpanel.wide.min { top: auto; bottom: 12px; height: auto; overflow: hidden; }
+.qpanel.wide.min #counter, body.fx .qpanel.wide.min #counter { display: none; }
+@media (min-width: 901px) { .qpanel.wide.min, body.fx .qpanel.wide.min { left: auto; width: min(360px, calc(100% - 24px)); } }
 @media (min-width: 640px) {
   .qpanel.wide .pwide { grid-template-columns: minmax(0, 2.1fr) minmax(240px, 1fr); align-items: start; }
   .qpanel.wide .paside { position: sticky; top: 4px; }
@@ -1322,7 +1328,7 @@ table.board tbody tr:nth-child(-n+3) td:first-child { font-weight: 800; color: v
     <div class="hint3d">Drag to look around. Pinch to zoom. Tap glowing spots to build.</div>
     <div class="fpq" id="fpq" hidden></div>
     <button type="button" class="fpleave" id="fpleave" data-act="fp-leave" aria-label="Leave this task">&#10005; Leave</button>
-    <div class="qpanel" id="qpanel" aria-live="polite"><button type="button" class="qgrab" id="qgrab" aria-expanded="true"><span>Hide card to look around</span></button><div id="counter"></div></div>
+    <div class="qpanel" id="qpanel" aria-live="polite"><button type="button" class="qgrab" id="qgrab" aria-expanded="true"><span>Hide card to see the pharmacy</span></button><div id="counter"></div></div>
   </section>
 
   <button type="button" class="scrim" data-act="drawer-close" aria-label="Close"></button>
@@ -9657,7 +9663,7 @@ const World = (function () {
   window.addEventListener('orientationchange', () => setTimeout(fitSoon, 250));
   if (window.ResizeObserver) new ResizeObserver(fitSoon).observe($('#counter'));
   if (document.fonts) { if (document.fonts.ready) document.fonts.ready.then(fitSoon); if (document.fonts.addEventListener) document.fonts.addEventListener('loadingdone', fitSoon); }
-  function qExpand() { const p = $('#qpanel'); if (p) { p.classList.remove('min'); const b = $('#qgrab'); if (b) { b.setAttribute('aria-expanded', 'true'); b.firstElementChild.textContent = 'Hide card to look around'; } } }
+  function qExpand() { const p = $('#qpanel'); if (p) { p.classList.remove('min'); const b = $('#qgrab'); if (b) { b.setAttribute('aria-expanded', 'true'); b.firstElementChild.textContent = 'Hide card to see the pharmacy'; } } }
   function openView(v) {
     if (view === 'syn' && v !== 'syn') synExit();
     qExpand();
@@ -9666,7 +9672,7 @@ const World = (function () {
     $('#qpanel').scrollTop = 0;
   }
   let nbClosing = false;
-  document.addEventListener('click', (e) => { const b = e.target.closest && e.target.closest('#qgrab'); if (!b) return; const p = $('#qpanel'), min = p.classList.toggle('min'); b.setAttribute('aria-expanded', String(!min)); b.firstElementChild.textContent = min ? 'Show question card' : 'Hide card to look around'; if (World.ok) updateInset(); fitPanel(); });
+  document.addEventListener('click', (e) => { const b = e.target.closest && e.target.closest('#qgrab'); if (!b) return; const p = $('#qpanel'), min = p.classList.toggle('min'); b.setAttribute('aria-expanded', String(!min)); b.firstElementChild.textContent = min ? 'Show question card' : 'Hide card to see the pharmacy'; if (World.ok) updateInset(); fitPanel(); });
   document.addEventListener('keydown', (e) => { if (e.key === 'Escape') document.body.classList.remove('drawer'); });
   function backToQ() {
     if ((view === 'studies' || view === 'set' || view === 'opts') && !nbClosing) {
@@ -11427,7 +11433,7 @@ const micLab3 = () => !!(World.ok && World.setMic);
   }
   setInterval(micTick, 25000);
 
-  const GAME_VERSION = 155;
+  const GAME_VERSION = 156;
   const b64u = (u8) => { let s = ''; for (let i = 0; i < u8.length; i += 0x8000) s += String.fromCharCode.apply(null, u8.subarray(i, i + 0x8000)); return btoa(s).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); };
   const unb64u = (t) => { const s = atob(t.replace(/-/g, '+').replace(/_/g, '/')), u = new Uint8Array(s.length); for (let i = 0; i < s.length; i++) u[i] = s.charCodeAt(i); return u; };
   const chk = (t) => { let h = 2166136261; for (let i = 0; i < t.length; i++) { h ^= t.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36); };

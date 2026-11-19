@@ -1859,7 +1859,7 @@
   window.addEventListener('orientationchange', () => setTimeout(fitSoon, 250));
   if (window.ResizeObserver) new ResizeObserver(fitSoon).observe($('#counter'));
   if (document.fonts) { if (document.fonts.ready) document.fonts.ready.then(fitSoon); if (document.fonts.addEventListener) document.fonts.addEventListener('loadingdone', fitSoon); }
-  function qExpand() { const p = $('#qpanel'); if (p) { p.classList.remove('min'); const b = $('#qgrab'); if (b) { b.setAttribute('aria-expanded', 'true'); b.firstElementChild.textContent = 'Hide card to look around'; } } }
+  function qExpand() { const p = $('#qpanel'); if (p) { p.classList.remove('min'); const b = $('#qgrab'); if (b) { b.setAttribute('aria-expanded', 'true'); b.firstElementChild.textContent = 'Hide card to see the pharmacy'; } } }
   function openView(v) {
     if (view === 'syn' && v !== 'syn') synExit();
     qExpand();
@@ -1868,7 +1868,7 @@
     $('#qpanel').scrollTop = 0;
   }
   let nbClosing = false;
-  document.addEventListener('click', (e) => { const b = e.target.closest && e.target.closest('#qgrab'); if (!b) return; const p = $('#qpanel'), min = p.classList.toggle('min'); b.setAttribute('aria-expanded', String(!min)); b.firstElementChild.textContent = min ? 'Show question card' : 'Hide card to look around'; if (World.ok) updateInset(); fitPanel(); });
+  document.addEventListener('click', (e) => { const b = e.target.closest && e.target.closest('#qgrab'); if (!b) return; const p = $('#qpanel'), min = p.classList.toggle('min'); b.setAttribute('aria-expanded', String(!min)); b.firstElementChild.textContent = min ? 'Show question card' : 'Hide card to see the pharmacy'; if (World.ok) updateInset(); fitPanel(); });
   document.addEventListener('keydown', (e) => { if (e.key === 'Escape') document.body.classList.remove('drawer'); });
   function backToQ() {
     if ((view === 'studies' || view === 'set' || view === 'opts') && !nbClosing) {
@@ -2067,7 +2067,7 @@
   /* ---- save code: the whole save as one long code, to move progress between devices or keep a backup ---- */
 /*@EXT@*/
 /*@MIC@*/
-  const GAME_VERSION = 155;
+  const GAME_VERSION = 156;
   const b64u = (u8) => { let s = ''; for (let i = 0; i < u8.length; i += 0x8000) s += String.fromCharCode.apply(null, u8.subarray(i, i + 0x8000)); return btoa(s).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); };
   const unb64u = (t) => { const s = atob(t.replace(/-/g, '+').replace(/_/g, '/')), u = new Uint8Array(s.length); for (let i = 0; i < s.length; i++) u[i] = s.charCodeAt(i); return u; };
   const chk = (t) => { let h = 2166136261; for (let i = 0; i < t.length; i++) { h ^= t.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36); };
