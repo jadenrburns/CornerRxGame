@@ -17,7 +17,7 @@ const { chromium } = require('playwright');
   if (tabs.join() !== 'Topics,Settings,My studies') fail.push('tabs ' + tabs);
   const cards = await p.evaluate(() => [...document.querySelectorAll('.crs')].map(e => e.dataset.crs + ':' + e.querySelector('.crsst').textContent));
   console.log('cards', cards);
-  if (cards.length !== 4 || !/p443:4 of 5 on/.test(cards.join()) || !/core:all 10 on/.test(cards.join())) fail.push('P2 cards ' + cards);
+  if (cards.length !== 4 || !/p443:5 of 6 on/.test(cards.join()) || !/core:all 10 on/.test(cards.join())) fail.push('P2 cards ' + cards);
   let c;
   // year tabs
   await act('year', 'P3');
