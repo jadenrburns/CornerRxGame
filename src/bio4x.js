@@ -201,9 +201,9 @@ PLC("B4PE", 2, "Electron transport: which complex does each inhibitor block?", [
   ["Carbon monoxide and hydrogen sulfide:  ", { a: 'Complex IV' }]
 ], ['Complex II', 'ATP synthase'], "Rotenone and amytal block complex I, antimycin A blocks III, and cyanide, CO and H2S block cytochrome c oxidase.", "Electron transport lecture");
 PLC("B4PE", 3, "Reactive oxygen species: place each step of the chain of events.", [
-  ["O2 plus one electron makes  ", { a: 'Superoxide' }],
-  ["The enzyme  ", { a: 'Superoxide dismutase' }, "  converts it to O2 and  ", { a: 'Hydrogen peroxide' }],
-  ["The enzyme  ", { a: 'Catalase' }, "  converts that to O2 and  ", { a: 'Water' }],
+  ["Step 1: O2 plus one electron makes  ", { a: 'Superoxide' }],
+  ["Step 2: superoxide is converted by the enzyme  ", { a: 'Superoxide dismutase' }, "  into O2 and  ", { a: 'Hydrogen peroxide' }],
+  ["Step 3: hydrogen peroxide is converted by the enzyme  ", { a: 'Catalase' }, "  into O2 and  ", { a: 'Water' }],
   ["Antioxidant vitamins that also help:  ", { a: 'E and C' }]
 ], ['Cytochrome c oxidase', 'Hydroxide', 'B1 and B2'], "Partial reduction of O2 gives superoxide (and peroxide with two electrons). SOD makes H2O2, catalase breaks it into O2 and water; vitamins E and C add protection.", "Electron transport lecture");
 PLC("B4PE", 2, "Mitochondria: place the location of each process.", [
