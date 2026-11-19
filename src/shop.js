@@ -49,9 +49,9 @@ const SHOP_DECOR = [
 /* radio tapes: [id, name, price, blurb]. The music for each lives in ext.js (MUS_TAPES). Tape t1 comes with the radio. Never rename a shipped id. */
 const SHOP_TAPES = [
   ['t1', 'Rainy Window', 0, 'Soft keys and a slow beat. Comes with the radio.'],
-  ['t2', 'Night Shift', 250, 'Slow and minor. For the late hours.'],
-  ['t3', 'Corner Cafe', 400, 'Jazzy chords with a little swing.'],
-  ['t4', 'Late Study', 500, 'Very mellow. Good for long cram sessions.'],
+  ['t2', 'Night Shift', 250, 'Minor chords with a rolling arpeggio. For the late hours.'],
+  ['t3', 'Corner Cafe', 400, 'Jazzy chords with swing and little piano stabs.'],
+  ['t4', 'Warm Light', 500, 'Warm, soulful chords with a gentle arpeggio.'],
   ['t5', 'Sunday Morning', 650, 'Bright and easy, a bit faster.']
 ];
 /* extra pharmacist hairstyles: [id, name, style number in world.js, price] */
