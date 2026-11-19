@@ -183,3 +183,6 @@ The three ring cards were replaced by one cyclic diagram builder `CYCD(blankKind
 
 ## Hide button on wide cards (v156)
 The wide drag-and-place card (`.qpanel.wide`) now always shows the `#qgrab` bar ("Hide card to see the pharmacy" / "Show question card") at every width (it was hidden above 900px and the fixed insets ignored `.min`). `.qpanel.wide.min` collapses to the bar at the bottom (bottom-right, 360px wide, on desktop) so the 3D pharmacy shows; tap again to expand. CSS is right under the `.qpanel.wide` rule in `head.html`.
+
+## Biochem practice exam (v158)
+`B4X` ("Exam 4: practice exam (all 40 questions)", first chip in the `p1bio` card): `src/bio4p.js` has every item of "BIOCHEM TEST 4 2023" with the exam's own key, each citing "Biochem Test 4 (2023), item N" and carrying `xn` (item number). The same PDF also feeds `BIO4` (v151, reworded, 38 items); `B4X` has its own mastery (`kx: 'B4X|'`). The exam has five options, so each item keeps the key plus three wrongs; item 6 (all of the above) is a single answer, item 31 (a picture of DNA forms) is replaced by a description, item 9 uses the exam key as given. Correct answer longest 30%. There is no in-order exam mode yet; questions come in the normal mix.
