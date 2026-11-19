@@ -13,9 +13,10 @@
      (or a new course). Order here is the order on screen. `sched` attaches a weekly drug schedule (WKCFG key). */
   const COURSES = [
     { id: 'core', name: 'Core skills', tag: 'Every year', year: 'all', cats: ['BG', 'CL', 'MOA', 'AE', 'DDI', 'CN', 'AD', 'SIG', 'CALC', 'HIM'], note: 'The everyday counter questions: names, classes, mechanisms, side effects, interactions, counseling, antidotes, sig and law, calculations, and Andy’s heart failure questions.' },
-    { id: 'p443', name: 'PharmTox', code: 'PHAR 443', tag: 'P2', year: 'P2', cats: ['TOP', 'PT3', 'PT3G', 'PT4Q', 'PT4S', 'PT4'], sched: 'p2', note: 'Weekly drug sheets plus the exam question sets.' },
+    { id: 'p443', name: 'PharmTox', code: 'PHAR 443', tag: 'P2', year: 'P2', cats: ['PT3', 'PT3G', 'PT4Q', 'PT4S', 'PT4'], note: 'The PharmTox exam question sets.' },
     { id: 'p451', name: 'Therapeutics', code: 'PHAR 451', tag: 'P2', year: 'P2', cats: ['TH3F', 'TH3C', 'TH3', 'GER'], note: 'Exam 3 GI and contraception topics, and geriatrics.' },
     { id: 'p421', name: 'Medicinal Chemistry', code: 'PHAR 421', tag: 'P2', year: 'P2', cats: ['EX3', 'ASD', 'CHO', 'MET3'], note: 'Exam 3: start with the cram tab (built from the professor\u2019s study guide), then antiseizure, cholinergic and tap-the-site metabolism.' },
+    { id: 'p2top', name: 'Weekly drugs', code: 'PHAR 443', tag: 'P2', year: 'P2', cats: ['TOP'], sched: 'p2', note: 'Weekly drug sheets for PharmTox, one set per week.' },
     { id: 'p1bio', name: 'Biochemistry', tag: 'P1', year: 'P1', cats: ['B4X', 'B4D', 'B4C', 'B4E', 'B4G', 'B4PD', 'B4PC', 'B4PE', 'B4PG', 'BIOG', 'BIO4'], note: 'Exam 4: digestion, citric acid cycle, electron transport and gluconeogenesis (questions, plus drag-and-place pathway cards). Then the older gene expression and metabolism tests.' },
     { id: 'p1top', name: 'Top 300 weekly drugs', short: 'Top 300', tag: 'P1', year: 'P1', cats: ['TP1'], sched: 'p1', note: 'Brand, generic and indication for the Top 300, most prescribed first. Starts Jan 12: top 20, 35, 50, 65, 80, 90, 100 and on to 300. Each week adds new drugs and the earlier weeks stay on for review.' },
     { id: 'p3top', name: 'Top 300 weekly drugs', short: 'Top 300', tag: 'P3', year: 'P3', cats: ['TP3'], sched: 'p3', note: 'Drug list sheets by system, one set per week.' },
@@ -2068,7 +2069,7 @@
   /* ---- save code: the whole save as one long code, to move progress between devices or keep a backup ---- */
 /*@EXT@*/
 /*@MIC@*/
-  const GAME_VERSION = 160;
+  const GAME_VERSION = 161;
   const b64u = (u8) => { let s = ''; for (let i = 0; i < u8.length; i += 0x8000) s += String.fromCharCode.apply(null, u8.subarray(i, i + 0x8000)); return btoa(s).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); };
   const unb64u = (t) => { const s = atob(t.replace(/-/g, '+').replace(/_/g, '/')), u = new Uint8Array(s.length); for (let i = 0; i < s.length; i++) u[i] = s.charCodeAt(i); return u; };
   const chk = (t) => { let h = 2166136261; for (let i = 0; i < t.length; i++) { h ^= t.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36); };
@@ -2176,6 +2177,7 @@
       case 'lab-clr': { LABCALC.expr = ''; const el = $('#labexpr'); if (el) el.value = ''; labTick(); return; }
       case 'labk': { S.labK = S.labK || {}; const on = ['comp', 'pk'].filter(x => S.labK[x] !== false).length; if (S.labK[v] !== false && on <= 1) { toast('Keep at least one kind on.'); return; } S.labK[v] = S.labK[v] === false; save(); renderPanel(); return; }
       case 'sfx': S.sfx = S.sfx === false; save(); sfxLabel(); SFX.play('ok'); return;
+      case 'music': S.music = S.music === false; save(); musLabel(); MUS.sync(); return;
       case 'flash': openView(view === 'flash' ? 'q' : 'flash'); if (view === 'q') { resumeTimers(); renderPanel(); } return;
       case 'share': return makeShare();
       case 'share-send': return shareSend();
@@ -2351,7 +2353,7 @@
   window.__rxDbg = () => ({ micDbg: () => ({ get R() { return micR; }, get inLab() { return micIn; }, drop: micDrop, paper: micPaperClick, part: micStartPart, startSort: micStartSort, sel: id => { micSelG = id; renderPanel(); } }), sr: srUpdate, nc: newCard, sp: specialRoll, fp: fp, S: S, view: view, rush: rush, phoneR: phone.ringing, TOPQ: TOPQ, pool: poolQs, cur: cur, synQ: () => (typeof SYN !== 'undefined' ? SYN.q : null), synTap: id => onSynSite(id), offer: k => offerEvt(k, 'test'), onEvt: onEvt, holiday: () => holNow(), holN: () => holCount(), renderStats: renderStats, passive: passive, techRate: techRate, buyUp: buyUp, openVial: openVial, tabletTake: tabletTake, capsuleOpen: capsuleOpen, buffOn: buffOn, GEAR: GEAR, gearBuff: gearBuff, gearHave: gearHave });
   if (!World.ok) $('#stage').classList.add('flat');
   else { document.body.classList.add('fx'); try { World.setBin(!!S.binBug); } catch (e) { /* decor */ } World.setPharmacist(meSpec()); World.setStore(S.store); World.setStaffLook(uniSpec()); World.setAwards(S.awards); World.setCalendar(Math.min(4, S.awards.calW || 0), false, S.awards.calW || 0); }
-  applyFocus(); syncBrand(); sfxLabel();
+  applyFocus(); syncBrand(); sfxLabel(); musLabel(); MUS.arm();
   /* test tools: open the game with ?dev=1 on the end of the link to get extra menu buttons for trying events quickly */
   { const bb = document.querySelector('#menu [data-act="board"]'); if (bb) bb.hidden = !Net.on(); }
   if (/[?&]flags=1/.test(location.search)) setTimeout(() => openView('flags'), 400);

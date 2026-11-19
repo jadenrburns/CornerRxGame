@@ -537,7 +537,7 @@ body.fx .fpq.mini { left: max(10px, env(safe-area-inset-left, 0px)); }
 .quick .qk { display: grid; place-items: center; width: 44px; height: 44px; padding: 0; border-radius: 14px; border: 2px solid var(--ink); background: var(--surface); color: var(--teal-ink, var(--ink)); box-shadow: 0 3px 0 var(--ink); cursor: pointer; pointer-events: auto; }
 .quick .qk i { display: grid; place-items: center; }
 .quick .qk[aria-pressed="true"] { background: var(--teal-soft); }
-#sfxbtn[aria-pressed="false"] { opacity: .6; text-decoration: line-through; }
+#sfxbtn[aria-pressed="false"], #musbtn[aria-pressed="false"] { opacity: .6; text-decoration: line-through; }
 .quick .qk:active { transform: translateY(2px); box-shadow: 0 1px 0 var(--ink); }
 .sr { position: absolute !important; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 body.fx .quick { gap: 6px; } body.fx .quick .qk { width: 40px; height: 40px; border-radius: 12px; }
@@ -681,7 +681,7 @@ body.fx .fpq.mini { left: max(10px, env(safe-area-inset-left, 0px)); }
 .quick .qk { display: grid; place-items: center; width: 44px; height: 44px; padding: 0; border-radius: 14px; border: 2px solid var(--ink); background: var(--surface); color: var(--teal-ink, var(--ink)); box-shadow: 0 3px 0 var(--ink); cursor: pointer; pointer-events: auto; }
 .quick .qk i { display: grid; place-items: center; }
 .quick .qk[aria-pressed="true"] { background: var(--teal-soft); }
-#sfxbtn[aria-pressed="false"] { opacity: .6; text-decoration: line-through; }
+#sfxbtn[aria-pressed="false"], #musbtn[aria-pressed="false"] { opacity: .6; text-decoration: line-through; }
 .quick .qk:active { transform: translateY(2px); box-shadow: 0 1px 0 var(--ink); }
 .sr { position: absolute !important; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 body.fx .quick { gap: 6px; } body.fx .quick .qk { width: 40px; height: 40px; border-radius: 12px; }
@@ -1315,7 +1315,7 @@ table.board tbody tr:nth-child(-n+3) td:first-child { font-weight: 800; color: v
       <div><h1>Corner Rx</h1><small>Pharmacy tycoon study game</small></div>
     </div>
     <div class="stats" id="stats" aria-label="Your pharmacy stats"></div>
-    <div class="quick"><button type="button" class="qk" id="vialbtn" data-act="vial" aria-label="Lost pills vial" aria-haspopup="dialog"><i aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 3h8M9 3v3M15 3v3M7 6h10v13a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2z"/><path d="M7 11h10"/></svg></i><b class="vcount" hidden>0</b></button><button type="button" class="qk" id="sfxbtn" data-act="sfx" aria-label="Sound" aria-pressed="true"><i aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9zM16 9a4 4 0 0 1 0 6M18.5 6.5a8 8 0 0 1 0 11"/></svg></i><span id="sfxlab" class="sr">Sound: on</span></button><button type="button" class="qk" id="focusbtn" data-act="focus" aria-label="Focus mode" aria-pressed="false"><i aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="2.5"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg></i><span id="focuslab" class="sr">Focus mode</span></button></div>
+    <div class="quick"><button type="button" class="qk" id="vialbtn" data-act="vial" aria-label="Lost pills vial" aria-haspopup="dialog"><i aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 3h8M9 3v3M15 3v3M7 6h10v13a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2z"/><path d="M7 11h10"/></svg></i><b class="vcount" hidden>0</b></button><button type="button" class="qk" id="sfxbtn" data-act="sfx" aria-label="Sound" aria-pressed="true"><i aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9zM16 9a4 4 0 0 1 0 6M18.5 6.5a8 8 0 0 1 0 11"/></svg></i><span id="sfxlab" class="sr">Sound: on</span></button><button type="button" class="qk" id="musbtn" data-act="music" aria-label="Music" aria-pressed="true"><i aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18V6l10-2v12M9 18a3 3 0 1 1-3-3 3 3 0 0 1 3 3zM19 16a3 3 0 1 1-3-3 3 3 0 0 1 3 3z"/></svg></i><span id="muslab" class="sr">Music: on</span></button><button type="button" class="qk" id="focusbtn" data-act="focus" aria-label="Focus mode" aria-pressed="false"><i aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="2.5"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg></i><span id="focuslab" class="sr">Focus mode</span></button></div>
     <button type="button" class="drawerbtn" data-act="menu" aria-label="Open menu" aria-haspopup="true"><span aria-hidden="true">&#9776;</span><b>Menu</b></button>
   </header>
     <div class="tags"></div>
@@ -7998,9 +7998,10 @@ const World = (function () {
      (or a new course). Order here is the order on screen. `sched` attaches a weekly drug schedule (WKCFG key). */
   const COURSES = [
     { id: 'core', name: 'Core skills', tag: 'Every year', year: 'all', cats: ['BG', 'CL', 'MOA', 'AE', 'DDI', 'CN', 'AD', 'SIG', 'CALC', 'HIM'], note: 'The everyday counter questions: names, classes, mechanisms, side effects, interactions, counseling, antidotes, sig and law, calculations, and Andy’s heart failure questions.' },
-    { id: 'p443', name: 'PharmTox', code: 'PHAR 443', tag: 'P2', year: 'P2', cats: ['TOP', 'PT3', 'PT3G', 'PT4Q', 'PT4S', 'PT4'], sched: 'p2', note: 'Weekly drug sheets plus the exam question sets.' },
+    { id: 'p443', name: 'PharmTox', code: 'PHAR 443', tag: 'P2', year: 'P2', cats: ['PT3', 'PT3G', 'PT4Q', 'PT4S', 'PT4'], note: 'The PharmTox exam question sets.' },
     { id: 'p451', name: 'Therapeutics', code: 'PHAR 451', tag: 'P2', year: 'P2', cats: ['TH3F', 'TH3C', 'TH3', 'GER'], note: 'Exam 3 GI and contraception topics, and geriatrics.' },
     { id: 'p421', name: 'Medicinal Chemistry', code: 'PHAR 421', tag: 'P2', year: 'P2', cats: ['EX3', 'ASD', 'CHO', 'MET3'], note: 'Exam 3: start with the cram tab (built from the professor\u2019s study guide), then antiseizure, cholinergic and tap-the-site metabolism.' },
+    { id: 'p2top', name: 'Weekly drugs', code: 'PHAR 443', tag: 'P2', year: 'P2', cats: ['TOP'], sched: 'p2', note: 'Weekly drug sheets for PharmTox, one set per week.' },
     { id: 'p1bio', name: 'Biochemistry', tag: 'P1', year: 'P1', cats: ['B4X', 'B4D', 'B4C', 'B4E', 'B4G', 'B4PD', 'B4PC', 'B4PE', 'B4PG', 'BIOG', 'BIO4'], note: 'Exam 4: digestion, citric acid cycle, electron transport and gluconeogenesis (questions, plus drag-and-place pathway cards). Then the older gene expression and metabolism tests.' },
     { id: 'p1top', name: 'Top 300 weekly drugs', short: 'Top 300', tag: 'P1', year: 'P1', cats: ['TP1'], sched: 'p1', note: 'Brand, generic and indication for the Top 300, most prescribed first. Starts Jan 12: top 20, 35, 50, 65, 80, 90, 100 and on to 300. Each week adds new drugs and the earlier weeks stay on for review.' },
     { id: 'p3top', name: 'Top 300 weekly drugs', short: 'Top 300', tag: 'P3', year: 'P3', cats: ['TP3'], sched: 'p3', note: 'Drug list sheets by system, one set per week.' },
@@ -10096,6 +10097,84 @@ const World = (function () {
     };
   })();
 
+
+  /* ---- music: a quiet generative lofi loop made with WebAudio (no audio files). I vi ii V in C, soft keys, bass, light drums and a wandering pentatonic melody. Starts after the first tap or key, pauses when the tab is hidden, toggled by the Music button ---- */
+  const MUS = (() => {
+    let a = null, bus = null, nz = null, timer = null, nextT = 0, step = 0, bar = 0, mi = 2, started = false, ready = false;
+    const SP = 60 / 76 / 2, VOL = 0.5;
+    const CH = [{ b: 48, n: [60, 64, 67, 71, 74] }, { b: 45, n: [57, 60, 64, 67, 71] }, { b: 50, n: [62, 65, 69, 72, 76] }, { b: 43, n: [59, 62, 65, 69, 71] }];
+    const PEN = [67, 69, 72, 74, 76, 79, 81, 84], mf = (m) => 440 * Math.pow(2, (m - 69) / 12);
+    function init() {
+      if (ready) return !!a;
+      ready = true;
+      try {
+        const C = window.AudioContext || window.webkitAudioContext; if (!C) return false;
+        a = new C(); bus = a.createGain(); bus.gain.value = 0;
+        const lp = a.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 4200;
+        const dl = a.createDelay(1); dl.delayTime.value = SP * 3; const fb = a.createGain(); fb.gain.value = 0.28; const wet = a.createGain(); wet.gain.value = 0.22;
+        bus.connect(lp); lp.connect(a.destination); lp.connect(dl); dl.connect(fb); fb.connect(dl); dl.connect(wet); wet.connect(a.destination);
+        nz = a.createBuffer(1, a.sampleRate, a.sampleRate); const d = nz.getChannelData(0); for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+      } catch (err) { a = null; }
+      return !!a;
+    }
+    function tone(t, f, dur, type, vol, cut, atk, rel) {
+      const o = a.createOscillator(), g = a.createGain(), fl = a.createBiquadFilter();
+      o.type = type; o.frequency.value = f; fl.type = 'lowpass'; fl.frequency.value = cut;
+      g.gain.setValueAtTime(0.0001, t); g.gain.linearRampToValueAtTime(vol, t + atk); g.gain.exponentialRampToValueAtTime(0.0001, t + dur + rel);
+      o.connect(fl); fl.connect(g); g.connect(bus); o.start(t); o.stop(t + dur + rel + 0.05);
+    }
+    function hit(t, dur, vol, type, freq) {
+      const s = a.createBufferSource(), g = a.createGain(), fl = a.createBiquadFilter();
+      s.buffer = nz; fl.type = type; fl.frequency.value = freq; g.gain.setValueAtTime(vol, t); g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+      s.connect(fl); fl.connect(g); g.connect(bus); s.start(t); s.stop(t + dur + 0.02);
+    }
+    function kick(t) {
+      const o = a.createOscillator(), g = a.createGain(); o.type = 'sine'; o.frequency.setValueAtTime(130, t); o.frequency.exponentialRampToValueAtTime(42, t + 0.14);
+      g.gain.setValueAtTime(0.34, t); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.28); o.connect(g); g.connect(bus); o.start(t); o.stop(t + 0.3);
+    }
+    function play(s, t) {
+      const c = CH[bar % 4], sw = (s % 2) ? SP * 0.14 : 0, tt = t + sw;
+      if (s === 0) {
+        c.n.forEach((m, i) => tone(t + i * 0.012, mf(m), SP * 7, 'triangle', 0.028, 1500, 0.08, 1.4));
+        tone(t, mf(c.b), SP * 3.4, 'sine', 0.2, 600, 0.02, 0.35);
+      }
+      if (s === 5) tone(tt, mf(c.b + 12), SP * 1.6, 'sine', 0.12, 700, 0.02, 0.25);
+      if (s === 0 || s === 3 || s === 6) { const m = c.n[(bar + s) % c.n.length] + 12; tone(tt, mf(m), SP * 1.2, 'triangle', 0.05, 2400, 0.008, 0.5); }
+      if (s === 2 || s === 5 || s === 7) {
+        if (Math.random() < 0.5) { mi = Math.max(0, Math.min(PEN.length - 1, mi + (Math.random() < 0.5 ? -1 : 1) * (1 + (Math.random() < 0.3 ? 1 : 0)))); tone(tt, mf(PEN[mi]), SP * 1.6, 'sine', 0.06, 3200, 0.01, 0.9); }
+      }
+      if (s === 0 || s === 5) kick(t);
+      if (s === 4) hit(t, 0.16, 0.07, 'bandpass', 1900);
+      if (s % 2) hit(tt, 0.05, 0.035, 'highpass', 7000);
+    }
+    function pump() {
+      if (!a || !started) return;
+      if (nextT < a.currentTime) nextT = a.currentTime + 0.06;
+      while (nextT < a.currentTime + 1.6) { play(step, nextT); nextT += SP; step++; if (step === 8) { step = 0; bar++; } }
+    }
+    function fade(v) { if (!a) return; const t = a.currentTime; bus.gain.cancelScheduledValues(t); bus.gain.setValueAtTime(bus.gain.value, t); bus.gain.linearRampToValueAtTime(v, t + 1.2); }
+    function want() { return S.music !== false && !document.hidden; }
+    function sync() {
+      if (want()) {
+        if (!init()) return;
+        if (a.state === 'suspended') { try { a.resume(); } catch (err) { /* ignore */ } }
+        if (!started) { started = true; nextT = a.currentTime + 0.1; step = 0; timer = setInterval(pump, 250); pump(); }
+        fade(0.16 * VOL / 0.5);
+      } else if (started) { fade(0); }
+    }
+    function arm() {
+      const go = () => { document.removeEventListener('pointerdown', go, true); document.removeEventListener('keydown', go, true); sync(); };
+      document.addEventListener('pointerdown', go, true); document.addEventListener('keydown', go, true);
+      document.addEventListener('visibilitychange', sync);
+    }
+    return { sync: sync, arm: arm, on: () => S.music !== false };
+  })();
+  function musLabel() {
+    const on = S.music !== false, l = $('#muslab'), b = $('#musbtn');
+    if (l) l.textContent = 'Music: ' + (on ? 'on' : 'off');
+    if (b) b.setAttribute('aria-pressed', String(on));
+  }
+
   /* ---- streak coin: a round badge with the number; from a streak of 10 it turns gold with an orange rim and a flame crown that grows with every right answer ---- */
   const SFX_ST = { cv: null, ctx: null, n: 0, shown: -1, pulse: 0, sparks: [], acc: 0, last: 0, run: false };
   function streakFx(n) {
@@ -11615,7 +11694,7 @@ const micLab3 = () => !!(World.ok && World.setMic);
   }
   setInterval(micTick, 25000);
 
-  const GAME_VERSION = 160;
+  const GAME_VERSION = 161;
   const b64u = (u8) => { let s = ''; for (let i = 0; i < u8.length; i += 0x8000) s += String.fromCharCode.apply(null, u8.subarray(i, i + 0x8000)); return btoa(s).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); };
   const unb64u = (t) => { const s = atob(t.replace(/-/g, '+').replace(/_/g, '/')), u = new Uint8Array(s.length); for (let i = 0; i < s.length; i++) u[i] = s.charCodeAt(i); return u; };
   const chk = (t) => { let h = 2166136261; for (let i = 0; i < t.length; i++) { h ^= t.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36); };
@@ -11723,6 +11802,7 @@ const micLab3 = () => !!(World.ok && World.setMic);
       case 'lab-clr': { LABCALC.expr = ''; const el = $('#labexpr'); if (el) el.value = ''; labTick(); return; }
       case 'labk': { S.labK = S.labK || {}; const on = ['comp', 'pk'].filter(x => S.labK[x] !== false).length; if (S.labK[v] !== false && on <= 1) { toast('Keep at least one kind on.'); return; } S.labK[v] = S.labK[v] === false; save(); renderPanel(); return; }
       case 'sfx': S.sfx = S.sfx === false; save(); sfxLabel(); SFX.play('ok'); return;
+      case 'music': S.music = S.music === false; save(); musLabel(); MUS.sync(); return;
       case 'flash': openView(view === 'flash' ? 'q' : 'flash'); if (view === 'q') { resumeTimers(); renderPanel(); } return;
       case 'share': return makeShare();
       case 'share-send': return shareSend();
@@ -11898,7 +11978,7 @@ const micLab3 = () => !!(World.ok && World.setMic);
   window.__rxDbg = () => ({ micDbg: () => ({ get R() { return micR; }, get inLab() { return micIn; }, drop: micDrop, paper: micPaperClick, part: micStartPart, startSort: micStartSort, sel: id => { micSelG = id; renderPanel(); } }), sr: srUpdate, nc: newCard, sp: specialRoll, fp: fp, S: S, view: view, rush: rush, phoneR: phone.ringing, TOPQ: TOPQ, pool: poolQs, cur: cur, synQ: () => (typeof SYN !== 'undefined' ? SYN.q : null), synTap: id => onSynSite(id), offer: k => offerEvt(k, 'test'), onEvt: onEvt, holiday: () => holNow(), holN: () => holCount(), renderStats: renderStats, passive: passive, techRate: techRate, buyUp: buyUp, openVial: openVial, tabletTake: tabletTake, capsuleOpen: capsuleOpen, buffOn: buffOn, GEAR: GEAR, gearBuff: gearBuff, gearHave: gearHave });
   if (!World.ok) $('#stage').classList.add('flat');
   else { document.body.classList.add('fx'); try { World.setBin(!!S.binBug); } catch (e) { /* decor */ } World.setPharmacist(meSpec()); World.setStore(S.store); World.setStaffLook(uniSpec()); World.setAwards(S.awards); World.setCalendar(Math.min(4, S.awards.calW || 0), false, S.awards.calW || 0); }
-  applyFocus(); syncBrand(); sfxLabel();
+  applyFocus(); syncBrand(); sfxLabel(); musLabel(); MUS.arm();
   /* test tools: open the game with ?dev=1 on the end of the link to get extra menu buttons for trying events quickly */
   { const bb = document.querySelector('#menu [data-act="board"]'); if (bb) bb.hidden = !Net.on(); }
   if (/[?&]flags=1/.test(location.search)) setTimeout(() => openView('flags'), 400);

@@ -43,6 +43,84 @@
     };
   })();
 
+
+  /* ---- music: a quiet generative lofi loop made with WebAudio (no audio files). I vi ii V in C, soft keys, bass, light drums and a wandering pentatonic melody. Starts after the first tap or key, pauses when the tab is hidden, toggled by the Music button ---- */
+  const MUS = (() => {
+    let a = null, bus = null, nz = null, timer = null, nextT = 0, step = 0, bar = 0, mi = 2, started = false, ready = false;
+    const SP = 60 / 76 / 2, VOL = 0.5;
+    const CH = [{ b: 48, n: [60, 64, 67, 71, 74] }, { b: 45, n: [57, 60, 64, 67, 71] }, { b: 50, n: [62, 65, 69, 72, 76] }, { b: 43, n: [59, 62, 65, 69, 71] }];
+    const PEN = [67, 69, 72, 74, 76, 79, 81, 84], mf = (m) => 440 * Math.pow(2, (m - 69) / 12);
+    function init() {
+      if (ready) return !!a;
+      ready = true;
+      try {
+        const C = window.AudioContext || window.webkitAudioContext; if (!C) return false;
+        a = new C(); bus = a.createGain(); bus.gain.value = 0;
+        const lp = a.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 4200;
+        const dl = a.createDelay(1); dl.delayTime.value = SP * 3; const fb = a.createGain(); fb.gain.value = 0.28; const wet = a.createGain(); wet.gain.value = 0.22;
+        bus.connect(lp); lp.connect(a.destination); lp.connect(dl); dl.connect(fb); fb.connect(dl); dl.connect(wet); wet.connect(a.destination);
+        nz = a.createBuffer(1, a.sampleRate, a.sampleRate); const d = nz.getChannelData(0); for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+      } catch (err) { a = null; }
+      return !!a;
+    }
+    function tone(t, f, dur, type, vol, cut, atk, rel) {
+      const o = a.createOscillator(), g = a.createGain(), fl = a.createBiquadFilter();
+      o.type = type; o.frequency.value = f; fl.type = 'lowpass'; fl.frequency.value = cut;
+      g.gain.setValueAtTime(0.0001, t); g.gain.linearRampToValueAtTime(vol, t + atk); g.gain.exponentialRampToValueAtTime(0.0001, t + dur + rel);
+      o.connect(fl); fl.connect(g); g.connect(bus); o.start(t); o.stop(t + dur + rel + 0.05);
+    }
+    function hit(t, dur, vol, type, freq) {
+      const s = a.createBufferSource(), g = a.createGain(), fl = a.createBiquadFilter();
+      s.buffer = nz; fl.type = type; fl.frequency.value = freq; g.gain.setValueAtTime(vol, t); g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+      s.connect(fl); fl.connect(g); g.connect(bus); s.start(t); s.stop(t + dur + 0.02);
+    }
+    function kick(t) {
+      const o = a.createOscillator(), g = a.createGain(); o.type = 'sine'; o.frequency.setValueAtTime(130, t); o.frequency.exponentialRampToValueAtTime(42, t + 0.14);
+      g.gain.setValueAtTime(0.34, t); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.28); o.connect(g); g.connect(bus); o.start(t); o.stop(t + 0.3);
+    }
+    function play(s, t) {
+      const c = CH[bar % 4], sw = (s % 2) ? SP * 0.14 : 0, tt = t + sw;
+      if (s === 0) {
+        c.n.forEach((m, i) => tone(t + i * 0.012, mf(m), SP * 7, 'triangle', 0.028, 1500, 0.08, 1.4));
+        tone(t, mf(c.b), SP * 3.4, 'sine', 0.2, 600, 0.02, 0.35);
+      }
+      if (s === 5) tone(tt, mf(c.b + 12), SP * 1.6, 'sine', 0.12, 700, 0.02, 0.25);
+      if (s === 0 || s === 3 || s === 6) { const m = c.n[(bar + s) % c.n.length] + 12; tone(tt, mf(m), SP * 1.2, 'triangle', 0.05, 2400, 0.008, 0.5); }
+      if (s === 2 || s === 5 || s === 7) {
+        if (Math.random() < 0.5) { mi = Math.max(0, Math.min(PEN.length - 1, mi + (Math.random() < 0.5 ? -1 : 1) * (1 + (Math.random() < 0.3 ? 1 : 0)))); tone(tt, mf(PEN[mi]), SP * 1.6, 'sine', 0.06, 3200, 0.01, 0.9); }
+      }
+      if (s === 0 || s === 5) kick(t);
+      if (s === 4) hit(t, 0.16, 0.07, 'bandpass', 1900);
+      if (s % 2) hit(tt, 0.05, 0.035, 'highpass', 7000);
+    }
+    function pump() {
+      if (!a || !started) return;
+      if (nextT < a.currentTime) nextT = a.currentTime + 0.06;
+      while (nextT < a.currentTime + 1.6) { play(step, nextT); nextT += SP; step++; if (step === 8) { step = 0; bar++; } }
+    }
+    function fade(v) { if (!a) return; const t = a.currentTime; bus.gain.cancelScheduledValues(t); bus.gain.setValueAtTime(bus.gain.value, t); bus.gain.linearRampToValueAtTime(v, t + 1.2); }
+    function want() { return S.music !== false && !document.hidden; }
+    function sync() {
+      if (want()) {
+        if (!init()) return;
+        if (a.state === 'suspended') { try { a.resume(); } catch (err) { /* ignore */ } }
+        if (!started) { started = true; nextT = a.currentTime + 0.1; step = 0; timer = setInterval(pump, 250); pump(); }
+        fade(0.16 * VOL / 0.5);
+      } else if (started) { fade(0); }
+    }
+    function arm() {
+      const go = () => { document.removeEventListener('pointerdown', go, true); document.removeEventListener('keydown', go, true); sync(); };
+      document.addEventListener('pointerdown', go, true); document.addEventListener('keydown', go, true);
+      document.addEventListener('visibilitychange', sync);
+    }
+    return { sync: sync, arm: arm, on: () => S.music !== false };
+  })();
+  function musLabel() {
+    const on = S.music !== false, l = $('#muslab'), b = $('#musbtn');
+    if (l) l.textContent = 'Music: ' + (on ? 'on' : 'off');
+    if (b) b.setAttribute('aria-pressed', String(on));
+  }
+
   /* ---- streak coin: a round badge with the number; from a streak of 10 it turns gold with an orange rim and a flame crown that grows with every right answer ---- */
   const SFX_ST = { cv: null, ctx: null, n: 0, shown: -1, pulse: 0, sparks: [], acc: 0, last: 0, run: false };
   function streakFx(n) {
