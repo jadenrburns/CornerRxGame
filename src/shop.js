@@ -51,7 +51,7 @@ const SHOP_TAPES = [
   ['t1', 'Rainy Window', 0, 'Soft keys and a slow beat. Comes with the radio.'],
   ['t2', 'Night Shift', 250, 'Minor chords with a rolling arpeggio. For the late hours.'],
   ['t3', 'Corner Cafe', 400, 'Jazzy chords with swing and little piano stabs.'],
-  ['t4', 'Warm Light', 500, 'Warm, soulful chords with a gentle arpeggio.'],
+  ['t4', 'Warm Light', 500, 'A hummed vocal melody over warm, slow chords.'],
   ['t5', 'Sunday Morning', 650, 'Bright and easy, a bit faster.']
 ];
 /* extra pharmacist hairstyles: [id, name, style number in world.js, price] */

@@ -49,7 +49,7 @@
     t1: { bpm: 76, ch: [{ b: 48, n: [60, 64, 67, 71, 74] }, { b: 45, n: [57, 60, 64, 67, 71] }, { b: 50, n: [62, 65, 69, 72, 76] }, { b: 43, n: [59, 62, 65, 69, 71] }], pen: [67, 69, 72, 74, 76, 79, 81, 84], kick: [0, 5], snare: 4, sw: 0.14, mel: 0.5, lp: 4200 },
     t2: { bpm: 84, ch: [{ b: 45, n: [57, 60, 64, 67, 71] }, { b: 38, n: [62, 65, 69, 72, 76] }, { b: 43, n: [59, 62, 65, 69, 76] }, { b: 48, n: [59, 64, 67, 71, 74] }], pen: [69, 72, 74, 76, 79, 81, 84, 88], kick: [0, 5], snare: 4, sw: 0.12, mel: 0.6, lp: 3800, rel: 2.2, pad: 0.03, arp: [0, 2, 1, 3, 2, 4, 3, 1] },
     t3: { bpm: 92, ch: [{ b: 50, n: [62, 65, 69, 72, 76] }, { b: 43, n: [59, 62, 64, 65, 69] }, { b: 48, n: [64, 67, 71, 74, 79] }, { b: 45, n: [61, 64, 67, 69, 73] }], pen: [72, 74, 76, 79, 81, 84, 86, 88], kick: [0, 3, 6], snare: 4, sw: 0.26, mel: 0.6, lp: 4800, rel: 1.4, stab: [2, 3, 6], pad: 0.02 },
-    t4: { bpm: 86, ch: [{ b: 41, n: [60, 64, 67, 69, 72] }, { b: 40, n: [59, 62, 66, 67, 71] }, { b: 38, n: [60, 65, 69, 72, 76] }, { b: 43, n: [59, 64, 65, 69, 74] }], pen: [67, 69, 72, 74, 76, 79, 81, 84], kick: [0, 3, 5], snare: 4, sw: 0.2, mel: 0.55, lp: 3600, rel: 2.4, pad: 0.035, arp: [0, 1, 2, 3, 4, 3, 2, 1], stab: [3] },
+    t4: { bpm: 80, ch: [{ b: 41, n: [60, 64, 67, 69, 72] }, { b: 40, n: [59, 62, 66, 67, 71] }, { b: 38, n: [60, 65, 69, 72, 76] }, { b: 43, n: [59, 64, 65, 69, 74] }], pen: [67, 69, 72, 74, 76, 79], kick: [0, 5], snare: 4, sw: 0.18, mel: 0, lp: 3400, rel: 2.4, pad: 0.035, arp: [0, 1, 2, 1, 3, 2, 1, 0], voice: { vowel: 'aah', vol: 0.07, ph: [[0, 72, 3], [3, 76, 2], [5, 74, 3], [8, 71, 4], [13, 74, 3], [16, 69, 3], [19, 72, 2], [21, 74, 3], [24, 74, 4], [29, 71, 3]] } },
     t5: { bpm: 88, ch: [{ b: 41, n: [57, 60, 64, 65, 69] }, { b: 43, n: [59, 62, 64, 67, 69] }, { b: 40, n: [59, 62, 64, 67, 71] }, { b: 45, n: [57, 60, 64, 67, 72] }], pen: [69, 72, 74, 76, 77, 81, 84, 86], kick: [0, 4], snare: 2, sw: 0.12, mel: 0.55, lp: 5200 }
   };
   const MUS = (() => {
@@ -84,6 +84,16 @@
       const o = a.createOscillator(), g = a.createGain(); o.type = 'sine'; o.frequency.setValueAtTime(130, t); o.frequency.exponentialRampToValueAtTime(42, t + 0.14);
       g.gain.setValueAtTime(0.34, t); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.28); o.connect(g); g.connect(bus); o.start(t); o.stop(t + 0.3);
     }
+    function voice(t, m, dur, V) {
+      const f = mf(m), mix = a.createGain(), fl = a.createBiquadFilter(), env = a.createGain(), lfo = a.createOscillator(), lg = a.createGain(), dl = a.createGain();
+      const fm = V.vowel === 'ooh' ? [[350, 6, 1], [800, 8, 0.4]] : [[730, 7, 1], [1090, 9, 0.6]];
+      [-7, 7].forEach(dt => { const o = a.createOscillator(); o.type = 'sawtooth'; o.frequency.value = f; o.detune.value = dt; lg.connect(o.detune); o.connect(mix); o.start(t); o.stop(t + dur + 0.9); });
+      lfo.frequency.value = 5.1; lg.gain.setValueAtTime(0, t); lg.gain.linearRampToValueAtTime(9, t + 0.5); lfo.connect(lg); lfo.start(t); lfo.stop(t + dur + 0.9);
+      fl.type = 'lowpass'; fl.frequency.value = 2600; mix.connect(fl);
+      fm.forEach(q => { const bp = a.createBiquadFilter(), g = a.createGain(); bp.type = 'bandpass'; bp.frequency.value = q[0]; bp.Q.value = q[1]; g.gain.value = q[2]; fl.connect(bp); bp.connect(g); g.connect(env); });
+      env.gain.setValueAtTime(0.0001, t); env.gain.linearRampToValueAtTime(V.vol, t + 0.14); env.gain.setValueAtTime(V.vol, t + Math.max(0.15, dur - 0.1)); env.gain.exponentialRampToValueAtTime(0.0001, t + dur + 0.7);
+      env.connect(bus);
+    }
     function play(s, t) {
       const P = tp(), SP = sp(), c = P.ch[bar % 4], tt = t + ((s % 2) ? SP * P.sw : 0);
       if (s === 0) {
@@ -96,6 +106,7 @@
       if (s === 2 || s === 5 || s === 7) {
         if (Math.random() < P.mel) { mi = Math.max(0, Math.min(P.pen.length - 1, mi + (Math.random() < 0.5 ? -1 : 1) * (1 + (Math.random() < 0.3 ? 1 : 0)))); tone(tt, mf(P.pen[mi]), SP * 1.6, 'sine', 0.06, 3200, 0.01, 0.9); }
       }
+      if (P.voice) P.voice.ph.forEach(n => { if (n[0] === (bar % 4) * 8 + s) voice(tt, n[1], SP * n[2], P.voice); });
       if (P.arp) tone(tt, mf(c.n[P.arp[s]] + 12), SP * 2.4, 'triangle', 0.034, 2600, 0.01, 1.1);
       if (P.stab && P.stab.indexOf(s) >= 0) c.n.slice(1).forEach((m, i) => tone(tt + i * 0.008, mf(m), SP * 0.9, 'triangle', 0.03, 2200, 0.005, 0.35));
       if (P.kick.indexOf(s) >= 0) kick(t);
