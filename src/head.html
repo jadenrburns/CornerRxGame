@@ -1055,6 +1055,20 @@ body.trip .stats .stat { animation: tripbob 1.4s ease-in-out infinite; }
 .pchip { padding: 5px 10px; border: 1px solid #6b7280; border-radius: 999px; background: #fff; color: #222; font: inherit; font-size: 13px; cursor: grab; touch-action: none; user-select: none; }
 .pchip.on { background: #2d7ff9; color: #fff; border-color: #2d7ff9; }
 .pghost { position: fixed; z-index: 9999; transform: translate(-50%, -120%); padding: 5px 10px; border-radius: 999px; background: #2d7ff9; color: #fff; font-size: 13px; pointer-events: none; box-shadow: 0 4px 12px rgba(0,0,0,.3); }
+.dia { position: relative; width: 100%; background: rgba(255,255,255,.55); border-radius: 12px; }
+.diasvg { position: absolute; inset: 0; width: 100%; height: 100%; }
+.diaar { fill: none; stroke: #4b5563; stroke-width: .7; }
+.diaar.g { stroke: #9ca3af; stroke-dasharray: 2 1.4; }
+.diaar.hot { stroke: #d64545; }
+.diabox { fill: rgba(120,160,200,.12); stroke: #8aa; stroke-width: .4; stroke-dasharray: 1.5 1; }
+.diabt { font-size: 2.6px; fill: #567; font-weight: 700; }
+.dn { position: absolute; display: flex; flex-direction: column; align-items: center; gap: 2px; font-size: clamp(10px, 3.1vw, 13px); line-height: 1.15; text-align: center; transform: translate(-50%, -50%); width: 30%; }
+.dn.l { transform: translate(0, -50%); align-items: flex-start; text-align: left; }
+.dn .pslot { min-width: 0; width: 100%; padding: 3px 4px; font-size: inherit; min-height: 24px; }
+.dn .dnt { padding: 2px 5px; border-radius: 8px; background: #fff; border: 1px solid #9aa; font-weight: 600; }
+.dn.note .dnt { background: transparent; border: 0; font-weight: 500; opacity: .8; }
+.dn.bad .dnt { background: #fff0f0; border-color: #d64545; }
+.dn.bdg .dnt { font-weight: 800; color: #2d7ff9; font-size: 1.15em; }
 .drawbox { display: grid; gap: 8px; margin-top: 8px; }
 .cycsvg { width: 100%; max-width: 520px; height: auto; touch-action: none; cursor: crosshair; display: block; margin: 0 auto; user-select: none; -webkit-user-select: none; }
 .cybox { fill: var(--surface); stroke: var(--line); stroke-width: 1.5; }

@@ -1055,6 +1055,20 @@ body.trip .stats .stat { animation: tripbob 1.4s ease-in-out infinite; }
 .pchip { padding: 5px 10px; border: 1px solid #6b7280; border-radius: 999px; background: #fff; color: #222; font: inherit; font-size: 13px; cursor: grab; touch-action: none; user-select: none; }
 .pchip.on { background: #2d7ff9; color: #fff; border-color: #2d7ff9; }
 .pghost { position: fixed; z-index: 9999; transform: translate(-50%, -120%); padding: 5px 10px; border-radius: 999px; background: #2d7ff9; color: #fff; font-size: 13px; pointer-events: none; box-shadow: 0 4px 12px rgba(0,0,0,.3); }
+.dia { position: relative; width: 100%; background: rgba(255,255,255,.55); border-radius: 12px; }
+.diasvg { position: absolute; inset: 0; width: 100%; height: 100%; }
+.diaar { fill: none; stroke: #4b5563; stroke-width: .7; }
+.diaar.g { stroke: #9ca3af; stroke-dasharray: 2 1.4; }
+.diaar.hot { stroke: #d64545; }
+.diabox { fill: rgba(120,160,200,.12); stroke: #8aa; stroke-width: .4; stroke-dasharray: 1.5 1; }
+.diabt { font-size: 2.6px; fill: #567; font-weight: 700; }
+.dn { position: absolute; display: flex; flex-direction: column; align-items: center; gap: 2px; font-size: clamp(10px, 3.1vw, 13px); line-height: 1.15; text-align: center; transform: translate(-50%, -50%); width: 30%; }
+.dn.l { transform: translate(0, -50%); align-items: flex-start; text-align: left; }
+.dn .pslot { min-width: 0; width: 100%; padding: 3px 4px; font-size: inherit; min-height: 24px; }
+.dn .dnt { padding: 2px 5px; border-radius: 8px; background: #fff; border: 1px solid #9aa; font-weight: 600; }
+.dn.note .dnt { background: transparent; border: 0; font-weight: 500; opacity: .8; }
+.dn.bad .dnt { background: #fff0f0; border-color: #d64545; }
+.dn.bdg .dnt { font-weight: 800; color: #2d7ff9; font-size: 1.15em; }
 .drawbox { display: grid; gap: 8px; margin-top: 8px; }
 .cycsvg { width: 100%; max-width: 520px; height: auto; touch-action: none; cursor: crosshair; display: block; margin: 0 auto; user-select: none; -webkit-user-select: none; }
 .cybox { fill: var(--surface); stroke: var(--line); stroke-width: 1.5; }
@@ -2056,11 +2070,29 @@ const XC = (d, q, a, w, e, t) => Q("B4C", d, q, a, w, e, t || "Citric acid cycle
 const XE = (d, q, a, w, e, t) => Q("B4E", d, q, a, w, e, t || "Electron transport", "Electron transport lecture");
 const XG = (d, q, a, w, e, t) => Q("B4G", d, q, a, w, e, t || "Gluconeogenesis", "Gluconeogenesis lecture");
 /* place card: rows are arrays of text and {a: answer} blanks. extra = decoy tiles. */
-const PLC = (cat, d, title, rows, extra, e, src) => {
-  const ans = []; rows.forEach(r => r.forEach(p => { if (typeof p !== 'string') ans.push(p.a); }));
+const PLC = (cat, d, title, rows, extra, e, src, dia) => {
+  const ans = []; if (dia) dia.nodes.forEach(n => { if (n.a) ans.push(n.a); });
+  rows.forEach(r => r.forEach(p => { if (typeof p !== 'string') ans.push(p.a); }));
   Q(cat, d, title, ans.join(' | '), ["A blank is wrong", "A blank is empty", "The order is mixed up"], e, "Drag and place", src);
-  BANK[BANK.length - 1].place = { rows, extra };
+  BANK[BANK.length - 1].place = { rows, extra, dia };
 };
+/* ring diagram (cyclic pathway): 8 nodes clockwise from the top; inner arrows with numbered badges */
+const RING = (nodes, notes) => {
+  const W = 100, H = 104, cx = 50, cy = 52, R = 34, r = 21, rad = x => x * Math.PI / 180, out = { W, H, nodes: [], arrows: [], boxes: [] };
+  nodes.forEach((n, i) => { const t = rad(-90 + 45 * i); out.nodes.push(Object.assign({ x: cx + R * Math.cos(t), y: cy + R * Math.sin(t), w: 27 }, n)); });
+  for (let i = 0; i < 8; i++) {
+    const a1 = rad(-90 + 45 * i + 9), a2 = rad(-90 + 45 * i + 36), m = rad(-90 + 45 * i + 22.5);
+    out.arrows.push({ d: 'M' + (cx + r * Math.cos(a1)).toFixed(1) + ',' + (cy + r * Math.sin(a1)).toFixed(1) + ' A' + r + ',' + r + ' 0 0 1 ' + (cx + r * Math.cos(a2)).toFixed(1) + ',' + (cy + r * Math.sin(a2)).toFixed(1) });
+    out.nodes.push({ x: cx + 12 * Math.cos(m), y: cy + 12 * Math.sin(m), t: String(i + 1), c: 'note bdg', w: 8 });
+  }
+  out.nodes.push({ x: cx, y: cy, t: 'Citric acid cycle', c: 'note', w: 20 });
+  (notes || []).forEach(n => out.nodes.push(Object.assign({ c: 'note', al: 'l', w: 40 }, n)));
+  return out;
+};
+const CAC_ORDER = ['Oxaloacetate', 'Citrate', 'Isocitrate', 'Alpha-ketoglutarate', 'Succinyl-CoA', 'Succinate', 'Fumarate', 'Malate'];
+const CAC_ENZ = ['Citrate synthase', 'Aconitase', 'Isocitrate dehydrogenase', 'Alpha-ketoglutarate dehydrogenase', 'Succinyl-CoA synthetase', 'Succinate dehydrogenase', 'Fumarase', 'Malate dehydrogenase'];
+const CAC_RES = ['CoA is released', 'No carrier made (isomerization)', 'NADH + CO2', 'NADH + CO2', 'GTP (or ATP)', 'FADH2', 'Water is added', 'NADH'];
+const SH = (m) => m;
 
 /* ---------- Digestion and energy carriers ---------- */
 XD(1, "What turns pepsinogen into active pepsin in the stomach?", "The low pH, which lets pepsinogen cut itself", ["Enteropeptidase released from the duodenal cells", "Secretin released by the intestinal wall into the blood", "Trypsin arriving from the pancreas"], "Stomach acid (pH 1 to 2) denatures proteins and also activates pepsinogen, which then cleaves itself to make active pepsin.", "Protein digestion");
@@ -2166,38 +2198,6 @@ XG(2, "What is the Cori cycle?", "Muscle lactate goes to the liver, becomes gluc
 XG(1, "Which enzyme converts lactate to pyruvate in the liver?", "Lactate dehydrogenase", ["Pyruvate carboxylase", "Pyruvate dehydrogenase", "Aldolase"], "Lactate can also be oxidized by well-oxygenated cells such as heart muscle.", "Cori cycle");
 
 /* ---------- Drag and place: citric acid cycle and PDH ---------- */
-const CAC_MOL = ['Citrate', 'Isocitrate', 'Alpha-ketoglutarate', 'Succinyl-CoA', 'Succinate', 'Fumarate', 'Malate', 'Oxaloacetate'];
-const CAC_ENZ = ['Citrate synthase', 'Aconitase', 'Isocitrate dehydrogenase', 'Alpha-ketoglutarate dehydrogenase', 'Succinyl-CoA synthetase', 'Succinate dehydrogenase', 'Fumarase', 'Malate dehydrogenase'];
-PLC("B4PC", 2, "Citric acid cycle: place the molecules in order. Acetyl-CoA enters at step 1; every arrow shows the enzyme.", [
-  ["1. Oxaloacetate + acetyl-CoA  → ", { a: 'Citrate' }, "  (citrate synthase)"],
-  ["2. Citrate  → ", { a: 'Isocitrate' }, "  (aconitase)"],
-  ["3. Isocitrate  → ", { a: 'Alpha-ketoglutarate' }, "  (isocitrate dehydrogenase)"],
-  ["4. Alpha-ketoglutarate  → ", { a: 'Succinyl-CoA' }, "  (alpha-ketoglutarate dehydrogenase)"],
-  ["5. Succinyl-CoA  → ", { a: 'Succinate' }, "  (succinyl-CoA synthetase)"],
-  ["6. Succinate  → ", { a: 'Fumarate' }, "  (succinate dehydrogenase)"],
-  ["7. Fumarate  → ", { a: 'Malate' }, "  (fumarase)"],
-  ["8. Malate  → ", { a: 'Oxaloacetate' }, "  (malate dehydrogenase)"]
-], ['Pyruvate', 'Glutamate', 'Phosphoenolpyruvate', 'Acetyl-CoA'], "The cycle starts with citrate and ends with oxaloacetate, which accepts the next acetyl-CoA. Molecule order: citrate, isocitrate, alpha-ketoglutarate, succinyl-CoA, succinate, fumarate, malate, oxaloacetate.", "Citric acid cycle lecture");
-PLC("B4PC", 2, "Citric acid cycle: place the enzyme on each arrow.", [
-  ["Oxaloacetate + acetyl-CoA → citrate:  ", { a: 'Citrate synthase' }],
-  ["Citrate → isocitrate:  ", { a: 'Aconitase' }],
-  ["Isocitrate → alpha-ketoglutarate:  ", { a: 'Isocitrate dehydrogenase' }],
-  ["Alpha-ketoglutarate → succinyl-CoA:  ", { a: 'Alpha-ketoglutarate dehydrogenase' }],
-  ["Succinyl-CoA → succinate:  ", { a: 'Succinyl-CoA synthetase' }],
-  ["Succinate → fumarate:  ", { a: 'Succinate dehydrogenase' }],
-  ["Fumarate → malate:  ", { a: 'Fumarase' }],
-  ["Malate → oxaloacetate:  ", { a: 'Malate dehydrogenase' }]
-], ['Pyruvate dehydrogenase', 'Pyruvate carboxylase', 'Lactate dehydrogenase'], "Citrate synthase condenses, aconitase isomerizes, two dehydrogenases decarboxylate (isocitrate DH, alpha-KGDH), succinyl-CoA synthetase makes GTP, succinate DH makes FADH2, fumarase hydrates and malate DH regenerates oxaloacetate.", "Citric acid cycle lecture");
-PLC("B4PC", 2, "Citric acid cycle: what is made or released at each step? Place the result on each arrow.", [
-  ["Citrate synthase (OAA + acetyl-CoA → citrate):  ", { a: 'CoA is released' }],
-  ["Aconitase (citrate → isocitrate):  ", { a: 'No carrier made (isomerization)' }],
-  ["Isocitrate dehydrogenase:  ", { a: 'NADH + CO2' }],
-  ["Alpha-ketoglutarate dehydrogenase:  ", { a: 'NADH + CO2' }],
-  ["Succinyl-CoA synthetase:  ", { a: 'GTP (or ATP)' }],
-  ["Succinate dehydrogenase:  ", { a: 'FADH2' }],
-  ["Fumarase (fumarate → malate):  ", { a: 'Water is added' }],
-  ["Malate dehydrogenase:  ", { a: 'NADH' }]
-], ['FADH2 + CO2', 'ATP + NADPH', 'Water is removed', 'NAD+ is made'], "Three NADH (isocitrate DH, alpha-KGDH, malate DH), one FADH2 (succinate DH), one GTP (succinyl-CoA synthetase) and two CO2 (isocitrate DH, alpha-KGDH) per turn.", "Citric acid cycle lecture");
 PLC("B4PC", 2, "Citric acid cycle: fill in the net result of one turn for one acetyl-CoA.", [
   ["NAD+ used:  ", { a: '3' }, "   NADH made:  ", { a: '3' }],
   ["FAD used:  ", { a: '1' }, "   FADH2 made:  ", { a: '1' }],
@@ -2231,15 +2231,6 @@ PLC("B4PC", 3, "Pyruvate dehydrogenase: place the enzyme (E1, E2, E3) with its j
 ], ['activates', 'Citrate synthase', 'ATP', 'cyanide'], "E1 decarboxylates pyruvate and is the target of the kinase/phosphatase pair. E2 forms the core and makes acetyl-CoA. E3 resets the enzyme. Arsenite and mercury hit E3.", "Citric acid cycle lecture");
 
 /* ---------- Drag and place: gluconeogenesis ---------- */
-PLC("B4PG", 2, "Gluconeogenesis: place the molecules and bypass enzymes on the path from pyruvate to glucose.", [
-  ["1. Pyruvate (enters the mitochondrion) → ", { a: 'Oxaloacetate' }, "  by ", { a: 'Pyruvate carboxylase' }],
-  ["2. Oxaloacetate → ", { a: 'Malate' }, "  (leaves the mitochondrion; malate dehydrogenase)"],
-  ["3. Malate → oxaloacetate in the cytosol → ", { a: 'Phosphoenolpyruvate' }, "  by ", { a: 'PEP carboxykinase' }],
-  ["4. PEP → … (glycolysis run backward) … → ", { a: 'Fructose 1,6-bisphosphate' }],
-  ["5. Fructose 1,6-bisphosphate → ", { a: 'Fructose 6-phosphate' }, "  by ", { a: 'Fructose 1,6-bisphosphatase' }],
-  ["6. Fructose 6-phosphate → ", { a: 'Glucose 6-phosphate' }],
-  ["7. Glucose 6-phosphate → ", { a: 'Glucose' }, "  by ", { a: 'Glucose 6-phosphatase' }]
-], ['Lactate', 'Citrate', 'Hexokinase', 'Phosphofructokinase', 'Pyruvate kinase'], "Pyruvate carboxylase (mitochondria) and PEPCK (cytosol) bypass pyruvate kinase. FBPase-1 bypasses phosphofructokinase. Glucose 6-phosphatase (mainly liver) bypasses hexokinase.", "Gluconeogenesis lecture");
 PLC("B4PG", 2, "Gluconeogenesis: match each irreversible glycolysis enzyme with the enzyme that replaces it.", [
   ["Hexokinase is bypassed by:  ", { a: 'Glucose 6-phosphatase' }],
   ["Phosphofructokinase is bypassed by:  ", { a: 'Fructose 1,6-bisphosphatase' }],
@@ -2267,27 +2258,12 @@ PLC("B4PG", 3, "Gluconeogenesis and glycolysis: place the regulatory effects (re
   ["Low blood glucose, glucagon high: fructose 2,6-bisphosphate  ", { a: 'falls' }],
   ["High blood glucose, fructose 6-phosphate high: fructose 2,6-bisphosphate  ", { a: 'rises' }]
 ], ['no change'], "Reciprocal regulation keeps only one of the two pathways active. Glucose scarce means gluconeogenesis; glucose abundant means glycolysis.", "Gluconeogenesis lecture");
-PLC("B4PG", 2, "The Cori cycle: place each part of the loop.", [
-  ["Working muscle (low oxygen) turns pyruvate into  ", { a: 'Lactate' }],
-  ["Lactate travels in the  ", { a: 'Blood' }, "  to the  ", { a: 'Liver' }],
-  ["The liver makes pyruvate using  ", { a: 'Lactate dehydrogenase' }, "  then makes glucose by  ", { a: 'Gluconeogenesis' }],
-  ["Glucose returns through the blood to  ", { a: 'Muscle' }]
-], ['Acetyl-CoA', 'Glycolysis', 'Brain', 'Pyruvate dehydrogenase'], "Lactate from muscle and red blood cells is recycled by the liver into glucose, which muscle can use again.", "Gluconeogenesis lecture");
-
-/* ---------- Drag and place: electron transport ---------- */
 PLC("B4PE", 2, "Electron transport: place the name of each complex.", [
   ["Complex I:  ", { a: 'NADH-Q oxidoreductase' }],
   ["Complex II:  ", { a: 'Succinate dehydrogenase' }],
   ["Complex III:  ", { a: 'Q-cytochrome c oxidoreductase' }],
   ["Complex IV:  ", { a: 'Cytochrome c oxidase' }]
 ], ['Pyruvate dehydrogenase', 'ATP synthase', 'Catalase'], "Complex I: NADH-Q oxidoreductase; II: succinate dehydrogenase; III: Q-cytochrome c oxidoreductase; IV: cytochrome c oxidase.", "Electron transport lecture");
-PLC("B4PE", 2, "Electron transport: place the path of electrons from NADH to oxygen.", [
-  ["NADH gives electrons to  ", { a: 'Complex I' }],
-  ["Complex I passes them to  ", { a: 'Coenzyme Q' }, ",  which carries them to  ", { a: 'Complex III' }],
-  ["Complex III passes them to  ", { a: 'Cytochrome c' }, ",  which carries them to  ", { a: 'Complex IV' }],
-  ["Complex IV gives them to  ", { a: 'O2' }, ",  making  ", { a: 'H2O' }],
-  ["Electrons from FADH2 enter at  ", { a: 'Complex II' }, "  and then also go to  ", { a: 'Coenzyme Q' }]
-], ['NAD+', 'CO2', 'Complex IV', 'Superoxide dismutase'], "NADH: I, then CoQ, then III, then cytochrome c, then IV, then O2 to H2O. FADH2 joins at II, then CoQ.", "Electron transport lecture");
 PLC("B4PE", 3, "Electron transport: how many protons are pumped?", [
   ["Complex I:  ", { a: '4' }, "   Complex II:  ", { a: '0' }],
   ["Complex III:  ", { a: '2' }, "   Complex IV:  ", { a: '4' }],
@@ -2346,6 +2322,66 @@ PLC("B4PD", 3, "ATP and fast energy: fill in the numbers and molecules.", [
   ["ATP hydrolyzed all the way to AMP releases about  ", { a: '-45.6 kJ/mol' }],
   ["Creatine phosphate + ADP →  ", { a: 'ATP' }, "  +  ", { a: 'Creatine' }, "  (enzyme:  ", { a: 'Creatine kinase' }, ")"]
 ], ['-15 kJ/mol', '+30.5 kJ/mol', 'Hexokinase', 'Creatinine'], "Hydrolysis to ADP releases about 30.5 kJ/mol and to AMP about 45.6 kJ/mol. Creatine kinase moves a phosphoryl group from creatine phosphate to ADP for quick bursts.", "Digestion lecture");
+
+/* ---------- Diagram cards (v153): cyclic and ladder layouts like the lecture outlines ---------- */
+const legend = (arr) => arr.map((t, i) => [(i + 1) + "  " + t]);
+PLC("B4PC", 2, "Citric acid cycle: place the molecule at each position around the cycle. Acetyl-CoA (2C) joins at step 1.",
+  legend(CAC_ENZ.map((e, i) => e + ":  " + (i === 0 ? "top position + acetyl-CoA → next position" : i === 7 ? "last position → top position (regenerated)" : "position " + i + " → position " + (i + 1)))),
+  ['Pyruvate', 'Glutamate', 'Phosphoenolpyruvate', 'Acetyl-CoA'],
+  "Clockwise from the top: oxaloacetate, citrate, isocitrate, alpha-ketoglutarate, succinyl-CoA, succinate, fumarate, malate. Oxaloacetate is regenerated and accepts the next acetyl-CoA.", "Citric acid cycle lecture",
+  RING(CAC_ORDER.map(m => ({ a: m })), [{ x: 56, y: 3, t: 'Acetyl-CoA (2C) in at step 1' }]));
+PLC("B4PC", 2, "Citric acid cycle: place the enzyme for each numbered step.",
+  CAC_ENZ.map((e, i) => [(i + 1) + "  " + CAC_ORDER[i] + " → " + CAC_ORDER[(i + 1) % 8] + ":  ", { a: e }]),
+  ['Pyruvate dehydrogenase', 'Pyruvate carboxylase', 'Lactate dehydrogenase'],
+  "Citrate synthase condenses, aconitase isomerizes, two dehydrogenases decarboxylate (isocitrate DH, alpha-KGDH), succinyl-CoA synthetase makes GTP, succinate DH makes FADH2, fumarase hydrates and malate DH regenerates oxaloacetate.", "Citric acid cycle lecture",
+  RING(CAC_ORDER.map(m => ({ t: m })), [{ x: 56, y: 3, t: 'Acetyl-CoA (2C) in at step 1' }]));
+PLC("B4PC", 2, "Citric acid cycle: what is made or released at each numbered step?",
+  CAC_ENZ.map((e, i) => [(i + 1) + "  " + e + ":  ", { a: CAC_RES[i] }]),
+  ['FADH2 + CO2', 'ATP + NADPH', 'Water is removed', 'NAD+ is made'],
+  "Three NADH (isocitrate DH, alpha-KGDH, malate DH), one FADH2 (succinate DH), one GTP (succinyl-CoA synthetase) and two CO2 (isocitrate DH, alpha-KGDH) per turn.", "Citric acid cycle lecture",
+  RING(CAC_ORDER.map(m => ({ t: m })), []));
+
+const GLU = (mode) => {
+  const dy = 5, L = 40, M = (t, a, y, x, w) => Object.assign({ x: x || L, y: y + dy, w: w || 33 }, mode === 'mol' ? { a } : { t }), E = (t, a, x, y, w, al) => Object.assign({ x, y: y + dy, w: w || 38, al: al || 'l' }, mode === 'enz' ? { a } : { t, c: 'note' });
+  const ys = [8, 28, 48, 68, 88, 108, 132, 168];
+  const nodes = [
+    M('Glucose', 'Glucose', ys[0]), M('Glucose 6-phosphate', 'Glucose 6-phosphate', ys[1]), M('Fructose 6-phosphate', 'Fructose 6-phosphate', ys[2]), M('Fructose 1,6-bisphosphate', 'Fructose 1,6-bisphosphate', ys[3]),
+    M('Triose phosphates (DHAP, G3P)', 'Triose phosphates (DHAP, G3P)', ys[4]), M('Phosphoenolpyruvate', 'Phosphoenolpyruvate', ys[5]), M('Oxaloacetate (cytosol)', 'Oxaloacetate', ys[6]), M('Pyruvate', 'Pyruvate', ys[7]),
+    M('Malate', 'Malate', 152, 81, 28), M('Oxaloacetate (mito)', 'Oxaloacetate', 172, 81, 28),
+    { x: 1, y: 2, t: 'Glycolysis (down)', c: 'note', al: 'l', w: 30 }, { x: 60, y: 2, t: 'Gluconeogenesis (up)', c: 'note', al: 'l', w: 38 },
+    { x: 1, y: 18 + dy, t: 'Hexokinase', c: 'note', al: 'l', w: 17 }, { x: 1, y: 58 + dy, t: 'PFK-1', c: 'note', al: 'l', w: 17 }, { x: 1, y: 138 + dy, t: 'Pyruvate kinase', c: 'note', al: 'l', w: 17 },
+    E('Glucose 6-phosphatase', 'Glucose 6-phosphatase', 60, 18), E('Fructose 1,6-bisphosphatase', 'Fructose 1,6-bisphosphatase', 60, 58), E('PEP carboxykinase', 'PEP carboxykinase', 60, 120), E('Pyruvate carboxylase', 'Pyruvate carboxylase', 40, 188, 36, 'c')
+  ];
+  const arrows = [];
+  for (let i = 0; i < 6; i++) { const y1 = ys[i] + dy, y2 = ys[i + 1] + dy; arrows.push({ p: [[L + 6, y2 - 4], [L + 6, y1 + 4]] }); }
+  arrows.pop(); arrows.push({ p: [[L + 6, ys[6] + dy - 4], [L + 6, ys[5] + dy + 4]] });
+  for (let i = 0; i < 5; i++) arrows.push({ p: [[21, ys[i] + dy + 3], [21, ys[i + 1] + dy - 3]], c: 'g' });
+  arrows.push({ p: [[21, ys[5] + dy + 3], [21, ys[7] + dy - 3]], c: 'g' });
+  arrows.push({ p: [[57, ys[7] + dy], [66, 172 + dy]] }); arrows.push({ p: [[81, 167 + dy], [81, 158 + dy]] }); arrows.push({ p: [[67, 152 + dy], [57, ys[6] + dy + 3]] });
+  return { W: 100, H: 196, nodes, arrows, boxes: [{ x: 63, y: 140 + dy, w: 36, h: 46, t: 'Mitochondrion' }] };
+};
+PLC("B4PG", 2, "Gluconeogenesis (ladder, up arrows): place every molecule. Dashed grey arrows are glycolysis going down; black arrows go up.", [],
+  ['Lactate', 'Citrate', 'Acetyl-CoA', 'Fructose 2,6-bisphosphate'],
+  "From pyruvate the pathway goes into the mitochondrion (oxaloacetate, malate), out to the cytosol (oxaloacetate), then up through PEP, triose phosphates, fructose 1,6-bisphosphate, fructose 6-phosphate and glucose 6-phosphate to glucose.", "Gluconeogenesis lecture", GLU('mol'));
+PLC("B4PG", 2, "Gluconeogenesis (ladder, up arrows): place the four bypass enzymes. The grey labels on the left are the glycolysis enzymes they replace.", [],
+  ['Hexokinase', 'Phosphofructokinase', 'Pyruvate kinase', 'Lactate dehydrogenase'],
+  "Pyruvate carboxylase (mitochondria) plus PEP carboxykinase (cytosol) bypass pyruvate kinase. Fructose 1,6-bisphosphatase bypasses PFK-1. Glucose 6-phosphatase (mainly liver) bypasses hexokinase.", "Gluconeogenesis lecture", GLU('enz'));
+PLC("B4PG", 2, "The Cori cycle: place each part of the loop. Arrows show the direction of travel.", [],
+  ['Acetyl-CoA', 'Glycolysis', 'Brain', 'Pyruvate dehydrogenase', 'Citrate'],
+  "Working muscle (low oxygen) makes lactate, which travels in the blood to the liver. The liver makes pyruvate with lactate dehydrogenase, then glucose by gluconeogenesis, and glucose returns through the blood to muscle.", "Gluconeogenesis lecture",
+  { W: 100, H: 100, boxes: [{ x: 2, y: 8, w: 40, h: 88, t: 'Skeletal muscle' }, { x: 58, y: 8, w: 40, h: 88, t: 'Liver' }],
+    nodes: [{ x: 22, y: 24, t: 'Glucose', w: 30 }, { x: 22, y: 52, t: 'Pyruvate', w: 30 }, { x: 22, y: 82, a: 'Lactate', w: 30 }, { x: 78, y: 82, a: 'Lactate', w: 30 }, { x: 78, y: 52, a: 'Pyruvate', w: 30 }, { x: 78, y: 24, a: 'Glucose', w: 30 },
+      { x: 50, y: 93, t: 'Blood', c: 'note', w: 14 }, { x: 50, y: 13, t: 'Blood', c: 'note', w: 14 }, { x: 50, y: 64, a: 'Lactate dehydrogenase', w: 20 }, { x: 50, y: 38, a: 'Gluconeogenesis', w: 20 }],
+    arrows: [{ p: [[22, 28], [22, 47]] }, { p: [[22, 57], [22, 77]] }, { p: [[38, 82], [62, 82]] }, { p: [[78, 77], [78, 57]] }, { p: [[78, 47], [78, 29]] }, { p: [[62, 24], [38, 24]] }] });
+
+PLC("B4PE", 2, "Electron transport: place each carrier and complex. Follow the arrows from NADH (and FADH2) to oxygen.", [],
+  ['NAD+', 'CO2', 'Superoxide dismutase', 'ATP synthase'],
+  "NADH: Complex I, then coenzyme Q, then Complex III, then cytochrome c, then Complex IV, then O2 to H2O. FADH2 joins at Complex II, then coenzyme Q.", "Electron transport lecture",
+  { W: 100, H: 100, boxes: [{ x: 1, y: 4, w: 98, h: 92, t: 'Inner mitochondrial membrane' }],
+    nodes: [{ x: 12, y: 18, t: 'NADH', w: 17 }, { x: 38, y: 18, a: 'Complex I', w: 21 }, { x: 64, y: 18, a: 'Coenzyme Q', w: 21 }, { x: 89, y: 18, a: 'Complex II', w: 19 }, { x: 89, y: 44, t: 'FADH2 (from succinate)', w: 19 },
+      { x: 64, y: 50, a: 'Complex III', w: 21 }, { x: 38, y: 50, a: 'Cytochrome c', w: 21 }, { x: 12, y: 50, a: 'Complex IV', w: 19 }, { x: 12, y: 80, a: 'O2', w: 15 }, { x: 38, y: 80, a: 'H2O', w: 15 },
+      { x: 20, y: 31, t: 'H+ pumped: 4', c: 'note', al: 'l', w: 20 }, { x: 70, y: 36, t: 'H+: 2', c: 'note', al: 'l', w: 12 }, { x: 14, y: 65, t: 'H+: 4', c: 'note', al: 'l', w: 14 }],
+    arrows: [{ p: [[21, 18], [26.5, 18]] }, { p: [[49.5, 18], [53.5, 18]] }, { p: [[79, 18], [74.5, 18]] }, { p: [[89, 38], [89, 24]] }, { p: [[64, 24], [64, 44]] }, { p: [[53.5, 50], [48.5, 50]] }, { p: [[27.5, 50], [21.5, 50]] }, { p: [[12, 56], [12, 74]] }, { p: [[20, 80], [30, 80]] }] });
 /* ---------------- Menstrual cycle graph: draw-the-hormone question ----------------
    Curves are traced from the instructor's idealized 28-day schematic (pituitary panel: FSH dashed, LH solid;
    ovary panel: progesterone dashed, estradiol solid). Values are 0..1 within each panel; shape matters, not scale. */
@@ -8663,7 +8699,14 @@ const World = (function () {
   }
 
   /* ---- drag-and-place pathway question (bio4x.js): q.place = { parts:[ [text | {a:'answer'}, ...] per row ], extra:[decoy chips] } ---- */
-  function placeSlots(q) { const out = []; q.place.rows.forEach((r, ri) => r.forEach((p, pi) => { if (typeof p !== 'string') out.push({ id: ri + '.' + pi, a: p.a }); })); return out; }
+  function placeSlots(q) { const out = []; ((q.place.dia && q.place.dia.nodes) || []).forEach((n, i) => { if (n.a) out.push({ id: 'd' + i, a: n.a }); }); q.place.rows.forEach((r, ri) => r.forEach((p, pi) => { if (typeof p !== 'string') out.push({ id: ri + '.' + pi, a: p.a }); })); return out; }
+  function slotBtn(id, a) { const v = (cur.pl || {})[id]; const cls = 'pslot' + (v ? ' full' : '') + (cur.done ? (v === a ? ' right' : ' wrong') : ''); return '<button type="button" class="' + cls + '" data-sid="' + id + '" aria-label="blank">' + (v ? esc(v) : '<i>drop here</i>') + (cur.done && v !== a ? '<small>' + esc(a) + '</small>' : '') + '</button>'; }
+  function diaHTML(dia) {
+    const W = dia.W, H = dia.H, pc = (x, y) => 'left:' + (x / W * 100).toFixed(2) + '%;top:' + (y / H * 100).toFixed(2) + '%';
+    const svg = '<svg class="diasvg" viewBox="0 0 ' + W + ' ' + H + '" aria-hidden="true"><defs><marker id="dah" viewBox="0 0 8 8" refX="6" refY="4" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M0,0 L8,4 L0,8 z" fill="context-stroke"/></marker></defs>' + (dia.boxes || []).map(b => '<rect class="diabox" x="' + b.x + '" y="' + b.y + '" width="' + b.w + '" height="' + b.h + '" rx="2"/><text class="diabt" x="' + (b.x + 2) + '" y="' + (b.y + 3.6) + '">' + esc(b.t || '') + '</text>').join('') + (dia.arrows || []).map(a => '<path class="diaar ' + (a.c || '') + '" d="' + (a.d || ('M' + a.p[0][0] + ',' + a.p[0][1] + ' L' + a.p[1][0] + ',' + a.p[1][1])) + '" marker-end="url(#dah)"/>').join('') + '</svg>';
+    const nodes = dia.nodes.map((n, i) => '<div class="dn ' + (n.al || 'c') + ' ' + (n.c || '') + '" style="' + pc(n.x, n.y) + (n.w ? ';width:' + n.w + '%' : '') + '">' + (n.t ? '<span class="dnt">' + esc(n.t) + '</span>' : '') + (n.a ? slotBtn('d' + i, n.a) : '') + '</div>').join('');
+    return '<div class="dia" style="aspect-ratio:' + W + ' / ' + H + '">' + svg + nodes + '</div>';
+  }
   function placeChips(q) {
     if (!q._pc) { const set = []; placeSlots(q).forEach(s => { if (set.indexOf(s.a) < 0) set.push(s.a); }); (q.place.extra || []).forEach(x => { if (set.indexOf(x) < 0) set.push(x); }); q._pc = set; }
     if (!cur.plOrder) cur.plOrder = shuffle(q._pc.slice());
@@ -8672,16 +8715,11 @@ const World = (function () {
   function placeHTML() {
     const q = cur.q, pl = cur.pl || (cur.pl = {}), sel = cur.plSel;
     const chips = placeChips(q);
-    const rows = q.place.rows.map((r, ri) => '<li class="prow">' + r.map((p, pi) => {
-      if (typeof p === 'string') return '<span class="ptxt">' + esc(p) + '</span>';
-      const id = ri + '.' + pi, v = pl[id];
-      const cls = 'pslot' + (v ? ' full' : '') + (cur.done ? (v === p.a ? ' right' : ' wrong') : '');
-      return '<button type="button" class="' + cls + '" data-sid="' + id + '" aria-label="blank">' + (v ? esc(v) : '<i>drop here</i>') + (cur.done && v !== p.a ? '<small>' + esc(p.a) + '</small>' : '') + '</button>';
-    }).join('') + '</li>').join('');
+    const rows = q.place.rows.map((r, ri) => '<li class="prow">' + r.map((p, pi) => (typeof p === 'string' ? '<span class="ptxt">' + esc(p) + '</span>' : slotBtn(ri + '.' + pi, p.a))).join('') + '</li>').join('');
     const bank = cur.done ? '' : '<div class="pbank" role="group" aria-label="Word bank">' + chips.map(c => '<button type="button" class="pchip' + (sel === c ? ' on' : '') + '" data-chip="' + esc(c) + '">' + esc(c) + '</button>').join('') + '</div>';
     const n = Object.keys(pl).length, tot = placeSlots(q).length;
     const note = cur.done ? (cur.ok ? '<b>Every blank is right.</b>' : 'Red blanks were wrong or empty; the right answer is shown under each.') : 'Drag a tile onto a blank, or tap a tile and then tap a blank. Tap a filled blank to clear it. Tiles can be used more than once. ' + n + ' of ' + tot + ' filled.';
-    return '<ol class="prows">' + rows + '</ol>' + bank + '<p class="drawnote" aria-live="polite">' + note + '</p>' + (cur.done ? '' : '<div class="btnrow"><button type="button" class="btn" id="plclr" ' + (n ? '' : 'disabled') + '>Clear</button><button type="button" class="btn go" id="plgo" ' + (n === tot ? '' : 'disabled') + '>Check</button></div>');
+    return (q.place.dia ? diaHTML(q.place.dia) : '') + (q.place.rows.length ? '<ol class="prows">' + rows + '</ol>' : '') + bank + '<p class="drawnote" aria-live="polite">' + note + '</p>' + (cur.done ? '' : '<div class="btnrow"><button type="button" class="btn" id="plclr" ' + (n ? '' : 'disabled') + '>Clear</button><button type="button" class="btn go" id="plgo" ' + (n === tot ? '' : 'disabled') + '>Check</button></div>');
   }
   function placeFill(id, chip) { if (!cur || !cur.q || !cur.q.place || cur.done) return; cur.pl = cur.pl || {}; if (chip) cur.pl[id] = chip; else delete cur.pl[id]; cur.plSel = null; renderPanel(); }
   function placeSubmit() {
@@ -11360,7 +11398,7 @@ const micLab3 = () => !!(World.ok && World.setMic);
   }
   setInterval(micTick, 25000);
 
-  const GAME_VERSION = 152;
+  const GAME_VERSION = 153;
   const b64u = (u8) => { let s = ''; for (let i = 0; i < u8.length; i += 0x8000) s += String.fromCharCode.apply(null, u8.subarray(i, i + 0x8000)); return btoa(s).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); };
   const unb64u = (t) => { const s = atob(t.replace(/-/g, '+').replace(/_/g, '/')), u = new Uint8Array(s.length); for (let i = 0; i < s.length; i++) u[i] = s.charCodeAt(i); return u; };
   const chk = (t) => { let h = 2166136261; for (let i = 0; i < t.length; i++) { h ^= t.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36); };

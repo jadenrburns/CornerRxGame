@@ -34,7 +34,7 @@ const { chromium } = require('playwright');
   for (const k of keys) {
     for (const mode of ['right', 'wrong', 'empty']) {
       if (!(await force(k))) { fail.push('not forced ' + k); continue; }
-      const q = await p.evaluate(k => { const q = BANK.find(x => x.k === k); const s = []; q.place.rows.forEach((r, ri) => r.forEach((x, pi) => { if (typeof x !== 'string') s.push({ id: ri + '.' + pi, a: x.a }); })); return { s, opts: document.querySelectorAll('.opt').length, hint: document.getElementById('hintbtn').disabled, chips: document.querySelectorAll('.pchip').length, slots: document.querySelectorAll('.pslot').length, conf: !!document.querySelector('.confbar') }; }, k);
+      const q = await p.evaluate(k => { const q = BANK.find(x => x.k === k); const s = []; ((q.place.dia && q.place.dia.nodes) || []).forEach((n, i) => { if (n.a) s.push({ id: 'd' + i, a: n.a }); }); q.place.rows.forEach((r, ri) => r.forEach((x, pi) => { if (typeof x !== 'string') s.push({ id: ri + '.' + pi, a: x.a }); })); return { s, opts: document.querySelectorAll('.opt').length, hint: document.getElementById('hintbtn').disabled, chips: document.querySelectorAll('.pchip').length, slots: document.querySelectorAll('.pslot').length, conf: !!document.querySelector('.confbar') }; }, k);
       if (q.opts !== 0 || !q.hint || q.chips < 2 || q.slots !== q.s.length || q.conf) fail.push('card shape ' + k + ' ' + JSON.stringify({ o: q.opts, h: q.hint, c: q.chips, s: q.slots }));
       const fillN = mode === 'empty' ? q.s.length - 1 : q.s.length;
       for (let i = 0; i < fillN; i++) {
@@ -56,6 +56,7 @@ const { chromium } = require('playwright');
       await p.evaluate(() => { const n = document.querySelector('#nextbtn'); n && n.click(); });
     }
   }
+  for (const k of keys) { const has = await p.evaluate(k => !!BANK.find(x => x.k === k).place.dia, k); if (!has) continue; await force(k); const t = await p.evaluate(() => window.__rxDbg().cur.q.q.slice(0, 22).replace(/[^a-z]/gi, '_')); const el = await p.$('.dia'); if (el) await el.screenshot({ path: (process.env.SHOT_DIR || '/tmp') + '/dia_' + t + '.png' }); }
   // clear a filled slot by tapping it, and a real pointer drag
   await force(keys[0]);
   await click('.pchip'); await click('.pslot');
