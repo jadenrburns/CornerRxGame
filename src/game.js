@@ -6,21 +6,22 @@
   const CATS = [
     ['BG', 'Brand / Generic'], ['CL', 'Drug classes'], ['MOA', 'Mechanisms'], ['AE', 'Adverse effects'],
     ['DDI', 'Interactions'], ['CN', 'Counseling'], ['AD', 'Antidotes'], ['SIG', 'Sig & law'],
-    ['TOP', 'Weekly drugs'], ['TP3', 'Weekly drugs \u00B7 P3'], ['CALC', 'Calculations'], ['PT3', 'PharmTox \u00B7 Exam 3 questions'], ['PT3G', 'PharmTox \u00B7 Exam 3 drug practice'], ['PT4', 'PharmTox \u00B7 Exam 4 drug practice'], ['TH3', 'Therapeutics \u00B7 Exam 3'], ['ASD', 'Med Chem \u00B7 Exam 3 antiseizure drugs'], ['CHO', 'Med Chem \u00B7 Exam 3 cholinergic drugs'], ['MET3', 'Med Chem \u00B7 Exam 3 metabolism (tap the site)'], ['EX3', 'Med Chem \u00B7 Exam 3 cram (professor review)'], ['TH3F', 'Therapeutics \u00B7 IBS, constipation, diarrhea'], ['TH3C', 'Therapeutics \u00B7 Contraceptives'], ['GER', 'Therapeutics \u00B7 Geriatrics'], ['T553', 'Therapeutics III \u00B7 Syllabus topics'], ['HIM', 'Andy \u00B7 Heart failure'], ['MY', 'My studies']
+    ['TOP', 'Weekly drugs'], ['TP3', 'Weekly drugs \u00B7 P3'], ['TP1', 'Weekly drugs \u00B7 P1'], ['PT4Q', 'PharmTox \u00B7 Exam 4 question bank'], ['CALC', 'Calculations'], ['PT3', 'PharmTox \u00B7 Exam 3 questions'], ['PT3G', 'PharmTox \u00B7 Exam 3 drug practice'], ['PT4', 'PharmTox \u00B7 Exam 4 drug practice'], ['TH3', 'Therapeutics \u00B7 Exam 3'], ['ASD', 'Med Chem \u00B7 Exam 3 antiseizure drugs'], ['CHO', 'Med Chem \u00B7 Exam 3 cholinergic drugs'], ['MET3', 'Med Chem \u00B7 Exam 3 metabolism (tap the site)'], ['EX3', 'Med Chem \u00B7 Exam 3 cram (professor review)'], ['TH3F', 'Therapeutics \u00B7 IBS, constipation, diarrhea'], ['TH3C', 'Therapeutics \u00B7 Contraceptives'], ['GER', 'Therapeutics \u00B7 Geriatrics'], ['T553', 'Therapeutics III \u00B7 Syllabus topics'], ['HIM', 'Andy \u00B7 Heart failure'], ['MY', 'My studies']
   ];
   const CATNAME = {}; CATS.forEach(c => CATNAME[c[0]] = c[1]);
   /* The Topics menu is built from this table. A new category needs a CATS entry above and a slot in one course here
      (or a new course). Order here is the order on screen. `sched` attaches a weekly drug schedule (WKCFG key). */
   const COURSES = [
     { id: 'core', name: 'Core skills', tag: 'Every year', year: 'all', cats: ['BG', 'CL', 'MOA', 'AE', 'DDI', 'CN', 'AD', 'SIG', 'CALC', 'HIM'], note: 'The everyday counter questions: names, classes, mechanisms, side effects, interactions, counseling, antidotes, sig and law, calculations, and Andy’s heart failure questions.' },
-    { id: 'p443', name: 'PharmTox', code: 'PHAR 443', tag: 'P2', year: 'P2', cats: ['TOP', 'PT3', 'PT3G', 'PT4'], sched: 'p2', note: 'Weekly drug sheets plus the exam question sets.' },
+    { id: 'p443', name: 'PharmTox', code: 'PHAR 443', tag: 'P2', year: 'P2', cats: ['TOP', 'PT3', 'PT3G', 'PT4Q', 'PT4'], sched: 'p2', note: 'Weekly drug sheets plus the exam question sets.' },
     { id: 'p451', name: 'Therapeutics', code: 'PHAR 451', tag: 'P2', year: 'P2', cats: ['TH3F', 'TH3C', 'TH3', 'GER'], note: 'Exam 3 GI and contraception topics, and geriatrics.' },
     { id: 'p421', name: 'Medicinal Chemistry', code: 'PHAR 421', tag: 'P2', year: 'P2', cats: ['EX3', 'ASD', 'CHO', 'MET3'], note: 'Exam 3: start with the cram tab (built from the professor\u2019s study guide), then antiseizure, cholinergic and tap-the-site metabolism.' },
+    { id: 'p1top', name: 'Top 300 weekly drugs', short: 'Top 300', tag: 'P1', year: 'P1', cats: ['TP1'], sched: 'p1', note: 'Brand, generic and indication for the Top 300, most prescribed first. Starts Jan 12: top 20, then top 35, 50, and so on up to the full list.' },
     { id: 'p3top', name: 'Top 300 weekly drugs', short: 'Top 300', tag: 'P3', year: 'P3', cats: ['TP3'], sched: 'p3', note: 'Drug list sheets by system, one set per week.' },
     { id: 'p553', name: 'Therapeutics III', code: 'PHAR 553', tag: 'P3', year: 'P3', cats: ['T553'], note: 'Syllabus topics: asthma, COPD, renal, diabetes, gout, migraine, RA and SLE, thyroid, liver, hepatitis, blood pressure, lipids, pain, nutrition, fluids and electrolytes.' },
     { id: 'my', name: 'My studies', tag: 'Yours', year: 'all', cats: ['MY'], note: 'Decks you wrote or imported from Quizlet. Add and manage them on the My studies tab.' }
   ];
-  const CHIP = { EX3: 'Exam 3 cram: professor\u2019s review (all three topics)', ASD: 'Exam 3: antiseizure drugs', CHO: 'Exam 3: cholinergic drugs', MET3: 'Exam 3: metabolism (tap the site)', TOP: 'Weekly drugs', PT3: 'Exam 3: your exam questions', PT3G: 'Exam 3: drug-list practice', PT4: 'Exam 4: mania and psychosis drugs', TH3: 'Exam 3: IBD, ulcers, hemorrhoids and the rest', TH3F: 'Exam 3: IBS, constipation, diarrhea', TH3C: 'Exam 3: contraceptives', GER: 'Geriatrics: aging, polypharmacy, deprescribing', HIM: 'Heart failure: Andy’s questions', T553: 'Therapeutics III topics', TP3: 'Top 300 weekly drugs', MY: 'My studies' };
+  const CHIP = { EX3: 'Exam 3 cram: professor\u2019s review (all three topics)', ASD: 'Exam 3: antiseizure drugs', CHO: 'Exam 3: cholinergic drugs', MET3: 'Exam 3: metabolism (tap the site)', TOP: 'Weekly drugs', PT3: 'Exam 3: your exam questions', PT3G: 'Exam 3: drug-list practice', PT4Q: 'Exam 4: PharmTox question bank', PT4: 'Exam 4: mania and psychosis drugs', TP1: 'Top 300: brand, generic, indication', TH3: 'Exam 3: IBD, ulcers, hemorrhoids and the rest', TH3F: 'Exam 3: IBS, constipation, diarrhea', TH3C: 'Exam 3: contraceptives', GER: 'Geriatrics: aging, polypharmacy, deprescribing', HIM: 'Heart failure: Andy’s questions', T553: 'Therapeutics III topics', TP3: 'Top 300 weekly drugs', MY: 'My studies' };
   const courseCats = (c) => c.cats.filter(k => k !== 'MY' || S.decks.length);
   const YEARS = ['P1', 'P2', 'P3'];
   const curYear = () => YEARS.indexOf(S.set.year) >= 0 ? S.set.year : 'P2';
@@ -41,6 +42,7 @@
     SIG: ['I cannot read the doctor handwriting.', 'The prescription is confusing, can you check?', 'The auditor stopped by, quick question.'],
     CALC: ['The nurse needs this calculation checked.', 'Please double-check this dose.', 'Compounding order just came in.'],
     TOP: ['This one is on this week\'s drug list.', 'Quiz week! Do you know this one?', 'Straight off the Top 300 sheet.'],
+    TP1: ['Top 300 time: brand, generic or what it treats?', 'Quiz week! Do you know this one?', 'Straight off the Top 300 list.'],
     TP3: ['P3 drug list: this one is on the sheet.', 'Quiz week! Do you know this one?', 'Straight off the Top 300 sheet.'],
     T553: ['My doctor changed my plan, can you explain?', 'Quick therapy question before I go.', 'Is this the right treatment for me?'],
     HIM: ['*high knees* Quick heart failure question!', 'Is my ejection fraction a problem?', 'Which pills do I take for my heart?'],
@@ -79,7 +81,7 @@
     return { cash: 0, earned: 0, rep: 50, streak: 0, best: 0, correct: 0, wrong: 0, served: 0, franchises: 0,
       pw: { hint: 0, second: 0, binder: 0 }, daily: null, recall: [], reg: {}, calcOK: 0, mastery: {}, missed: [], karenCd: 0, karenWin: 0, karenLoss: 0, sweatyCd: 0, jimWin: 0, jimLoss: 0, phoneOK: 0, phoneBad: 0, phoneMiss: 0, lastShelve: 0, retired: 0, shelveOK: 0, shelveBad: 0, priorN: 0, decks: [],
       me: { done: false, body: 'normal', gender: 'n', hair: 0, hairColor: 0, skin: 1, scrub: 0, shirt: 0, shoes: 3 }, awards: { frames: [], pets: [] },
-      set: { topics: topics, diffs: [1, 2, 3], mode: 'mixed', timer: true, focus: false, conf: true, p2fold: true, p3fold: true },
+      set: { topics: topics, diffs: [1, 2, 3], mode: 'mixed', timer: true, focus: false, conf: true, p2fold: true, p3fold: true, p1fold: true },
       vial: [], cosm: [], cosmOn: {}, pillN: 0, store: { own: [], walls: 'w0', floor: 'f0', uni: '', deco: [], rug: { off: false, c: '#F2A516', p: 'solid' }, pos: {} },
       up: { shelf: 0, tech: 0, train: 0, counsel: 0, robot: 0 } };
   }
@@ -106,7 +108,7 @@
         if (os.topics && os.topics.TH3 === false) { if (os.topics.TH3F === undefined) f.set.topics.TH3F = false; if (os.topics.TH3C === undefined) f.set.topics.TH3C = false; }
         if (!Array.isArray(f.set.diffs) || !f.set.diffs.length) f.set.diffs = [1, 2, 3];
         if (!f.set.year && (os.folder === 'P1' || os.folder === 'P3')) f.set.year = os.folder; delete f.set.folder;
-        if (os.p2fold === undefined) f.set.p2fold = true; if (os.p3fold === undefined) f.set.p3fold = true; // v120: schedules start collapsed inside the course cards
+        if (os.p2fold === undefined) f.set.p2fold = true; if (os.p3fold === undefined) f.set.p3fold = true; if (os.p1fold === undefined) f.set.p1fold = true; // v120: schedules start collapsed inside the course cards
         if (!MODES.some(m => m[0] === f.set.mode)) f.set.mode = 'mixed'; // Even shuffle / Linear was removed
         if (!Array.isArray(f.decks)) f.decks = [];
       }
@@ -129,7 +131,11 @@
   /* P3 folder: its own weekly schedule (Top Drug List sheets by system). Drug copies carry p3:1 and ids offset by 100000 so their progress stays separate. */
   const WK3 = {}; P3WEEKS.forEach(w => { WK3[w.n] = w; });
   const D3 = []; P3WEEKS.forEach(w => w.ids.forEach(id => { const b = DRUGS.find(x => x.id === id); if (b) D3.push(Object.assign({}, b, { id: 100000 + id, w: w.n, p3: 1 })); }));
-  const ALLD = DRUGS.concat(D3), baseId = (d) => d.id % 100000;
+  /* P1 folder: Top 300 by rank (descending), brand, generic and indication only. Copies carry p1:1 and ids offset by 200000. */
+  const WK1 = {}; P1WEEKS.forEach(w => { WK1[w.n] = w; });
+  const D1 = []; P1WEEKS.forEach(w => w.ids.forEach(id => { const b = DRUGS.find(x => x.id === id); if (b) D1.push(Object.assign({}, b, { id: 200000 + id, w: w.n, p1: 1 })); }));
+  const wkOfN = (n) => n > 200 ? WK1[n] : n > 100 ? WK3[n] : WK[n];
+  const ALLD = DRUGS.concat(D3, D1), baseId = (d) => d.id % 100000;
   (function buildTop() {
     const rngOf = (str) => { let h = 1779033703 ^ str.length; for (let i = 0; i < str.length; i++) { h = Math.imul(h ^ str.charCodeAt(i), 3432918353); h = (h << 13) | (h >>> 19); } return () => { h = Math.imul(h ^ (h >>> 16), 2246822507); h = Math.imul(h ^ (h >>> 13), 3266489909); h ^= h >>> 16; return (h >>> 0) / 4294967296; }; };
     const shuf = (a, r) => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(r() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
@@ -269,7 +275,7 @@
     const GENPT = /sedat|drows|dizz|orthostat|hypotens|hypertens|nausea|vomit|diarr|headache|constipat|\bgi\b|gastro|fatigue|weight|tachy|brady|side effect|adverse|most common|lowest effective|abrupt|full course|with food|empty stomach|\bsun|alcohol|pregnan|dry mouth|rash|bleed|hypoglyc|hyperglyc|blood sugar|blood pressure|heart rate|suicid|boxed|mortality|renal|kidney|liver|hepat|angioedema|cough|edema|sexual|mood|confus|tremor|insomnia|anxiety|palpitat|\bpain|allerg|skin|eye|vision|infection|fever|dose|dosing|monitor|toxicity|dependence|withdraw|brand|apply|clean|area|layer|amount|improv|days|wash|hands|store|keep|refrigerat|as needed|daily|weekly|twice|once|before|after|minutes|hours|meal|breakfast|first line|second line|alternative|preferred|not for|avoid use|same time|every day|everyday|adherence|absorption|dietary|diet|interaction|onset|effect|water|glass|crush|chew|swallow|hypersensitiv|hydrat|report any|\.\.\./i;
     const cnSim = (a, b) => { const A = sig(a), B = sig(b); if (!A.length || !B.length) return nz(a) === nz(b); const i = ovl(A, B).length; return i >= 2 || i / Math.min(A.length, B.length) >= 0.5; };
     ALLD.forEach(d => {
-      const p3 = !!d.p3, CAT = p3 ? 'TP3' : 'TOP', wk = p3 ? WK3[d.w] : WK[d.w], r = rngOf('top' + d.id), label = p3 ? 'P3 · ' + wk.d + ' · ' + wk.topic : 'Week ' + wk.n + (wk.t === 'PHAR 444' ? ' (spring)' : '') + ' · ' + wk.d;
+      const p3 = !!d.p3, p1 = !!d.p1, CAT = p1 ? 'TP1' : p3 ? 'TP3' : 'TOP', wk = wkOfN(d.w), r = rngOf('top' + d.id), label = p1 ? 'P1 · ' + wk.d + ' · ' + wk.topic : p3 ? 'P3 · ' + wk.d + ' · ' + wk.topic : 'Week ' + wk.n + (wk.t === 'PHAR 444' ? ' (spring)' : '') + ' · ' + wk.d;
       const mk = (type, diff, q, a, w, extra) => {
         if (!w) return;
         TOPQ.push({ wt: (type === 'brand' || type === 'gen') ? 'bg' : type, c: CAT, d: diff, q: q, a: a, w: w, e: ref(d), t: label, from: wk.from, wk: d.w, ref: d.id, rows: rowsOf(d), k: hash(CAT + '|' + d.id + '|' + type) });
@@ -280,14 +286,14 @@
         mk('brand', 1, 'Which is a brand name for ' + d.g + '?', brand, wrongs(d, x => brandPick(x), r, (t) => nz(d.b).indexOf(nz(t)) >= 0, 'brand'));
         mk('gen', 1, brand + ' is the brand name of which drug?', d.g, wrongs(d, x => x.g, r, null, 'gen'));
       }
-      if (d.c) mk('class', 2, d.g + ' belongs to which drug class?', cut(d.c, 90), wrongs(d, x => cut(x.c, 90), r, null, 'class'));
+      if (!p1 && d.c) mk('class', 2, d.g + ' belongs to which drug class?', cut(d.c, 90), wrongs(d, x => cut(x.c, 90), r, null, 'class'));
       if (d.i && d.i.length) {
         const mine = words(d.i.join(' ')), first = cut(d.i[0], 100);
         mk('ind', 2, d.g + ' is indicated for:', first, wrongs(d, x => x.i && x.i.length ? cut(x.i[0], 100) : '', r, (t, x) => words(x.i.join(' ')).some(w => mine.indexOf(w) >= 0), 'ind'));
       }
-      if (String(d.p || '').replace(/\s+/g, ' ').trim().length >= 30) { const pr = cut(String(d.p).replace(/\s+/g, ' ').trim(), 150); mk('pearl', 2, 'Which is a clinical pearl for ' + d.g + '?', pr, wrongs(d, x => String(x.p || '').trim().length >= 30 ? cut(String(x.p).replace(/\s+/g, ' ').trim(), 150) : '', r, (t) => ovl(sig(t), sig(pr)).length >= 3 || t.toLowerCase().indexOf(String(d.g).toLowerCase().split(/[ ,\/]/)[0]) >= 0, null)); }
-      if (d.m && d.m.length >= 40 && !/^n\/a/i.test(d.m)) mk('moa', 3, 'Which statement describes the mechanism of action of ' + d.g + '?', firstSent(d.m, 170), wrongs(d, x => x.m && x.m.length >= 40 && !/^n\/a/i.test(x.m) ? firstSent(x.m, 170) : '', r, null, 'moa'));
-      if (d.cl && d.cl.length) {
+      if (!p1 && String(d.p || '').replace(/\s+/g, ' ').trim().length >= 30) { const pr = cut(String(d.p).replace(/\s+/g, ' ').trim(), 150); mk('pearl', 2, 'Which is a clinical pearl for ' + d.g + '?', pr, wrongs(d, x => String(x.p || '').trim().length >= 30 ? cut(String(x.p).replace(/\s+/g, ' ').trim(), 150) : '', r, (t) => ovl(sig(t), sig(pr)).length >= 3 || t.toLowerCase().indexOf(String(d.g).toLowerCase().split(/[ ,\/]/)[0]) >= 0, null)); }
+      if (!p1 && d.m && d.m.length >= 40 && !/^n\/a/i.test(d.m)) mk('moa', 3, 'Which statement describes the mechanism of action of ' + d.g + '?', firstSent(d.m, 170), wrongs(d, x => x.m && x.m.length >= 40 && !/^n\/a/i.test(x.m) ? firstSent(x.m, 170) : '', r, null, 'moa'));
+      if (!p1 && d.cl && d.cl.length) {
         const pts = d.cl.slice(), total = Math.min(pts.length, 2 + Math.floor(r() * 3)), shown = shuf(pts, r).slice(0, Math.max(1, total));
         const nW = shown.length >= 3 ? 6 - shown.length : shown.length === 2 ? 3 : 3;
         const seen = {}; shown.forEach(p => { seen[nz(p)] = 1; });
@@ -316,9 +322,10 @@
   })();
   const curWeek = () => { const t = todayStr(); let n = 0; WEEKS.forEach(w => { if (w.from <= t) n = w.n; }); return n; };
   const curWeek3 = () => { const t = todayStr(); let n = 0; P3WEEKS.forEach(w => { if (w.from <= t) n = w.n; }); return n; };
-  const isTop = (q) => q.c === 'TOP' || q.c === 'TP3';
-  const wkNow = (q) => q.c === 'TP3' ? curWeek3() : curWeek();
-  const wkAhead = (q) => q.c === 'TP3' ? !!S.set.ahead3 : !!S.set.ahead;
+  const curWeek1 = () => { const t = todayStr(); let n = 0; P1WEEKS.forEach(w => { if (w.from <= t) n = w.n; }); return n; };
+  const isTop = (q) => q.c === 'TOP' || q.c === 'TP3' || q.c === 'TP1';
+  const wkNow = (q) => q.c === 'TP1' ? curWeek1() : q.c === 'TP3' ? curWeek3() : curWeek();
+  const wkAhead = (q) => q.c === 'TP1' ? !!S.set.ahead1 : q.c === 'TP3' ? !!S.set.ahead3 : !!S.set.ahead;
   function rebuildIndex() {
     BYKEY = {}; BANK.forEach(q => BYKEY[q.k] = q); TOPQ.forEach(q => { BYKEY[q.k] = q; });
     S.decks.forEach(d => d.items.forEach(q => { BYKEY[q.k] = q; }));
@@ -398,7 +405,7 @@
   function eligible(q) {
     const st = S.set;
     if (st.mode === 'review') return !(q.from && q.from > todayStr()) && srDue(S.mastery[q.k]);
-    if (q.c === 'TP3') { if (!p3On(q.wk)) return false; } else if (q.c === 'TOP') { if (!p2On(q.wk)) return false; } else if (q.from && q.from > todayStr()) return false;
+    if (q.c === 'TP1') { if (!p1On(q.wk)) return false; } else if (q.c === 'TP3') { if (!p3On(q.wk)) return false; } else if (q.c === 'TOP') { if (!p2On(q.wk)) return false; } else if (q.from && q.from > todayStr()) return false;
     if (isTop(q) && wkTypeOff(q)) return false;
     if (!st.topics[q.c] || st.diffs.indexOf(q.d) < 0) return false;
     if (st.mode === 'missed') return S.missed.indexOf(q.k) >= 0;
@@ -418,13 +425,14 @@
      Before that, the old rules apply (started weeks, Study ahead, This week only, p3off) so older saves behave the same. */
   const WKCFG = {
     p2: { L: WEEKS, M: WK, cur: curWeek, only: 'wkOnly', ahead: 'ahead', topic: 'TOP' },
-    p3: { L: P3WEEKS, M: WK3, cur: curWeek3, only: 'wkOnly3', ahead: 'ahead3', topic: 'TP3' }
+    p3: { L: P3WEEKS, M: WK3, cur: curWeek3, only: 'wkOnly3', ahead: 'ahead3', topic: 'TP3' },
+    p1: { L: P1WEEKS, M: WK1, cur: curWeek1, only: 'wkOnly1', ahead: 'ahead1', topic: 'TP1' }
   };
   const wkOn = (k, n) => { const st = S.set, c = WKCFG[k], sel = st[k + 'sel']; if (sel) return !!sel[n]; if (st[c.only]) return n === c.cur(); const w = c.M[n]; return !!w && (w.from <= todayStr() || !!st[c.ahead]) && !(st[k + 'off'] && st[k + 'off'][n]); };
   const wkSel = (k) => { const o = {}; WKCFG[k].L.forEach(w => { if (wkOn(k, w.n)) o[w.n] = true; }); return o; };
   const wkOpenSel = (k) => { const o = {}, t = todayStr(); WKCFG[k].L.forEach(w => { if (w.from <= t) o[w.n] = true; }); return o; };
   const wkOnlyNow = (k) => { const c = WKCFG[k].cur(), ks = Object.keys(wkSel(k)); return !!c && ks.length === 1 && +ks[0] === c; };
-  const p3On = (n) => wkOn('p3', n), p2On = (n) => wkOn('p2', n);
+  const p1On = (n) => wkOn('p1', n), p3On = (n) => wkOn('p3', n), p2On = (n) => wkOn('p2', n);
   /* a week counts as unlocked once it has started or the player picked it */
   const wk2Open = (w) => w.from <= todayStr() || p2On(w.n);
   function wkPick(k, v, a) {
@@ -441,7 +449,7 @@
   }
   function wkSchedHTML(k, title) {
     const st = S.set, c = WKCFG[k], t = todayStr(), cw = c.cur(), n = c.L.filter(w => wkOn(k, w.n)).length;
-    const row = (w) => { const on = wkOn(k, w.n), started = w.from <= t, cnt = k === 'p3' ? w.ids.length : DRUGS.filter(d => d.w === w.n).length, lab = (w.t ? 'Wk ' + w.wk + ' · ' : '') + w.d;
+    const row = (w) => { const on = wkOn(k, w.n), started = w.from <= t, cnt = w.ids ? w.ids.length : DRUGS.filter(d => d.w === w.n).length, lab = (w.t ? 'Wk ' + w.wk + ' · ' : '') + w.d;
       return `<li class="${w.n === cw ? 'now' : started || on ? '' : 'lock'}${on ? '' : ' off'}${shown(w) ? '' : ' upc'}"${shown(w) ? '' : ' hidden'} data-find="${esc(('week ' + w.wk + ' wk ' + w.wk + ' ' + (w.t || '') + ' ' + w.d + ' ' + w.topic + (w.n === cw ? ' this week now' : '')).toLowerCase())}"><button type="button" data-act="wkpick" data-v="${k}:${w.n}" aria-pressed="${on}" aria-label="${esc(lab)} ${esc(w.topic)}: ${on ? 'on' : 'off'}"><i class="p3box">${on ? '✓' : ''}</i><b>${esc(lab)}</b><span>${esc(w.topic)}</span><small>${on ? cnt + ' drugs' + (w.n === cw ? ' · this week' : started ? '' : ' · upcoming') : 'off'}</small></button></li>`; };
     const started = c.L.filter(w => w.from <= t), up = c.L.filter(w => w.from > t), foldUp = up.length > 3 && !st[k + 'up'];
     const shown = (w) => w.from <= t || !foldUp || wkOn(k, w.n);
@@ -823,7 +831,7 @@
   /* where a question comes from, for the reference binder */
   function binderNote(q) {
     const cat = (CATS.find(c => c[0] === q.c) || [0, q.c || 'Question'])[1], parts = [cat];
-    const w = q.wk ? (q.c === 'TP3' ? WK3[q.wk] : WK[q.wk]) : null;
+    const w = q.wk ? wkOfN(q.wk) : null;
     if (w) parts.push((w.t ? w.t + ' wk ' + w.wk + ' \u00B7 ' : '') + w.d + ' \u00B7 ' + w.topic);
     else if (q.t) parts.push(q.t);
     if (q.gen) return 'Calculation: set up the units first, then solve.';
@@ -949,7 +957,7 @@
   }
   function masteryByCat() {
     const m = {}, add = (q) => { const o = m[q.c] = m[q.c] || { n: 0, s: 0 }, x = S.mastery[q.k]; o.n++; if (x && x.seen) o.s += [0.2, 0.45, 0.8, 1][x.box] || 0; };
-    const cw = curWeek() || (S.set.ahead ? WEEKS[0].n : 0), cw3 = curWeek3() || (S.set.ahead3 ? P3WEEKS[0].n : 0); BANK.forEach(add); TOPQ.forEach(q => { if (q.wk === (q.c === 'TP3' ? cw3 : cw)) add(q); }); S.decks.forEach(d => d.items.forEach(add));
+    const cw = curWeek() || (S.set.ahead ? WEEKS[0].n : 0), cw3 = curWeek3() || (S.set.ahead3 ? P3WEEKS[0].n : 0), cw1 = curWeek1() || (S.set.ahead1 ? P1WEEKS[0].n : 0); BANK.forEach(add); TOPQ.forEach(q => { if (q.wk === (q.c === 'TP1' ? cw1 : q.c === 'TP3' ? cw3 : cw)) add(q); }); S.decks.forEach(d => d.items.forEach(add));
     return m;
   }
   function hubTabs(active) {
@@ -1275,14 +1283,14 @@
   }
   /* an achievement pop-up for every weekly quiz (Top 300 and P3) the first time all of its questions are mastered */
   function checkWeekQuiz(silent) {
-    const isOpen = (w) => w.from <= todayStr() || (w.n > 100 ? p3On(w.n) : p2On(w.n));
-    const mast = WEEKS.concat(P3WEEKS).filter(isOpen).filter(w => { const p = weekProg(w.n); return p.total > 0 && p.done >= p.total; });
+    const isOpen = (w) => w.from <= todayStr() || (w.n > 200 ? p1On(w.n) : w.n > 100 ? p3On(w.n) : p2On(w.n));
+    const mast = WEEKS.concat(P3WEEKS, P1WEEKS).filter(isOpen).filter(w => { const p = weekProg(w.n); return p.total > 0 && p.done >= p.total; });
     if (!S.awards.wkDone) { S.awards.wkDone = mast.map(w => w.n); save(); return; }
     const fresh = mast.filter(w => S.awards.wkDone.indexOf(w.n) < 0);
     if (!fresh.length) return;
     fresh.forEach(w => S.awards.wkDone.push(w.n)); save();
     if (silent) return;
-    fresh.forEach(w => showUnlock({ emoji: '\uD83C\uDFC6', title: (w.n > 100 ? 'P3 Week ' : 'Week ') + w.wk + ' quiz mastered', sub: w.topic + ' \u00B7 ' + w.d, target: { kind: 'cal' }, land: () => { if (view === 'awards') renderPanel(); } }));
+    fresh.forEach(w => showUnlock({ emoji: '\uD83C\uDFC6', title: (w.n > 200 ? 'P1 Week ' : w.n > 100 ? 'P3 Week ' : 'Week ') + w.wk + ' quiz mastered', sub: w.topic + ' \u00B7 ' + w.d, target: { kind: 'cal' }, land: () => { if (view === 'awards') renderPanel(); } }));
   }
   function checkCal(silent) {
     checkWeekQuiz(silent);
@@ -1869,6 +1877,7 @@
     CATS.forEach(c => {
       if (c[0] === 'MY') return;
       if (c[0] === 'CALC') { h += `<div class="mrow"><b>${c[1]}</b><span>${S.calcOK} solved</span><div class="bar"><i style="width:${Math.min(100, S.calcOK / 20 * 100)}%"></i></div></div>`; return; }
+      if (c[0] === 'TP1') { const un = TOPQ.filter(q => q.c === 'TP1' && !(q.from > todayStr())); h += masteryRow('Weekly drugs P1 (unlocked)', un.filter(q => (S.mastery[q.k] || {}).box >= 2).length, un.length); return; }
       if (c[0] === 'TP3') { const un = TOPQ.filter(q => q.c === 'TP3' && !(q.from > todayStr())); h += masteryRow('Weekly drugs P3 (unlocked)', un.filter(q => (S.mastery[q.k] || {}).box >= 2).length, un.length); return; }
       if (c[0] === 'TOP') { const un = TOPQ.filter(q => q.c === 'TOP' && !(q.from > todayStr())); h += masteryRow('Weekly drugs (unlocked)', un.filter(q => (S.mastery[q.k] || {}).box >= 2).length, un.length); return; }
       const qs = BANK.filter(q => q.c === c[0]);
@@ -1988,7 +1997,7 @@
   /* ---- save code: the whole save as one long code, to move progress between devices or keep a backup ---- */
 /*@EXT@*/
 /*@MIC@*/
-  const GAME_VERSION = 148;
+  const GAME_VERSION = 149;
   const b64u = (u8) => { let s = ''; for (let i = 0; i < u8.length; i += 0x8000) s += String.fromCharCode.apply(null, u8.subarray(i, i + 0x8000)); return btoa(s).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); };
   const unb64u = (t) => { const s = atob(t.replace(/-/g, '+').replace(/_/g, '/')), u = new Uint8Array(s.length); for (let i = 0; i < s.length; i++) u[i] = s.charCodeAt(i); return u; };
   const chk = (t) => { let h = 2166136261; for (let i = 0; i < t.length; i++) { h ^= t.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36); };

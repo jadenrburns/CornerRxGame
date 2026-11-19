@@ -17,7 +17,7 @@ const { chromium } = require('playwright');
   if (tabs.join() !== 'Topics,Settings,My studies') fail.push('tabs ' + tabs);
   const cards = await p.evaluate(() => [...document.querySelectorAll('.crs')].map(e => e.dataset.crs + ':' + e.querySelector('.crsst').textContent));
   console.log('cards', cards);
-  if (cards.length !== 4 || !/p443:3 of 4 on/.test(cards.join()) || !/core:all 10 on/.test(cards.join())) fail.push('P2 cards ' + cards);
+  if (cards.length !== 4 || !/p443:4 of 5 on/.test(cards.join()) || !/core:all 10 on/.test(cards.join())) fail.push('P2 cards ' + cards);
   let c;
   // year tabs
   await act('year', 'P3');
@@ -29,7 +29,7 @@ const { chromium } = require('playwright');
   if (!(c.TP3 && c.T553 && c.BG && !c.TOP && !c.TH3)) fail.push('year-only P3 ' + JSON.stringify(c));
   await act('year-only', 'P3'); c = await chips(); if (!(c.TOP && c.TH3 && !c.PT4)) fail.push('year-only undo ' + JSON.stringify(c));
   await act('year', 'P1');
-  if (!(await p.evaluate(() => /Nothing is filed under P1/.test(document.querySelector('.crsl').textContent)))) fail.push('P1 empty note');
+  if (!(await p.evaluate(() => /Top 300 weekly drugs/.test(document.querySelector('.crsl').textContent) && !!document.querySelector('[data-v="p1:201"]')))) fail.push('P1 Top 300 card');
   await act('year', 'P2');
   // Only this course, then undo
   await act('course-only', 'p451'); c = await chips();

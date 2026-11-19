@@ -330,11 +330,11 @@
     else { r.tries = (r.tries || 0) + 1; if (r.tries >= 2 && i >= 0) S.recall.splice(i, 1); else r.due = Date.now() + RC_DELAY; }
   }
   function regularDone(ok) { const g = cur.regular; if (!g) return; g.visits = (g.visits || 0) + 1; if (ok) g.ok = (g.ok || 0) + 1; }
-  const courseColor = (w) => w.n > 100 ? '#F2B01E' : w.t === 'PHAR 444' ? '#8E6BD8' : '#2FB5A5';
-  const masteryList = () => WEEKS.concat(P3WEEKS).filter(w => (S.reg || {})[w.n]).map(w => ({ n: w.n, c: courseColor(w) }));
+  const courseColor = (w) => w.n > 200 ? '#E8647C' : w.n > 100 ? '#F2B01E' : w.t === 'PHAR 444' ? '#8E6BD8' : '#2FB5A5';
+  const masteryList = () => WEEKS.concat(P3WEEKS, P1WEEKS).filter(w => (S.reg || {})[w.n]).map(w => ({ n: w.n, c: courseColor(w) }));
   function checkRegulars() {
     S.reg = S.reg || {}; let fresh = 0;
-    WEEKS.concat(P3WEEKS).forEach(w => {
+    WEEKS.concat(P3WEEKS, P1WEEKS).forEach(w => {
       if (S.reg[w.n]) return;
       const p = weekProg(w.n); if (!(p.total > 0 && p.done >= p.total)) return;
       const body = w.n % 5 === 0 ? 'jacked' : w.n % 7 === 0 ? 'obese' : 'normal', name = REG_NAMES[(w.n * 7) % REG_NAMES.length];
@@ -347,7 +347,7 @@
   const dayWord = (t) => { const d = Math.max(0, Math.round((Date.now() - t) / 864e5)); return d <= 0 ? 'earlier today' : d === 1 ? 'yesterday' : d + ' days ago'; };
   function spBanner() {
     if (cur.recall) return `<div class="spbanner recall" role="note"><b>↩ RECALL PATIENT</b><span>You missed this ${esc(dayWord(cur.recall.at))}. It can be from any topic.</span></div>`;
-    if (cur.regular) { const g = cur.regular, w = g.n > 100 ? WK3[g.n] : WK[g.n]; return `<div class="spbanner regular" role="note"><b>★ REGULAR</b><span>${esc(g.name)} · from a week you mastered${w ? ': ' + esc(w.topic) : ''}. It may not match your topic filters.</span></div>`; }
+    if (cur.regular) { const g = cur.regular, w = wkOfN(g.n); return `<div class="spbanner regular" role="note"><b>★ REGULAR</b><span>${esc(g.name)} · from a week you mastered${w ? ': ' + esc(w.topic) : ''}. It may not match your topic filters.</span></div>`; }
     return '';
   }
 
