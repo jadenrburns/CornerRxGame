@@ -44,20 +44,26 @@
   })();
 
 
-  /* ---- music: a quiet generative lofi loop made with WebAudio (no audio files). I vi ii V in C, soft keys, bass, light drums and a wandering pentatonic melody. Starts after the first tap or key, pauses when the tab is hidden, toggled by the Music button ---- */
+  /* ---- music: lofi tapes for the counter radio, made with WebAudio (no audio files). MUS_TAPES holds the music for each tape id in SHOP_TAPES (shop.js). Plays only while the Tape radio is placed and Music is on; starts after the first tap or key; pauses when the tab is hidden ---- */
+  const MUS_TAPES = {
+    t1: { bpm: 76, ch: [{ b: 48, n: [60, 64, 67, 71, 74] }, { b: 45, n: [57, 60, 64, 67, 71] }, { b: 50, n: [62, 65, 69, 72, 76] }, { b: 43, n: [59, 62, 65, 69, 71] }], pen: [67, 69, 72, 74, 76, 79, 81, 84], kick: [0, 5], snare: 4, sw: 0.14, mel: 0.5, lp: 4200 },
+    t2: { bpm: 66, ch: [{ b: 45, n: [57, 60, 64, 67, 72] }, { b: 41, n: [53, 57, 60, 64, 69] }, { b: 48, n: [55, 60, 64, 67, 71] }, { b: 43, n: [55, 59, 62, 64, 69] }], pen: [64, 67, 69, 72, 74, 76, 79, 81], kick: [0, 6], snare: 4, sw: 0.1, mel: 0.4, lp: 3000 },
+    t3: { bpm: 84, ch: [{ b: 50, n: [62, 65, 69, 72, 76] }, { b: 43, n: [59, 62, 64, 65, 69] }, { b: 48, n: [64, 67, 71, 74, 79] }, { b: 45, n: [61, 64, 67, 69, 73] }], pen: [72, 74, 76, 79, 81, 84, 86, 88], kick: [0, 3, 6], snare: 4, sw: 0.22, mel: 0.6, lp: 4600 },
+    t4: { bpm: 62, ch: [{ b: 40, n: [59, 62, 64, 67, 71] }, { b: 48, n: [55, 60, 64, 67, 71] }, { b: 43, n: [55, 59, 62, 66, 69] }, { b: 50, n: [57, 62, 66, 69, 74] }], pen: [64, 66, 67, 71, 74, 76, 78, 79], kick: [0], snare: 4, sw: 0.08, mel: 0.3, lp: 2600 },
+    t5: { bpm: 88, ch: [{ b: 41, n: [57, 60, 64, 65, 69] }, { b: 43, n: [59, 62, 64, 67, 69] }, { b: 40, n: [59, 62, 64, 67, 71] }, { b: 45, n: [57, 60, 64, 67, 72] }], pen: [69, 72, 74, 76, 77, 81, 84, 86], kick: [0, 4], snare: 2, sw: 0.12, mel: 0.55, lp: 5200 }
+  };
   const MUS = (() => {
-    let a = null, bus = null, nz = null, timer = null, nextT = 0, step = 0, bar = 0, mi = 2, started = false, ready = false;
-    const SP = 60 / 76 / 2, VOL = 0.5;
-    const CH = [{ b: 48, n: [60, 64, 67, 71, 74] }, { b: 45, n: [57, 60, 64, 67, 71] }, { b: 50, n: [62, 65, 69, 72, 76] }, { b: 43, n: [59, 62, 65, 69, 71] }];
-    const PEN = [67, 69, 72, 74, 76, 79, 81, 84], mf = (m) => 440 * Math.pow(2, (m - 69) / 12);
+    let a = null, bus = null, lp = null, nz = null, timer = null, nextT = 0, step = 0, bar = 0, mi = 2, started = false, ready = false, active = false;
+    const tp = () => MUS_TAPES[(S.store || {}).tape] || MUS_TAPES.t1, sp = () => 60 / tp().bpm / 2, mf = (m) => 440 * Math.pow(2, (m - 69) / 12);
+    const radioOwned = () => ((S.store || {}).deco || []).indexOf('radio') >= 0;
     function init() {
       if (ready) return !!a;
       ready = true;
       try {
         const C = window.AudioContext || window.webkitAudioContext; if (!C) return false;
         a = new C(); bus = a.createGain(); bus.gain.value = 0;
-        const lp = a.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 4200;
-        const dl = a.createDelay(1); dl.delayTime.value = SP * 3; const fb = a.createGain(); fb.gain.value = 0.28; const wet = a.createGain(); wet.gain.value = 0.22;
+        lp = a.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 4200;
+        const dl = a.createDelay(1); dl.delayTime.value = 0.4; const fb = a.createGain(); fb.gain.value = 0.28; const wet = a.createGain(); wet.gain.value = 0.22;
         bus.connect(lp); lp.connect(a.destination); lp.connect(dl); dl.connect(fb); fb.connect(dl); dl.connect(wet); wet.connect(a.destination);
         nz = a.createBuffer(1, a.sampleRate, a.sampleRate); const d = nz.getChannelData(0); for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
       } catch (err) { a = null; }
@@ -79,7 +85,7 @@
       g.gain.setValueAtTime(0.34, t); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.28); o.connect(g); g.connect(bus); o.start(t); o.stop(t + 0.3);
     }
     function play(s, t) {
-      const c = CH[bar % 4], sw = (s % 2) ? SP * 0.14 : 0, tt = t + sw;
+      const P = tp(), SP = sp(), c = P.ch[bar % 4], tt = t + ((s % 2) ? SP * P.sw : 0);
       if (s === 0) {
         c.n.forEach((m, i) => tone(t + i * 0.012, mf(m), SP * 7, 'triangle', 0.028, 1500, 0.08, 1.4));
         tone(t, mf(c.b), SP * 3.4, 'sine', 0.2, 600, 0.02, 0.35);
@@ -87,38 +93,52 @@
       if (s === 5) tone(tt, mf(c.b + 12), SP * 1.6, 'sine', 0.12, 700, 0.02, 0.25);
       if (s === 0 || s === 3 || s === 6) { const m = c.n[(bar + s) % c.n.length] + 12; tone(tt, mf(m), SP * 1.2, 'triangle', 0.05, 2400, 0.008, 0.5); }
       if (s === 2 || s === 5 || s === 7) {
-        if (Math.random() < 0.5) { mi = Math.max(0, Math.min(PEN.length - 1, mi + (Math.random() < 0.5 ? -1 : 1) * (1 + (Math.random() < 0.3 ? 1 : 0)))); tone(tt, mf(PEN[mi]), SP * 1.6, 'sine', 0.06, 3200, 0.01, 0.9); }
+        if (Math.random() < P.mel) { mi = Math.max(0, Math.min(P.pen.length - 1, mi + (Math.random() < 0.5 ? -1 : 1) * (1 + (Math.random() < 0.3 ? 1 : 0)))); tone(tt, mf(P.pen[mi]), SP * 1.6, 'sine', 0.06, 3200, 0.01, 0.9); }
       }
-      if (s === 0 || s === 5) kick(t);
-      if (s === 4) hit(t, 0.16, 0.07, 'bandpass', 1900);
+      if (P.kick.indexOf(s) >= 0) kick(t);
+      if (s === P.snare) hit(t, 0.16, 0.07, 'bandpass', 1900);
       if (s % 2) hit(tt, 0.05, 0.035, 'highpass', 7000);
     }
     function pump() {
-      if (!a || !started) return;
+      if (!a || !started || !active) return;
       if (nextT < a.currentTime) nextT = a.currentTime + 0.06;
-      while (nextT < a.currentTime + 1.6) { play(step, nextT); nextT += SP; step++; if (step === 8) { step = 0; bar++; } }
+      while (nextT < a.currentTime + 1.6) { play(step, nextT); nextT += sp(); step++; if (step === 8) { step = 0; bar++; } }
     }
     function fade(v) { if (!a) return; const t = a.currentTime; bus.gain.cancelScheduledValues(t); bus.gain.setValueAtTime(bus.gain.value, t); bus.gain.linearRampToValueAtTime(v, t + 1.2); }
-    function want() { return S.music !== false && !document.hidden; }
+    function want() { return S.music !== false && radioOwned() && !document.hidden; }
+    function spin() { try { if (World.ok && World.setRadio) World.setRadio(S.music !== false && radioOwned()); } catch (err) { /* cosmetic */ } }
     function sync() {
+      spin();
       if (want()) {
         if (!init()) return;
         if (a.state === 'suspended') { try { a.resume(); } catch (err) { /* ignore */ } }
-        if (!started) { started = true; nextT = a.currentTime + 0.1; step = 0; timer = setInterval(pump, 250); pump(); }
-        fade(0.16 * VOL / 0.5);
-      } else if (started) { fade(0); }
+        lp.frequency.value = tp().lp; active = true;
+        if (!started) { started = true; nextT = a.currentTime + 0.1; step = 0; timer = setInterval(pump, 250); }
+        pump(); fade(0.16);
+      } else if (started) { active = false; fade(0); }
     }
+    function tape() { step = 0; bar = 0; mi = 2; if (a) nextT = a.currentTime + 0.15; sync(); }
+    function owned() { return SHOP_TAPES.filter(t => !t[2] || shopOwn(t[0])).map(t => t[0]); }
+    function tap() {
+      if (!radioOwned()) return;
+      const l = owned(), cur = (S.store.tape || 't1');
+      if (S.music === false) { S.music = true; toast('Radio on: ' + tapeName(cur) + '.'); }
+      else if (l.length < 2) { S.music = false; toast('Radio off.'); }
+      else { const i = l.indexOf(cur), nx = l[(i + 1) % l.length]; S.store.tape = nx; toast('Tape in: ' + tapeName(nx) + '.'); tape(); }
+      save(); musLabel(); sync(); SFX.play('ok');
+    }
+    function tapeName(id) { const t = SHOP_TAPES.find(x => x[0] === id); return t ? t[1] : id; }
     function arm() {
       const go = () => { document.removeEventListener('pointerdown', go, true); document.removeEventListener('keydown', go, true); sync(); };
       document.addEventListener('pointerdown', go, true); document.addEventListener('keydown', go, true);
       document.addEventListener('visibilitychange', sync);
     }
-    return { sync: sync, arm: arm, on: () => S.music !== false };
+    return { sync: sync, arm: arm, tape: tape, tap: tap, owned: owned, radio: radioOwned, playing: () => active };
   })();
   function musLabel() {
-    const on = S.music !== false, l = $('#muslab'), b = $('#musbtn');
-    if (l) l.textContent = 'Music: ' + (on ? 'on' : 'off');
-    if (b) b.setAttribute('aria-pressed', String(on));
+    const on = S.music !== false, l = $('#muslab'), b = $('#musbtn'), has = ((S.store || {}).deco || []).indexOf('radio') >= 0;
+    if (l) l.textContent = 'Radio: ' + (on ? 'on' : 'off');
+    if (b) { b.setAttribute('aria-pressed', String(on)); b.style.display = has ? '' : 'none'; }
   }
 
   /* ---- streak coin: a round badge with the number; from a streak of 10 it turns gold with an orange rim and a flame crown that grows with every right answer ---- */

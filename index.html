@@ -1315,7 +1315,7 @@ table.board tbody tr:nth-child(-n+3) td:first-child { font-weight: 800; color: v
       <div><h1>Corner Rx</h1><small>Pharmacy tycoon study game</small></div>
     </div>
     <div class="stats" id="stats" aria-label="Your pharmacy stats"></div>
-    <div class="quick"><button type="button" class="qk" id="vialbtn" data-act="vial" aria-label="Lost pills vial" aria-haspopup="dialog"><i aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 3h8M9 3v3M15 3v3M7 6h10v13a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2z"/><path d="M7 11h10"/></svg></i><b class="vcount" hidden>0</b></button><button type="button" class="qk" id="sfxbtn" data-act="sfx" aria-label="Sound" aria-pressed="true"><i aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9zM16 9a4 4 0 0 1 0 6M18.5 6.5a8 8 0 0 1 0 11"/></svg></i><span id="sfxlab" class="sr">Sound: on</span></button><button type="button" class="qk" id="musbtn" data-act="music" aria-label="Music" aria-pressed="true"><i aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18V6l10-2v12M9 18a3 3 0 1 1-3-3 3 3 0 0 1 3 3zM19 16a3 3 0 1 1-3-3 3 3 0 0 1 3 3z"/></svg></i><span id="muslab" class="sr">Music: on</span></button><button type="button" class="qk" id="focusbtn" data-act="focus" aria-label="Focus mode" aria-pressed="false"><i aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="2.5"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg></i><span id="focuslab" class="sr">Focus mode</span></button></div>
+    <div class="quick"><button type="button" class="qk" id="vialbtn" data-act="vial" aria-label="Lost pills vial" aria-haspopup="dialog"><i aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 3h8M9 3v3M15 3v3M7 6h10v13a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2z"/><path d="M7 11h10"/></svg></i><b class="vcount" hidden>0</b></button><button type="button" class="qk" id="sfxbtn" data-act="sfx" aria-label="Sound" aria-pressed="true"><i aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9zM16 9a4 4 0 0 1 0 6M18.5 6.5a8 8 0 0 1 0 11"/></svg></i><span id="sfxlab" class="sr">Sound: on</span></button><button type="button" class="qk" id="musbtn" data-act="music" aria-label="Radio" aria-pressed="true"><i aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18V6l10-2v12M9 18a3 3 0 1 1-3-3 3 3 0 0 1 3 3zM19 16a3 3 0 1 1-3-3 3 3 0 0 1 3 3z"/></svg></i><span id="muslab" class="sr">Radio: on</span></button><button type="button" class="qk" id="focusbtn" data-act="focus" aria-label="Focus mode" aria-pressed="false"><i aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="2.5"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg></i><span id="focuslab" class="sr">Focus mode</span></button></div>
     <button type="button" class="drawerbtn" data-act="menu" aria-label="Open menu" aria-haspopup="true"><span aria-hidden="true">&#9776;</span><b>Menu</b></button>
   </header>
     <div class="tags"></div>
@@ -4239,7 +4239,16 @@ const SHOP_DECOR = [
   ['photo', 'Framed photo', 220, 'A sunny landscape for the side wall.', '🖼️'],
   ['poster', 'Health poster', 260, 'Ask your pharmacist. Goes on the side wall.', '📋'],
   ['clock', 'Wall clock', 320, 'Keeps real time. Goes on the side wall.', '🕒'],
-  ['vend', 'Vending machine', 900, 'Snacks by the counter.', '🥤']
+  ['vend', 'Vending machine', 900, 'Snacks by the counter.', '🥤'],
+  ['radio', 'Tape radio', 350, 'A little cassette radio for the counter. Plays lofi tapes. Tap it to switch tape.', '📻']
+];
+/* radio tapes: [id, name, price, blurb]. The music for each lives in ext.js (MUS_TAPES). Tape t1 comes with the radio. Never rename a shipped id. */
+const SHOP_TAPES = [
+  ['t1', 'Rainy Window', 0, 'Soft keys and a slow beat. Comes with the radio.'],
+  ['t2', 'Night Shift', 250, 'Slow and minor. For the late hours.'],
+  ['t3', 'Corner Cafe', 400, 'Jazzy chords with a little swing.'],
+  ['t4', 'Late Study', 500, 'Very mellow. Good for long cram sessions.'],
+  ['t5', 'Sunday Morning', 650, 'Bright and easy, a bit faster.']
 ];
 /* extra pharmacist hairstyles: [id, name, style number in world.js, price] */
 const SHOP_HAIR = [
@@ -5655,10 +5664,10 @@ const World = (function () {
 
   /* ---- shop: wall paint, floor tiles, decorations, technician uniforms ---- */
   let uniOpts = null, decorG = null, surfReady = false;
-  const decorBuilt = {}, decorObst = {}, decorAnim = [];
+  const decorBuilt = {}, decorObst = {}, decorAnim = []; let radioOn = false;
   function surfMat(list) { if (!list.length) return null; const m = list[0].material.clone ? list[0].material.clone() : list[0].material; list.forEach(x => { x.material = m; }); return m; }
   const DECOR_OBST = { cooler: { x0: -9.45, x1: -8.7, z0: 2.65, z1: 3.35 }, vend: { x0: -9.5, x1: -8.5, z0: 1.35, z1: 2.45 } };
-  const DECOR_MODE = { rug: 'floor', cooler: 'floor', vend: 'floor', bell: 'counter', cactus: 'counter', lava: 'counter', fish: 'counter', photo: 'wall', poster: 'wall', clock: 'wall' };
+  const DECOR_MODE = { rug: 'floor', cooler: 'floor', vend: 'floor', bell: 'counter', radio: 'counter', cactus: 'counter', lava: 'counter', fish: 'counter', photo: 'wall', poster: 'wall', clock: 'wall' };
   const decorDef = {}; // default position of every decor item, so a saved position can shift its obstacle
   function decorObstFor(id, g) {
     const b = DECOR_OBST[id], d = decorDef[id]; if (!b || !d) return null; const dx = g.position.x - d[0], dz = g.position.z - d[2];
@@ -5673,6 +5682,15 @@ const World = (function () {
     } else if (id === 'bell') {
       g.position.set(-0.5, 1.26, 0.55);
       cy(g, 0.17, 0.19, 0.04, 10, '#27384F', 0, 0.02, 0); const d = ico(g, 0.14, '#F2C94C', 0, 0.1, 0); d.scale.set(1, 0.7, 1); cy(g, 0.025, 0.025, 0.05, 6, '#F2C94C', 0, 0.2, 0);
+    } else if (id === 'radio') {
+      g.position.set(-3.2, 1.26, 0.6);
+      bx(g, 0.56, 0.3, 0.2, '#E8D9A8', 0, 0.15, 0); bx(g, 0.58, 0.04, 0.22, '#D9374A', 0, 0.32, 0); bx(g, 0.3, 0.03, 0.03, '#27384F', 0, 0.36, 0);
+      [-0.2].forEach(x => { const sp = cy(g, 0.085, 0.085, 0.02, 14, '#27384F', x, 0.15, 0.105); sp.rotation.x = PI / 2; cy(g, 0.045, 0.045, 0.022, 10, '#4A5568', x, 0.15, 0.108).rotation.x = PI / 2; });
+      bx(g, 0.26, 0.15, 0.02, '#1F3B4A', 0.09, 0.17, 0.102); bx(g, 0.28, 0.17, 0.012, '#B9C2C9', 0.09, 0.17, 0.1);
+      const reels = [-0.03, 0.21].map(x => { const rg = new T.Group(); rg.position.set(x + 0.0, 0.17, 0.115); g.add(rg); const hub = cy(rg, 0.045, 0.045, 0.015, 8, '#F4F9F9', 0, 0, 0); hub.rotation.x = PI / 2; bx(rg, 0.07, 0.012, 0.016, '#27384F', 0, 0, 0.004); bx(rg, 0.012, 0.07, 0.016, '#27384F', 0, 0, 0.004); return rg; });
+      const led = cy(g, 0.012, 0.012, 0.012, 6, '#5A2A2A', 0.24, 0.27, 0.105, null, { emissive: new T.Color(0x000000), emissiveIntensity: 1 }); led.rotation.x = PI / 2;
+      const kn = [0.0, 0.07].map((x, i) => { const k = cy(g, 0.018, 0.018, 0.02, 8, '#27384F', 0.02 + x, 0.045, 0.105); k.rotation.x = PI / 2; return k; });
+      let lt = 0; decorAnim.push(t => { const dt = Math.min(0.1, Math.max(0, t - lt)); lt = t; if (radioOn) reels.forEach((r, i) => { r.rotation.z -= dt * (i ? 2.4 : 3.1); }); if (led.material.emissive && led.material.emissive.setHex) { led.material.emissive.setHex(radioOn ? 0xFF4A3A : 0x000000); } });
     } else if (id === 'cactus') {
       g.position.set(3.6, 1.26, 0.6);
       cy(g, 0.15, 0.12, 0.2, 7, '#E07A4F', 0, 0.1, 0); cy(g, 0.1, 0.1, 0.34, 6, '#3E8E41', 0, 0.37, 0); bx(g, 0.2, 0.06, 0.06, '#3E8E41', -0.13, 0.36, 0); bx(g, 0.06, 0.2, 0.06, '#3E8E41', -0.22, 0.46, 0); bx(g, 0.2, 0.06, 0.06, '#3E8E41', 0.13, 0.28, 0); bx(g, 0.06, 0.18, 0.06, '#3E8E41', 0.22, 0.36, 0); ico(g, 0.04, '#F29BC1', 0, 0.58, 0);
@@ -5739,6 +5757,7 @@ const World = (function () {
     setEntryRug(st.rug || null);
   }
   function decorTick(t) { for (let i = 0; i < decorAnim.length; i++) decorAnim[i](t); }
+  api.setRadio = function (on) { radioOn = !!on; };
   api.setStore = function (st) { try { applyStore(st); } catch (e) { /* cosmetic only */ } };
   api.setStaffLook = function (spec) {
     uniOpts = spec || null;
@@ -6055,6 +6074,7 @@ const World = (function () {
     canvas.addEventListener('click', e => {
       if (noClick) { noClick = false; return; }
       if (fpT) { const id = fpPick(e); if (id && B.onFp) B.onFp(id); return; }
+      if (!labOn && !synOn && !micOn) { const rd = decorHit(e); if (rd && rd.userData.decorId === 'radio' && B.onRadio) { dismissHint(); B.onRadio(); return; } }
       const h = pick(e); dismissHint();
       if (synOn) { if (h && h.site && B.onSynSite) B.onSynSite(h.site); return; }
       if (micOn) { if (h && h.micSite && B.onMicSite) B.onMicSite(h.micSite); else if (h && h.micDish && B.onMicDish) B.onMicDish(h.micDish); else if (h && h.micPaper && B.onMicPaper) { const pa = api.micPaperAt(e.clientX, e.clientY); if (pa) B.onMicPaper(pa.id, pa.row); } return; }
@@ -8080,7 +8100,7 @@ const World = (function () {
       pw: { hint: 0, second: 0, binder: 0 }, daily: null, recall: [], reg: {}, calcOK: 0, mastery: {}, missed: [], karenCd: 0, karenWin: 0, karenLoss: 0, sweatyCd: 0, jimWin: 0, jimLoss: 0, phoneOK: 0, phoneBad: 0, phoneMiss: 0, lastShelve: 0, retired: 0, shelveOK: 0, shelveBad: 0, priorN: 0, decks: [],
       me: { done: false, body: 'normal', gender: 'n', hair: 0, hairColor: 0, skin: 1, scrub: 0, shirt: 0, shoes: 3 }, awards: { frames: [], pets: [] },
       set: { topics: topics, diffs: [1, 2, 3], mode: 'mixed', timer: true, focus: false, conf: true, p2fold: true, p3fold: true, p1fold: true },
-      vial: [], cosm: [], cosmOn: {}, pillN: 0, store: { own: [], walls: 'w0', floor: 'f0', uni: '', deco: [], rug: { off: false, c: '#F2A516', p: 'solid' }, pos: {} },
+      vial: [], cosm: [], cosmOn: {}, pillN: 0, store: { own: [], walls: 'w0', floor: 'f0', uni: '', deco: [], rug: { off: false, c: '#F2A516', p: 'solid' }, pos: {}, tape: 't1' },
       up: { shelf: 0, tech: 0, train: 0, counsel: 0, robot: 0 } };
   }
   let S = load();
@@ -8099,7 +8119,7 @@ const World = (function () {
         if (!o.pw && o.hintsLeft) f.pw.hint = Math.min(9, o.hintsLeft);
         if (f.up.library) { let r = 0; for (let l = 0; l < f.up.library; l++) r += Math.round(150 * Math.pow(1.9, l)); f.cash = (f.cash || 0) + r; f.libRefund = (f.libRefund || 0) + r; }
         delete f.up.library; delete f.hintsLeft; delete f.sinceHint;
-        f.store = Object.assign(defaults().store, o.store || {}); f.store.own = (f.store.own || []).slice(); f.store.deco = (f.store.deco || []).slice(); f.store.rug = Object.assign({ off: false, c: '#F2A516', p: 'solid' }, f.store.rug || {}); f.store.pos = Object.assign({}, f.store.pos || {}); f.store.rot = Object.assign({}, f.store.rot || {}); f.store.petOn = Object.assign({}, f.store.petOn || {}); if (f.store.own.indexOf('neon') >= 0) { f.store.own = f.store.own.filter(x => x !== 'neon'); f.store.deco = f.store.deco.filter(x => x !== 'neon'); f.cash = (f.cash || 0) + 700; delete f.store.pos.neon; f.neonRefund = 700; }
+        f.store = Object.assign(defaults().store, o.store || {}); f.store.own = (f.store.own || []).slice(); f.store.deco = (f.store.deco || []).slice(); f.store.rug = Object.assign({ off: false, c: '#F2A516', p: 'solid' }, f.store.rug || {}); f.store.pos = Object.assign({}, f.store.pos || {}); f.store.tape = f.store.tape || 't1'; f.store.rot = Object.assign({}, f.store.rot || {}); f.store.petOn = Object.assign({}, f.store.petOn || {}); if (f.store.own.indexOf('neon') >= 0) { f.store.own = f.store.own.filter(x => x !== 'neon'); f.store.deco = f.store.deco.filter(x => x !== 'neon'); f.cash = (f.cash || 0) + 700; delete f.store.pos.neon; f.neonRefund = 700; }
         f.awards = { frames: ((o.awards || {}).frames || []).slice(), pets: ((o.awards || {}).pets || []).slice(), calW: (o.awards || {}).calW || 0, wkDone: (o.awards || {}).wkDone ? o.awards.wkDone.slice() : null };
         const d = defaults().set, os = o.set || {};
         f.set = Object.assign(d, os); f.set.topics = Object.assign(defaults().set.topics, os.topics || {});
@@ -9213,14 +9233,15 @@ const World = (function () {
   let cTab = 'me'; const shopOpen = { walls: true };
   const buffText = b => [b.tech ? '+' + Math.round(b.tech * 100) + '% tech tips' : '', b.pay ? '+' + Math.round(b.pay * 100) + '% pay' : ''].filter(Boolean).join(', ');
   function uniSpec() { const u = uniOf(); return u ? { shirt: u[2], scrub: u[3], cosm: { hat: u[4] || '', eyes: u[0] === 'u5' ? 'goggles' : '' } } : null; }
-  function applyShop() { if (!World.ok) return; World.setStore(S.store); World.setStaffLook(uniSpec()); World.setPharmacist(meSpec()); }
-  const SHOP_CATS = [['walls', 'Wall paint'], ['floors', 'Floors'], ['uni', 'Tech uniforms'], ['deco', 'Decor'], ['wear', 'Wardrobe'], ['pow', 'Power-ups']];
+  function applyShop() { musLabel(); MUS.sync(); if (!World.ok) return; World.setStore(S.store); World.setStaffLook(uniSpec()); World.setPharmacist(meSpec()); }
+  const SHOP_CATS = [['walls', 'Wall paint'], ['floors', 'Floors'], ['uni', 'Tech uniforms'], ['deco', 'Decor'], ['tape', 'Radio tapes'], ['wear', 'Wardrobe'], ['pow', 'Power-ups']];
   function shopRows(cat) {
     const st = S.store;
     if (cat === 'walls') return SHOP_WALLS.map(w => ({ id: w[0], name: w[1], price: w[4], free: !w[4], on: st.walls === w[0], sw: [w[2], w[3]], note: '' }));
     if (cat === 'floors') return SHOP_FLOORS.map(f => ({ id: f[0], name: f[1], price: f[4], free: !f[4], on: st.floor === f[0], sw: [f[2], f[3]], note: '' }));
     if (cat === 'uni') return [{ id: '', name: 'Standard coats', price: 0, free: true, on: !st.uni, sw: ['#F4FAFA', '#27384F'], note: 'No bonus.' }].concat(SHOP_UNI.map(u => ({ id: u[0], name: u[1], price: u[6], on: st.uni === u[0], sw: [u[2], u[3]], note: buffText(u[5]) + '. ' + u[7] })));
     if (cat === 'deco') return SHOP_DECOR.map(d => ({ id: d[0], name: d[1], price: d[2], on: (st.deco || []).indexOf(d[0]) >= 0, emoji: d[4], note: d[3], toggle: true }));
+    if (cat === 'tape') return SHOP_TAPES.map(t => ({ id: t[0], name: t[1], price: t[2], free: !t[2], on: (st.tape || 't1') === t[0], emoji: '📼', note: t[3] }));
     if (cat === 'pow') return Object.keys(PW).map(k => ({ id: k, name: PW[k].name, price: pwCost(k), emoji: PW[k].emoji, note: PW[k].note, stack: true, count: S.pw[k] || 0 }));
     return GEAR.filter(g => g.src === 'shop').map(g => ({ id: g.id, name: g.name, price: g.price, on: gearOn(g.id), emoji: g.e, r: g.r, note: SLOT_NAME[g.slot] + (buffText2(g.buff) ? ' · ' + buffText2(g.buff) : '') + (g.d ? '. ' + g.d : '') }));
   }
@@ -9242,7 +9263,7 @@ const World = (function () {
     const rg = Object.assign({ off: false, c: '#F2A516', p: 'solid' }, S.store.rug || {}), RUGC = ['#F2A516', '#0E9A8E', '#D9374A', '#4C7BD9', '#3E8E41', '#8A63C9', '#F29BC1', '#7C8A93', '#27384F', '#E8D9A8'], RUGP = [['solid', 'Plain'], ['stripes', 'Stripes'], ['checks', 'Checks'], ['diamonds', 'Diamonds'], ['border', 'Border']];
     const rugSec = `<details class="crs" data-shop="rug"${shopOpen.rug ? ' open' : ''}><summary><i class="caret" aria-hidden="true"></i><span class="crsn"><b>Entry rug</b><small>${rg.off ? 'removed' : 'color and pattern'}</small></span></summary><div class="crsb"><div class="spcard${rg.off ? '' : ' on'}"><span class="spem" aria-hidden="true">🟫</span><div class="sptx"><b>Rug at the front door</b><small>Free. Pick a color and a pattern, or take it away.</small></div><button type="button" class="btn" data-act="rug-off" aria-pressed="${!rg.off}">${rg.off ? 'Put back' : 'Remove'}</button></div>${rg.off ? '' : `<div class="rugrow">${RUGP.map(q => `<button type="button" class="chip" data-act="rug-p" data-v="${q[0]}" aria-pressed="${rg.p === q[0]}">${q[1]}</button>`).join('')}</div><div class="rugrow">${RUGC.map(c => `<button type="button" class="rugsw${rg.c === c ? ' on' : ''}" data-act="rug-c" data-v="${c}" style="background:${c}" aria-label="Rug color ${c}"></button>`).join('')}</div>`}</div></details>`;
     const mvNote = `<p class="note">Tip: press and hold a decoration in the pharmacy, then drag it where you want it. <button type="button" class="btn" data-act="deco-reset">Put decorations back</button></p>`;
-    const rotIds = SHOP_DECOR.filter(d => S.store.deco.indexOf(d[0]) >= 0 && ['bell', 'cactus', 'lava', 'fish', 'cooler', 'vend', 'rug'].indexOf(d[0]) >= 0).map(d => [d[0], d[1]]); if (!rg.off) rotIds.push(['erug', 'Entry rug']);
+    const rotIds = SHOP_DECOR.filter(d => S.store.deco.indexOf(d[0]) >= 0 && ['bell', 'radio', 'cactus', 'lava', 'fish', 'cooler', 'vend', 'rug'].indexOf(d[0]) >= 0).map(d => [d[0], d[1]]); if (!rg.off) rotIds.push(['erug', 'Entry rug']);
     const rotSec = `<details class="crs" data-shop="rot"${shopOpen.rot ? ' open' : ''}><summary><i class="caret" aria-hidden="true"></i><span class="crsn"><b>Rotate decorations</b><small>turn floor and counter items</small></span></summary><div class="crsb">${rotIds.map(r => `<div class="rotrow"><span>${esc(r[1])}</span><button type="button" class="btn" data-act="deco-rot" data-v="${r[0]}" data-d="-1" aria-label="Turn ${esc(r[1])} left">⟲</button><button type="button" class="btn" data-act="deco-rot" data-v="${r[0]}" data-d="1" aria-label="Turn ${esc(r[1])} right">⟳</button></div>`).join('') || '<p class="note">Buy a decoration to turn it.</p>'}</div></details>`;
     return `<div class="spcash">Cash <b>${money(cash)}</b></div><div class="crsl">${secs}${rugSec}${rotSec}</div>${mvNote}`;
   }
@@ -9253,12 +9274,14 @@ const World = (function () {
       if (S.cash < c) { toast('Not enough cash for ' + PW[id].name + '.'); return; }
       S.cash -= c; pwAdd(id, 1); SFX.play('unlock'); save(); renderStats(); toast('Bought ' + PW[id].name + '. You have ' + S.pw[id] + '.'); return;
     }
+    if (kind === 'tape' && !shopOwn('radio')) { toast('Buy the Tape radio in Decor first.'); return; }
     const rows = shopRows(kind), r = rows.find(x => x.id === id); if (!r || r.free || shopOwn(id)) return;
     if (S.cash < r.price) { toast('Not enough cash for ' + r.name + '.'); return; }
     S.cash -= r.price; S.store.own.push(id); SFX.play('unlock'); shopUse(kind, id, true); save(); renderStats(); toast('Bought ' + r.name + '.');
   }
   function shopUse(kind, id, quiet) {
     const st = S.store;
+    if (kind === 'tape') { st.tape = id; S.music = true; save(); MUS.tape(); if (view === 'create') renderPanel(); return; }
     if (kind === 'walls') st.walls = id; else if (kind === 'floors') st.floor = id; else if (kind === 'uni') st.uni = id;
     else if (kind === 'deco') { const i = st.deco.indexOf(id); if (i >= 0 && !quiet) st.deco.splice(i, 1); else if (i < 0) st.deco.push(id); }
     else if (kind === 'wear' || kind === 'hair' || kind === 'cyber') { const g = gearById(id); if (g) { if (g.slot === 'hair') S.me.hair = g.hv; else { S.cosmOn = S.cosmOn || {}; S.cosmOn[g.slot] = id; } } }
@@ -10098,20 +10121,26 @@ const World = (function () {
   })();
 
 
-  /* ---- music: a quiet generative lofi loop made with WebAudio (no audio files). I vi ii V in C, soft keys, bass, light drums and a wandering pentatonic melody. Starts after the first tap or key, pauses when the tab is hidden, toggled by the Music button ---- */
+  /* ---- music: lofi tapes for the counter radio, made with WebAudio (no audio files). MUS_TAPES holds the music for each tape id in SHOP_TAPES (shop.js). Plays only while the Tape radio is placed and Music is on; starts after the first tap or key; pauses when the tab is hidden ---- */
+  const MUS_TAPES = {
+    t1: { bpm: 76, ch: [{ b: 48, n: [60, 64, 67, 71, 74] }, { b: 45, n: [57, 60, 64, 67, 71] }, { b: 50, n: [62, 65, 69, 72, 76] }, { b: 43, n: [59, 62, 65, 69, 71] }], pen: [67, 69, 72, 74, 76, 79, 81, 84], kick: [0, 5], snare: 4, sw: 0.14, mel: 0.5, lp: 4200 },
+    t2: { bpm: 66, ch: [{ b: 45, n: [57, 60, 64, 67, 72] }, { b: 41, n: [53, 57, 60, 64, 69] }, { b: 48, n: [55, 60, 64, 67, 71] }, { b: 43, n: [55, 59, 62, 64, 69] }], pen: [64, 67, 69, 72, 74, 76, 79, 81], kick: [0, 6], snare: 4, sw: 0.1, mel: 0.4, lp: 3000 },
+    t3: { bpm: 84, ch: [{ b: 50, n: [62, 65, 69, 72, 76] }, { b: 43, n: [59, 62, 64, 65, 69] }, { b: 48, n: [64, 67, 71, 74, 79] }, { b: 45, n: [61, 64, 67, 69, 73] }], pen: [72, 74, 76, 79, 81, 84, 86, 88], kick: [0, 3, 6], snare: 4, sw: 0.22, mel: 0.6, lp: 4600 },
+    t4: { bpm: 62, ch: [{ b: 40, n: [59, 62, 64, 67, 71] }, { b: 48, n: [55, 60, 64, 67, 71] }, { b: 43, n: [55, 59, 62, 66, 69] }, { b: 50, n: [57, 62, 66, 69, 74] }], pen: [64, 66, 67, 71, 74, 76, 78, 79], kick: [0], snare: 4, sw: 0.08, mel: 0.3, lp: 2600 },
+    t5: { bpm: 88, ch: [{ b: 41, n: [57, 60, 64, 65, 69] }, { b: 43, n: [59, 62, 64, 67, 69] }, { b: 40, n: [59, 62, 64, 67, 71] }, { b: 45, n: [57, 60, 64, 67, 72] }], pen: [69, 72, 74, 76, 77, 81, 84, 86], kick: [0, 4], snare: 2, sw: 0.12, mel: 0.55, lp: 5200 }
+  };
   const MUS = (() => {
-    let a = null, bus = null, nz = null, timer = null, nextT = 0, step = 0, bar = 0, mi = 2, started = false, ready = false;
-    const SP = 60 / 76 / 2, VOL = 0.5;
-    const CH = [{ b: 48, n: [60, 64, 67, 71, 74] }, { b: 45, n: [57, 60, 64, 67, 71] }, { b: 50, n: [62, 65, 69, 72, 76] }, { b: 43, n: [59, 62, 65, 69, 71] }];
-    const PEN = [67, 69, 72, 74, 76, 79, 81, 84], mf = (m) => 440 * Math.pow(2, (m - 69) / 12);
+    let a = null, bus = null, lp = null, nz = null, timer = null, nextT = 0, step = 0, bar = 0, mi = 2, started = false, ready = false, active = false;
+    const tp = () => MUS_TAPES[(S.store || {}).tape] || MUS_TAPES.t1, sp = () => 60 / tp().bpm / 2, mf = (m) => 440 * Math.pow(2, (m - 69) / 12);
+    const radioOwned = () => ((S.store || {}).deco || []).indexOf('radio') >= 0;
     function init() {
       if (ready) return !!a;
       ready = true;
       try {
         const C = window.AudioContext || window.webkitAudioContext; if (!C) return false;
         a = new C(); bus = a.createGain(); bus.gain.value = 0;
-        const lp = a.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 4200;
-        const dl = a.createDelay(1); dl.delayTime.value = SP * 3; const fb = a.createGain(); fb.gain.value = 0.28; const wet = a.createGain(); wet.gain.value = 0.22;
+        lp = a.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 4200;
+        const dl = a.createDelay(1); dl.delayTime.value = 0.4; const fb = a.createGain(); fb.gain.value = 0.28; const wet = a.createGain(); wet.gain.value = 0.22;
         bus.connect(lp); lp.connect(a.destination); lp.connect(dl); dl.connect(fb); fb.connect(dl); dl.connect(wet); wet.connect(a.destination);
         nz = a.createBuffer(1, a.sampleRate, a.sampleRate); const d = nz.getChannelData(0); for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
       } catch (err) { a = null; }
@@ -10133,7 +10162,7 @@ const World = (function () {
       g.gain.setValueAtTime(0.34, t); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.28); o.connect(g); g.connect(bus); o.start(t); o.stop(t + 0.3);
     }
     function play(s, t) {
-      const c = CH[bar % 4], sw = (s % 2) ? SP * 0.14 : 0, tt = t + sw;
+      const P = tp(), SP = sp(), c = P.ch[bar % 4], tt = t + ((s % 2) ? SP * P.sw : 0);
       if (s === 0) {
         c.n.forEach((m, i) => tone(t + i * 0.012, mf(m), SP * 7, 'triangle', 0.028, 1500, 0.08, 1.4));
         tone(t, mf(c.b), SP * 3.4, 'sine', 0.2, 600, 0.02, 0.35);
@@ -10141,38 +10170,52 @@ const World = (function () {
       if (s === 5) tone(tt, mf(c.b + 12), SP * 1.6, 'sine', 0.12, 700, 0.02, 0.25);
       if (s === 0 || s === 3 || s === 6) { const m = c.n[(bar + s) % c.n.length] + 12; tone(tt, mf(m), SP * 1.2, 'triangle', 0.05, 2400, 0.008, 0.5); }
       if (s === 2 || s === 5 || s === 7) {
-        if (Math.random() < 0.5) { mi = Math.max(0, Math.min(PEN.length - 1, mi + (Math.random() < 0.5 ? -1 : 1) * (1 + (Math.random() < 0.3 ? 1 : 0)))); tone(tt, mf(PEN[mi]), SP * 1.6, 'sine', 0.06, 3200, 0.01, 0.9); }
+        if (Math.random() < P.mel) { mi = Math.max(0, Math.min(P.pen.length - 1, mi + (Math.random() < 0.5 ? -1 : 1) * (1 + (Math.random() < 0.3 ? 1 : 0)))); tone(tt, mf(P.pen[mi]), SP * 1.6, 'sine', 0.06, 3200, 0.01, 0.9); }
       }
-      if (s === 0 || s === 5) kick(t);
-      if (s === 4) hit(t, 0.16, 0.07, 'bandpass', 1900);
+      if (P.kick.indexOf(s) >= 0) kick(t);
+      if (s === P.snare) hit(t, 0.16, 0.07, 'bandpass', 1900);
       if (s % 2) hit(tt, 0.05, 0.035, 'highpass', 7000);
     }
     function pump() {
-      if (!a || !started) return;
+      if (!a || !started || !active) return;
       if (nextT < a.currentTime) nextT = a.currentTime + 0.06;
-      while (nextT < a.currentTime + 1.6) { play(step, nextT); nextT += SP; step++; if (step === 8) { step = 0; bar++; } }
+      while (nextT < a.currentTime + 1.6) { play(step, nextT); nextT += sp(); step++; if (step === 8) { step = 0; bar++; } }
     }
     function fade(v) { if (!a) return; const t = a.currentTime; bus.gain.cancelScheduledValues(t); bus.gain.setValueAtTime(bus.gain.value, t); bus.gain.linearRampToValueAtTime(v, t + 1.2); }
-    function want() { return S.music !== false && !document.hidden; }
+    function want() { return S.music !== false && radioOwned() && !document.hidden; }
+    function spin() { try { if (World.ok && World.setRadio) World.setRadio(S.music !== false && radioOwned()); } catch (err) { /* cosmetic */ } }
     function sync() {
+      spin();
       if (want()) {
         if (!init()) return;
         if (a.state === 'suspended') { try { a.resume(); } catch (err) { /* ignore */ } }
-        if (!started) { started = true; nextT = a.currentTime + 0.1; step = 0; timer = setInterval(pump, 250); pump(); }
-        fade(0.16 * VOL / 0.5);
-      } else if (started) { fade(0); }
+        lp.frequency.value = tp().lp; active = true;
+        if (!started) { started = true; nextT = a.currentTime + 0.1; step = 0; timer = setInterval(pump, 250); }
+        pump(); fade(0.16);
+      } else if (started) { active = false; fade(0); }
     }
+    function tape() { step = 0; bar = 0; mi = 2; if (a) nextT = a.currentTime + 0.15; sync(); }
+    function owned() { return SHOP_TAPES.filter(t => !t[2] || shopOwn(t[0])).map(t => t[0]); }
+    function tap() {
+      if (!radioOwned()) return;
+      const l = owned(), cur = (S.store.tape || 't1');
+      if (S.music === false) { S.music = true; toast('Radio on: ' + tapeName(cur) + '.'); }
+      else if (l.length < 2) { S.music = false; toast('Radio off.'); }
+      else { const i = l.indexOf(cur), nx = l[(i + 1) % l.length]; S.store.tape = nx; toast('Tape in: ' + tapeName(nx) + '.'); tape(); }
+      save(); musLabel(); sync(); SFX.play('ok');
+    }
+    function tapeName(id) { const t = SHOP_TAPES.find(x => x[0] === id); return t ? t[1] : id; }
     function arm() {
       const go = () => { document.removeEventListener('pointerdown', go, true); document.removeEventListener('keydown', go, true); sync(); };
       document.addEventListener('pointerdown', go, true); document.addEventListener('keydown', go, true);
       document.addEventListener('visibilitychange', sync);
     }
-    return { sync: sync, arm: arm, on: () => S.music !== false };
+    return { sync: sync, arm: arm, tape: tape, tap: tap, owned: owned, radio: radioOwned, playing: () => active };
   })();
   function musLabel() {
-    const on = S.music !== false, l = $('#muslab'), b = $('#musbtn');
-    if (l) l.textContent = 'Music: ' + (on ? 'on' : 'off');
-    if (b) b.setAttribute('aria-pressed', String(on));
+    const on = S.music !== false, l = $('#muslab'), b = $('#musbtn'), has = ((S.store || {}).deco || []).indexOf('radio') >= 0;
+    if (l) l.textContent = 'Radio: ' + (on ? 'on' : 'off');
+    if (b) { b.setAttribute('aria-pressed', String(on)); b.style.display = has ? '' : 'none'; }
   }
 
   /* ---- streak coin: a round badge with the number; from a streak of 10 it turns gold with an orange rim and a flame crown that grows with every right answer ---- */
@@ -11802,7 +11845,7 @@ const micLab3 = () => !!(World.ok && World.setMic);
       case 'lab-clr': { LABCALC.expr = ''; const el = $('#labexpr'); if (el) el.value = ''; labTick(); return; }
       case 'labk': { S.labK = S.labK || {}; const on = ['comp', 'pk'].filter(x => S.labK[x] !== false).length; if (S.labK[v] !== false && on <= 1) { toast('Keep at least one kind on.'); return; } S.labK[v] = S.labK[v] === false; save(); renderPanel(); return; }
       case 'sfx': S.sfx = S.sfx === false; save(); sfxLabel(); SFX.play('ok'); return;
-      case 'music': S.music = S.music === false; save(); musLabel(); MUS.sync(); return;
+      case 'music': S.music = S.music === false; save(); musLabel(); MUS.sync(); toast(S.music === false ? 'Radio off.' : 'Radio on.'); return;
       case 'flash': openView(view === 'flash' ? 'q' : 'flash'); if (view === 'q') { resumeTimers(); renderPanel(); } return;
       case 'share': return makeShare();
       case 'share-send': return shareSend();
@@ -11974,8 +12017,8 @@ const micLab3 = () => !!(World.ok && World.setMic);
   setInterval(() => { if (window.__rxLoading) return; try { localStorage.setItem(SAVE_KEY, JSON.stringify(S)); } catch (e) { /* ignore */ } }, 5000);
 
   { const sc = $('#savecard'); if (sc) sc.innerHTML = saveBoxHTML(); }
-  World.init({ host: $('#stage'), getS: () => S, onPetMove: (k, pos) => { S.store.petOn = S.store.petOn || {}; if (pos) S.store.petOn[k] = pos; else delete S.store.petOn[k]; save(); }, onDecorMove: (id, p) => { S.store.pos = S.store.pos || {}; S.store.pos[id] = p.map(v => Math.round(v * 100) / 100); save(); }, specialRoll: specialRoll, tagInfo: tagInfo, onBuy: buyUp, onNotes: () => openView('studies'), onBin: () => { micR = null; openView('mic'); }, onMicSite: (id) => micSiteClick(id), onMicDish: (id) => micDishClick(id), onMicPaper: (id, row) => micPaperClick(id, row), notesInfo: customCount, karenRoll: karenRoll, sweatyRoll: sweatyRoll, elderRoll: elderRoll, eventRoll: eventRoll, onVisitor: visitClick, onVisitorArrive: visitArrive, capsuleOk: capsuleOk, onCapsule: onCapsule, onBrain: synEnter, onSynSite: onSynSite, onEvt: onEvt, pillOk: pillOk, onPill: onPill, pillBoost: () => gearBuff().pills, onPhone: openPhone, onPolice: policeCome, himOk: himOk, onHimSpawn: onHimSpawn, onHimAngel: himAngelOk, onHimLand: himLand, onHimBless: onHimBless, onFp: fpClick, sign: () => shopName() + '|' + tierName() + ' #' + (S.franchises + 1) });
-  window.__rxDbg = () => ({ micDbg: () => ({ get R() { return micR; }, get inLab() { return micIn; }, drop: micDrop, paper: micPaperClick, part: micStartPart, startSort: micStartSort, sel: id => { micSelG = id; renderPanel(); } }), sr: srUpdate, nc: newCard, sp: specialRoll, fp: fp, S: S, view: view, rush: rush, phoneR: phone.ringing, TOPQ: TOPQ, pool: poolQs, cur: cur, synQ: () => (typeof SYN !== 'undefined' ? SYN.q : null), synTap: id => onSynSite(id), offer: k => offerEvt(k, 'test'), onEvt: onEvt, holiday: () => holNow(), holN: () => holCount(), renderStats: renderStats, passive: passive, techRate: techRate, buyUp: buyUp, openVial: openVial, tabletTake: tabletTake, capsuleOpen: capsuleOpen, buffOn: buffOn, GEAR: GEAR, gearBuff: gearBuff, gearHave: gearHave });
+  World.init({ host: $('#stage'), getS: () => S, onPetMove: (k, pos) => { S.store.petOn = S.store.petOn || {}; if (pos) S.store.petOn[k] = pos; else delete S.store.petOn[k]; save(); }, onRadio: () => MUS.tap(), onDecorMove: (id, p) => { S.store.pos = S.store.pos || {}; S.store.pos[id] = p.map(v => Math.round(v * 100) / 100); save(); }, specialRoll: specialRoll, tagInfo: tagInfo, onBuy: buyUp, onNotes: () => openView('studies'), onBin: () => { micR = null; openView('mic'); }, onMicSite: (id) => micSiteClick(id), onMicDish: (id) => micDishClick(id), onMicPaper: (id, row) => micPaperClick(id, row), notesInfo: customCount, karenRoll: karenRoll, sweatyRoll: sweatyRoll, elderRoll: elderRoll, eventRoll: eventRoll, onVisitor: visitClick, onVisitorArrive: visitArrive, capsuleOk: capsuleOk, onCapsule: onCapsule, onBrain: synEnter, onSynSite: onSynSite, onEvt: onEvt, pillOk: pillOk, onPill: onPill, pillBoost: () => gearBuff().pills, onPhone: openPhone, onPolice: policeCome, himOk: himOk, onHimSpawn: onHimSpawn, onHimAngel: himAngelOk, onHimLand: himLand, onHimBless: onHimBless, onFp: fpClick, sign: () => shopName() + '|' + tierName() + ' #' + (S.franchises + 1) });
+  window.__rxDbg = () => ({ mus: MUS, micDbg: () => ({ get R() { return micR; }, get inLab() { return micIn; }, drop: micDrop, paper: micPaperClick, part: micStartPart, startSort: micStartSort, sel: id => { micSelG = id; renderPanel(); } }), sr: srUpdate, nc: newCard, sp: specialRoll, fp: fp, S: S, view: view, rush: rush, phoneR: phone.ringing, TOPQ: TOPQ, pool: poolQs, cur: cur, synQ: () => (typeof SYN !== 'undefined' ? SYN.q : null), synTap: id => onSynSite(id), offer: k => offerEvt(k, 'test'), onEvt: onEvt, holiday: () => holNow(), holN: () => holCount(), renderStats: renderStats, passive: passive, techRate: techRate, buyUp: buyUp, openVial: openVial, tabletTake: tabletTake, capsuleOpen: capsuleOpen, buffOn: buffOn, GEAR: GEAR, gearBuff: gearBuff, gearHave: gearHave });
   if (!World.ok) $('#stage').classList.add('flat');
   else { document.body.classList.add('fx'); try { World.setBin(!!S.binBug); } catch (e) { /* decor */ } World.setPharmacist(meSpec()); World.setStore(S.store); World.setStaffLook(uniSpec()); World.setAwards(S.awards); World.setCalendar(Math.min(4, S.awards.calW || 0), false, S.awards.calW || 0); }
   applyFocus(); syncBrand(); sfxLabel(); musLabel(); MUS.arm();

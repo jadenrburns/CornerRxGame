@@ -1042,10 +1042,10 @@ const World = (function () {
 
   /* ---- shop: wall paint, floor tiles, decorations, technician uniforms ---- */
   let uniOpts = null, decorG = null, surfReady = false;
-  const decorBuilt = {}, decorObst = {}, decorAnim = [];
+  const decorBuilt = {}, decorObst = {}, decorAnim = []; let radioOn = false;
   function surfMat(list) { if (!list.length) return null; const m = list[0].material.clone ? list[0].material.clone() : list[0].material; list.forEach(x => { x.material = m; }); return m; }
   const DECOR_OBST = { cooler: { x0: -9.45, x1: -8.7, z0: 2.65, z1: 3.35 }, vend: { x0: -9.5, x1: -8.5, z0: 1.35, z1: 2.45 } };
-  const DECOR_MODE = { rug: 'floor', cooler: 'floor', vend: 'floor', bell: 'counter', cactus: 'counter', lava: 'counter', fish: 'counter', photo: 'wall', poster: 'wall', clock: 'wall' };
+  const DECOR_MODE = { rug: 'floor', cooler: 'floor', vend: 'floor', bell: 'counter', radio: 'counter', cactus: 'counter', lava: 'counter', fish: 'counter', photo: 'wall', poster: 'wall', clock: 'wall' };
   const decorDef = {}; // default position of every decor item, so a saved position can shift its obstacle
   function decorObstFor(id, g) {
     const b = DECOR_OBST[id], d = decorDef[id]; if (!b || !d) return null; const dx = g.position.x - d[0], dz = g.position.z - d[2];
@@ -1060,6 +1060,15 @@ const World = (function () {
     } else if (id === 'bell') {
       g.position.set(-0.5, 1.26, 0.55);
       cy(g, 0.17, 0.19, 0.04, 10, '#27384F', 0, 0.02, 0); const d = ico(g, 0.14, '#F2C94C', 0, 0.1, 0); d.scale.set(1, 0.7, 1); cy(g, 0.025, 0.025, 0.05, 6, '#F2C94C', 0, 0.2, 0);
+    } else if (id === 'radio') {
+      g.position.set(-3.2, 1.26, 0.6);
+      bx(g, 0.56, 0.3, 0.2, '#E8D9A8', 0, 0.15, 0); bx(g, 0.58, 0.04, 0.22, '#D9374A', 0, 0.32, 0); bx(g, 0.3, 0.03, 0.03, '#27384F', 0, 0.36, 0);
+      [-0.2].forEach(x => { const sp = cy(g, 0.085, 0.085, 0.02, 14, '#27384F', x, 0.15, 0.105); sp.rotation.x = PI / 2; cy(g, 0.045, 0.045, 0.022, 10, '#4A5568', x, 0.15, 0.108).rotation.x = PI / 2; });
+      bx(g, 0.26, 0.15, 0.02, '#1F3B4A', 0.09, 0.17, 0.102); bx(g, 0.28, 0.17, 0.012, '#B9C2C9', 0.09, 0.17, 0.1);
+      const reels = [-0.03, 0.21].map(x => { const rg = new T.Group(); rg.position.set(x + 0.0, 0.17, 0.115); g.add(rg); const hub = cy(rg, 0.045, 0.045, 0.015, 8, '#F4F9F9', 0, 0, 0); hub.rotation.x = PI / 2; bx(rg, 0.07, 0.012, 0.016, '#27384F', 0, 0, 0.004); bx(rg, 0.012, 0.07, 0.016, '#27384F', 0, 0, 0.004); return rg; });
+      const led = cy(g, 0.012, 0.012, 0.012, 6, '#5A2A2A', 0.24, 0.27, 0.105, null, { emissive: new T.Color(0x000000), emissiveIntensity: 1 }); led.rotation.x = PI / 2;
+      const kn = [0.0, 0.07].map((x, i) => { const k = cy(g, 0.018, 0.018, 0.02, 8, '#27384F', 0.02 + x, 0.045, 0.105); k.rotation.x = PI / 2; return k; });
+      let lt = 0; decorAnim.push(t => { const dt = Math.min(0.1, Math.max(0, t - lt)); lt = t; if (radioOn) reels.forEach((r, i) => { r.rotation.z -= dt * (i ? 2.4 : 3.1); }); if (led.material.emissive && led.material.emissive.setHex) { led.material.emissive.setHex(radioOn ? 0xFF4A3A : 0x000000); } });
     } else if (id === 'cactus') {
       g.position.set(3.6, 1.26, 0.6);
       cy(g, 0.15, 0.12, 0.2, 7, '#E07A4F', 0, 0.1, 0); cy(g, 0.1, 0.1, 0.34, 6, '#3E8E41', 0, 0.37, 0); bx(g, 0.2, 0.06, 0.06, '#3E8E41', -0.13, 0.36, 0); bx(g, 0.06, 0.2, 0.06, '#3E8E41', -0.22, 0.46, 0); bx(g, 0.2, 0.06, 0.06, '#3E8E41', 0.13, 0.28, 0); bx(g, 0.06, 0.18, 0.06, '#3E8E41', 0.22, 0.36, 0); ico(g, 0.04, '#F29BC1', 0, 0.58, 0);
@@ -1126,6 +1135,7 @@ const World = (function () {
     setEntryRug(st.rug || null);
   }
   function decorTick(t) { for (let i = 0; i < decorAnim.length; i++) decorAnim[i](t); }
+  api.setRadio = function (on) { radioOn = !!on; };
   api.setStore = function (st) { try { applyStore(st); } catch (e) { /* cosmetic only */ } };
   api.setStaffLook = function (spec) {
     uniOpts = spec || null;
@@ -1442,6 +1452,7 @@ const World = (function () {
     canvas.addEventListener('click', e => {
       if (noClick) { noClick = false; return; }
       if (fpT) { const id = fpPick(e); if (id && B.onFp) B.onFp(id); return; }
+      if (!labOn && !synOn && !micOn) { const rd = decorHit(e); if (rd && rd.userData.decorId === 'radio' && B.onRadio) { dismissHint(); B.onRadio(); return; } }
       const h = pick(e); dismissHint();
       if (synOn) { if (h && h.site && B.onSynSite) B.onSynSite(h.site); return; }
       if (micOn) { if (h && h.micSite && B.onMicSite) B.onMicSite(h.micSite); else if (h && h.micDish && B.onMicDish) B.onMicDish(h.micDish); else if (h && h.micPaper && B.onMicPaper) { const pa = api.micPaperAt(e.clientX, e.clientY); if (pa) B.onMicPaper(pa.id, pa.row); } return; }

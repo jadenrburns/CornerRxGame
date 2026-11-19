@@ -95,7 +95,7 @@
       pw: { hint: 0, second: 0, binder: 0 }, daily: null, recall: [], reg: {}, calcOK: 0, mastery: {}, missed: [], karenCd: 0, karenWin: 0, karenLoss: 0, sweatyCd: 0, jimWin: 0, jimLoss: 0, phoneOK: 0, phoneBad: 0, phoneMiss: 0, lastShelve: 0, retired: 0, shelveOK: 0, shelveBad: 0, priorN: 0, decks: [],
       me: { done: false, body: 'normal', gender: 'n', hair: 0, hairColor: 0, skin: 1, scrub: 0, shirt: 0, shoes: 3 }, awards: { frames: [], pets: [] },
       set: { topics: topics, diffs: [1, 2, 3], mode: 'mixed', timer: true, focus: false, conf: true, p2fold: true, p3fold: true, p1fold: true },
-      vial: [], cosm: [], cosmOn: {}, pillN: 0, store: { own: [], walls: 'w0', floor: 'f0', uni: '', deco: [], rug: { off: false, c: '#F2A516', p: 'solid' }, pos: {} },
+      vial: [], cosm: [], cosmOn: {}, pillN: 0, store: { own: [], walls: 'w0', floor: 'f0', uni: '', deco: [], rug: { off: false, c: '#F2A516', p: 'solid' }, pos: {}, tape: 't1' },
       up: { shelf: 0, tech: 0, train: 0, counsel: 0, robot: 0 } };
   }
   let S = load();
@@ -114,7 +114,7 @@
         if (!o.pw && o.hintsLeft) f.pw.hint = Math.min(9, o.hintsLeft);
         if (f.up.library) { let r = 0; for (let l = 0; l < f.up.library; l++) r += Math.round(150 * Math.pow(1.9, l)); f.cash = (f.cash || 0) + r; f.libRefund = (f.libRefund || 0) + r; }
         delete f.up.library; delete f.hintsLeft; delete f.sinceHint;
-        f.store = Object.assign(defaults().store, o.store || {}); f.store.own = (f.store.own || []).slice(); f.store.deco = (f.store.deco || []).slice(); f.store.rug = Object.assign({ off: false, c: '#F2A516', p: 'solid' }, f.store.rug || {}); f.store.pos = Object.assign({}, f.store.pos || {}); f.store.rot = Object.assign({}, f.store.rot || {}); f.store.petOn = Object.assign({}, f.store.petOn || {}); if (f.store.own.indexOf('neon') >= 0) { f.store.own = f.store.own.filter(x => x !== 'neon'); f.store.deco = f.store.deco.filter(x => x !== 'neon'); f.cash = (f.cash || 0) + 700; delete f.store.pos.neon; f.neonRefund = 700; }
+        f.store = Object.assign(defaults().store, o.store || {}); f.store.own = (f.store.own || []).slice(); f.store.deco = (f.store.deco || []).slice(); f.store.rug = Object.assign({ off: false, c: '#F2A516', p: 'solid' }, f.store.rug || {}); f.store.pos = Object.assign({}, f.store.pos || {}); f.store.tape = f.store.tape || 't1'; f.store.rot = Object.assign({}, f.store.rot || {}); f.store.petOn = Object.assign({}, f.store.petOn || {}); if (f.store.own.indexOf('neon') >= 0) { f.store.own = f.store.own.filter(x => x !== 'neon'); f.store.deco = f.store.deco.filter(x => x !== 'neon'); f.cash = (f.cash || 0) + 700; delete f.store.pos.neon; f.neonRefund = 700; }
         f.awards = { frames: ((o.awards || {}).frames || []).slice(), pets: ((o.awards || {}).pets || []).slice(), calW: (o.awards || {}).calW || 0, wkDone: (o.awards || {}).wkDone ? o.awards.wkDone.slice() : null };
         const d = defaults().set, os = o.set || {};
         f.set = Object.assign(d, os); f.set.topics = Object.assign(defaults().set.topics, os.topics || {});
@@ -1228,14 +1228,15 @@
   let cTab = 'me'; const shopOpen = { walls: true };
   const buffText = b => [b.tech ? '+' + Math.round(b.tech * 100) + '% tech tips' : '', b.pay ? '+' + Math.round(b.pay * 100) + '% pay' : ''].filter(Boolean).join(', ');
   function uniSpec() { const u = uniOf(); return u ? { shirt: u[2], scrub: u[3], cosm: { hat: u[4] || '', eyes: u[0] === 'u5' ? 'goggles' : '' } } : null; }
-  function applyShop() { if (!World.ok) return; World.setStore(S.store); World.setStaffLook(uniSpec()); World.setPharmacist(meSpec()); }
-  const SHOP_CATS = [['walls', 'Wall paint'], ['floors', 'Floors'], ['uni', 'Tech uniforms'], ['deco', 'Decor'], ['wear', 'Wardrobe'], ['pow', 'Power-ups']];
+  function applyShop() { musLabel(); MUS.sync(); if (!World.ok) return; World.setStore(S.store); World.setStaffLook(uniSpec()); World.setPharmacist(meSpec()); }
+  const SHOP_CATS = [['walls', 'Wall paint'], ['floors', 'Floors'], ['uni', 'Tech uniforms'], ['deco', 'Decor'], ['tape', 'Radio tapes'], ['wear', 'Wardrobe'], ['pow', 'Power-ups']];
   function shopRows(cat) {
     const st = S.store;
     if (cat === 'walls') return SHOP_WALLS.map(w => ({ id: w[0], name: w[1], price: w[4], free: !w[4], on: st.walls === w[0], sw: [w[2], w[3]], note: '' }));
     if (cat === 'floors') return SHOP_FLOORS.map(f => ({ id: f[0], name: f[1], price: f[4], free: !f[4], on: st.floor === f[0], sw: [f[2], f[3]], note: '' }));
     if (cat === 'uni') return [{ id: '', name: 'Standard coats', price: 0, free: true, on: !st.uni, sw: ['#F4FAFA', '#27384F'], note: 'No bonus.' }].concat(SHOP_UNI.map(u => ({ id: u[0], name: u[1], price: u[6], on: st.uni === u[0], sw: [u[2], u[3]], note: buffText(u[5]) + '. ' + u[7] })));
     if (cat === 'deco') return SHOP_DECOR.map(d => ({ id: d[0], name: d[1], price: d[2], on: (st.deco || []).indexOf(d[0]) >= 0, emoji: d[4], note: d[3], toggle: true }));
+    if (cat === 'tape') return SHOP_TAPES.map(t => ({ id: t[0], name: t[1], price: t[2], free: !t[2], on: (st.tape || 't1') === t[0], emoji: '📼', note: t[3] }));
     if (cat === 'pow') return Object.keys(PW).map(k => ({ id: k, name: PW[k].name, price: pwCost(k), emoji: PW[k].emoji, note: PW[k].note, stack: true, count: S.pw[k] || 0 }));
     return GEAR.filter(g => g.src === 'shop').map(g => ({ id: g.id, name: g.name, price: g.price, on: gearOn(g.id), emoji: g.e, r: g.r, note: SLOT_NAME[g.slot] + (buffText2(g.buff) ? ' · ' + buffText2(g.buff) : '') + (g.d ? '. ' + g.d : '') }));
   }
@@ -1257,7 +1258,7 @@
     const rg = Object.assign({ off: false, c: '#F2A516', p: 'solid' }, S.store.rug || {}), RUGC = ['#F2A516', '#0E9A8E', '#D9374A', '#4C7BD9', '#3E8E41', '#8A63C9', '#F29BC1', '#7C8A93', '#27384F', '#E8D9A8'], RUGP = [['solid', 'Plain'], ['stripes', 'Stripes'], ['checks', 'Checks'], ['diamonds', 'Diamonds'], ['border', 'Border']];
     const rugSec = `<details class="crs" data-shop="rug"${shopOpen.rug ? ' open' : ''}><summary><i class="caret" aria-hidden="true"></i><span class="crsn"><b>Entry rug</b><small>${rg.off ? 'removed' : 'color and pattern'}</small></span></summary><div class="crsb"><div class="spcard${rg.off ? '' : ' on'}"><span class="spem" aria-hidden="true">🟫</span><div class="sptx"><b>Rug at the front door</b><small>Free. Pick a color and a pattern, or take it away.</small></div><button type="button" class="btn" data-act="rug-off" aria-pressed="${!rg.off}">${rg.off ? 'Put back' : 'Remove'}</button></div>${rg.off ? '' : `<div class="rugrow">${RUGP.map(q => `<button type="button" class="chip" data-act="rug-p" data-v="${q[0]}" aria-pressed="${rg.p === q[0]}">${q[1]}</button>`).join('')}</div><div class="rugrow">${RUGC.map(c => `<button type="button" class="rugsw${rg.c === c ? ' on' : ''}" data-act="rug-c" data-v="${c}" style="background:${c}" aria-label="Rug color ${c}"></button>`).join('')}</div>`}</div></details>`;
     const mvNote = `<p class="note">Tip: press and hold a decoration in the pharmacy, then drag it where you want it. <button type="button" class="btn" data-act="deco-reset">Put decorations back</button></p>`;
-    const rotIds = SHOP_DECOR.filter(d => S.store.deco.indexOf(d[0]) >= 0 && ['bell', 'cactus', 'lava', 'fish', 'cooler', 'vend', 'rug'].indexOf(d[0]) >= 0).map(d => [d[0], d[1]]); if (!rg.off) rotIds.push(['erug', 'Entry rug']);
+    const rotIds = SHOP_DECOR.filter(d => S.store.deco.indexOf(d[0]) >= 0 && ['bell', 'radio', 'cactus', 'lava', 'fish', 'cooler', 'vend', 'rug'].indexOf(d[0]) >= 0).map(d => [d[0], d[1]]); if (!rg.off) rotIds.push(['erug', 'Entry rug']);
     const rotSec = `<details class="crs" data-shop="rot"${shopOpen.rot ? ' open' : ''}><summary><i class="caret" aria-hidden="true"></i><span class="crsn"><b>Rotate decorations</b><small>turn floor and counter items</small></span></summary><div class="crsb">${rotIds.map(r => `<div class="rotrow"><span>${esc(r[1])}</span><button type="button" class="btn" data-act="deco-rot" data-v="${r[0]}" data-d="-1" aria-label="Turn ${esc(r[1])} left">⟲</button><button type="button" class="btn" data-act="deco-rot" data-v="${r[0]}" data-d="1" aria-label="Turn ${esc(r[1])} right">⟳</button></div>`).join('') || '<p class="note">Buy a decoration to turn it.</p>'}</div></details>`;
     return `<div class="spcash">Cash <b>${money(cash)}</b></div><div class="crsl">${secs}${rugSec}${rotSec}</div>${mvNote}`;
   }
@@ -1268,12 +1269,14 @@
       if (S.cash < c) { toast('Not enough cash for ' + PW[id].name + '.'); return; }
       S.cash -= c; pwAdd(id, 1); SFX.play('unlock'); save(); renderStats(); toast('Bought ' + PW[id].name + '. You have ' + S.pw[id] + '.'); return;
     }
+    if (kind === 'tape' && !shopOwn('radio')) { toast('Buy the Tape radio in Decor first.'); return; }
     const rows = shopRows(kind), r = rows.find(x => x.id === id); if (!r || r.free || shopOwn(id)) return;
     if (S.cash < r.price) { toast('Not enough cash for ' + r.name + '.'); return; }
     S.cash -= r.price; S.store.own.push(id); SFX.play('unlock'); shopUse(kind, id, true); save(); renderStats(); toast('Bought ' + r.name + '.');
   }
   function shopUse(kind, id, quiet) {
     const st = S.store;
+    if (kind === 'tape') { st.tape = id; S.music = true; save(); MUS.tape(); if (view === 'create') renderPanel(); return; }
     if (kind === 'walls') st.walls = id; else if (kind === 'floors') st.floor = id; else if (kind === 'uni') st.uni = id;
     else if (kind === 'deco') { const i = st.deco.indexOf(id); if (i >= 0 && !quiet) st.deco.splice(i, 1); else if (i < 0) st.deco.push(id); }
     else if (kind === 'wear' || kind === 'hair' || kind === 'cyber') { const g = gearById(id); if (g) { if (g.slot === 'hair') S.me.hair = g.hv; else { S.cosmOn = S.cosmOn || {}; S.cosmOn[g.slot] = id; } } }
@@ -2177,7 +2180,7 @@
       case 'lab-clr': { LABCALC.expr = ''; const el = $('#labexpr'); if (el) el.value = ''; labTick(); return; }
       case 'labk': { S.labK = S.labK || {}; const on = ['comp', 'pk'].filter(x => S.labK[x] !== false).length; if (S.labK[v] !== false && on <= 1) { toast('Keep at least one kind on.'); return; } S.labK[v] = S.labK[v] === false; save(); renderPanel(); return; }
       case 'sfx': S.sfx = S.sfx === false; save(); sfxLabel(); SFX.play('ok'); return;
-      case 'music': S.music = S.music === false; save(); musLabel(); MUS.sync(); return;
+      case 'music': S.music = S.music === false; save(); musLabel(); MUS.sync(); toast(S.music === false ? 'Radio off.' : 'Radio on.'); return;
       case 'flash': openView(view === 'flash' ? 'q' : 'flash'); if (view === 'q') { resumeTimers(); renderPanel(); } return;
       case 'share': return makeShare();
       case 'share-send': return shareSend();
@@ -2349,8 +2352,8 @@
   setInterval(() => { if (window.__rxLoading) return; try { localStorage.setItem(SAVE_KEY, JSON.stringify(S)); } catch (e) { /* ignore */ } }, 5000);
 
   { const sc = $('#savecard'); if (sc) sc.innerHTML = saveBoxHTML(); }
-  World.init({ host: $('#stage'), getS: () => S, onPetMove: (k, pos) => { S.store.petOn = S.store.petOn || {}; if (pos) S.store.petOn[k] = pos; else delete S.store.petOn[k]; save(); }, onDecorMove: (id, p) => { S.store.pos = S.store.pos || {}; S.store.pos[id] = p.map(v => Math.round(v * 100) / 100); save(); }, specialRoll: specialRoll, tagInfo: tagInfo, onBuy: buyUp, onNotes: () => openView('studies'), onBin: () => { micR = null; openView('mic'); }, onMicSite: (id) => micSiteClick(id), onMicDish: (id) => micDishClick(id), onMicPaper: (id, row) => micPaperClick(id, row), notesInfo: customCount, karenRoll: karenRoll, sweatyRoll: sweatyRoll, elderRoll: elderRoll, eventRoll: eventRoll, onVisitor: visitClick, onVisitorArrive: visitArrive, capsuleOk: capsuleOk, onCapsule: onCapsule, onBrain: synEnter, onSynSite: onSynSite, onEvt: onEvt, pillOk: pillOk, onPill: onPill, pillBoost: () => gearBuff().pills, onPhone: openPhone, onPolice: policeCome, himOk: himOk, onHimSpawn: onHimSpawn, onHimAngel: himAngelOk, onHimLand: himLand, onHimBless: onHimBless, onFp: fpClick, sign: () => shopName() + '|' + tierName() + ' #' + (S.franchises + 1) });
-  window.__rxDbg = () => ({ micDbg: () => ({ get R() { return micR; }, get inLab() { return micIn; }, drop: micDrop, paper: micPaperClick, part: micStartPart, startSort: micStartSort, sel: id => { micSelG = id; renderPanel(); } }), sr: srUpdate, nc: newCard, sp: specialRoll, fp: fp, S: S, view: view, rush: rush, phoneR: phone.ringing, TOPQ: TOPQ, pool: poolQs, cur: cur, synQ: () => (typeof SYN !== 'undefined' ? SYN.q : null), synTap: id => onSynSite(id), offer: k => offerEvt(k, 'test'), onEvt: onEvt, holiday: () => holNow(), holN: () => holCount(), renderStats: renderStats, passive: passive, techRate: techRate, buyUp: buyUp, openVial: openVial, tabletTake: tabletTake, capsuleOpen: capsuleOpen, buffOn: buffOn, GEAR: GEAR, gearBuff: gearBuff, gearHave: gearHave });
+  World.init({ host: $('#stage'), getS: () => S, onPetMove: (k, pos) => { S.store.petOn = S.store.petOn || {}; if (pos) S.store.petOn[k] = pos; else delete S.store.petOn[k]; save(); }, onRadio: () => MUS.tap(), onDecorMove: (id, p) => { S.store.pos = S.store.pos || {}; S.store.pos[id] = p.map(v => Math.round(v * 100) / 100); save(); }, specialRoll: specialRoll, tagInfo: tagInfo, onBuy: buyUp, onNotes: () => openView('studies'), onBin: () => { micR = null; openView('mic'); }, onMicSite: (id) => micSiteClick(id), onMicDish: (id) => micDishClick(id), onMicPaper: (id, row) => micPaperClick(id, row), notesInfo: customCount, karenRoll: karenRoll, sweatyRoll: sweatyRoll, elderRoll: elderRoll, eventRoll: eventRoll, onVisitor: visitClick, onVisitorArrive: visitArrive, capsuleOk: capsuleOk, onCapsule: onCapsule, onBrain: synEnter, onSynSite: onSynSite, onEvt: onEvt, pillOk: pillOk, onPill: onPill, pillBoost: () => gearBuff().pills, onPhone: openPhone, onPolice: policeCome, himOk: himOk, onHimSpawn: onHimSpawn, onHimAngel: himAngelOk, onHimLand: himLand, onHimBless: onHimBless, onFp: fpClick, sign: () => shopName() + '|' + tierName() + ' #' + (S.franchises + 1) });
+  window.__rxDbg = () => ({ mus: MUS, micDbg: () => ({ get R() { return micR; }, get inLab() { return micIn; }, drop: micDrop, paper: micPaperClick, part: micStartPart, startSort: micStartSort, sel: id => { micSelG = id; renderPanel(); } }), sr: srUpdate, nc: newCard, sp: specialRoll, fp: fp, S: S, view: view, rush: rush, phoneR: phone.ringing, TOPQ: TOPQ, pool: poolQs, cur: cur, synQ: () => (typeof SYN !== 'undefined' ? SYN.q : null), synTap: id => onSynSite(id), offer: k => offerEvt(k, 'test'), onEvt: onEvt, holiday: () => holNow(), holN: () => holCount(), renderStats: renderStats, passive: passive, techRate: techRate, buyUp: buyUp, openVial: openVial, tabletTake: tabletTake, capsuleOpen: capsuleOpen, buffOn: buffOn, GEAR: GEAR, gearBuff: gearBuff, gearHave: gearHave });
   if (!World.ok) $('#stage').classList.add('flat');
   else { document.body.classList.add('fx'); try { World.setBin(!!S.binBug); } catch (e) { /* decor */ } World.setPharmacist(meSpec()); World.setStore(S.store); World.setStaffLook(uniSpec()); World.setAwards(S.awards); World.setCalendar(Math.min(4, S.awards.calW || 0), false, S.awards.calW || 0); }
   applyFocus(); syncBrand(); sfxLabel(); musLabel(); MUS.arm();

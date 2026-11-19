@@ -43,7 +43,16 @@ const SHOP_DECOR = [
   ['photo', 'Framed photo', 220, 'A sunny landscape for the side wall.', '🖼️'],
   ['poster', 'Health poster', 260, 'Ask your pharmacist. Goes on the side wall.', '📋'],
   ['clock', 'Wall clock', 320, 'Keeps real time. Goes on the side wall.', '🕒'],
-  ['vend', 'Vending machine', 900, 'Snacks by the counter.', '🥤']
+  ['vend', 'Vending machine', 900, 'Snacks by the counter.', '🥤'],
+  ['radio', 'Tape radio', 350, 'A little cassette radio for the counter. Plays lofi tapes. Tap it to switch tape.', '📻']
+];
+/* radio tapes: [id, name, price, blurb]. The music for each lives in ext.js (MUS_TAPES). Tape t1 comes with the radio. Never rename a shipped id. */
+const SHOP_TAPES = [
+  ['t1', 'Rainy Window', 0, 'Soft keys and a slow beat. Comes with the radio.'],
+  ['t2', 'Night Shift', 250, 'Slow and minor. For the late hours.'],
+  ['t3', 'Corner Cafe', 400, 'Jazzy chords with a little swing.'],
+  ['t4', 'Late Study', 500, 'Very mellow. Good for long cram sessions.'],
+  ['t5', 'Sunday Morning', 650, 'Bright and easy, a bit faster.']
 ];
 /* extra pharmacist hairstyles: [id, name, style number in world.js, price] */
 const SHOP_HAIR = [
