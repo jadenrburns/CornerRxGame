@@ -1069,6 +1069,16 @@ body.trip .stats .stat { animation: tripbob 1.4s ease-in-out infinite; }
 .dn.note .dnt { background: transparent; border: 0; font-weight: 500; opacity: .8; }
 .dn.bad .dnt { background: #fff0f0; border-color: #d64545; }
 .dn.bdg .dnt { font-weight: 800; color: #2d7ff9; font-size: 1.15em; }
+.pwide { display: grid; gap: 10px; }
+.pmain, .paside { display: grid; gap: 10px; min-width: 0; align-content: start; }
+.qpanel.wide, body.fx .qpanel.wide { left: 12px; right: 12px; width: auto; max-height: none; top: calc(var(--tb, 0px) + 8px); bottom: 12px; }
+@media (min-width: 640px) {
+  .qpanel.wide .pwide { grid-template-columns: minmax(0, 1.55fr) minmax(220px, 1fr); align-items: start; }
+  .qpanel.wide .paside { position: sticky; top: 4px; }
+  .qpanel.wide .pbank { max-height: 60vh; overflow: auto; }
+  .qpanel.wide .rx-body { max-width: none; }
+  .qpanel.wide .dia { width: min(100%, calc(64vh * var(--ar, 1))); margin: 0 auto; }
+}
 .drawbox { display: grid; gap: 8px; margin-top: 8px; }
 .cycsvg { width: 100%; max-width: 520px; height: auto; touch-action: none; cursor: crosshair; display: block; margin: 0 auto; user-select: none; -webkit-user-select: none; }
 .cybox { fill: var(--surface); stroke: var(--line); stroke-width: 1.5; }

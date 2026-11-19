@@ -934,7 +934,7 @@
     const W = dia.W, H = dia.H, pc = (x, y) => 'left:' + (x / W * 100).toFixed(2) + '%;top:' + (y / H * 100).toFixed(2) + '%';
     const svg = '<svg class="diasvg" viewBox="0 0 ' + W + ' ' + H + '" aria-hidden="true"><defs><marker id="dah" viewBox="0 0 8 8" refX="6" refY="4" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M0,0 L8,4 L0,8 z" fill="context-stroke"/></marker></defs>' + (dia.boxes || []).map(b => '<rect class="diabox" x="' + b.x + '" y="' + b.y + '" width="' + b.w + '" height="' + b.h + '" rx="2"/><text class="diabt" x="' + (b.x + 2) + '" y="' + (b.y + 3.6) + '">' + esc(b.t || '') + '</text>').join('') + (dia.arrows || []).map(a => '<path class="diaar ' + (a.c || '') + '" d="' + (a.d || ('M' + a.p[0][0] + ',' + a.p[0][1] + ' L' + a.p[1][0] + ',' + a.p[1][1])) + '" marker-end="url(#dah)"/>').join('') + '</svg>';
     const nodes = dia.nodes.map((n, i) => '<div class="dn ' + (n.al || 'c') + ' ' + (n.c || '') + '" style="' + pc(n.x, n.y) + (n.w ? ';width:' + n.w + '%' : '') + '">' + (n.t ? '<span class="dnt">' + esc(n.t) + '</span>' : '') + (n.a ? slotBtn('d' + i, n.a) : '') + '</div>').join('');
-    return '<div class="dia" style="aspect-ratio:' + W + ' / ' + H + '">' + svg + nodes + '</div>';
+    return '<div class="dia" style="aspect-ratio:' + W + ' / ' + H + ';--ar:' + (W / H).toFixed(3) + '">' + svg + nodes + '</div>';
   }
   function placeChips(q) {
     if (!q._pc) { const set = []; placeSlots(q).forEach(s => { if (set.indexOf(s.a) < 0) set.push(s.a); }); (q.place.extra || []).forEach(x => { if (set.indexOf(x) < 0) set.push(x); }); q._pc = set; }
@@ -948,7 +948,7 @@
     const bank = cur.done ? '' : '<div class="pbank" role="group" aria-label="Word bank">' + chips.map(c => '<button type="button" class="pchip' + (sel === c ? ' on' : '') + '" data-chip="' + esc(c) + '">' + esc(c) + '</button>').join('') + '</div>';
     const n = Object.keys(pl).length, tot = placeSlots(q).length;
     const note = cur.done ? (cur.ok ? '<b>Every blank is right.</b>' : 'Red blanks were wrong or empty; the right answer is shown under each.') : 'Drag a tile onto a blank, or tap a tile and then tap a blank. Tap a filled blank to clear it. Tiles can be used more than once. ' + n + ' of ' + tot + ' filled.';
-    return (q.place.dia ? diaHTML(q.place.dia) : '') + (q.place.rows.length ? '<ol class="prows">' + rows + '</ol>' : '') + bank + '<p class="drawnote" aria-live="polite">' + note + '</p>' + (cur.done ? '' : '<div class="btnrow"><button type="button" class="btn" id="plclr" ' + (n ? '' : 'disabled') + '>Clear</button><button type="button" class="btn go" id="plgo" ' + (n === tot ? '' : 'disabled') + '>Check</button></div>');
+    return '<div class="pwide"><div class="pmain">' + (q.place.dia ? diaHTML(q.place.dia) : '') + (q.place.rows.length ? '<ol class="prows">' + rows + '</ol>' : '') + '</div><div class="paside">' + bank + '<p class="drawnote" aria-live="polite">' + note + '</p>' + (cur.done ? '' : '<div class="btnrow"><button type="button" class="btn" id="plclr" ' + (n ? '' : 'disabled') + '>Clear</button><button type="button" class="btn go" id="plgo" ' + (n === tot ? '' : 'disabled') + '>Check</button></div>') + '</div></div>';
   }
   function placeFill(id, chip) { if (!cur || !cur.q || !cur.q.place || cur.done) return; cur.pl = cur.pl || {}; if (chip) cur.pl[id] = chip; else delete cur.pl[id]; cur.plSel = null; renderPanel(); }
   function placeSubmit() {
@@ -1809,6 +1809,7 @@
     micSync();
     const pn = $('#qpanel'); if (!pn) return;
     pn.classList.toggle('karen', !!(cur && cur.karen && !cur.done && view === 'q'));
+    pn.classList.toggle('wide', !!(view === 'q' && cur && cur.q && cur.q.place));
     const body = view === 'create' ? createHTML() : view === 'awards' ? awardsHTML() : view === 'phone' ? phoneHTML() : view === 'fp' || view === 'him' ? '' : view === 'shift' ? shiftHTML() : view === 'daily' ? dailyHTML() : view === 'mic' ? micHTML() : view === 'board' ? boardHTML() : view === 'flags' ? flagsHTML() : view === 'flash' ? fcHTML() : view === 'syn' ? synHTML() : view === 'ref' ? refHTML() : view === 'retire' ? retireHTML() : view === 'set' ? settingsHTML() : view === 'opts' ? optionsHTML() : view === 'studies' ? studiesHTML() : (cur ? cardHTML() : '');
     $('#counter').innerHTML = qbar() + body;
     const nb = document.querySelector('.nbk');
@@ -2065,7 +2066,7 @@
   /* ---- save code: the whole save as one long code, to move progress between devices or keep a backup ---- */
 /*@EXT@*/
 /*@MIC@*/
-  const GAME_VERSION = 153;
+  const GAME_VERSION = 154;
   const b64u = (u8) => { let s = ''; for (let i = 0; i < u8.length; i += 0x8000) s += String.fromCharCode.apply(null, u8.subarray(i, i + 0x8000)); return btoa(s).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); };
   const unb64u = (t) => { const s = atob(t.replace(/-/g, '+').replace(/_/g, '/')), u = new Uint8Array(s.length); for (let i = 0; i < s.length; i++) u[i] = s.charCodeAt(i); return u; };
   const chk = (t) => { let h = 2166136261; for (let i = 0; i < t.length; i++) { h ^= t.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36); };
