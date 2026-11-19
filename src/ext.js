@@ -852,7 +852,7 @@
     if (g.src === 'start') return true; if (g.src === 'rank') return (S.acc || 0) >= g.rank; if (g.src === 'shop') return ((S.store || {}).own || []).indexOf(id) >= 0;
     if (g.slot === 'pet') return ((S.awards || {}).pets || []).indexOf(g.kind) >= 0; return (S.cosm || []).indexOf(id) >= 0; };
   const gearOn = id => { const g = gearById(id); if (!g || !gearHave(id)) return false; if (g.slot === 'pet') return true; if (g.slot === 'hair') return S.me.hair === g.hv; return ((S.cosmOn || {})[g.slot]) === id; };
-  const gearSrcText = g => g.src === 'start' ? 'Everyone starts with it' : g.src === 'shop' ? 'Shop, ' + money(g.price) : g.src === 'rank' ? 'Rank: ' + RANKS[g.rank][1] : g.src === 'award' ? 'Mastery award (see Awards)' : RAR[g.r].n + ' capsule';
+  const gearSrcText = g => g.src === 'start' ? 'Everyone starts with it' : g.src === 'shop' ? 'Shop, ' + money(shopPx(g.price)) : g.src === 'rank' ? 'Rank: ' + RANKS[g.rank][1] : g.src === 'award' ? 'Mastery award (see Awards)' : RAR[g.r].n + ' capsule';
   const buffText2 = b => { b = b || {}; const o = []; if (b.pay) o.push('+' + Math.round(b.pay * 100) + '% pay'); if (b.tech) o.push('+' + Math.round(b.tech * 100) + '% tech tips'); if (b.time) o.push('+' + b.time + ' s on the timer'); if (b.rep) o.push('+' + b.rep + ' reputation per fill'); if (b.pills) o.push('+' + Math.round(b.pills * 100) + '% lost pills'); if (b.streak) o.push('+' + b.streak + ' streak cap'); return o.join(', '); };
   /* total bonus from everything equipped plus every pet you own */
   function gearBuff() {

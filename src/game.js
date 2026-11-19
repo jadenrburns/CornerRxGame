@@ -371,7 +371,7 @@
     second: { name: 'Second chance', emoji: '🔁', base: 120, note: 'Arm it on a question. If your first pick is wrong, you get one more try. No streak or reputation loss, pays half, and it still counts as a miss for mastery.' },
     binder: { name: 'Reference binder', emoji: '📘', base: 90, note: 'Shows where this question comes from (week, topic and study source). Pays 15% less.' }
   };
-  const pwCost = (k) => Math.round(PW[k].base * franchiseMult());
+  const pwCost = (k) => shopPx(Math.round(PW[k].base * franchiseMult()));
   const pwAdd = (k, n) => { S.pw[k] = Math.min(PW_MAX, (S.pw[k] || 0) + n); };
   const upTotal = () => Object.keys(S.up).reduce((a, k) => a + S.up[k], 0);
   const customCount = () => S.decks.reduce((a, d) => a + d.items.length, 0);
@@ -1230,7 +1230,10 @@
   function uniSpec() { const u = uniOf(); return u ? { shirt: u[2], scrub: u[3], cosm: { hat: u[4] || '', eyes: u[0] === 'u5' ? 'goggles' : '' } } : null; }
   function applyShop() { musLabel(); MUS.sync(); if (!World.ok) return; World.setStore(S.store); World.setStaffLook(uniSpec()); World.setPharmacist(meSpec()); }
   const SHOP_CATS = [['walls', 'Wall paint'], ['floors', 'Floors'], ['uni', 'Tech uniforms'], ['deco', 'Decor'], ['tape', 'Radio tapes'], ['wear', 'Wardrobe'], ['pow', 'Power-ups']];
-  function shopRows(cat) {
+  /* v162: every shop price is multiplied by SHOP_X, so items take much longer to afford. Prices in shop.js and gear.js stay the base values. Free items stay free. */
+  const SHOP_X = 5, shopPx = n => n ? Math.round(n * SHOP_X / 10) * 10 : 0;
+  function shopRows(cat) { return shopRows0(cat).map(r => r.price && !r.free ? Object.assign({}, r, { price: r.stack ? r.price : shopPx(r.price) }) : r); }
+  function shopRows0(cat) {
     const st = S.store;
     if (cat === 'walls') return SHOP_WALLS.map(w => ({ id: w[0], name: w[1], price: w[4], free: !w[4], on: st.walls === w[0], sw: [w[2], w[3]], note: '' }));
     if (cat === 'floors') return SHOP_FLOORS.map(f => ({ id: f[0], name: f[1], price: f[4], free: !f[4], on: st.floor === f[0], sw: [f[2], f[3]], note: '' }));
@@ -2072,7 +2075,7 @@
   /* ---- save code: the whole save as one long code, to move progress between devices or keep a backup ---- */
 /*@EXT@*/
 /*@MIC@*/
-  const GAME_VERSION = 161;
+  const GAME_VERSION = 162;
   const b64u = (u8) => { let s = ''; for (let i = 0; i < u8.length; i += 0x8000) s += String.fromCharCode.apply(null, u8.subarray(i, i + 0x8000)); return btoa(s).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); };
   const unb64u = (t) => { const s = atob(t.replace(/-/g, '+').replace(/_/g, '/')), u = new Uint8Array(s.length); for (let i = 0; i < s.length; i++) u[i] = s.charCodeAt(i); return u; };
   const chk = (t) => { let h = 2166136261; for (let i = 0; i < t.length; i++) { h ^= t.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36); };

@@ -24,7 +24,7 @@ const { chromium } = require('playwright');
   const neck = await p.$eval('.crow[data-k=neck] .cval', e => e.textContent);
   if (!/Gold chain/.test(neck) || !/\+2% pay/.test(neck)) fail.push('neck row ' + neck);
   const hatLock = await p.$eval('.crow[data-k=hat] .clock', e => ({ sum: e.querySelector('summary').textContent, n: e.querySelectorAll('li').length, txt: e.textContent }));
-  if (!(hatLock.n >= 10 && /Legendary capsule|Golden halo/.test(hatLock.txt) && /Shop, \$150/.test(hatLock.txt) && /Rank: /.test(hatLock.txt))) fail.push('hat locked list ' + JSON.stringify(hatLock));
+  if (!(hatLock.n >= 10 && /Legendary capsule|Golden halo/.test(hatLock.txt) && /Shop, \$750/.test(hatLock.txt) && /Rank: /.test(hatLock.txt))) fail.push('hat locked list ' + JSON.stringify(hatLock));
   const tabs = await p.$$eval('.cpane .hubtabs [role=tab]', e => e.map(x => x.textContent));
   if (tabs.join() !== 'Wardrobe,Shop,Pets') fail.push('tabs ' + tabs);
   if (!/Outfit bonus: \+2% pay, \+1 streak cap/.test(await p.$eval('.outfit', e => e.textContent))) fail.push('outfit summary');
@@ -39,7 +39,7 @@ const { chromium } = require('playwright');
   if (await p.$$eval('.cpane .chips', e => e.length)) fail.push('chips in shop');
   await p.evaluate(() => { document.querySelector('.crs[data-shop=wear]').open = true; });
   await act('shop-buy', 'surgcap'); s = await S();
-  if (!(s.store.own.indexOf('surgcap') >= 0 && s.cosmOn.hat === 'surgcap' && s.cash === 5000 - 150)) fail.push('buy surgcap ' + JSON.stringify([s.store.own, s.cosmOn.hat, s.cash]));
+  if (!(s.store.own.indexOf('surgcap') >= 0 && s.cosmOn.hat === 'surgcap' && s.cash === 5000 - 750)) fail.push('buy surgcap ' + JSON.stringify([s.store.own, s.cosmOn.hat, s.cash]));
   await act('ctab', 'me');
   if (!/Scrub cap/.test(await p.$eval('.crow[data-k=hat] .cval', e => e.textContent))) fail.push('scrub cap not in hat slider');
   // 4. pets tab
