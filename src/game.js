@@ -16,7 +16,7 @@
     { id: 'p443', name: 'PharmTox', code: 'PHAR 443', tag: 'P2', year: 'P2', cats: ['TOP', 'PT3', 'PT3G', 'PT4Q', 'PT4'], sched: 'p2', note: 'Weekly drug sheets plus the exam question sets.' },
     { id: 'p451', name: 'Therapeutics', code: 'PHAR 451', tag: 'P2', year: 'P2', cats: ['TH3F', 'TH3C', 'TH3', 'GER'], note: 'Exam 3 GI and contraception topics, and geriatrics.' },
     { id: 'p421', name: 'Medicinal Chemistry', code: 'PHAR 421', tag: 'P2', year: 'P2', cats: ['EX3', 'ASD', 'CHO', 'MET3'], note: 'Exam 3: start with the cram tab (built from the professor\u2019s study guide), then antiseizure, cholinergic and tap-the-site metabolism.' },
-    { id: 'p1top', name: 'Top 300 weekly drugs', short: 'Top 300', tag: 'P1', year: 'P1', cats: ['TP1'], sched: 'p1', note: 'Brand, generic and indication for the Top 300, most prescribed first. Starts Jan 12: top 20, then top 35, 50, and so on up to the full list.' },
+    { id: 'p1top', name: 'Top 300 weekly drugs', short: 'Top 300', tag: 'P1', year: 'P1', cats: ['TP1'], sched: 'p1', note: 'Brand, generic and indication for the Top 300, most prescribed first. Starts Jan 12: top 20, 35, 50, 65, 80, 90, 100 and on to 300. Each week adds new drugs and the earlier weeks stay on for review.' },
     { id: 'p3top', name: 'Top 300 weekly drugs', short: 'Top 300', tag: 'P3', year: 'P3', cats: ['TP3'], sched: 'p3', note: 'Drug list sheets by system, one set per week.' },
     { id: 'p553', name: 'Therapeutics III', code: 'PHAR 553', tag: 'P3', year: 'P3', cats: ['T553'], note: 'Syllabus topics: asthma, COPD, renal, diabetes, gout, migraine, RA and SLE, thyroid, liver, hepatitis, blood pressure, lipids, pain, nutrition, fluids and electrolytes.' },
     { id: 'my', name: 'My studies', tag: 'Yours', year: 'all', cats: ['MY'], note: 'Decks you wrote or imported from Quizlet. Add and manage them on the My studies tab.' }
@@ -426,9 +426,9 @@
   const WKCFG = {
     p2: { L: WEEKS, M: WK, cur: curWeek, only: 'wkOnly', ahead: 'ahead', topic: 'TOP' },
     p3: { L: P3WEEKS, M: WK3, cur: curWeek3, only: 'wkOnly3', ahead: 'ahead3', topic: 'TP3' },
-    p1: { L: P1WEEKS, M: WK1, cur: curWeek1, only: 'wkOnly1', ahead: 'ahead1', topic: 'TP1' }
+    p1: { L: P1WEEKS, M: WK1, cur: curWeek1, only: 'wkOnly1', ahead: 'ahead1', topic: 'TP1', auto: true }
   };
-  const wkOn = (k, n) => { const st = S.set, c = WKCFG[k], sel = st[k + 'sel']; if (sel) return !!sel[n]; if (st[c.only]) return n === c.cur(); const w = c.M[n]; return !!w && (w.from <= todayStr() || !!st[c.ahead]) && !(st[k + 'off'] && st[k + 'off'][n]); };
+  const wkOn = (k, n) => { const st = S.set, c = WKCFG[k], sel = st[k + 'sel']; if (sel) { const w0 = c.M[n]; if (c.auto && sel[n] === undefined && w0 && st[k + 'selAt'] && w0.from > st[k + 'selAt'] && w0.from <= todayStr()) return true; return !!sel[n]; } /* cumulative lists (P1): a week that starts after the player's last pick joins automatically */ if (st[c.only]) return n === c.cur(); const w = c.M[n]; return !!w && (w.from <= todayStr() || !!st[c.ahead]) && !(st[k + 'off'] && st[k + 'off'][n]); };
   const wkSel = (k) => { const o = {}; WKCFG[k].L.forEach(w => { if (wkOn(k, w.n)) o[w.n] = true; }); return o; };
   const wkOpenSel = (k) => { const o = {}, t = todayStr(); WKCFG[k].L.forEach(w => { if (w.from <= t) o[w.n] = true; }); return o; };
   const wkOnlyNow = (k) => { const c = WKCFG[k].cur(), ks = Object.keys(wkSel(k)); return !!c && ks.length === 1 && +ks[0] === c; };
@@ -440,12 +440,13 @@
     if (a === 'toggle') { const o = wkSel(k); if (o[v]) delete o[v]; else { o[v] = true; st.topics[c.topic] = true; } st[k + 'sel'] = o; }
     else if (a === 'all') { const o = {}; c.L.forEach(w => { o[w.n] = true; }); st[k + 'sel'] = o; st.topics[c.topic] = true; }
     else if (a === 'none') st[k + 'sel'] = {};
+    else if (a === 'sofar') { if (!c.cur()) { toast('No week has started yet. Tap a week below to preview it.'); return false; } st[k + 'sel'] = wkOpenSel(k); st.topics[c.topic] = true; }
     else if (a === 'only') {
       const cw = c.cur(); if (!cw) { toast('No week has started yet. Tap a week below to preview it.'); return false; }
       if (wkOnlyNow(k)) { st[k + 'sel'] = st[k + 'prev'] && Object.keys(st[k + 'prev']).length ? st[k + 'prev'] : wkOpenSel(k); st[k + 'prev'] = null; }
       else { st[k + 'prev'] = wkSel(k); st[k + 'sel'] = {}; st[k + 'sel'][cw] = true; st.topics[c.topic] = true; }
     } else if (a === 'course') { const o = wkSel(k), on = v.split('|')[1] === '1'; c.L.forEach(w => { if (w.t === v.split('|')[0]) { if (on) o[w.n] = true; else delete o[w.n]; } }); st[k + 'sel'] = o; if (on) st.topics[c.topic] = true; }
-    st[c.only] = false; return true;
+    st[c.only] = false; st[k + 'selAt'] = todayStr(); return true;
   }
   function wkSchedHTML(k, title) {
     const st = S.set, c = WKCFG[k], t = todayStr(), cw = c.cur(), n = c.L.filter(w => wkOn(k, w.n)).length;
@@ -464,7 +465,7 @@
     else body = `<ol class="p3sched">${c.L.map(row).join('')}</ol>`;
     const hidden = c.L.filter(w => !shown(w)).length;
     const more = up.length > 3 ? `<button type="button" class="link upmore" data-act="wkup" data-v="${k}">${st[k + 'up'] ? 'Hide' : 'Show'} upcoming weeks${hidden ? ' (' + hidden + ' more)' : ''}</button>` : '';
-    return `<div class="grp"><div class="grphd"><button type="button" class="fold" data-act="wkfold" data-v="${k}" aria-expanded="${!st[k + 'fold']}"><i>${st[k + 'fold'] ? '▸' : '▾'}</i> ${title}</button><span class="grpr"><button type="button" class="chip sm" data-act="wkpick" data-v="${k}:only" aria-pressed="${wkOnlyNow(k)}">This week only</button><button type="button" class="link" data-act="wkpick" data-v="${k}:all">All</button> &middot; <button type="button" class="link" data-act="wkpick" data-v="${k}:none">None</button></span></div>${st[k + 'fold'] ? `<p class="note wkfoldnote">${n} of ${c.L.length} weeks on. Tap ${title} to show the schedule.</p>` : ''}<div class="wkbody"${st[k + 'fold'] ? ' hidden' : ''}>${body + more}<p class="note">${k === 'p3' ? weekNote3() : weekNote()}</p></div><div class="chips" aria-label="Weekly question types">${WK_TYPES.map(x => `<button type="button" class="chip" data-act="wktype" data-v="${x[0]}" aria-pressed="${!(st.wkTypes && st.wkTypes[x[0]] === false)}">${x[1]}</button>`).join('')}</div></div>`;
+    return `<div class="grp"><div class="grphd"><button type="button" class="fold" data-act="wkfold" data-v="${k}" aria-expanded="${!st[k + 'fold']}"><i>${st[k + 'fold'] ? '▸' : '▾'}</i> ${title}</button><span class="grpr"><button type="button" class="chip sm" data-act="wkpick" data-v="${k}:only" aria-pressed="${wkOnlyNow(k)}">This week only</button>${c.auto ? `<button type="button" class="link" data-act="wkpick" data-v="${k}:sofar">So far</button> &middot; ` : ''}<button type="button" class="link" data-act="wkpick" data-v="${k}:all">All</button> &middot; <button type="button" class="link" data-act="wkpick" data-v="${k}:none">None</button></span></div>${st[k + 'fold'] ? `<p class="note wkfoldnote">${n} of ${c.L.length} weeks on. Tap ${title} to show the schedule.</p>` : ''}<div class="wkbody"${st[k + 'fold'] ? ' hidden' : ''}>${body + more}<p class="note">${k === 'p3' ? weekNote3() : weekNote()}</p></div><div class="chips" aria-label="Weekly question types">${WK_TYPES.map(x => `<button type="button" class="chip" data-act="wktype" data-v="${x[0]}" aria-pressed="${!(st.wkTypes && st.wkTypes[x[0]] === false)}">${x[1]}</button>`).join('')}</div></div>`;
   }
   const wkTypeOff = (q) => !!(S.set.wkTypes && S.set.wkTypes[q.wt] === false);
   const focusOn = () => !!S.set.focus;
@@ -1997,7 +1998,7 @@
   /* ---- save code: the whole save as one long code, to move progress between devices or keep a backup ---- */
 /*@EXT@*/
 /*@MIC@*/
-  const GAME_VERSION = 149;
+  const GAME_VERSION = 150;
   const b64u = (u8) => { let s = ''; for (let i = 0; i < u8.length; i += 0x8000) s += String.fromCharCode.apply(null, u8.subarray(i, i + 0x8000)); return btoa(s).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); };
   const unb64u = (t) => { const s = atob(t.replace(/-/g, '+').replace(/_/g, '/')), u = new Uint8Array(s.length); for (let i = 0; i < s.length; i++) u[i] = s.charCodeAt(i); return u; };
   const chk = (t) => { let h = 2166136261; for (let i = 0; i < t.length; i++) { h ^= t.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36); };
@@ -2166,7 +2167,7 @@
       case 'week-only': { const k = WKCFG[v] ? v : 'p2', cat = WKCFG[k].topic; if (weekOnly(k)) { unsetOnly(); wkPick(k, '', 'only'); toast('The other topics and weeks are back on.'); } else { if (!WKCFG[k].cur()) { toast('No week has started yet.'); return; } setOnly([cat]); if (!wkOnlyNow(k)) wkPick(k, '', 'only'); toast('Only this week’s drugs are on.'); } break; }
       case 'year': st.year = YEARS.indexOf(v) >= 0 ? v : 'P2'; findQ = ''; break;
       case 'year-only': { if (yearOnly(v)) { unsetOnly(); toast('The other years are back on.'); } else { if (!COURSES.some(c => c.year === v && courseCats(c).length)) { toast(v + ' has no courses filed yet.'); return; } setOnly(yearCats(v)); toast('Only ' + v + ' topics are on.'); } break; }
-      case 'wkpick': { const [k, x] = v.split(':'); const a = x === 'all' || x === 'none' || x === 'only' ? x : 'toggle'; if (wkPick(k, a === 'toggle' ? x : '', a) === false) return; break; }
+      case 'wkpick': { const [k, x] = v.split(':'); const a = x === 'all' || x === 'none' || x === 'only' || x === 'sofar' ? x : 'toggle'; if (wkPick(k, a === 'toggle' ? x : '', a) === false) return; break; }
       case 'wkcourse': { const i = v.indexOf(':'); wkPick(v.slice(0, i), v.slice(i + 1), 'course'); break; }
       case 'wkfold': st[v + 'fold'] = !st[v + 'fold']; break;
       case 'wkup': st[v + 'up'] = !st[v + 'up']; break;
