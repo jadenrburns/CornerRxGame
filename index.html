@@ -1040,6 +1040,21 @@ body.trip .stats .stat { animation: tripbob 1.4s ease-in-out infinite; }
 .confbtn { flex: 1 1 110px; font-weight: 700; }
 .confbtn kbd { opacity: .6; margin-right: 6px; }
 .deckrow a.mini { text-decoration: none; color: inherit; display: inline-block; }
+.placebox { display: grid; gap: 10px; margin-top: 8px; }
+.prows { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+.prow { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; padding: 6px 8px; border-radius: 10px; background: rgba(0,0,0,.05); font-size: 14px; }
+.ptxt { font-weight: 600; }
+.pslot { min-width: 110px; min-height: 34px; padding: 4px 10px; border: 2px dashed #8a8f98; border-radius: 9px; background: #fff; color: #222; font: inherit; font-size: 13px; cursor: pointer; text-align: center; touch-action: manipulation; }
+.pslot i { opacity: .45; font-style: normal; }
+.pslot.full { border-style: solid; border-color: #2d7ff9; background: #eaf2ff; }
+.pslot.hot { border-color: #f5a000; background: #fff4d6; }
+.pslot.right { border-color: #2e9e4f; background: #e4f7ea; }
+.pslot.wrong { border-color: #d64545; background: #fdeaea; }
+.pslot small { display: block; color: #2e7d3f; font-size: 11px; }
+.pbank { display: flex; flex-wrap: wrap; gap: 6px; padding: 8px; border-radius: 10px; background: rgba(0,0,0,.07); }
+.pchip { padding: 5px 10px; border: 1px solid #6b7280; border-radius: 999px; background: #fff; color: #222; font: inherit; font-size: 13px; cursor: grab; touch-action: none; user-select: none; }
+.pchip.on { background: #2d7ff9; color: #fff; border-color: #2d7ff9; }
+.pghost { position: fixed; z-index: 9999; transform: translate(-50%, -120%); padding: 5px 10px; border-radius: 999px; background: #2d7ff9; color: #fff; font-size: 13px; pointer-events: none; box-shadow: 0 4px 12px rgba(0,0,0,.3); }
 .drawbox { display: grid; gap: 8px; margin-top: 8px; }
 .cycsvg { width: 100%; max-width: 520px; height: auto; touch-action: none; cursor: crosshair; display: block; margin: 0 auto; user-select: none; -webkit-user-select: none; }
 .cybox { fill: var(--surface); stroke: var(--line); stroke-width: 1.5; }
@@ -2033,6 +2048,304 @@ B4(DR, 2, "Which property makes DNA suitable for storing genetic information?", 
 B4(DR, 3, "Which compound acts as a suicide inhibitor?", "Fluorodeoxyuridylate", ["Thymine", "Trimethoprim", "Aminopterin"], "Fluorodeoxyuridylate (from 5 fluorouracil) permanently traps thymidylate synthase. Trimethoprim and aminopterin are competitive inhibitors of DHFR.", 38);
 B4(DR, 2, "Which chemical forces stabilize DNA through base stacking?", "Van der Waals interactions", ["Disulfide bonds", "Covalent bonds", "Ionic bonds"], "Stacked bases attract through van der Waals forces and hydrophobic effects, in addition to hydrogen bonds between strands.", 39);
 B4(DR, 1, "In which direction does a DNA strand grow during replication?", "5' to 3'", ["3' to 5'", "3' to 3'", "5' to 5'"], "DNA polymerase adds each new nucleotide to the free 3' hydroxyl of the growing chain.", 40);
+/* P1 Biochemistry, Exam 4: digestion, PDH and citric acid cycle, electron transport, gluconeogenesis.
+   Concept questions (B4D, B4C, B4E, B4G) and drag-and-place cards (B4PD, B4PC, B4PE, B4PG).
+   Built from the four lecture PDFs: digestion, citric acid cycle (incl. PDH), electron transport chain, gluconeogenesis. */
+const XD = (d, q, a, w, e, t) => Q("B4D", d, q, a, w, e, t || "Digestion and energy carriers", "Digestion lecture");
+const XC = (d, q, a, w, e, t) => Q("B4C", d, q, a, w, e, t || "Citric acid cycle", "Citric acid cycle lecture");
+const XE = (d, q, a, w, e, t) => Q("B4E", d, q, a, w, e, t || "Electron transport", "Electron transport lecture");
+const XG = (d, q, a, w, e, t) => Q("B4G", d, q, a, w, e, t || "Gluconeogenesis", "Gluconeogenesis lecture");
+/* place card: rows are arrays of text and {a: answer} blanks. extra = decoy tiles. */
+const PLC = (cat, d, title, rows, extra, e, src) => {
+  const ans = []; rows.forEach(r => r.forEach(p => { if (typeof p !== 'string') ans.push(p.a); }));
+  Q(cat, d, title, ans.join(' | '), ["A blank is wrong", "A blank is empty", "The order is mixed up"], e, "Drag and place", src);
+  BANK[BANK.length - 1].place = { rows, extra };
+};
+
+/* ---------- Digestion and energy carriers ---------- */
+XD(1, "What turns pepsinogen into active pepsin in the stomach?", "The low pH, which lets pepsinogen cut itself", ["Enteropeptidase released from the duodenal cells", "Secretin released by the intestinal wall into the blood", "Trypsin arriving from the pancreas"], "Stomach acid (pH 1 to 2) denatures proteins and also activates pepsinogen, which then cleaves itself to make active pepsin.", "Protein digestion");
+XD(1, "Omeprazole (Prilosec) works by irreversibly blocking which target?", "The K+/H+ ATPase (proton pump) of parietal cells", ["The pancreatic bicarbonate transporter of the duct cells", "Pepsin itself, in the stomach lumen", "The Na+-glucose transporter of the small intestine"], "The sulfenamide form of omeprazole binds the K+/H+ ATPase, so the stomach makes far less acid.", "Protein digestion");
+XD(1, "Which hormone, released when acidic food reaches the small intestine, makes the pancreas secrete sodium bicarbonate?", "Secretin", ["Cholecystokinin (CCK)", "Insulin", "Glucagon"], "Low pH in the digest makes the intestinal wall release secretin. Bicarbonate raises the pH so pancreatic proteases can work.", "Protein digestion");
+XD(1, "Polypeptides in the small intestine trigger release of CCK. What does CCK make happen?", "The pancreas releases digestive enzymes and the gallbladder releases bile salts", ["The stomach makes more acid and more pepsinogen", "The pancreas releases only sodium bicarbonate, no enzymes", "The duodenum releases enteropeptidase and the gallbladder stays closed"], "CCK acts on the pancreas (enzymes) and the gallbladder (bile salts). Secretin is the one tied to bicarbonate.", "Protein digestion");
+XD(1, "What does enteropeptidase do?", "It converts trypsinogen to trypsin, and trypsin then activates the other zymogens", ["It cuts proteins into single amino acids at the brush border of the gut", "It releases bicarbonate from the pancreas when the digest is acidic", "It activates pepsinogen in the stomach once the pH falls"], "Enteropeptidase is made by duodenal cells. It starts the zymogen cascade by activating trypsinogen.", "Protein digestion");
+XD(1, "What is a zymogen?", "An inactive protease precursor that is activated by cleavage", ["A fully active enzyme that is stored in granules in the gallbladder", "A bile salt made from cholesterol that emulsifies dietary fat", "A hormone from the gut wall that triggers enzyme release"], "Pepsinogen and trypsinogen are zymogens. Making them inactive protects the cells that produce them.", "Protein digestion");
+XD(2, "Which sequence correctly orders protein digestion?", "Pepsin in the stomach, then pancreatic proteases in the lumen, then peptidases on the intestinal cells", ["Pancreatic proteases in the lumen, then pepsin in the stomach, then peptidases on the intestinal cells", "Peptidases on the intestinal cells, then trypsin in the lumen, then pepsin in the stomach", "Trypsin in the stomach, then pepsin in the lumen, then chymotrypsin on the cells"], "Stomach (pepsin), small intestine lumen (trypsin, chymotrypsin, elastase, carboxypeptidase), then cell-associated peptidases.", "Protein digestion");
+XD(1, "In what form is most digested protein absorbed by intestinal cells?", "Amino acids, dipeptides and tripeptides", ["Whole proteins in chylomicrons", "Only free single amino acids, never peptides", "Peptides of 20 or more residues in micelles"], "Specific transporters take up amino acids, di- and tripeptides and pass them to the blood.", "Protein digestion");
+XD(2, "Which bonds does alpha-amylase cleave in starch?", "Alpha 1-4 bonds, but not alpha 1-6 branch points", ["Alpha 1-6 branch bonds only, but not alpha 1-4", "Both alpha 1-4 and alpha 1-6 bonds equally well", "Beta 1-4 bonds, as in cellulose"], "Amylase leaves branch points behind. Alpha-dextrinase handles the alpha 1-6 bonds.", "Carbohydrate digestion");
+XD(1, "Which brush-border enzyme splits lactose, and into what?", "Lactase, into glucose and galactose", ["Sucrase, into glucose and fructose", "Maltase, into two glucoses", "Alpha-amylase, into glucose and galactose"], "Lactase: lactose to glucose plus galactose. Sucrase: sucrose to glucose plus fructose. Maltase: maltose to two glucoses.", "Carbohydrate digestion");
+XD(2, "Sucrose is broken down by sucrase into which two sugars?", "Glucose and fructose", ["Glucose and galactose", "Two molecules of glucose", "Fructose and galactose"], "Sucrose is the main sugar of fruit and honey. Lactose (animal source) is glucose plus galactose.", "Carbohydrate digestion");
+XD(2, "How do glucose and galactose enter the intestinal epithelial cell?", "By Na+-dependent co-transporters", ["Only by passive diffusion through the lipid membrane", "By uptake inside chylomicrons made in the lumen", "Only through GLUT2 on the lumen side of the cell"], "Glucose and galactose use Na+-dependent co-transport. Facilitative GLUT transporters also move glucose across cell membranes.", "Carbohydrate digestion");
+XD(2, "Acarbose helps type 2 diabetes by blocking which enzymes?", "Pancreatic alpha-amylase and brush-border alpha-glucosidases", ["Lactase and sucrase of the brush border only", "Pancreatic lipase and bile salt micelles", "Hexokinase and glucokinase in the liver"], "Less carbohydrate is digested, so less glucose enters the blood. Undigested carbohydrate causes flatulence and diarrhea.", "Carbohydrate digestion");
+XD(1, "Why does acarbose cause flatulence and diarrhea?", "Undigested carbohydrate reaches the colon and is fermented by bacteria", ["It blocks the release of bile salts from the gallbladder", "It stimulates too much secretin release from the gut wall", "It irritates the lining of the stomach and causes acid reflux"], "Carbohydrate that is not digested in the small intestine builds up in the colon, where gut bacteria ferment it.", "Carbohydrate digestion");
+XD(1, "Bile salts are made from which molecule in the liver?", "Cholesterol", ["Glucose", "Pyruvate", "Chylomicron remnants"], "Bile salts such as glycocholate come from cholesterol and emulsify lipid so lipases can reach it.", "Lipid digestion");
+XD(2, "After lipases act on triacylglycerols, which products are carried in micelles to the intestinal wall?", "Free fatty acids and monoacylglycerol", ["Intact triacylglycerols and bile salts", "Glycerol and cholesterol esters only", "Fully formed chylomicrons with apoprotein B48"], "Micelles formed with bile salts carry fatty acids and monoacylglycerol to the cell surface for absorption.", "Lipid digestion");
+XD(2, "Inside intestinal cells, absorbed fat is rebuilt into triacylglycerol and packaged as what, and where does it go first?", "Chylomicrons, which enter the lymph", ["VLDL, which enter the portal vein", "Micelles, which enter the lymph", "Free fatty acids, which enter the portal vein"], "Chylomicrons contain apoprotein B48 and travel through the lymph before reaching the blood.", "Lipid digestion");
+XD(1, "What is steatorrhea and when does it appear?", "Fat in the stool when bile salts are low", ["Blood in the stool after a protease deficiency in the stomach", "Watery stool with gas from lactase deficiency in the gut", "Undigested starch in the stool after taking acarbose"], "Without bile salts fat is not emulsified or absorbed, so it is excreted.", "Lipid digestion");
+XD(2, "Which fuels can the body store?", "Carbohydrate (glycogen) and lipid (fat), but not amino acids", ["Carbohydrate and amino acids, but not lipid or fat", "Amino acids and lipid, but not carbohydrate or glycogen", "All three fuels, in equal amounts, in every tissue"], "Excess amino acids are broken down to carbohydrate or acetyl units. Liver and muscle store glycogen; adipose stores fat.", "Fuel use");
+XD(2, "When glucose runs low, what is the correct order of fuel mobilization?", "Glycogen, then fat, then amino acids only in fasting", ["Amino acids first, then glycogen, and then fat from adipose", "Fat from adipose first, then glycogen, and amino acids last", "Fat and amino acids together before any glycogen is touched"], "The liver breaks down glycogen first. Adipose lipases mobilize fat only when glucose is scarce.", "Fuel use");
+XD(1, "NAD+ is made from which vitamin?", "Niacin (vitamin B3)", ["Riboflavin (vitamin B2)", "Thiamine (vitamin B1)", "Pantothenate (vitamin B5)"], "FAD comes from riboflavin, TPP from thiamine, and acetyl-CoA contains pantothenate.", "Energy carriers");
+XD(1, "The isoalloxazine ring of FAD comes from which vitamin?", "Riboflavin (vitamin B2)", ["Niacin (vitamin B3), the NAD+ precursor", "Thiamine (vitamin B1), the TPP precursor", "Folate, the one-carbon carrier"], "Humans cannot make FAD and must get riboflavin from the diet.", "Energy carriers");
+XD(2, "What is NADPH used for?", "Reductive biosynthesis, not ATP production", ["Carrying electrons to complex I of the electron transport chain", "Substrate-level phosphorylation", "Carrying acetyl groups into the citric acid cycle"], "NADPH carries electrons like NADH but is used for reductive biosynthesis. NADH feeds the respiratory chain.", "Energy carriers");
+XD(2, "When NAD+ is reduced, what does it accept?", "A hydride ion (one proton and two electrons)", ["Two protons and one electron from the fuel", "A single electron only, with no proton", "A phosphate group from ATP"], "NAD+ + hydride gives NADH. A second proton is released into solution.", "Energy carriers");
+XD(2, "Creatine kinase helps a sprinter by doing what?", "Passing phosphate from creatine phosphate to ADP", ["Making creatine phosphate from ATP in the liver at rest", "Oxidizing fatty acids in the muscle mitochondria", "Moving lactate out of working muscle into the blood"], "Creatine phosphate + ADP gives ATP + creatine. It is a quick reserve for bursts of energy.", "Energy carriers");
+XD(2, "Which statement about ATP hydrolysis is correct?", "ATP to ADP + Pi releases about -30.5 kJ/mol, and ATP to AMP + Pi about -45.6 kJ/mol", ["ATP to ADP + Pi releases about -45.6 kJ/mol, and ATP to AMP + Pi about -30.5 kJ/mol", "ATP to AMP + Pi releases less energy than ATP to ADP + Pi does", "ATP hydrolysis absorbs about 30 kJ/mol, and synthesis releases it"], "The energy is held in the phosphoanhydride bonds of the triphosphate group.", "Energy carriers");
+XD(1, "Substrate-level phosphorylation makes ATP by which means?", "Direct phosphoryl transfer from a high-energy compound, e.g. PEP", ["A proton gradient across the inner mitochondrial membrane that drives ATP synthase", "Reduction of oxygen to water at complex IV of the chain", "Hydrolysis of NADH to NAD+ in the cytosol"], "The other route is oxidative phosphorylation, which uses the proton gradient.", "Energy carriers");
+XD(1, "Which describes a catabolic reaction?", "It breaks molecules down and releases useful energy", ["It uses energy to build larger new molecules", "It only happens in the nucleus of the cell", "It never produces any ATP or reduced carriers"], "Anabolic reactions are the ones that use energy to synthesize molecules.", "Metabolism basics");
+XD(2, "Which vitamins are coenzyme precursors?", "The water-soluble vitamins", ["The fat-soluble vitamins A, D, E and K", "Only vitamins A and D", "None of the vitamins, which are not coenzymes"], "Almost all activated carriers that act as coenzymes come from water-soluble vitamins. Fat-soluble vitamins are not coenzymes.", "Metabolism basics");
+
+/* ---------- Pyruvate dehydrogenase and the citric acid cycle ---------- */
+XC(1, "Where in the cell do pyruvate dehydrogenase and the citric acid cycle enzymes sit?", "In the mitochondrial matrix", ["In the cytosol", "On the outer mitochondrial membrane", "In the intermembrane space"], "Succinate dehydrogenase is the one exception: it is embedded in the inner membrane.", "Pyruvate dehydrogenase");
+XC(1, "What is the reaction catalyzed by the pyruvate dehydrogenase complex?", "Pyruvate + CoA + NAD+ to acetyl-CoA + CO2 + NADH", ["Pyruvate + CO2 + ATP to oxaloacetate + ADP + Pi", "Pyruvate + NADH to lactate + NAD+ (no CO2 made)", "Acetyl-CoA + oxaloacetate to citrate + CoA (no CO2 made)"], "It is an oxidative decarboxylation. It is irreversible and commits the carbon to oxidation (or to fatty acid synthesis).", "Pyruvate dehydrogenase");
+XC(2, "Which three enzymes make up the PDH complex?", "Pyruvate dehydrogenase (E1), dihydrolipoyl transacetylase (E2) and dihydrolipoyl dehydrogenase (E3)", ["Citrate synthase, aconitase and isocitrate dehydrogenase of the cycle", "Pyruvate carboxylase, PEPCK and lactate dehydrogenase of the liver", "Hexokinase, phosphofructokinase and pyruvate kinase of glycolysis"], "The E2 transacetylase forms the core of the complex. E3 resets the enzyme for another round.", "Pyruvate dehydrogenase");
+XC(2, "Which coenzymes of PDH are stoichiometric (used up as substrates)?", "CoA and NAD+", ["TPP and lipoic acid", "TPP and FAD", "Lipoic acid and FAD"], "TPP (vitamin B1), lipoic acid and FAD are catalytic and regenerated. CoA and NAD+ behave as substrates.", "Pyruvate dehydrogenase");
+XC(2, "Which vitamin supplies thiamine pyrophosphate (TPP), a PDH coenzyme?", "Thiamine (vitamin B1)", ["Riboflavin (vitamin B2)", "Niacin (vitamin B3)", "Pantothenate (vitamin B5)"], "TPP is also needed by alpha-ketoglutarate dehydrogenase.", "Pyruvate dehydrogenase");
+XC(2, "How does the PDH kinase change PDH activity?", "It phosphorylates E1 and inactivates the complex", ["It phosphorylates E1 and activates the complex", "It dephosphorylates E1 and inactivates the complex", "It removes CoA from E2"], "PDH phosphatase reverses the effect. The kinase and phosphatase are both bound to E2.", "PDH regulation");
+XC(2, "Which conditions activate PDH kinase (and so shut PDH off)?", "High NADH, acetyl-CoA and ATP ratios", ["High ADP and high pyruvate during exercise", "A rise in Ca2+ in muscle cells", "Insulin acting on the liver cell"], "High energy charge turns PDH off. ADP, pyruvate and Ca2+ (during exercise) turn it back on.", "PDH regulation");
+XC(2, "Which signal activates PDH phosphatase?", "A rise in Ca2+ and insulin (in liver)", ["High NADH and high acetyl-CoA in the matrix", "High acetyl-CoA alone", "High ATP in resting muscle"], "Insulin pushes pyruvate toward acetyl-CoA for fatty acid synthesis.", "PDH regulation");
+XC(2, "Product inhibition of PDH works through which pair?", "Acetyl-CoA inhibits E2 and NADH inhibits E3", ["Acetyl-CoA inhibits E1 and NADH inhibits E2", "ATP inhibits E2 and ADP inhibits E3", "CO2 inhibits E1 and CoA inhibits E3"], "High products signal that the complex does not need to run.", "PDH regulation");
+XC(2, "Thiamine deficiency (beriberi) causes pyruvate and alpha-ketoglutarate to build up. Why?", "TPP is needed by both PDH and alpha-ketoglutarate dehydrogenase", ["TPP is needed by citrate synthase and aconitase", "Thiamine is the carrier of CO2 for pyruvate carboxylase", "Thiamine is converted into NAD+"], "The nervous system suffers most because it depends on glucose. Cardiac problems also occur.", "PDH clinical");
+XC(2, "Arsenite and mercury inhibit PDH by binding which component?", "The E3 subunit", ["The E1 subunit", "The E2 core only", "The PDH kinase"], "Both have a high affinity for the lipoic acid/E3 part, giving beriberi-like symptoms.", "PDH clinical");
+XC(2, "A person with PDH phosphatase deficiency has PDH that is always phosphorylated. What happens to glucose?", "It is converted to lactate instead of acetyl-CoA", ["It is stored as extra glycogen only, with no lactate", "It is converted to oxaloacetate and to citrate", "It cannot enter glycolysis at all"], "The complex is inactive, so pyruvate is pushed to lactate, and the nervous system malfunctions.", "PDH clinical");
+XC(1, "What two-carbon molecule enters the citric acid cycle, and what accepts it?", "Acetyl-CoA, which is added to oxaloacetate", ["Pyruvate, which is added to citrate to form isocitrate", "Acetyl-CoA, which is added to succinate", "Acetate, which is added directly to malate"], "Oxaloacetate is regenerated at the end of each turn, so it can take up another acetyl unit.", "Citric acid cycle");
+XC(1, "Which enzyme condenses acetyl-CoA with oxaloacetate?", "Citrate synthase", ["Aconitase", "Isocitrate dehydrogenase", "Malate dehydrogenase"], "The reaction goes through a citryl-CoA intermediate. Oxaloacetate must bind first.", "Citric acid cycle");
+XC(2, "Fluoroacetate is a toxin because its product, fluorocitrate, is a suicide inhibitor of which enzyme?", "Aconitase", ["Citrate synthase", "Fumarase", "Succinate dehydrogenase"], "Aconitase converts citrate to isocitrate through cis-aconitate.", "Citric acid cycle");
+XC(1, "Which step of the cycle makes the first NADH and the first CO2?", "Isocitrate dehydrogenase (isocitrate to alpha-ketoglutarate)", ["Citrate synthase (acetyl-CoA + oxaloacetate)", "Aconitase (citrate to isocitrate)", "Succinyl-CoA synthetase (making GTP)"], "The second NADH and CO2 come from alpha-ketoglutarate dehydrogenase.", "Citric acid cycle");
+XC(2, "Alpha-ketoglutarate dehydrogenase is most like which other enzyme?", "Pyruvate dehydrogenase, with the same five coenzymes", ["Citrate synthase, with CoA and acetyl groups", "Aconitase, with an iron-sulfur cluster", "Fumarase, which also needs TPP"], "Both turn a 2-oxo acid into an acyl-CoA + CO2 + NADH. Unlike PDH, alpha-KGDH is not regulated by covalent modification.", "Citric acid cycle");
+XC(2, "Which step is a substrate-level phosphorylation?", "Succinyl-CoA to succinate (succinyl-CoA synthetase), making GTP or ATP", ["Succinate to fumarate (succinate dehydrogenase), making FADH2", "Malate to oxaloacetate (malate dehydrogenase), making NADH", "Isocitrate to alpha-ketoglutarate (isocitrate dehydrogenase), making NADH"], "Cleaving the thioester bond of succinyl-CoA drives formation of GTP (liver) or ATP (muscle).", "Citric acid cycle");
+XC(2, "Why does succinate dehydrogenase use FAD instead of NAD+?", "The free energy change is too small to reduce NAD+", ["It sits in the cytosol where NAD+ is scarce", "It makes CO2, which needs FAD", "FAD is a stronger oxidant than NAD+ in every reaction"], "The FADH2 stays bound and passes its electrons to coenzyme Q.", "Citric acid cycle");
+XC(2, "Which citric acid cycle enzyme is embedded in the inner mitochondrial membrane?", "Succinate dehydrogenase", ["Citrate synthase of the matrix", "Fumarase of the matrix", "Malate dehydrogenase of the matrix"], "It is also complex II of the electron transport chain.", "Citric acid cycle");
+XC(1, "What does fumarase do?", "It adds water to fumarate to make malate", ["It oxidizes succinate to fumarate using FAD", "It oxidizes malate to oxaloacetate using NAD+", "It makes GTP from succinyl-CoA and GDP"], "No electron carrier is reduced in this hydration step.", "Citric acid cycle");
+XC(1, "Which is the net result of one turn of the cycle for one acetyl-CoA?", "3 NADH, 1 FADH2, 1 GTP and 2 CO2", ["2 NADH, 2 FADH2, 1 ATP and 3 CO2", "3 NADH, 3 FADH2 and 2 CO2", "1 NADH, 1 FADH2, 3 GTP and 1 CO2"], "About 10 ATP are made when the electrons are passed to O2 by oxidative phosphorylation.", "Citric acid cycle");
+XC(2, "Why can the citric acid cycle run only when oxygen is available?", "NAD+ and FAD must be regenerated by oxidative phosphorylation", ["Citrate synthase needs O2 as a direct substrate", "Oxaloacetate is made from O2 in the matrix", "CO2 cannot leave the mitochondrion without O2 present"], "Glycolysis has an anaerobic mode, but the cycle has only an aerobic mode.", "Citric acid cycle");
+XC(2, "What are the three main control points of the cycle?", "PDH, isocitrate dehydrogenase and alpha-KGDH", ["Citrate synthase, fumarase and malate dehydrogenase of the cycle", "Aconitase, succinyl-CoA synthetase and fumarase of the cycle", "Pyruvate kinase, hexokinase and PFK of glycolysis in the cytosol"], "Alpha-KGDH is inhibited by succinyl-CoA, NADH, ATP and GTP.", "Citric acid cycle");
+XC(2, "What is the difference between anaplerotic and cataplerotic reactions?", "Anaplerotic reactions refill cycle intermediates; cataplerotic reactions drain them", ["Anaplerotic reactions drain intermediates; cataplerotic reactions refill them", "Both make NADH", "Anaplerotic reactions happen only in the cytosol"], "Draining intermediates supplies biosynthesis. Refilling keeps the cycle running.", "Citric acid cycle");
+XC(2, "Pyruvate carboxylase refills the cycle. What turns it on?", "Acetyl-CoA, signaling low oxaloacetate", ["High ADP, signaling low energy", "Insulin only, acting through the kinase", "Citrate, made by citrate synthase"], "The enzyme is only active when acetyl-CoA is bound.", "Citric acid cycle");
+XC(1, "Which of these sources of acetyl-CoA is correct besides pyruvate?", "Fatty acid breakdown and some amino acids", ["Only glucose, through pyruvate", "Only lactate from the muscle", "Only the pentose phosphate pathway"], "Acetyl-CoA from many fuels meets in the cycle.", "Citric acid cycle");
+
+/* ---------- Electron transport and oxidative phosphorylation ---------- */
+XE(1, "Where are the electron transport chain complexes located?", "In the inner mitochondrial membrane", ["In the mitochondrial matrix", "In the outer mitochondrial membrane", "In the cytosol"], "The inner membrane is folded into cristae, giving a huge surface area.", "Mitochondria");
+XE(2, "Which statement about mitochondrial membranes is correct?", "The outer membrane has VDAC pores; the inner membrane is freely permeable only to H2O, O2 and CO2", ["The inner membrane has VDAC pores; the outer membrane is impermeable to small ions", "Both membranes are freely permeable to ions and to protons", "The inner membrane is smooth and the outer membrane is folded into many cristae"], "The inner membrane controls passage of ATP, ADP, pyruvate, Ca2+ and phosphate through transport proteins.", "Mitochondria");
+XE(2, "Which statement about mitochondrial DNA is correct?", "It is circular, inherited from the mother, and encodes 13 genes for oxidative phosphorylation", ["It is linear and inherited from both parents equally", "It encodes all of the 1500 proteins the mitochondrion needs", "It is inherited from the father and encodes 13 genes"], "Most mitochondrial proteins come from the nuclear genome.", "Mitochondria");
+XE(1, "Which complex is NADH-Q oxidoreductase?", "Complex I", ["Complex II", "Complex III", "Complex IV"], "Complex II is succinate dehydrogenase, III is Q-cytochrome c oxidoreductase, IV is cytochrome c oxidase.", "Complexes");
+XE(1, "Where does FADH2 from succinate oxidation donate its electrons?", "Complex II (succinate dehydrogenase)", ["Complex I (NADH-Q oxidoreductase)", "Complex III (Q-cytochrome c oxidoreductase)", "Complex IV (cytochrome c oxidase)"], "Electrons from FADH2 enter downstream of those from NADH. Complexes I and II do not operate in series.", "Complexes");
+XE(2, "What carries electrons from complexes I and II to complex III?", "Coenzyme Q (ubiquinone)", ["Cytochrome c", "NAD+", "Iron-sulfur clusters only"], "CoQ is hydrophobic, with a long isoprenoid tail, and diffuses in the inner membrane.", "Carriers");
+XE(2, "What carries electrons from complex III to complex IV?", "Cytochrome c, carrying one electron at a time", ["Coenzyme Q, carrying two electrons at a time", "FADH2, carrying a hydride ion", "NADPH, carrying two electrons"], "Cytochrome c is a small water-soluble heme protein associated with the inner membrane.", "Carriers");
+XE(2, "Which is the fully reduced form of coenzyme Q?", "Ubiquinol (QH2)", ["Semiquinone (QH)", "Ubiquinone (Q)", "Cytochrome c"], "Q takes one electron and H+ to form QH, and a second to form QH2.", "Carriers");
+XE(2, "How many protons does complex I pump per NADH?", "4", ["2", "6", "10"], "Complex III pumps 2 and complex IV pumps 4, giving 10 per NADH.", "Proton pumping");
+XE(2, "Which complex of the main chain does NOT pump protons?", "Complex II", ["Complex I", "Complex III", "Complex IV"], "That is why FADH2 yields less ATP than NADH.", "Proton pumping");
+XE(2, "Per pair of electrons, about how many protons are pumped for NADH versus FADH2?", "10 for NADH and 6 for FADH2", ["6 for NADH and 10 for FADH2", "4 for NADH and 2 for FADH2", "10 for both"], "FADH2 skips complex I, so it loses the 4 protons pumped there.", "Proton pumping");
+XE(2, "What is the final electron acceptor, and what is formed?", "O2, which is reduced to water by complex IV", ["NAD+, which is reduced to NADH by complex IV", "CO2, which is reduced to glucose by complex IV", "Cytochrome c, which is reduced to water by complex III"], "Four electrons reduce one O2 to two H2O. This is why oxygen is needed.", "Complexes");
+XE(2, "Where is the proton gradient built?", "Protons are pumped from the matrix to the cytoplasmic (intermembrane) side, making the matrix negative", ["Protons are pumped into the matrix, making it positive and the outside negative", "Protons are pumped into the cytosol through VDAC in the outer membrane", "Protons are pumped from the cytosol into the matrix side by complex II"], "The two sides are called N (matrix, negative) and P (cytoplasmic, positive).", "Proton pumping");
+XE(1, "Which complex does rotenone inhibit?", "Complex I", ["Complex III", "Complex IV", "Complex II"], "Barbiturates such as amobarbital also inhibit complex I.", "Inhibitors");
+XE(1, "Which complex does antimycin A inhibit?", "Complex III", ["Complex I (NADH-Q oxidoreductase)", "Complex II (succinate dehydrogenase)", "Complex IV (cytochrome c oxidase)"], "Antimycin A is an antibiotic that blocks Q-cytochrome c oxidoreductase.", "Inhibitors");
+XE(1, "Cyanide, carbon monoxide and hydrogen sulfide all inhibit which complex?", "Complex IV (cytochrome c oxidase)", ["Complex I (NADH-Q oxidoreductase)", "Complex II (succinate dehydrogenase)", "Complex III (Q-cytochrome c oxidoreductase)"], "Blocking the last step stops the whole chain because electrons back up.", "Inhibitors");
+XE(2, "Partial reduction of O2 by one electron makes which reactive oxygen species?", "Superoxide", ["Water, the product of complex IV", "Peroxide, from two electrons", "Hydroxide ion"], "Two electrons give peroxide. About 2 to 4% of O2 used by mitochondria becomes superoxide.", "ROS");
+XE(2, "Which enzyme converts superoxide to hydrogen peroxide and O2?", "Superoxide dismutase", ["Catalase", "Cytochrome c oxidase", "Succinate dehydrogenase"], "2 O2- + 2 H+ gives O2 + H2O2.", "ROS");
+XE(2, "Which enzyme breaks down hydrogen peroxide?", "Catalase, making O2 and water", ["Superoxide dismutase, making superoxide", "Aconitase, making citrate", "Complex III, making water"], "2 H2O2 gives O2 + 2 H2O. Vitamins E and C also help.", "ROS");
+XE(2, "Why does the ETC use iron?", "Iron-sulfur clusters and heme groups in cytochromes carry electrons", ["Iron makes ATP directly from ADP and Pi", "Iron pumps protons without any protein at all", "Iron reduces NAD+ in the matrix"], "Both Fe-S clusters and hemes are redox centers.", "Carriers");
+
+/* ---------- Gluconeogenesis and the Cori cycle ---------- */
+XG(1, "In which organs does gluconeogenesis mainly occur?", "Liver and kidney", ["Skeletal muscle and brain", "Heart and red blood cells", "Adipose tissue and pancreas"], "They keep blood glucose up for the brain and muscle.", "Basics");
+XG(1, "When is gluconeogenesis most important?", "During fasting, when dietary glucose is gone and glycogen is used up", ["Right after a large carbohydrate meal, when insulin is high", "Only during hard exercise, when lactate is high", "Only in newborn infants, never in adults"], "Glucose reserves last about a day. Brain needs roughly 120 g of the 160 g used daily.", "Basics");
+XG(2, "Which three glycolysis enzymes catalyze the irreversible steps that gluconeogenesis must bypass?", "Hexokinase, phosphofructokinase and pyruvate kinase", ["Aldolase, enolase and phosphoglycerate kinase, which are reversible", "Hexokinase, aldolase and enolase, which includes reversible steps", "Glucose 6-phosphatase, FBPase and PEPCK, which are gluconeogenic enzymes"], "These steps have large negative free energy changes, so they cannot simply run backward.", "Bypass steps");
+XG(2, "The pyruvate kinase step is bypassed by which two enzymes?", "Pyruvate carboxylase and PEP carboxykinase", ["Hexokinase and glucose 6-phosphatase together", "Phosphofructokinase and fructose 1,6-bisphosphatase", "Lactate dehydrogenase and pyruvate dehydrogenase"], "Pyruvate goes to oxaloacetate, then to phosphoenolpyruvate.", "Bypass steps");
+XG(2, "Which enzyme bypasses the phosphofructokinase step?", "Fructose 1,6-bisphosphatase", ["Glucose 6-phosphatase of the liver", "PEP carboxykinase of the cytosol", "Pyruvate carboxylase of the mitochondria"], "It is a major control point of the pathway.", "Bypass steps");
+XG(2, "Which enzyme bypasses the hexokinase step, and where is it found mainly?", "Glucose 6-phosphatase, mainly in the liver", ["Glucose 6-phosphatase, mainly in muscle", "Hexokinase IV, mainly in the brain", "Phosphoglucomutase, mainly in red blood cells"], "Free glucose is released mainly by the liver. Other tissues stop at glucose 6-phosphate (stored as glycogen).", "Bypass steps");
+XG(2, "Where is pyruvate carboxylase located and what does it need?", "The mitochondrial matrix; biotin, ATP and acetyl-CoA", ["The cytosol; biotin, ATP and NADH", "The mitochondrial matrix; thiamine, ATP and FAD", "The cytosol; ATP, lipoic acid and acetyl-CoA"], "Biotin carries the CO2 group. Acetyl-CoA binding activates the enzyme.", "Pyruvate to PEP");
+XG(2, "Where is PEP carboxykinase (PEPCK) located?", "The cytosol", ["The mitochondrial matrix only", "The outer mitochondrial membrane", "The inner mitochondrial membrane"], "Oxaloacetate is shuttled out of the mitochondrion as malate and converted back to oxaloacetate in the cytosol.", "Pyruvate to PEP");
+XG(2, "Why is oxaloacetate converted to malate in the mitochondrion?", "So it can leave the mitochondrion, since oxaloacetate itself is not shuttled out", ["To make NAD+ for the citric acid cycle", "Because malate is the substrate of PEPCK in the cytosol", "To make ATP in the matrix by substrate-level phosphorylation"], "Malate dehydrogenase reduces OAA to malate; in the cytosol malate is oxidized back to OAA.", "Pyruvate to PEP");
+XG(2, "Why can fatty acids not be turned into a net amount of glucose in humans?", "Acetyl-CoA cannot be converted back to oxaloacetate", ["Fatty acids are too hydrophobic to enter the liver cell", "Fatty acids are degraded to pyruvate, which cannot go forward", "Fatty acids are only stored in the brain and kidney"], "There is no pathway from acetyl-CoA to oxaloacetate: the two carbons that enter the cycle are matched by two lost as CO2.", "Substrates");
+XG(2, "How does glycerol enter gluconeogenesis?", "As dihydroxyacetone phosphate", ["As oxaloacetate, after a carboxylation", "As acetyl-CoA, through beta-oxidation", "As lactate, through lactate dehydrogenase"], "Glycerol comes from breakdown of triacylglycerols.", "Substrates");
+XG(2, "Which amino acids cannot be used to make glucose?", "Leucine and lysine", ["Alanine and glutamine", "Aspartate and glutamate", "Serine and glycine"], "Those two are degraded to acetyl-CoA, not to oxaloacetate or pyruvate.", "Substrates");
+XG(2, "How many high-energy phosphates are spent to make one glucose from two pyruvates?", "Six (4 ATP and 2 GTP)", ["Two ATP and no GTP", "Four ATP and no GTP", "Two ATP and two GTP, giving four"], "The extra cost of reversing the favorable pathway is 4 high-energy phosphates.", "Energetics");
+XG(2, "How does the cost compare when two glycerols make one glucose?", "It costs only 2 ATP", ["It costs 4 ATP and 2 GTP", "It costs 6 ATP", "It makes ATP"], "Glycerol enters at DHAP, past the expensive pyruvate to PEP steps.", "Energetics");
+XG(2, "What does fructose 2,6-bisphosphate do?", "It activates PFK (glycolysis) and inhibits fructose 1,6-bisphosphatase (gluconeogenesis)", ["It inhibits PFK and activates fructose 1,6-bisphosphatase in the liver", "It activates both PFK and fructose 1,6-bisphosphatase", "It inhibits both PFK and fructose 1,6-bisphosphatase"], "It is the signal that glucose is abundant.", "Regulation");
+XG(2, "Low blood glucose leads to glucagon release and a rise in cAMP. What happens to fructose 2,6-bisphosphate?", "It falls, because the FBPase2 activity is activated", ["It rises, because PFK2 is activated by glucagon", "It is unchanged, because cAMP has no effect on it", "It becomes fructose 1,6-bisphosphate in the cell"], "Low F2,6BP lets gluconeogenesis run and slows glycolysis.", "Regulation");
+XG(2, "Which cell conditions favor gluconeogenesis over glycolysis in the liver?", "High ATP and citrate, low AMP", ["High AMP and ADP, low ATP", "Low citrate and high AMP", "High fructose 2,6-bisphosphate"], "When energy is needed (high AMP), glycolysis (PFK) is on and FBPase is off.", "Regulation");
+XG(2, "What is the Cori cycle?", "Muscle lactate goes to the liver, becomes glucose, and returns to muscle", ["Liver glucose goes to muscle and becomes glycogen only, with no lactate", "Muscle pyruvate is turned into acetyl-CoA in the liver and stored", "Fatty acids from adipose are turned into glucose in the kidney"], "Lactate from skeletal muscle and red blood cells travels in the blood to the liver, where lactate dehydrogenase makes pyruvate for gluconeogenesis.", "Cori cycle");
+XG(1, "Which enzyme converts lactate to pyruvate in the liver?", "Lactate dehydrogenase", ["Pyruvate carboxylase", "Pyruvate dehydrogenase", "Aldolase"], "Lactate can also be oxidized by well-oxygenated cells such as heart muscle.", "Cori cycle");
+
+/* ---------- Drag and place: citric acid cycle and PDH ---------- */
+const CAC_MOL = ['Citrate', 'Isocitrate', 'Alpha-ketoglutarate', 'Succinyl-CoA', 'Succinate', 'Fumarate', 'Malate', 'Oxaloacetate'];
+const CAC_ENZ = ['Citrate synthase', 'Aconitase', 'Isocitrate dehydrogenase', 'Alpha-ketoglutarate dehydrogenase', 'Succinyl-CoA synthetase', 'Succinate dehydrogenase', 'Fumarase', 'Malate dehydrogenase'];
+PLC("B4PC", 2, "Citric acid cycle: place the molecules in order. Acetyl-CoA enters at step 1; every arrow shows the enzyme.", [
+  ["1. Oxaloacetate + acetyl-CoA  → ", { a: 'Citrate' }, "  (citrate synthase)"],
+  ["2. Citrate  → ", { a: 'Isocitrate' }, "  (aconitase)"],
+  ["3. Isocitrate  → ", { a: 'Alpha-ketoglutarate' }, "  (isocitrate dehydrogenase)"],
+  ["4. Alpha-ketoglutarate  → ", { a: 'Succinyl-CoA' }, "  (alpha-ketoglutarate dehydrogenase)"],
+  ["5. Succinyl-CoA  → ", { a: 'Succinate' }, "  (succinyl-CoA synthetase)"],
+  ["6. Succinate  → ", { a: 'Fumarate' }, "  (succinate dehydrogenase)"],
+  ["7. Fumarate  → ", { a: 'Malate' }, "  (fumarase)"],
+  ["8. Malate  → ", { a: 'Oxaloacetate' }, "  (malate dehydrogenase)"]
+], ['Pyruvate', 'Glutamate', 'Phosphoenolpyruvate', 'Acetyl-CoA'], "The cycle starts with citrate and ends with oxaloacetate, which accepts the next acetyl-CoA. Molecule order: citrate, isocitrate, alpha-ketoglutarate, succinyl-CoA, succinate, fumarate, malate, oxaloacetate.", "Citric acid cycle lecture");
+PLC("B4PC", 2, "Citric acid cycle: place the enzyme on each arrow.", [
+  ["Oxaloacetate + acetyl-CoA → citrate:  ", { a: 'Citrate synthase' }],
+  ["Citrate → isocitrate:  ", { a: 'Aconitase' }],
+  ["Isocitrate → alpha-ketoglutarate:  ", { a: 'Isocitrate dehydrogenase' }],
+  ["Alpha-ketoglutarate → succinyl-CoA:  ", { a: 'Alpha-ketoglutarate dehydrogenase' }],
+  ["Succinyl-CoA → succinate:  ", { a: 'Succinyl-CoA synthetase' }],
+  ["Succinate → fumarate:  ", { a: 'Succinate dehydrogenase' }],
+  ["Fumarate → malate:  ", { a: 'Fumarase' }],
+  ["Malate → oxaloacetate:  ", { a: 'Malate dehydrogenase' }]
+], ['Pyruvate dehydrogenase', 'Pyruvate carboxylase', 'Lactate dehydrogenase'], "Citrate synthase condenses, aconitase isomerizes, two dehydrogenases decarboxylate (isocitrate DH, alpha-KGDH), succinyl-CoA synthetase makes GTP, succinate DH makes FADH2, fumarase hydrates and malate DH regenerates oxaloacetate.", "Citric acid cycle lecture");
+PLC("B4PC", 2, "Citric acid cycle: what is made or released at each step? Place the result on each arrow.", [
+  ["Citrate synthase (OAA + acetyl-CoA → citrate):  ", { a: 'CoA is released' }],
+  ["Aconitase (citrate → isocitrate):  ", { a: 'No carrier made (isomerization)' }],
+  ["Isocitrate dehydrogenase:  ", { a: 'NADH + CO2' }],
+  ["Alpha-ketoglutarate dehydrogenase:  ", { a: 'NADH + CO2' }],
+  ["Succinyl-CoA synthetase:  ", { a: 'GTP (or ATP)' }],
+  ["Succinate dehydrogenase:  ", { a: 'FADH2' }],
+  ["Fumarase (fumarate → malate):  ", { a: 'Water is added' }],
+  ["Malate dehydrogenase:  ", { a: 'NADH' }]
+], ['FADH2 + CO2', 'ATP + NADPH', 'Water is removed', 'NAD+ is made'], "Three NADH (isocitrate DH, alpha-KGDH, malate DH), one FADH2 (succinate DH), one GTP (succinyl-CoA synthetase) and two CO2 (isocitrate DH, alpha-KGDH) per turn.", "Citric acid cycle lecture");
+PLC("B4PC", 2, "Citric acid cycle: fill in the net result of one turn for one acetyl-CoA.", [
+  ["NAD+ used:  ", { a: '3' }, "   NADH made:  ", { a: '3' }],
+  ["FAD used:  ", { a: '1' }, "   FADH2 made:  ", { a: '1' }],
+  ["GDP used:  ", { a: '1' }, "   GTP made:  ", { a: '1' }],
+  ["CO2 released:  ", { a: '2' }],
+  ["ATP made later by oxidative phosphorylation (about):  ", { a: '10' }]
+], ['0', '4', '6'], "3 NAD+ + FAD + GDP + Pi + acetyl-CoA gives 3 NADH + FADH2 + GTP + CoA + 2 CO2. About 10 ATP result when the four electron pairs reach O2.", "Citric acid cycle lecture");
+PLC("B4PC", 3, "Citric acid cycle: how many carbons does each molecule have?", [
+  ["Oxaloacetate:  ", { a: '4' }, "   Citrate:  ", { a: '6' }],
+  ["Isocitrate:  ", { a: '6' }, "   Alpha-ketoglutarate:  ", { a: '5' }],
+  ["Succinyl-CoA (acyl part):  ", { a: '4' }, "   Succinate:  ", { a: '4' }],
+  ["Fumarate:  ", { a: '4' }, "   Malate:  ", { a: '4' }]
+], ['2', '3'], "Acetyl (2C) adds to oxaloacetate (4C) to make citrate (6C). Two carbons are lost as CO2 (isocitrate DH, then alpha-KGDH), leaving 4-carbon molecules until oxaloacetate is regenerated.", "Citric acid cycle lecture");
+PLC("B4PC", 2, "Pyruvate dehydrogenase: place the substrates and products of the reaction.", [
+  ["Pyruvate + ", { a: 'CoA' }, " + ", { a: 'NAD+' }],
+  ["→  ", { a: 'Acetyl-CoA' }, " + ", { a: 'CO2' }, " + ", { a: 'NADH' }],
+  ["Where it happens:  ", { a: 'Mitochondrial matrix' }],
+  ["Is the reaction reversible?  ", { a: 'No, irreversible' }]
+], ['FAD', 'Oxaloacetate', 'FADH2', 'Cytosol', 'Yes, reversible'], "Pyruvate + CoA + NAD+ gives acetyl-CoA + CO2 + NADH in the matrix. It cannot be reversed, so animals cannot turn acetyl-CoA back into pyruvate.", "Citric acid cycle lecture");
+PLC("B4PC", 3, "Pyruvate dehydrogenase: place each coenzyme as catalytic (regenerated) or stoichiometric (used as a substrate).", [
+  ["Thiamine pyrophosphate (TPP):  ", { a: 'Catalytic' }],
+  ["Lipoic acid:  ", { a: 'Catalytic' }],
+  ["FAD:  ", { a: 'Catalytic' }],
+  ["CoA:  ", { a: 'Stoichiometric' }],
+  ["NAD+:  ", { a: 'Stoichiometric' }]
+], ['Allosteric inhibitor'], "TPP (B1), lipoic acid and FAD are catalytic coenzymes. CoA and NAD+ are consumed as substrates.", "Citric acid cycle lecture");
+PLC("B4PC", 3, "Pyruvate dehydrogenase: place the enzyme (E1, E2, E3) with its job and its regulator.", [
+  ["E1:  ", { a: 'Pyruvate dehydrogenase' }, "  (phosphorylated by PDH kinase, which ", { a: 'inactivates' }, " it)"],
+  ["E2:  ", { a: 'Dihydrolipoyl transacetylase' }, "  (inhibited by ", { a: 'acetyl-CoA' }, ")"],
+  ["E3:  ", { a: 'Dihydrolipoyl dehydrogenase' }, "  (inhibited by ", { a: 'NADH' }, "; bound by ", { a: 'arsenite' }, ")"]
+], ['activates', 'Citrate synthase', 'ATP', 'cyanide'], "E1 decarboxylates pyruvate and is the target of the kinase/phosphatase pair. E2 forms the core and makes acetyl-CoA. E3 resets the enzyme. Arsenite and mercury hit E3.", "Citric acid cycle lecture");
+
+/* ---------- Drag and place: gluconeogenesis ---------- */
+PLC("B4PG", 2, "Gluconeogenesis: place the molecules and bypass enzymes on the path from pyruvate to glucose.", [
+  ["1. Pyruvate (enters the mitochondrion) → ", { a: 'Oxaloacetate' }, "  by ", { a: 'Pyruvate carboxylase' }],
+  ["2. Oxaloacetate → ", { a: 'Malate' }, "  (leaves the mitochondrion; malate dehydrogenase)"],
+  ["3. Malate → oxaloacetate in the cytosol → ", { a: 'Phosphoenolpyruvate' }, "  by ", { a: 'PEP carboxykinase' }],
+  ["4. PEP → … (glycolysis run backward) … → ", { a: 'Fructose 1,6-bisphosphate' }],
+  ["5. Fructose 1,6-bisphosphate → ", { a: 'Fructose 6-phosphate' }, "  by ", { a: 'Fructose 1,6-bisphosphatase' }],
+  ["6. Fructose 6-phosphate → ", { a: 'Glucose 6-phosphate' }],
+  ["7. Glucose 6-phosphate → ", { a: 'Glucose' }, "  by ", { a: 'Glucose 6-phosphatase' }]
+], ['Lactate', 'Citrate', 'Hexokinase', 'Phosphofructokinase', 'Pyruvate kinase'], "Pyruvate carboxylase (mitochondria) and PEPCK (cytosol) bypass pyruvate kinase. FBPase-1 bypasses phosphofructokinase. Glucose 6-phosphatase (mainly liver) bypasses hexokinase.", "Gluconeogenesis lecture");
+PLC("B4PG", 2, "Gluconeogenesis: match each irreversible glycolysis enzyme with the enzyme that replaces it.", [
+  ["Hexokinase is bypassed by:  ", { a: 'Glucose 6-phosphatase' }],
+  ["Phosphofructokinase is bypassed by:  ", { a: 'Fructose 1,6-bisphosphatase' }],
+  ["Pyruvate kinase is bypassed by:  ", { a: 'Pyruvate carboxylase' }, "  then  ", { a: 'PEP carboxykinase' }]
+], ['Lactate dehydrogenase', 'Aldolase', 'Enolase'], "The three glycolytic enzymes with large negative free energy changes are replaced by four gluconeogenic enzymes.", "Gluconeogenesis lecture");
+PLC("B4PG", 3, "Gluconeogenesis: place the location and helper for each key enzyme.", [
+  ["Pyruvate carboxylase is in the ", { a: 'mitochondrial matrix' }, ", uses the vitamin ", { a: 'biotin' }, " and needs ", { a: 'acetyl-CoA' }, " bound to be active"],
+  ["PEP carboxykinase is in the ", { a: 'cytosol' }],
+  ["Glucose 6-phosphatase frees glucose mainly in the ", { a: 'liver' }]
+], ['muscle', 'thiamine (TPP)', 'NADH', 'outer membrane'], "Pyruvate carboxylase needs ATP, biotin (CO2 carrier) and acetyl-CoA as an activator. PEPCK is cytosolic. Glucose release is mainly a liver job.", "Gluconeogenesis lecture");
+PLC("B4PG", 2, "Gluconeogenesis: which substrates enter, and where?", [
+  ["Lactate enters as:  ", { a: 'Pyruvate' }],
+  ["Glycerol enters as:  ", { a: 'Dihydroxyacetone phosphate' }],
+  ["Most amino acids (not leucine or lysine) can be converted to:  ", { a: 'Oxaloacetate' }],
+  ["Fatty acids give ", { a: 'Acetyl-CoA' }, ", which cannot make net glucose because it cannot become ", { a: 'Oxaloacetate' }]
+], ['Fructose 1,6-bisphosphate', 'Citrate', 'Glucose 6-phosphate'], "Lactate and some amino acids enter via pyruvate, glycerol via DHAP, and many amino acids via oxaloacetate. Acetyl-CoA has no route back to oxaloacetate.", "Gluconeogenesis lecture");
+PLC("B4PG", 2, "Gluconeogenesis: fill in the energy cost.", [
+  ["Two pyruvate make one glucose and cost  ", { a: '4' }, "  ATP plus  ", { a: '2' }, "  GTP, which is  ", { a: '6' }, "  high-energy phosphates"],
+  ["Two glycerol make one glucose and cost only  ", { a: '2' }, "  ATP"]
+], ['1', '3', '8'], "Pyruvate to glucose costs 4 ATP + 2 GTP. Glycerol enters at DHAP, past the costly steps, so 2 ATP is enough.", "Gluconeogenesis lecture");
+PLC("B4PG", 3, "Gluconeogenesis and glycolysis: place the regulatory effects (reciprocal regulation in the liver).", [
+  ["Fructose 2,6-bisphosphate ", { a: 'activates' }, " PFK and ", { a: 'inhibits' }, " fructose 1,6-bisphosphatase"],
+  ["High AMP (energy needed): gluconeogenesis is  ", { a: 'turned off' }, ",  glycolysis is  ", { a: 'turned on' }],
+  ["High ATP and citrate (energy plentiful): gluconeogenesis is  ", { a: 'turned on' }],
+  ["Low blood glucose, glucagon high: fructose 2,6-bisphosphate  ", { a: 'falls' }],
+  ["High blood glucose, fructose 6-phosphate high: fructose 2,6-bisphosphate  ", { a: 'rises' }]
+], ['no change'], "Reciprocal regulation keeps only one of the two pathways active. Glucose scarce means gluconeogenesis; glucose abundant means glycolysis.", "Gluconeogenesis lecture");
+PLC("B4PG", 2, "The Cori cycle: place each part of the loop.", [
+  ["Working muscle (low oxygen) turns pyruvate into  ", { a: 'Lactate' }],
+  ["Lactate travels in the  ", { a: 'Blood' }, "  to the  ", { a: 'Liver' }],
+  ["The liver makes pyruvate using  ", { a: 'Lactate dehydrogenase' }, "  then makes glucose by  ", { a: 'Gluconeogenesis' }],
+  ["Glucose returns through the blood to  ", { a: 'Muscle' }]
+], ['Acetyl-CoA', 'Glycolysis', 'Brain', 'Pyruvate dehydrogenase'], "Lactate from muscle and red blood cells is recycled by the liver into glucose, which muscle can use again.", "Gluconeogenesis lecture");
+
+/* ---------- Drag and place: electron transport ---------- */
+PLC("B4PE", 2, "Electron transport: place the name of each complex.", [
+  ["Complex I:  ", { a: 'NADH-Q oxidoreductase' }],
+  ["Complex II:  ", { a: 'Succinate dehydrogenase' }],
+  ["Complex III:  ", { a: 'Q-cytochrome c oxidoreductase' }],
+  ["Complex IV:  ", { a: 'Cytochrome c oxidase' }]
+], ['Pyruvate dehydrogenase', 'ATP synthase', 'Catalase'], "Complex I: NADH-Q oxidoreductase; II: succinate dehydrogenase; III: Q-cytochrome c oxidoreductase; IV: cytochrome c oxidase.", "Electron transport lecture");
+PLC("B4PE", 2, "Electron transport: place the path of electrons from NADH to oxygen.", [
+  ["NADH gives electrons to  ", { a: 'Complex I' }],
+  ["Complex I passes them to  ", { a: 'Coenzyme Q' }, ",  which carries them to  ", { a: 'Complex III' }],
+  ["Complex III passes them to  ", { a: 'Cytochrome c' }, ",  which carries them to  ", { a: 'Complex IV' }],
+  ["Complex IV gives them to  ", { a: 'O2' }, ",  making  ", { a: 'H2O' }],
+  ["Electrons from FADH2 enter at  ", { a: 'Complex II' }, "  and then also go to  ", { a: 'Coenzyme Q' }]
+], ['NAD+', 'CO2', 'Complex IV', 'Superoxide dismutase'], "NADH: I, then CoQ, then III, then cytochrome c, then IV, then O2 to H2O. FADH2 joins at II, then CoQ.", "Electron transport lecture");
+PLC("B4PE", 3, "Electron transport: how many protons are pumped?", [
+  ["Complex I:  ", { a: '4' }, "   Complex II:  ", { a: '0' }],
+  ["Complex III:  ", { a: '2' }, "   Complex IV:  ", { a: '4' }],
+  ["Total for one NADH:  ", { a: '10' }, "   Total for one FADH2:  ", { a: '6' }]
+], ['1', '3', '8', '12'], "NADH: 4 + 2 + 4 = 10 protons. FADH2 skips complex I and II pumps none, so 2 + 4 = 6.", "Electron transport lecture");
+PLC("B4PE", 2, "Electron transport: which complex does each inhibitor block?", [
+  ["Rotenone:  ", { a: 'Complex I' }],
+  ["Amobarbital (a barbiturate):  ", { a: 'Complex I' }],
+  ["Antimycin A:  ", { a: 'Complex III' }],
+  ["Cyanide:  ", { a: 'Complex IV' }],
+  ["Carbon monoxide and hydrogen sulfide:  ", { a: 'Complex IV' }]
+], ['Complex II', 'ATP synthase'], "Rotenone and amytal block complex I, antimycin A blocks III, and cyanide, CO and H2S block cytochrome c oxidase.", "Electron transport lecture");
+PLC("B4PE", 3, "Reactive oxygen species: place each step of the chain of events.", [
+  ["O2 plus one electron makes  ", { a: 'Superoxide' }],
+  ["The enzyme  ", { a: 'Superoxide dismutase' }, "  converts it to O2 and  ", { a: 'Hydrogen peroxide' }],
+  ["The enzyme  ", { a: 'Catalase' }, "  converts that to O2 and  ", { a: 'Water' }],
+  ["Antioxidant vitamins that also help:  ", { a: 'E and C' }]
+], ['Cytochrome c oxidase', 'Hydroxide', 'B1 and B2'], "Partial reduction of O2 gives superoxide (and peroxide with two electrons). SOD makes H2O2, catalase breaks it into O2 and water; vitamins E and C add protection.", "Electron transport lecture");
+PLC("B4PE", 2, "Mitochondria: place the location of each process.", [
+  ["Electron transport chain complexes:  ", { a: 'Inner membrane' }],
+  ["Citric acid cycle enzymes and PDH:  ", { a: 'Matrix' }],
+  ["Protons are pumped from the matrix into the  ", { a: 'Intermembrane space' }],
+  ["The matrix side of the inner membrane is  ", { a: 'Negative (N)' }, "  and the cytoplasmic side is  ", { a: 'Positive (P)' }]
+], ['Outer membrane', 'Cytosol', 'Nucleus'], "The chain sits in the inner membrane. Pumping protons out of the matrix makes the matrix side negative and the outer side positive.", "Electron transport lecture");
+
+/* ---------- Drag and place: digestion and energy carriers ---------- */
+PLC("B4PD", 2, "Protein digestion: place the signals and the enzymes.", [
+  ["Stomach acid activates  ", { a: 'Pepsinogen' }, "  into  ", { a: 'Pepsin' }],
+  ["Acid chyme makes the intestine release  ", { a: 'Secretin' }, ",  which makes the pancreas release  ", { a: 'Sodium bicarbonate' }],
+  ["Polypeptides make the intestine release  ", { a: 'CCK' }, ",  which makes the pancreas release enzymes and the gallbladder release  ", { a: 'Bile salts' }],
+  ["The duodenum makes  ", { a: 'Enteropeptidase' }, ",  which turns trypsinogen into  ", { a: 'Trypsin' }]
+], ['Insulin', 'Glucagon', 'Lipase', 'Pepsin A'], "Secretin brings bicarbonate; CCK brings enzymes and bile; enteropeptidase starts the pancreatic zymogen cascade by making trypsin.", "Digestion lecture");
+PLC("B4PD", 2, "Carbohydrate digestion: place the enzyme and the products.", [
+  ["Starch alpha 1-4 bonds are cut by  ", { a: 'Alpha-amylase' }],
+  ["Alpha 1-6 branch points are cut by  ", { a: 'Alpha-dextrinase' }],
+  ["Sucrose is split by  ", { a: 'Sucrase' }, "  into glucose and  ", { a: 'Fructose' }],
+  ["Lactose is split by  ", { a: 'Lactase' }, "  into glucose and  ", { a: 'Galactose' }],
+  ["Maltose is split by  ", { a: 'Maltase' }, "  into two  ", { a: 'Glucose' }]
+], ['Pepsin', 'Trypsin', 'Mannose'], "Amylase and dextrinase work on starch. Sucrase, lactase and maltase are brush-border disaccharidases. Acarbose blocks amylase and alpha-glucosidases.", "Digestion lecture");
+PLC("B4PD", 2, "Lipid digestion: place the steps from the diet to the lymph.", [
+  ["Bile salts are made from  ", { a: 'Cholesterol' }, "  in the liver and make an  ", { a: 'Emulsion' }],
+  ["Lipases break triacylglycerol into  ", { a: 'Fatty acids' }, "  and  ", { a: 'Monoacylglycerol' }],
+  ["These are carried to the gut wall in  ", { a: 'Micelles' }],
+  ["Inside the cell they are rebuilt into  ", { a: 'Triacylglycerol' }, "  and packed into  ", { a: 'Chylomicrons' }, "  with apoprotein  ", { a: 'B48' }],
+  ["Chylomicrons first enter the  ", { a: 'Lymph' }]
+], ['Glucose', 'Portal vein', 'B100', 'Amino acids'], "Emulsified fat is cut by lipases; absorbed products form triacylglycerol in the gut cell, then chylomicrons carrying apoB48 go to lymph and then blood.", "Digestion lecture");
+PLC("B4PD", 2, "Energy carriers: place the vitamin or role for each carrier.", [
+  ["NAD+ is made from  ", { a: 'Niacin (B3)' }],
+  ["FAD is made from  ", { a: 'Riboflavin (B2)' }],
+  ["Acetyl-CoA contains  ", { a: 'Pantothenate (B5)' }],
+  ["TPP, the PDH coenzyme, is made from  ", { a: 'Thiamine (B1)' }],
+  ["NADPH is used for  ", { a: 'Reductive biosynthesis' }, ";  NADH and FADH2 feed the  ", { a: 'Electron transport chain' }]
+], ['Folate', 'Vitamin K', 'Glycolysis', 'Beta-oxidation'], "Water-soluble vitamins are coenzyme precursors: niacin to NAD+, riboflavin to FAD, pantothenate to CoA, thiamine to TPP.", "Digestion lecture");
+PLC("B4PD", 3, "ATP and fast energy: fill in the numbers and molecules.", [
+  ["ATP + H2O → ADP + Pi releases about  ", { a: '-30.5 kJ/mol' }],
+  ["ATP hydrolyzed all the way to AMP releases about  ", { a: '-45.6 kJ/mol' }],
+  ["Creatine phosphate + ADP →  ", { a: 'ATP' }, "  +  ", { a: 'Creatine' }, "  (enzyme:  ", { a: 'Creatine kinase' }, ")"]
+], ['-15 kJ/mol', '+30.5 kJ/mol', 'Hexokinase', 'Creatinine'], "Hydrolysis to ADP releases about 30.5 kJ/mol and to AMP about 45.6 kJ/mol. Creatine kinase moves a phosphoryl group from creatine phosphate to ADP for quick bursts.", "Digestion lecture");
 /* ---------------- Menstrual cycle graph: draw-the-hormone question ----------------
    Curves are traced from the instructor's idealized 28-day schematic (pituitary panel: FSH dashed, LH solid;
    ovary panel: progesterone dashed, estradiol solid). Values are 0..1 within each panel; shape matters, not scale. */
@@ -7428,7 +7741,7 @@ const World = (function () {
   const CATS = [
     ['BG', 'Brand / Generic'], ['CL', 'Drug classes'], ['MOA', 'Mechanisms'], ['AE', 'Adverse effects'],
     ['DDI', 'Interactions'], ['CN', 'Counseling'], ['AD', 'Antidotes'], ['SIG', 'Sig & law'],
-    ['TOP', 'Weekly drugs'], ['TP3', 'Weekly drugs \u00B7 P3'], ['TP1', 'Weekly drugs \u00B7 P1'], ['BIOG', 'Biochemistry \u00B7 transcription and translation'], ['BIO4', 'Biochemistry \u00B7 metabolism and DNA replication'], ['PT4Q', 'PharmTox \u00B7 Exam 4 question bank'], ['CALC', 'Calculations'], ['PT3', 'PharmTox \u00B7 Exam 3 questions'], ['PT3G', 'PharmTox \u00B7 Exam 3 drug practice'], ['PT4', 'PharmTox \u00B7 Exam 4 drug practice'], ['TH3', 'Therapeutics \u00B7 Exam 3'], ['ASD', 'Med Chem \u00B7 Exam 3 antiseizure drugs'], ['CHO', 'Med Chem \u00B7 Exam 3 cholinergic drugs'], ['MET3', 'Med Chem \u00B7 Exam 3 metabolism (tap the site)'], ['EX3', 'Med Chem \u00B7 Exam 3 cram (professor review)'], ['TH3F', 'Therapeutics \u00B7 IBS, constipation, diarrhea'], ['TH3C', 'Therapeutics \u00B7 Contraceptives'], ['GER', 'Therapeutics \u00B7 Geriatrics'], ['T553', 'Therapeutics III \u00B7 Syllabus topics'], ['HIM', 'Andy \u00B7 Heart failure'], ['MY', 'My studies']
+    ['TOP', 'Weekly drugs'], ['TP3', 'Weekly drugs \u00B7 P3'], ['TP1', 'Weekly drugs \u00B7 P1'], ['B4D', 'Exam 4 \u00B7 digestion and energy carriers'], ['B4C', 'Exam 4 \u00B7 pyruvate dehydrogenase and citric acid cycle'], ['B4E', 'Exam 4 \u00B7 electron transport'], ['B4G', 'Exam 4 \u00B7 gluconeogenesis and Cori cycle'], ['B4PD', 'Exam 4 place \u00B7 digestion and energy carriers'], ['B4PC', 'Exam 4 place \u00B7 citric acid cycle and PDH'], ['B4PE', 'Exam 4 place \u00B7 electron transport'], ['B4PG', 'Exam 4 place \u00B7 gluconeogenesis'], ['BIOG', 'Biochemistry \u00B7 transcription and translation'], ['BIO4', 'Biochemistry \u00B7 metabolism and DNA replication'], ['PT4Q', 'PharmTox \u00B7 Exam 4 question bank'], ['CALC', 'Calculations'], ['PT3', 'PharmTox \u00B7 Exam 3 questions'], ['PT3G', 'PharmTox \u00B7 Exam 3 drug practice'], ['PT4', 'PharmTox \u00B7 Exam 4 drug practice'], ['TH3', 'Therapeutics \u00B7 Exam 3'], ['ASD', 'Med Chem \u00B7 Exam 3 antiseizure drugs'], ['CHO', 'Med Chem \u00B7 Exam 3 cholinergic drugs'], ['MET3', 'Med Chem \u00B7 Exam 3 metabolism (tap the site)'], ['EX3', 'Med Chem \u00B7 Exam 3 cram (professor review)'], ['TH3F', 'Therapeutics \u00B7 IBS, constipation, diarrhea'], ['TH3C', 'Therapeutics \u00B7 Contraceptives'], ['GER', 'Therapeutics \u00B7 Geriatrics'], ['T553', 'Therapeutics III \u00B7 Syllabus topics'], ['HIM', 'Andy \u00B7 Heart failure'], ['MY', 'My studies']
   ];
   const CATNAME = {}; CATS.forEach(c => CATNAME[c[0]] = c[1]);
   /* The Topics menu is built from this table. A new category needs a CATS entry above and a slot in one course here
@@ -7438,13 +7751,13 @@ const World = (function () {
     { id: 'p443', name: 'PharmTox', code: 'PHAR 443', tag: 'P2', year: 'P2', cats: ['TOP', 'PT3', 'PT3G', 'PT4Q', 'PT4'], sched: 'p2', note: 'Weekly drug sheets plus the exam question sets.' },
     { id: 'p451', name: 'Therapeutics', code: 'PHAR 451', tag: 'P2', year: 'P2', cats: ['TH3F', 'TH3C', 'TH3', 'GER'], note: 'Exam 3 GI and contraception topics, and geriatrics.' },
     { id: 'p421', name: 'Medicinal Chemistry', code: 'PHAR 421', tag: 'P2', year: 'P2', cats: ['EX3', 'ASD', 'CHO', 'MET3'], note: 'Exam 3: start with the cram tab (built from the professor\u2019s study guide), then antiseizure, cholinergic and tap-the-site metabolism.' },
-    { id: 'p1bio', name: 'Biochemistry', tag: 'P1', year: 'P1', cats: ['BIOG', 'BIO4'], note: 'Practice questions from the biochemistry tests: gene expression, then metabolism and DNA replication.' },
+    { id: 'p1bio', name: 'Biochemistry', tag: 'P1', year: 'P1', cats: ['B4D', 'B4C', 'B4E', 'B4G', 'B4PD', 'B4PC', 'B4PE', 'B4PG', 'BIOG', 'BIO4'], note: 'Exam 4: digestion, citric acid cycle, electron transport and gluconeogenesis (questions, plus drag-and-place pathway cards). Then the older gene expression and metabolism tests.' },
     { id: 'p1top', name: 'Top 300 weekly drugs', short: 'Top 300', tag: 'P1', year: 'P1', cats: ['TP1'], sched: 'p1', note: 'Brand, generic and indication for the Top 300, most prescribed first. Starts Jan 12: top 20, 35, 50, 65, 80, 90, 100 and on to 300. Each week adds new drugs and the earlier weeks stay on for review.' },
     { id: 'p3top', name: 'Top 300 weekly drugs', short: 'Top 300', tag: 'P3', year: 'P3', cats: ['TP3'], sched: 'p3', note: 'Drug list sheets by system, one set per week.' },
     { id: 'p553', name: 'Therapeutics III', code: 'PHAR 553', tag: 'P3', year: 'P3', cats: ['T553'], note: 'Syllabus topics: asthma, COPD, renal, diabetes, gout, migraine, RA and SLE, thyroid, liver, hepatitis, blood pressure, lipids, pain, nutrition, fluids and electrolytes.' },
     { id: 'my', name: 'My studies', tag: 'Yours', year: 'all', cats: ['MY'], note: 'Decks you wrote or imported from Quizlet. Add and manage them on the My studies tab.' }
   ];
-  const CHIP = { EX3: 'Exam 3 cram: professor\u2019s review (all three topics)', ASD: 'Exam 3: antiseizure drugs', CHO: 'Exam 3: cholinergic drugs', MET3: 'Exam 3: metabolism (tap the site)', TOP: 'Weekly drugs', PT3: 'Exam 3: your exam questions', PT3G: 'Exam 3: drug-list practice', BIOG: 'Biochem: transcription and translation', BIO4: 'Biochem: metabolism and DNA replication', PT4Q: 'Exam 4: PharmTox question bank', PT4: 'Exam 4: mania and psychosis drugs', TP1: 'Top 300: brand, generic, indication', TH3: 'Exam 3: IBD, ulcers, hemorrhoids and the rest', TH3F: 'Exam 3: IBS, constipation, diarrhea', TH3C: 'Exam 3: contraceptives', GER: 'Geriatrics: aging, polypharmacy, deprescribing', HIM: 'Heart failure: Andy’s questions', T553: 'Therapeutics III topics', TP3: 'Top 300 weekly drugs', MY: 'My studies' };
+  const CHIP = { B4D: 'Exam 4: digestion and energy carriers', B4C: 'Exam 4: pyruvate dehydrogenase and citric acid cycle', B4E: 'Exam 4: electron transport', B4G: 'Exam 4: gluconeogenesis and Cori cycle', B4PD: 'Exam 4 drag and place: digestion and energy carriers', B4PC: 'Exam 4 drag and place: citric acid cycle and PDH', B4PE: 'Exam 4 drag and place: electron transport', B4PG: 'Exam 4 drag and place: gluconeogenesis', EX3: 'Exam 3 cram: professor\u2019s review (all three topics)', ASD: 'Exam 3: antiseizure drugs', CHO: 'Exam 3: cholinergic drugs', MET3: 'Exam 3: metabolism (tap the site)', TOP: 'Weekly drugs', PT3: 'Exam 3: your exam questions', PT3G: 'Exam 3: drug-list practice', BIOG: 'Biochem: transcription and translation', BIO4: 'Biochem: metabolism and DNA replication', PT4Q: 'Exam 4: PharmTox question bank', PT4: 'Exam 4: mania and psychosis drugs', TP1: 'Top 300: brand, generic, indication', TH3: 'Exam 3: IBD, ulcers, hemorrhoids and the rest', TH3F: 'Exam 3: IBS, constipation, diarrhea', TH3C: 'Exam 3: contraceptives', GER: 'Geriatrics: aging, polypharmacy, deprescribing', HIM: 'Heart failure: Andy’s questions', T553: 'Therapeutics III topics', TP3: 'Top 300 weekly drugs', MY: 'My studies' };
   const courseCats = (c) => c.cats.filter(k => k !== 'MY' || S.decks.length);
   const YEARS = ['P1', 'P2', 'P3'];
   const curYear = () => YEARS.indexOf(S.set.year) >= 0 ? S.set.year : 'P2';
@@ -7465,6 +7778,14 @@ const World = (function () {
     SIG: ['I cannot read the doctor handwriting.', 'The prescription is confusing, can you check?', 'The auditor stopped by, quick question.'],
     CALC: ['The nurse needs this calculation checked.', 'Please double-check this dose.', 'Compounding order just came in.'],
     TOP: ['This one is on this week\'s drug list.', 'Quiz week! Do you know this one?', 'Straight off the Top 300 sheet.'],
+    B4D: ['Biochem Exam 4: how food is digested.', 'Digestion and energy carriers.', 'Enzymes, hormones and vitamins.'],
+    B4C: ['Biochem Exam 4: the citric acid cycle.', 'Pyruvate to CO2: what is made?', 'Around the cycle.'],
+    B4E: ['Biochem Exam 4: electron transport.', 'Complexes, carriers and protons.', 'From NADH to oxygen.'],
+    B4G: ['Biochem Exam 4: making glucose.', 'Gluconeogenesis and the Cori cycle.', 'Bypass the irreversible steps.'],
+    B4PD: ['Drag and place: digestion.', 'Place each enzyme, hormone and carrier.'],
+    B4PC: ['Drag and place: the citric acid cycle.', 'Place molecules, enzymes and products.'],
+    B4PE: ['Drag and place: electron transport.', 'Place the complexes, carriers and protons.'],
+    B4PG: ['Drag and place: gluconeogenesis.', 'Place the bypass steps and the Cori cycle.'],
     BIOG: ['Biochem time: from DNA to protein.', 'Transcription or translation?', 'Gene expression check.'],
     BIO4: ['Biochem time: metabolism and DNA replication.', 'Pathways and polymerases.', 'Biochem test practice.'],
     TP1: ['Top 300 time: brand, generic or what it treats?', 'Quiz week! Do you know this one?', 'Straight off the Top 300 list.'],
@@ -7997,7 +8318,7 @@ const World = (function () {
     const himDev = forceHim; forceHim = false;
     if (!q) { cur = { empty: true, seed: info.seed, karen: false }; renderPanel(); return; }
     const himWalk = q.c === 'HIM' && !evt && !karen && !sweaty && !elder && !calm && World.ok && !!World.himArrive && (!S.himDone || himDev);
-    const opts = q.draw ? [{ t: q.a, ok: true }, { t: 'Your line did not match the real curve closely enough', ok: false }] : q.ms ? shuffle(q.as.map(t => ({ t, ok: true })).concat(q.w.map(t => ({ t, ok: false })))) : shuffle([q.a, ...q.w].map((t, i) => ({ t, ok: i === 0 })));
+    const opts = q.place ? [{ t: q.a, ok: true }, { t: 'At least one blank was empty or wrong', ok: false }] : q.draw ? [{ t: q.a, ok: true }, { t: 'Your line did not match the real curve closely enough', ok: false }] : q.ms ? shuffle(q.as.map(t => ({ t, ok: true })).concat(q.w.map(t => ({ t, ok: false })))) : shuffle([q.a, ...q.w].map((t, i) => ({ t, ok: i === 0 })));
     cur = { q, sel: {}, wasMissed: S.missed.indexOf(q.k) >= 0, opts, t0: Date.now(), done: false, hint: false, karen, sweaty, elder, elderStage: elder ? 0 : 2, ask: pick(ELDER_ASK), caller: !!info.caller && !calm, name: karen ? 'Karen' : sweaty ? 'Jittery Jim' : elder ? pick(info.seed % 2 === 0 ? ELDER_F : ELDER_M) : evt && EV_NAME[evt] ? pick(EV_NAME[evt]) : pick(NAMES), flavor: info.caller ? pick(CALLER_LINES) : evt ? pick(EV_FLAVOR[evt]) : karen ? pick(KAREN_LINES) : sweaty ? pick(JIM_LINES) : pick(FLAVOR[q.c] || FLAVOR.MY), seed: info.seed, num: S.served + 1, picked: -1, ok: false, resHTML: '', interrupt: null, evt: evt, insp: evt === 'inspector' ? { n: 1, of: 3, ok: 0, used: [q.k] } : null, review: reviewDue(S.mastery[q.k]), body: info.body || 'normal' };
     if (info.recall) delete spOut['r' + info.recall]; if (info.regular) delete spOut['g' + info.regular];
     if (sp) spApply(sp);
@@ -8019,7 +8340,7 @@ const World = (function () {
     World.karenLoss(u.id);
     return { lost: u, from, to: from - 1 };
   }
-  const confNeeded = () => S.set.conf !== false && srOn() && cur && cur.q && !askedToday(cur.q.k) && cur && cur.q && !cur.q.gen && !cur.q.draw && !cur.q.meta && !cur.karen && !cur.sweaty && !cur.elder && !cur.lab && !cur.caller && !cur.evt && !cur.visit;
+  const confNeeded = () => S.set.conf !== false && srOn() && cur && cur.q && !askedToday(cur.q.k) && cur && cur.q && !cur.q.gen && !cur.q.draw && !cur.q.place && !cur.q.meta && !cur.karen && !cur.sweaty && !cur.elder && !cur.lab && !cur.caller && !cur.evt && !cur.visit;
   function answer(idx, conf) {
     if (!cur || cur.empty || cur.done || view !== 'q') return;
     if (cur.elder && cur.elderStage < 2) { if (idx >= 0 && idx < 2 && cur.elderStage === 0) elderPick(); return; }
@@ -8131,6 +8452,7 @@ const World = (function () {
     checkAwards();
     if (cur.lab) { S.labN = (S.labN || 0) + 1; save(); } else if (cur.visit) { if (cur.hero) World.himReact(ok); else World.visitorReact(ok); } else World.react(ok, pay);
     if (q.meta) { const ms = MOLS[q.meta.mol]().sites, want = [].concat(q.meta.site)[0]; if (!siteOk) extra += '<p class="why"><b>Site:</b> ' + (cur.site && ms[cur.site] ? 'You tapped the ' + esc(ms[cur.site].t) + '. ' : '') + 'The change happens at the ' + esc(ms[want].t) + ' (shown in green).</p>'; }
+    if (q.place && !ok) extra += '<p class="why"><b>Correct blanks:</b> ' + esc(placeSlots(q).map(s => s.a).join(' \u2192 ')) + '</p>';
     if (q.draw && cur.dscore) extra += '<p class="why"><b>Your drawing:</b> ' + esc(cur.dscore.reason) + '</p>';
     const correctText = q.ms ? cur.opts.filter(o2 => o2.ok).map(o2 => o2.t).join(' · ') : cur.opts.find(o2 => o2.ok).t;
     cur.resHTML = `<div class="result ${ok ? 'good' : 'fail'}" id="result"><h3>${esc(head)}</h3>
@@ -8316,12 +8638,12 @@ const World = (function () {
       ${isK ? `<div class="ktimer" role="timer" aria-label="Time before Karen leaves"><div class="timer"><i id="timerbar"></i></div><b id="tcount">${KAREN_SEC}</b><small>sec</small></div>` : ''}
       <div class="rx-body">
         <div class="patient">${avatar(cur.seed, cur.done ? (cur.ok ? 'ok' : 'bad') : 'idle', cur.karen, cur.sweaty, cur.elder, cur.name === 'Andy')}<div class="bubble"><em>${esc(cur.flavor)}</em><p>${esc(q.q)}</p></div></div>
-        ${molHTML()}${q.draw ? `<div class="drawbox">${drawHTML()}</div>${jimHTML()}` : `<div class="opts" role="group" aria-label="Answer choices">${opts}${jimHTML()}</div>`}${q.ms && !cur.done && cur.pend === undefined ? `<div class="msbar"><span>Select all that apply (${Object.keys(cur.sel).length} picked)</span><button type="button" class="btn go" id="msgo" ${Object.keys(cur.sel).length ? '' : 'disabled'}>Submit answer</button></div>` : ''}${labToolsHTML()}
+        ${molHTML()}${q.place ? `<div class="placebox">${placeHTML()}</div>${jimHTML()}` : q.draw ? `<div class="drawbox">${drawHTML()}</div>${jimHTML()}` : `<div class="opts" role="group" aria-label="Answer choices">${opts}${jimHTML()}</div>`}${q.ms && !cur.done && cur.pend === undefined ? `<div class="msbar"><span>Select all that apply (${Object.keys(cur.sel).length} picked)</span><button type="button" class="btn go" id="msgo" ${Object.keys(cur.sel).length ? '' : 'disabled'}>Submit answer</button></div>` : ''}${labToolsHTML()}
         ${cur.pend !== undefined && !cur.done ? confBar() : ''}
         ${cur.binder ? `<div class="binderbox" role="note"><b>\uD83D\uDCD8 Reference binder</b><span>${binderNote(q)}</span></div>` : ''}
-        <div class="tools pwtools"><button type="button" class="btn" id="hintbtn" ${S.pw.hint < 1 || cur.hint || cur.done || q.draw ? 'disabled' : ''}>\uD83D\uDC8A Hint pill (${S.pw.hint})</button>
-          <button type="button" class="btn" id="secbtn" aria-pressed="${!!cur.secArmed}" ${(S.pw.second < 1 && !cur.secArmed) || cur.secUsed || cur.done || q.draw || q.meta ? 'disabled' : ''}>\uD83D\uDD01 Second chance (${S.pw.second})${cur.secArmed ? ' ready' : ''}</button>
-          <button type="button" class="btn" id="bindbtn" ${S.pw.binder < 1 || cur.binder || cur.done || q.draw ? 'disabled' : ''}>\uD83D\uDCD8 Binder (${S.pw.binder})</button>
+        <div class="tools pwtools"><button type="button" class="btn" id="hintbtn" ${S.pw.hint < 1 || cur.hint || cur.done || q.draw || q.place ? 'disabled' : ''}>\uD83D\uDC8A Hint pill (${S.pw.hint})</button>
+          <button type="button" class="btn" id="secbtn" aria-pressed="${!!cur.secArmed}" ${(S.pw.second < 1 && !cur.secArmed) || cur.secUsed || cur.done || q.draw || q.place || q.meta ? 'disabled' : ''}>\uD83D\uDD01 Second chance (${S.pw.second})${cur.secArmed ? ' ready' : ''}</button>
+          <button type="button" class="btn" id="bindbtn" ${S.pw.binder < 1 || cur.binder || cur.done || q.draw || q.place ? 'disabled' : ''}>\uD83D\uDCD8 Binder (${S.pw.binder})</button>
           ${S.pw.hint + S.pw.second + S.pw.binder < 1 && !cur.done ? '<button type="button" class="mini" data-act="pwshop">Get power-ups</button>' : ''}
           <span class="keyhint">${isK ? 'Karen leaves in ' + KAREN_SEC + ' s. A wrong answer costs an upgrade.' : cur.lab ? 'Lab bench: no timer. Pays x1.5.' : timerOn() ? 'Speed bonus fades over 20 s' : focusOn() ? 'Focus mode: no timer' : 'Timer bonus is off'}</span></div>
       </div>${(cur.resHTML || '').replace('<!--FLAG-->', () => cur.q && cur.done ? flagLink(cur.q, cur.flagPick) : '')}</article>`;
@@ -8339,6 +8661,59 @@ const World = (function () {
     const msg = cur.done ? (cur.dscore ? esc(cur.dscore.reason) : '') : 'Press and drag across the graph from day 1 to day 28. Draw the line for <b>' + esc(CYC[q.draw].name) + '</b>.';
     return cycSVG(q.draw, pts, cur.done, cur.ok) + `<p class="drawnote" aria-live="polite">${msg}</p>` + (cur.done ? `<p class="drawkey"><i class="k1"></i> your line <i class="k2" style="--c:${CYC[q.draw].col}"></i> the real ${esc(CYC[q.draw].name)} curve</p>` : `<div class="btnrow"><button type="button" class="btn" id="drawclr" ${n ? '' : 'disabled'}>Clear</button><button type="button" class="btn go" id="drawgo" ${n >= 8 ? '' : 'disabled'}>Submit drawing</button></div>`);
   }
+
+  /* ---- drag-and-place pathway question (bio4x.js): q.place = { parts:[ [text | {a:'answer'}, ...] per row ], extra:[decoy chips] } ---- */
+  function placeSlots(q) { const out = []; q.place.rows.forEach((r, ri) => r.forEach((p, pi) => { if (typeof p !== 'string') out.push({ id: ri + '.' + pi, a: p.a }); })); return out; }
+  function placeChips(q) {
+    if (!q._pc) { const set = []; placeSlots(q).forEach(s => { if (set.indexOf(s.a) < 0) set.push(s.a); }); (q.place.extra || []).forEach(x => { if (set.indexOf(x) < 0) set.push(x); }); q._pc = set; }
+    if (!cur.plOrder) cur.plOrder = shuffle(q._pc.slice());
+    return cur.plOrder;
+  }
+  function placeHTML() {
+    const q = cur.q, pl = cur.pl || (cur.pl = {}), sel = cur.plSel;
+    const chips = placeChips(q);
+    const rows = q.place.rows.map((r, ri) => '<li class="prow">' + r.map((p, pi) => {
+      if (typeof p === 'string') return '<span class="ptxt">' + esc(p) + '</span>';
+      const id = ri + '.' + pi, v = pl[id];
+      const cls = 'pslot' + (v ? ' full' : '') + (cur.done ? (v === p.a ? ' right' : ' wrong') : '');
+      return '<button type="button" class="' + cls + '" data-sid="' + id + '" aria-label="blank">' + (v ? esc(v) : '<i>drop here</i>') + (cur.done && v !== p.a ? '<small>' + esc(p.a) + '</small>' : '') + '</button>';
+    }).join('') + '</li>').join('');
+    const bank = cur.done ? '' : '<div class="pbank" role="group" aria-label="Word bank">' + chips.map(c => '<button type="button" class="pchip' + (sel === c ? ' on' : '') + '" data-chip="' + esc(c) + '">' + esc(c) + '</button>').join('') + '</div>';
+    const n = Object.keys(pl).length, tot = placeSlots(q).length;
+    const note = cur.done ? (cur.ok ? '<b>Every blank is right.</b>' : 'Red blanks were wrong or empty; the right answer is shown under each.') : 'Drag a tile onto a blank, or tap a tile and then tap a blank. Tap a filled blank to clear it. Tiles can be used more than once. ' + n + ' of ' + tot + ' filled.';
+    return '<ol class="prows">' + rows + '</ol>' + bank + '<p class="drawnote" aria-live="polite">' + note + '</p>' + (cur.done ? '' : '<div class="btnrow"><button type="button" class="btn" id="plclr" ' + (n ? '' : 'disabled') + '>Clear</button><button type="button" class="btn go" id="plgo" ' + (n === tot ? '' : 'disabled') + '>Check</button></div>');
+  }
+  function placeFill(id, chip) { if (!cur || !cur.q || !cur.q.place || cur.done) return; cur.pl = cur.pl || {}; if (chip) cur.pl[id] = chip; else delete cur.pl[id]; cur.plSel = null; renderPanel(); }
+  function placeSubmit() {
+    if (!cur || !cur.q || !cur.q.place || cur.done) return;
+    const sl = placeSlots(cur.q); if (sl.some(s => !cur.pl[s.id])) { toast('Fill every blank first.'); return; }
+    const all = sl.every(s => cur.pl[s.id] === s.a); cur.tPick = Date.now(); answer(all ? 0 : 1);
+  }
+  let plDrag = null, plSkip = false;
+  document.addEventListener('pointerdown', (e) => {
+    const c = e.target.closest && e.target.closest('.pchip'); if (!c || !cur || !cur.q || !cur.q.place || cur.done) return;
+    plDrag = { chip: c.dataset.chip, x: e.clientX, y: e.clientY, ghost: null, id: e.pointerId };
+  });
+  document.addEventListener('pointermove', (e) => {
+    if (!plDrag) return;
+    if (!plDrag.ghost && Math.hypot(e.clientX - plDrag.x, e.clientY - plDrag.y) > 7) { const g = document.createElement('div'); g.className = 'pghost'; g.textContent = plDrag.chip; document.body.appendChild(g); plDrag.ghost = g; }
+    if (plDrag.ghost) { e.preventDefault(); plDrag.ghost.style.left = e.clientX + 'px'; plDrag.ghost.style.top = e.clientY + 'px'; const el = document.elementFromPoint(e.clientX, e.clientY), sl = el && el.closest && el.closest('.pslot'); document.querySelectorAll('.pslot.hot').forEach(x => x.classList.remove('hot')); if (sl) sl.classList.add('hot'); }
+  }, { passive: false });
+  const plEnd = (e) => {
+    if (!plDrag) return; const d = plDrag; plDrag = null;
+    if (!d.ghost) return;
+    d.ghost.remove(); document.querySelectorAll('.pslot.hot').forEach(x => x.classList.remove('hot')); plSkip = true; setTimeout(() => { plSkip = false; }, 60);
+    if (e.type === 'pointercancel') return;
+    const el = document.elementFromPoint(e.clientX, e.clientY), sl = el && el.closest && el.closest('.pslot');
+    if (sl) placeFill(sl.dataset.sid, d.chip);
+  };
+  document.addEventListener('pointerup', plEnd); document.addEventListener('pointercancel', plEnd);
+  document.addEventListener('click', (e) => {
+    if (plSkip || !cur || !cur.q || !cur.q.place || cur.done) return;
+    const c = e.target.closest && e.target.closest('.pchip'), sl = e.target.closest && e.target.closest('.pslot');
+    if (c) { cur.plSel = cur.plSel === c.dataset.chip ? null : c.dataset.chip; renderPanel(); }
+    else if (sl) { if (cur.plSel) placeFill(sl.dataset.sid, cur.plSel); else if ((cur.pl || {})[sl.dataset.sid]) placeFill(sl.dataset.sid, null); }
+  });
   function drawPt(e) {
     const svg = $('#cycsvg'); if (!svg) return null;
     const r = svg.getBoundingClientRect(), vx = (e.clientX - r.left) / r.width * 360, vy = (e.clientY - r.top) / r.height * 222;
@@ -8941,7 +9316,7 @@ const World = (function () {
     TOPQ.forEach(q => { if (isTop(q) && S.set.topics[q.c] !== false && q.from <= t && !q.ms) live.push(q); });
     let pool = live;
     const dated = live.filter(q => q.from); if (dated.length) { const latest = dated.map(q => q.from).sort().pop(); pool = live.filter(q => q.from === latest); if (pool.length < 2) pool = dated; }
-    if (pool.length < 2) pool = pool.concat(BANK.filter(q => !q.meta && !q.draw));
+    if (pool.length < 2) pool = pool.concat(BANK.filter(q => !q.meta && !q.draw && !q.place));
     const picks = []; shuffle(pool.slice()).forEach(q => { if (picks.length < 2 && picks.every(p => p.k !== q.k)) picks.push(q); });
     return picks.map(q => ({ q: q, opts: shuffle([q.a, ...q.w].map((x, i) => ({ t: x, ok: i === 0 }))) }));
   }
@@ -10985,7 +11360,7 @@ const micLab3 = () => !!(World.ok && World.setMic);
   }
   setInterval(micTick, 25000);
 
-  const GAME_VERSION = 151;
+  const GAME_VERSION = 152;
   const b64u = (u8) => { let s = ''; for (let i = 0; i < u8.length; i += 0x8000) s += String.fromCharCode.apply(null, u8.subarray(i, i + 0x8000)); return btoa(s).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); };
   const unb64u = (t) => { const s = atob(t.replace(/-/g, '+').replace(/_/g, '/')), u = new Uint8Array(s.length); for (let i = 0; i < s.length; i++) u[i] = s.charCodeAt(i); return u; };
   const chk = (t) => { let h = 2166136261; for (let i = 0; i < t.length; i++) { h ^= t.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36); };
@@ -11190,6 +11565,8 @@ const micLab3 = () => !!(World.ok && World.setMic);
     if (t.id === 'hangbtn') return hangUp();
     if (t.dataset.conf) { if (cur && cur.pend !== undefined && !cur.done) answer(cur.pend, t.dataset.conf); return; }
     if (t.id === 'msgo') return answer(-2);
+    if (t.id === 'plgo') return placeSubmit();
+    if (t.id === 'plclr') { if (cur && !cur.done) { cur.pl = {}; cur.plSel = null; renderPanel(); } return; }
     if (t.id === 'drawgo') return drawSubmit();
     if (t.id === 'drawclr') { if (cur && !cur.done) { cur.dpts = []; renderPanel(); } return; }
     if (t.classList.contains('opt')) return cur && cur.q && cur.q.ms ? msToggle(+t.dataset.i) : answer(+t.dataset.i);
@@ -11223,7 +11600,7 @@ const micLab3 = () => !!(World.ok && World.setMic);
       else if (e.key === 'Enter' && phone.call && phone.call.done && !e.target.closest('button')) hangUp();
       return;
     }
-    if (view === 'q' && !cur.done && !cur.empty && cur.q && cur.q.draw) return;
+    if (view === 'q' && !cur.done && !cur.empty && cur.q && (cur.q.draw || cur.q.place)) return;
     if (view === 'q' && !cur.done && !cur.empty && cur.q && cur.q.ms && cur.pend !== undefined && ['1', '2', '3'].indexOf(e.key) >= 0) { answer(-2, ['guess', 'sure', 'certain'][+e.key - 1]); return; }
     if (view === 'q' && !cur.done && !cur.empty && cur.q && cur.q.ms) { if (['1', '2', '3', '4', '5', '6'].indexOf(e.key) >= 0) msToggle(+e.key - 1); else if (e.key === 'Enter' && Object.keys(cur.sel).length) { e.preventDefault(); answer(-2); } return; }
     if (view === 'q' && cur.pend !== undefined && !cur.done && !cur.empty && ['1', '2', '3'].indexOf(e.key) >= 0) { answer(cur.pend, ['guess', 'sure', 'certain'][+e.key - 1]); return; }

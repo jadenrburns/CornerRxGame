@@ -1040,6 +1040,21 @@ body.trip .stats .stat { animation: tripbob 1.4s ease-in-out infinite; }
 .confbtn { flex: 1 1 110px; font-weight: 700; }
 .confbtn kbd { opacity: .6; margin-right: 6px; }
 .deckrow a.mini { text-decoration: none; color: inherit; display: inline-block; }
+.placebox { display: grid; gap: 10px; margin-top: 8px; }
+.prows { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+.prow { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; padding: 6px 8px; border-radius: 10px; background: rgba(0,0,0,.05); font-size: 14px; }
+.ptxt { font-weight: 600; }
+.pslot { min-width: 110px; min-height: 34px; padding: 4px 10px; border: 2px dashed #8a8f98; border-radius: 9px; background: #fff; color: #222; font: inherit; font-size: 13px; cursor: pointer; text-align: center; touch-action: manipulation; }
+.pslot i { opacity: .45; font-style: normal; }
+.pslot.full { border-style: solid; border-color: #2d7ff9; background: #eaf2ff; }
+.pslot.hot { border-color: #f5a000; background: #fff4d6; }
+.pslot.right { border-color: #2e9e4f; background: #e4f7ea; }
+.pslot.wrong { border-color: #d64545; background: #fdeaea; }
+.pslot small { display: block; color: #2e7d3f; font-size: 11px; }
+.pbank { display: flex; flex-wrap: wrap; gap: 6px; padding: 8px; border-radius: 10px; background: rgba(0,0,0,.07); }
+.pchip { padding: 5px 10px; border: 1px solid #6b7280; border-radius: 999px; background: #fff; color: #222; font: inherit; font-size: 13px; cursor: grab; touch-action: none; user-select: none; }
+.pchip.on { background: #2d7ff9; color: #fff; border-color: #2d7ff9; }
+.pghost { position: fixed; z-index: 9999; transform: translate(-50%, -120%); padding: 5px 10px; border-radius: 999px; background: #2d7ff9; color: #fff; font-size: 13px; pointer-events: none; box-shadow: 0 4px 12px rgba(0,0,0,.3); }
 .drawbox { display: grid; gap: 8px; margin-top: 8px; }
 .cycsvg { width: 100%; max-width: 520px; height: auto; touch-action: none; cursor: crosshair; display: block; margin: 0 auto; user-select: none; -webkit-user-select: none; }
 .cybox { fill: var(--surface); stroke: var(--line); stroke-width: 1.5; }

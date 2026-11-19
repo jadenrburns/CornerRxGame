@@ -6,7 +6,7 @@
   const CATS = [
     ['BG', 'Brand / Generic'], ['CL', 'Drug classes'], ['MOA', 'Mechanisms'], ['AE', 'Adverse effects'],
     ['DDI', 'Interactions'], ['CN', 'Counseling'], ['AD', 'Antidotes'], ['SIG', 'Sig & law'],
-    ['TOP', 'Weekly drugs'], ['TP3', 'Weekly drugs \u00B7 P3'], ['TP1', 'Weekly drugs \u00B7 P1'], ['BIOG', 'Biochemistry \u00B7 transcription and translation'], ['BIO4', 'Biochemistry \u00B7 metabolism and DNA replication'], ['PT4Q', 'PharmTox \u00B7 Exam 4 question bank'], ['CALC', 'Calculations'], ['PT3', 'PharmTox \u00B7 Exam 3 questions'], ['PT3G', 'PharmTox \u00B7 Exam 3 drug practice'], ['PT4', 'PharmTox \u00B7 Exam 4 drug practice'], ['TH3', 'Therapeutics \u00B7 Exam 3'], ['ASD', 'Med Chem \u00B7 Exam 3 antiseizure drugs'], ['CHO', 'Med Chem \u00B7 Exam 3 cholinergic drugs'], ['MET3', 'Med Chem \u00B7 Exam 3 metabolism (tap the site)'], ['EX3', 'Med Chem \u00B7 Exam 3 cram (professor review)'], ['TH3F', 'Therapeutics \u00B7 IBS, constipation, diarrhea'], ['TH3C', 'Therapeutics \u00B7 Contraceptives'], ['GER', 'Therapeutics \u00B7 Geriatrics'], ['T553', 'Therapeutics III \u00B7 Syllabus topics'], ['HIM', 'Andy \u00B7 Heart failure'], ['MY', 'My studies']
+    ['TOP', 'Weekly drugs'], ['TP3', 'Weekly drugs \u00B7 P3'], ['TP1', 'Weekly drugs \u00B7 P1'], ['B4D', 'Exam 4 \u00B7 digestion and energy carriers'], ['B4C', 'Exam 4 \u00B7 pyruvate dehydrogenase and citric acid cycle'], ['B4E', 'Exam 4 \u00B7 electron transport'], ['B4G', 'Exam 4 \u00B7 gluconeogenesis and Cori cycle'], ['B4PD', 'Exam 4 place \u00B7 digestion and energy carriers'], ['B4PC', 'Exam 4 place \u00B7 citric acid cycle and PDH'], ['B4PE', 'Exam 4 place \u00B7 electron transport'], ['B4PG', 'Exam 4 place \u00B7 gluconeogenesis'], ['BIOG', 'Biochemistry \u00B7 transcription and translation'], ['BIO4', 'Biochemistry \u00B7 metabolism and DNA replication'], ['PT4Q', 'PharmTox \u00B7 Exam 4 question bank'], ['CALC', 'Calculations'], ['PT3', 'PharmTox \u00B7 Exam 3 questions'], ['PT3G', 'PharmTox \u00B7 Exam 3 drug practice'], ['PT4', 'PharmTox \u00B7 Exam 4 drug practice'], ['TH3', 'Therapeutics \u00B7 Exam 3'], ['ASD', 'Med Chem \u00B7 Exam 3 antiseizure drugs'], ['CHO', 'Med Chem \u00B7 Exam 3 cholinergic drugs'], ['MET3', 'Med Chem \u00B7 Exam 3 metabolism (tap the site)'], ['EX3', 'Med Chem \u00B7 Exam 3 cram (professor review)'], ['TH3F', 'Therapeutics \u00B7 IBS, constipation, diarrhea'], ['TH3C', 'Therapeutics \u00B7 Contraceptives'], ['GER', 'Therapeutics \u00B7 Geriatrics'], ['T553', 'Therapeutics III \u00B7 Syllabus topics'], ['HIM', 'Andy \u00B7 Heart failure'], ['MY', 'My studies']
   ];
   const CATNAME = {}; CATS.forEach(c => CATNAME[c[0]] = c[1]);
   /* The Topics menu is built from this table. A new category needs a CATS entry above and a slot in one course here
@@ -16,13 +16,13 @@
     { id: 'p443', name: 'PharmTox', code: 'PHAR 443', tag: 'P2', year: 'P2', cats: ['TOP', 'PT3', 'PT3G', 'PT4Q', 'PT4'], sched: 'p2', note: 'Weekly drug sheets plus the exam question sets.' },
     { id: 'p451', name: 'Therapeutics', code: 'PHAR 451', tag: 'P2', year: 'P2', cats: ['TH3F', 'TH3C', 'TH3', 'GER'], note: 'Exam 3 GI and contraception topics, and geriatrics.' },
     { id: 'p421', name: 'Medicinal Chemistry', code: 'PHAR 421', tag: 'P2', year: 'P2', cats: ['EX3', 'ASD', 'CHO', 'MET3'], note: 'Exam 3: start with the cram tab (built from the professor\u2019s study guide), then antiseizure, cholinergic and tap-the-site metabolism.' },
-    { id: 'p1bio', name: 'Biochemistry', tag: 'P1', year: 'P1', cats: ['BIOG', 'BIO4'], note: 'Practice questions from the biochemistry tests: gene expression, then metabolism and DNA replication.' },
+    { id: 'p1bio', name: 'Biochemistry', tag: 'P1', year: 'P1', cats: ['B4D', 'B4C', 'B4E', 'B4G', 'B4PD', 'B4PC', 'B4PE', 'B4PG', 'BIOG', 'BIO4'], note: 'Exam 4: digestion, citric acid cycle, electron transport and gluconeogenesis (questions, plus drag-and-place pathway cards). Then the older gene expression and metabolism tests.' },
     { id: 'p1top', name: 'Top 300 weekly drugs', short: 'Top 300', tag: 'P1', year: 'P1', cats: ['TP1'], sched: 'p1', note: 'Brand, generic and indication for the Top 300, most prescribed first. Starts Jan 12: top 20, 35, 50, 65, 80, 90, 100 and on to 300. Each week adds new drugs and the earlier weeks stay on for review.' },
     { id: 'p3top', name: 'Top 300 weekly drugs', short: 'Top 300', tag: 'P3', year: 'P3', cats: ['TP3'], sched: 'p3', note: 'Drug list sheets by system, one set per week.' },
     { id: 'p553', name: 'Therapeutics III', code: 'PHAR 553', tag: 'P3', year: 'P3', cats: ['T553'], note: 'Syllabus topics: asthma, COPD, renal, diabetes, gout, migraine, RA and SLE, thyroid, liver, hepatitis, blood pressure, lipids, pain, nutrition, fluids and electrolytes.' },
     { id: 'my', name: 'My studies', tag: 'Yours', year: 'all', cats: ['MY'], note: 'Decks you wrote or imported from Quizlet. Add and manage them on the My studies tab.' }
   ];
-  const CHIP = { EX3: 'Exam 3 cram: professor\u2019s review (all three topics)', ASD: 'Exam 3: antiseizure drugs', CHO: 'Exam 3: cholinergic drugs', MET3: 'Exam 3: metabolism (tap the site)', TOP: 'Weekly drugs', PT3: 'Exam 3: your exam questions', PT3G: 'Exam 3: drug-list practice', BIOG: 'Biochem: transcription and translation', BIO4: 'Biochem: metabolism and DNA replication', PT4Q: 'Exam 4: PharmTox question bank', PT4: 'Exam 4: mania and psychosis drugs', TP1: 'Top 300: brand, generic, indication', TH3: 'Exam 3: IBD, ulcers, hemorrhoids and the rest', TH3F: 'Exam 3: IBS, constipation, diarrhea', TH3C: 'Exam 3: contraceptives', GER: 'Geriatrics: aging, polypharmacy, deprescribing', HIM: 'Heart failure: Andy’s questions', T553: 'Therapeutics III topics', TP3: 'Top 300 weekly drugs', MY: 'My studies' };
+  const CHIP = { B4D: 'Exam 4: digestion and energy carriers', B4C: 'Exam 4: pyruvate dehydrogenase and citric acid cycle', B4E: 'Exam 4: electron transport', B4G: 'Exam 4: gluconeogenesis and Cori cycle', B4PD: 'Exam 4 drag and place: digestion and energy carriers', B4PC: 'Exam 4 drag and place: citric acid cycle and PDH', B4PE: 'Exam 4 drag and place: electron transport', B4PG: 'Exam 4 drag and place: gluconeogenesis', EX3: 'Exam 3 cram: professor\u2019s review (all three topics)', ASD: 'Exam 3: antiseizure drugs', CHO: 'Exam 3: cholinergic drugs', MET3: 'Exam 3: metabolism (tap the site)', TOP: 'Weekly drugs', PT3: 'Exam 3: your exam questions', PT3G: 'Exam 3: drug-list practice', BIOG: 'Biochem: transcription and translation', BIO4: 'Biochem: metabolism and DNA replication', PT4Q: 'Exam 4: PharmTox question bank', PT4: 'Exam 4: mania and psychosis drugs', TP1: 'Top 300: brand, generic, indication', TH3: 'Exam 3: IBD, ulcers, hemorrhoids and the rest', TH3F: 'Exam 3: IBS, constipation, diarrhea', TH3C: 'Exam 3: contraceptives', GER: 'Geriatrics: aging, polypharmacy, deprescribing', HIM: 'Heart failure: Andy’s questions', T553: 'Therapeutics III topics', TP3: 'Top 300 weekly drugs', MY: 'My studies' };
   const courseCats = (c) => c.cats.filter(k => k !== 'MY' || S.decks.length);
   const YEARS = ['P1', 'P2', 'P3'];
   const curYear = () => YEARS.indexOf(S.set.year) >= 0 ? S.set.year : 'P2';
@@ -43,6 +43,14 @@
     SIG: ['I cannot read the doctor handwriting.', 'The prescription is confusing, can you check?', 'The auditor stopped by, quick question.'],
     CALC: ['The nurse needs this calculation checked.', 'Please double-check this dose.', 'Compounding order just came in.'],
     TOP: ['This one is on this week\'s drug list.', 'Quiz week! Do you know this one?', 'Straight off the Top 300 sheet.'],
+    B4D: ['Biochem Exam 4: how food is digested.', 'Digestion and energy carriers.', 'Enzymes, hormones and vitamins.'],
+    B4C: ['Biochem Exam 4: the citric acid cycle.', 'Pyruvate to CO2: what is made?', 'Around the cycle.'],
+    B4E: ['Biochem Exam 4: electron transport.', 'Complexes, carriers and protons.', 'From NADH to oxygen.'],
+    B4G: ['Biochem Exam 4: making glucose.', 'Gluconeogenesis and the Cori cycle.', 'Bypass the irreversible steps.'],
+    B4PD: ['Drag and place: digestion.', 'Place each enzyme, hormone and carrier.'],
+    B4PC: ['Drag and place: the citric acid cycle.', 'Place molecules, enzymes and products.'],
+    B4PE: ['Drag and place: electron transport.', 'Place the complexes, carriers and protons.'],
+    B4PG: ['Drag and place: gluconeogenesis.', 'Place the bypass steps and the Cori cycle.'],
     BIOG: ['Biochem time: from DNA to protein.', 'Transcription or translation?', 'Gene expression check.'],
     BIO4: ['Biochem time: metabolism and DNA replication.', 'Pathways and polymerases.', 'Biochem test practice.'],
     TP1: ['Top 300 time: brand, generic or what it treats?', 'Quiz week! Do you know this one?', 'Straight off the Top 300 list.'],
@@ -575,7 +583,7 @@
     const himDev = forceHim; forceHim = false;
     if (!q) { cur = { empty: true, seed: info.seed, karen: false }; renderPanel(); return; }
     const himWalk = q.c === 'HIM' && !evt && !karen && !sweaty && !elder && !calm && World.ok && !!World.himArrive && (!S.himDone || himDev);
-    const opts = q.draw ? [{ t: q.a, ok: true }, { t: 'Your line did not match the real curve closely enough', ok: false }] : q.ms ? shuffle(q.as.map(t => ({ t, ok: true })).concat(q.w.map(t => ({ t, ok: false })))) : shuffle([q.a, ...q.w].map((t, i) => ({ t, ok: i === 0 })));
+    const opts = q.place ? [{ t: q.a, ok: true }, { t: 'At least one blank was empty or wrong', ok: false }] : q.draw ? [{ t: q.a, ok: true }, { t: 'Your line did not match the real curve closely enough', ok: false }] : q.ms ? shuffle(q.as.map(t => ({ t, ok: true })).concat(q.w.map(t => ({ t, ok: false })))) : shuffle([q.a, ...q.w].map((t, i) => ({ t, ok: i === 0 })));
     cur = { q, sel: {}, wasMissed: S.missed.indexOf(q.k) >= 0, opts, t0: Date.now(), done: false, hint: false, karen, sweaty, elder, elderStage: elder ? 0 : 2, ask: pick(ELDER_ASK), caller: !!info.caller && !calm, name: karen ? 'Karen' : sweaty ? 'Jittery Jim' : elder ? pick(info.seed % 2 === 0 ? ELDER_F : ELDER_M) : evt && EV_NAME[evt] ? pick(EV_NAME[evt]) : pick(NAMES), flavor: info.caller ? pick(CALLER_LINES) : evt ? pick(EV_FLAVOR[evt]) : karen ? pick(KAREN_LINES) : sweaty ? pick(JIM_LINES) : pick(FLAVOR[q.c] || FLAVOR.MY), seed: info.seed, num: S.served + 1, picked: -1, ok: false, resHTML: '', interrupt: null, evt: evt, insp: evt === 'inspector' ? { n: 1, of: 3, ok: 0, used: [q.k] } : null, review: reviewDue(S.mastery[q.k]), body: info.body || 'normal' };
     if (info.recall) delete spOut['r' + info.recall]; if (info.regular) delete spOut['g' + info.regular];
     if (sp) spApply(sp);
@@ -597,7 +605,7 @@
     World.karenLoss(u.id);
     return { lost: u, from, to: from - 1 };
   }
-  const confNeeded = () => S.set.conf !== false && srOn() && cur && cur.q && !askedToday(cur.q.k) && cur && cur.q && !cur.q.gen && !cur.q.draw && !cur.q.meta && !cur.karen && !cur.sweaty && !cur.elder && !cur.lab && !cur.caller && !cur.evt && !cur.visit;
+  const confNeeded = () => S.set.conf !== false && srOn() && cur && cur.q && !askedToday(cur.q.k) && cur && cur.q && !cur.q.gen && !cur.q.draw && !cur.q.place && !cur.q.meta && !cur.karen && !cur.sweaty && !cur.elder && !cur.lab && !cur.caller && !cur.evt && !cur.visit;
   function answer(idx, conf) {
     if (!cur || cur.empty || cur.done || view !== 'q') return;
     if (cur.elder && cur.elderStage < 2) { if (idx >= 0 && idx < 2 && cur.elderStage === 0) elderPick(); return; }
@@ -709,6 +717,7 @@
     checkAwards();
     if (cur.lab) { S.labN = (S.labN || 0) + 1; save(); } else if (cur.visit) { if (cur.hero) World.himReact(ok); else World.visitorReact(ok); } else World.react(ok, pay);
     if (q.meta) { const ms = MOLS[q.meta.mol]().sites, want = [].concat(q.meta.site)[0]; if (!siteOk) extra += '<p class="why"><b>Site:</b> ' + (cur.site && ms[cur.site] ? 'You tapped the ' + esc(ms[cur.site].t) + '. ' : '') + 'The change happens at the ' + esc(ms[want].t) + ' (shown in green).</p>'; }
+    if (q.place && !ok) extra += '<p class="why"><b>Correct blanks:</b> ' + esc(placeSlots(q).map(s => s.a).join(' \u2192 ')) + '</p>';
     if (q.draw && cur.dscore) extra += '<p class="why"><b>Your drawing:</b> ' + esc(cur.dscore.reason) + '</p>';
     const correctText = q.ms ? cur.opts.filter(o2 => o2.ok).map(o2 => o2.t).join(' · ') : cur.opts.find(o2 => o2.ok).t;
     cur.resHTML = `<div class="result ${ok ? 'good' : 'fail'}" id="result"><h3>${esc(head)}</h3>
@@ -894,12 +903,12 @@
       ${isK ? `<div class="ktimer" role="timer" aria-label="Time before Karen leaves"><div class="timer"><i id="timerbar"></i></div><b id="tcount">${KAREN_SEC}</b><small>sec</small></div>` : ''}
       <div class="rx-body">
         <div class="patient">${avatar(cur.seed, cur.done ? (cur.ok ? 'ok' : 'bad') : 'idle', cur.karen, cur.sweaty, cur.elder, cur.name === 'Andy')}<div class="bubble"><em>${esc(cur.flavor)}</em><p>${esc(q.q)}</p></div></div>
-        ${molHTML()}${q.draw ? `<div class="drawbox">${drawHTML()}</div>${jimHTML()}` : `<div class="opts" role="group" aria-label="Answer choices">${opts}${jimHTML()}</div>`}${q.ms && !cur.done && cur.pend === undefined ? `<div class="msbar"><span>Select all that apply (${Object.keys(cur.sel).length} picked)</span><button type="button" class="btn go" id="msgo" ${Object.keys(cur.sel).length ? '' : 'disabled'}>Submit answer</button></div>` : ''}${labToolsHTML()}
+        ${molHTML()}${q.place ? `<div class="placebox">${placeHTML()}</div>${jimHTML()}` : q.draw ? `<div class="drawbox">${drawHTML()}</div>${jimHTML()}` : `<div class="opts" role="group" aria-label="Answer choices">${opts}${jimHTML()}</div>`}${q.ms && !cur.done && cur.pend === undefined ? `<div class="msbar"><span>Select all that apply (${Object.keys(cur.sel).length} picked)</span><button type="button" class="btn go" id="msgo" ${Object.keys(cur.sel).length ? '' : 'disabled'}>Submit answer</button></div>` : ''}${labToolsHTML()}
         ${cur.pend !== undefined && !cur.done ? confBar() : ''}
         ${cur.binder ? `<div class="binderbox" role="note"><b>\uD83D\uDCD8 Reference binder</b><span>${binderNote(q)}</span></div>` : ''}
-        <div class="tools pwtools"><button type="button" class="btn" id="hintbtn" ${S.pw.hint < 1 || cur.hint || cur.done || q.draw ? 'disabled' : ''}>\uD83D\uDC8A Hint pill (${S.pw.hint})</button>
-          <button type="button" class="btn" id="secbtn" aria-pressed="${!!cur.secArmed}" ${(S.pw.second < 1 && !cur.secArmed) || cur.secUsed || cur.done || q.draw || q.meta ? 'disabled' : ''}>\uD83D\uDD01 Second chance (${S.pw.second})${cur.secArmed ? ' ready' : ''}</button>
-          <button type="button" class="btn" id="bindbtn" ${S.pw.binder < 1 || cur.binder || cur.done || q.draw ? 'disabled' : ''}>\uD83D\uDCD8 Binder (${S.pw.binder})</button>
+        <div class="tools pwtools"><button type="button" class="btn" id="hintbtn" ${S.pw.hint < 1 || cur.hint || cur.done || q.draw || q.place ? 'disabled' : ''}>\uD83D\uDC8A Hint pill (${S.pw.hint})</button>
+          <button type="button" class="btn" id="secbtn" aria-pressed="${!!cur.secArmed}" ${(S.pw.second < 1 && !cur.secArmed) || cur.secUsed || cur.done || q.draw || q.place || q.meta ? 'disabled' : ''}>\uD83D\uDD01 Second chance (${S.pw.second})${cur.secArmed ? ' ready' : ''}</button>
+          <button type="button" class="btn" id="bindbtn" ${S.pw.binder < 1 || cur.binder || cur.done || q.draw || q.place ? 'disabled' : ''}>\uD83D\uDCD8 Binder (${S.pw.binder})</button>
           ${S.pw.hint + S.pw.second + S.pw.binder < 1 && !cur.done ? '<button type="button" class="mini" data-act="pwshop">Get power-ups</button>' : ''}
           <span class="keyhint">${isK ? 'Karen leaves in ' + KAREN_SEC + ' s. A wrong answer costs an upgrade.' : cur.lab ? 'Lab bench: no timer. Pays x1.5.' : timerOn() ? 'Speed bonus fades over 20 s' : focusOn() ? 'Focus mode: no timer' : 'Timer bonus is off'}</span></div>
       </div>${(cur.resHTML || '').replace('<!--FLAG-->', () => cur.q && cur.done ? flagLink(cur.q, cur.flagPick) : '')}</article>`;
@@ -917,6 +926,59 @@
     const msg = cur.done ? (cur.dscore ? esc(cur.dscore.reason) : '') : 'Press and drag across the graph from day 1 to day 28. Draw the line for <b>' + esc(CYC[q.draw].name) + '</b>.';
     return cycSVG(q.draw, pts, cur.done, cur.ok) + `<p class="drawnote" aria-live="polite">${msg}</p>` + (cur.done ? `<p class="drawkey"><i class="k1"></i> your line <i class="k2" style="--c:${CYC[q.draw].col}"></i> the real ${esc(CYC[q.draw].name)} curve</p>` : `<div class="btnrow"><button type="button" class="btn" id="drawclr" ${n ? '' : 'disabled'}>Clear</button><button type="button" class="btn go" id="drawgo" ${n >= 8 ? '' : 'disabled'}>Submit drawing</button></div>`);
   }
+
+  /* ---- drag-and-place pathway question (bio4x.js): q.place = { parts:[ [text | {a:'answer'}, ...] per row ], extra:[decoy chips] } ---- */
+  function placeSlots(q) { const out = []; q.place.rows.forEach((r, ri) => r.forEach((p, pi) => { if (typeof p !== 'string') out.push({ id: ri + '.' + pi, a: p.a }); })); return out; }
+  function placeChips(q) {
+    if (!q._pc) { const set = []; placeSlots(q).forEach(s => { if (set.indexOf(s.a) < 0) set.push(s.a); }); (q.place.extra || []).forEach(x => { if (set.indexOf(x) < 0) set.push(x); }); q._pc = set; }
+    if (!cur.plOrder) cur.plOrder = shuffle(q._pc.slice());
+    return cur.plOrder;
+  }
+  function placeHTML() {
+    const q = cur.q, pl = cur.pl || (cur.pl = {}), sel = cur.plSel;
+    const chips = placeChips(q);
+    const rows = q.place.rows.map((r, ri) => '<li class="prow">' + r.map((p, pi) => {
+      if (typeof p === 'string') return '<span class="ptxt">' + esc(p) + '</span>';
+      const id = ri + '.' + pi, v = pl[id];
+      const cls = 'pslot' + (v ? ' full' : '') + (cur.done ? (v === p.a ? ' right' : ' wrong') : '');
+      return '<button type="button" class="' + cls + '" data-sid="' + id + '" aria-label="blank">' + (v ? esc(v) : '<i>drop here</i>') + (cur.done && v !== p.a ? '<small>' + esc(p.a) + '</small>' : '') + '</button>';
+    }).join('') + '</li>').join('');
+    const bank = cur.done ? '' : '<div class="pbank" role="group" aria-label="Word bank">' + chips.map(c => '<button type="button" class="pchip' + (sel === c ? ' on' : '') + '" data-chip="' + esc(c) + '">' + esc(c) + '</button>').join('') + '</div>';
+    const n = Object.keys(pl).length, tot = placeSlots(q).length;
+    const note = cur.done ? (cur.ok ? '<b>Every blank is right.</b>' : 'Red blanks were wrong or empty; the right answer is shown under each.') : 'Drag a tile onto a blank, or tap a tile and then tap a blank. Tap a filled blank to clear it. Tiles can be used more than once. ' + n + ' of ' + tot + ' filled.';
+    return '<ol class="prows">' + rows + '</ol>' + bank + '<p class="drawnote" aria-live="polite">' + note + '</p>' + (cur.done ? '' : '<div class="btnrow"><button type="button" class="btn" id="plclr" ' + (n ? '' : 'disabled') + '>Clear</button><button type="button" class="btn go" id="plgo" ' + (n === tot ? '' : 'disabled') + '>Check</button></div>');
+  }
+  function placeFill(id, chip) { if (!cur || !cur.q || !cur.q.place || cur.done) return; cur.pl = cur.pl || {}; if (chip) cur.pl[id] = chip; else delete cur.pl[id]; cur.plSel = null; renderPanel(); }
+  function placeSubmit() {
+    if (!cur || !cur.q || !cur.q.place || cur.done) return;
+    const sl = placeSlots(cur.q); if (sl.some(s => !cur.pl[s.id])) { toast('Fill every blank first.'); return; }
+    const all = sl.every(s => cur.pl[s.id] === s.a); cur.tPick = Date.now(); answer(all ? 0 : 1);
+  }
+  let plDrag = null, plSkip = false;
+  document.addEventListener('pointerdown', (e) => {
+    const c = e.target.closest && e.target.closest('.pchip'); if (!c || !cur || !cur.q || !cur.q.place || cur.done) return;
+    plDrag = { chip: c.dataset.chip, x: e.clientX, y: e.clientY, ghost: null, id: e.pointerId };
+  });
+  document.addEventListener('pointermove', (e) => {
+    if (!plDrag) return;
+    if (!plDrag.ghost && Math.hypot(e.clientX - plDrag.x, e.clientY - plDrag.y) > 7) { const g = document.createElement('div'); g.className = 'pghost'; g.textContent = plDrag.chip; document.body.appendChild(g); plDrag.ghost = g; }
+    if (plDrag.ghost) { e.preventDefault(); plDrag.ghost.style.left = e.clientX + 'px'; plDrag.ghost.style.top = e.clientY + 'px'; const el = document.elementFromPoint(e.clientX, e.clientY), sl = el && el.closest && el.closest('.pslot'); document.querySelectorAll('.pslot.hot').forEach(x => x.classList.remove('hot')); if (sl) sl.classList.add('hot'); }
+  }, { passive: false });
+  const plEnd = (e) => {
+    if (!plDrag) return; const d = plDrag; plDrag = null;
+    if (!d.ghost) return;
+    d.ghost.remove(); document.querySelectorAll('.pslot.hot').forEach(x => x.classList.remove('hot')); plSkip = true; setTimeout(() => { plSkip = false; }, 60);
+    if (e.type === 'pointercancel') return;
+    const el = document.elementFromPoint(e.clientX, e.clientY), sl = el && el.closest && el.closest('.pslot');
+    if (sl) placeFill(sl.dataset.sid, d.chip);
+  };
+  document.addEventListener('pointerup', plEnd); document.addEventListener('pointercancel', plEnd);
+  document.addEventListener('click', (e) => {
+    if (plSkip || !cur || !cur.q || !cur.q.place || cur.done) return;
+    const c = e.target.closest && e.target.closest('.pchip'), sl = e.target.closest && e.target.closest('.pslot');
+    if (c) { cur.plSel = cur.plSel === c.dataset.chip ? null : c.dataset.chip; renderPanel(); }
+    else if (sl) { if (cur.plSel) placeFill(sl.dataset.sid, cur.plSel); else if ((cur.pl || {})[sl.dataset.sid]) placeFill(sl.dataset.sid, null); }
+  });
   function drawPt(e) {
     const svg = $('#cycsvg'); if (!svg) return null;
     const r = svg.getBoundingClientRect(), vx = (e.clientX - r.left) / r.width * 360, vy = (e.clientY - r.top) / r.height * 222;
@@ -1519,7 +1581,7 @@
     TOPQ.forEach(q => { if (isTop(q) && S.set.topics[q.c] !== false && q.from <= t && !q.ms) live.push(q); });
     let pool = live;
     const dated = live.filter(q => q.from); if (dated.length) { const latest = dated.map(q => q.from).sort().pop(); pool = live.filter(q => q.from === latest); if (pool.length < 2) pool = dated; }
-    if (pool.length < 2) pool = pool.concat(BANK.filter(q => !q.meta && !q.draw));
+    if (pool.length < 2) pool = pool.concat(BANK.filter(q => !q.meta && !q.draw && !q.place));
     const picks = []; shuffle(pool.slice()).forEach(q => { if (picks.length < 2 && picks.every(p => p.k !== q.k)) picks.push(q); });
     return picks.map(q => ({ q: q, opts: shuffle([q.a, ...q.w].map((x, i) => ({ t: x, ok: i === 0 }))) }));
   }
@@ -2001,7 +2063,7 @@
   /* ---- save code: the whole save as one long code, to move progress between devices or keep a backup ---- */
 /*@EXT@*/
 /*@MIC@*/
-  const GAME_VERSION = 151;
+  const GAME_VERSION = 152;
   const b64u = (u8) => { let s = ''; for (let i = 0; i < u8.length; i += 0x8000) s += String.fromCharCode.apply(null, u8.subarray(i, i + 0x8000)); return btoa(s).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); };
   const unb64u = (t) => { const s = atob(t.replace(/-/g, '+').replace(/_/g, '/')), u = new Uint8Array(s.length); for (let i = 0; i < s.length; i++) u[i] = s.charCodeAt(i); return u; };
   const chk = (t) => { let h = 2166136261; for (let i = 0; i < t.length; i++) { h ^= t.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36); };
@@ -2206,6 +2268,8 @@
     if (t.id === 'hangbtn') return hangUp();
     if (t.dataset.conf) { if (cur && cur.pend !== undefined && !cur.done) answer(cur.pend, t.dataset.conf); return; }
     if (t.id === 'msgo') return answer(-2);
+    if (t.id === 'plgo') return placeSubmit();
+    if (t.id === 'plclr') { if (cur && !cur.done) { cur.pl = {}; cur.plSel = null; renderPanel(); } return; }
     if (t.id === 'drawgo') return drawSubmit();
     if (t.id === 'drawclr') { if (cur && !cur.done) { cur.dpts = []; renderPanel(); } return; }
     if (t.classList.contains('opt')) return cur && cur.q && cur.q.ms ? msToggle(+t.dataset.i) : answer(+t.dataset.i);
@@ -2239,7 +2303,7 @@
       else if (e.key === 'Enter' && phone.call && phone.call.done && !e.target.closest('button')) hangUp();
       return;
     }
-    if (view === 'q' && !cur.done && !cur.empty && cur.q && cur.q.draw) return;
+    if (view === 'q' && !cur.done && !cur.empty && cur.q && (cur.q.draw || cur.q.place)) return;
     if (view === 'q' && !cur.done && !cur.empty && cur.q && cur.q.ms && cur.pend !== undefined && ['1', '2', '3'].indexOf(e.key) >= 0) { answer(-2, ['guess', 'sure', 'certain'][+e.key - 1]); return; }
     if (view === 'q' && !cur.done && !cur.empty && cur.q && cur.q.ms) { if (['1', '2', '3', '4', '5', '6'].indexOf(e.key) >= 0) msToggle(+e.key - 1); else if (e.key === 'Enter' && Object.keys(cur.sel).length) { e.preventDefault(); answer(-2); } return; }
     if (view === 'q' && cur.pend !== undefined && !cur.done && !cur.empty && ['1', '2', '3'].indexOf(e.key) >= 0) { answer(cur.pend, ['guess', 'sure', 'certain'][+e.key - 1]); return; }
