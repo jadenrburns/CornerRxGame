@@ -931,10 +931,11 @@
   function placeSlots(q) { const out = []; ((q.place.dia && q.place.dia.nodes) || []).forEach((n, i) => { if (n.a) out.push({ id: 'd' + i, a: n.a }); }); q.place.rows.forEach((r, ri) => r.forEach((p, pi) => { if (typeof p !== 'string') out.push({ id: ri + '.' + pi, a: p.a }); })); return out; }
   function slotBtn(id, a) { const v = (cur.pl || {})[id]; const cls = 'pslot' + (v ? ' full' : '') + (cur.done ? (v === a ? ' right' : ' wrong') : ''); return '<button type="button" class="' + cls + '" data-sid="' + id + '" aria-label="blank">' + (v ? esc(v) : '<i>drop here</i>') + (cur.done && v !== a ? '<small>' + esc(a) + '</small>' : '') + '</button>'; }
   function diaHTML(dia) {
+    if (!cur.diaT0) cur.diaT0 = Date.now(); const el = Date.now() - cur.diaT0, popC = el < 900 ? ' pop' : '', popS = el < 900 ? ';animation-delay:-' + el + 'ms' : '';
     const W = dia.W, H = dia.H, pc = (x, y) => 'left:' + (x / W * 100).toFixed(2) + '%;top:' + (y / H * 100).toFixed(2) + '%';
-    const svg = '<svg class="diasvg" viewBox="0 0 ' + W + ' ' + H + '" aria-hidden="true"><defs><marker id="dah" viewBox="0 0 8 8" refX="6" refY="4" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M0,0 L8,4 L0,8 z" fill="context-stroke"/></marker></defs>' + (dia.boxes || []).map(b => '<rect class="diabox" x="' + b.x + '" y="' + b.y + '" width="' + b.w + '" height="' + b.h + '" rx="2"/><text class="diabt" x="' + (b.x + 2) + '" y="' + (b.y + 3.6) + '">' + esc(b.t || '') + '</text>').join('') + (dia.arrows || []).map(a => '<path class="diaar ' + (a.c || '') + '" d="' + (a.d || ('M' + a.p[0][0] + ',' + a.p[0][1] + ' L' + a.p[1][0] + ',' + a.p[1][1])) + '" marker-end="url(#dah)"/>').join('') + '</svg>';
+    const svg = '<svg class="diasvg" viewBox="0 0 ' + W + ' ' + H + '" aria-hidden="true"><defs><marker id="dah" viewBox="0 0 8 8" refX="6" refY="4" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M0,0 L8,4 L0,8 z" fill="context-stroke"/></marker></defs>' + (dia.boxes || []).map(b => '<rect class="diabox" x="' + b.x + '" y="' + b.y + '" width="' + b.w + '" height="' + b.h + '" rx="2"/><text class="diabt" x="' + (b.x + 2) + '" y="' + (b.y + 3.6) + '">' + esc(b.t || '') + '</text>').join('') + (dia.arrows || []).map(a => '<path class="diaar ' + (a.c || '') + '" d="' + (a.d || ('M' + a.p[0][0] + ',' + a.p[0][1] + ' L' + a.p[1][0] + ',' + a.p[1][1])) + '"' + (a.nm ? '' : ' marker-end="url(#dah)"') + '/>').join('') + '</svg>';
     const nodes = dia.nodes.map((n, i) => '<div class="dn ' + (n.al || 'c') + ' ' + (n.c || '') + '" style="' + pc(n.x, n.y) + (n.w ? ';width:' + n.w + '%' : '') + '">' + (n.t ? '<span class="dnt">' + esc(n.t) + '</span>' : '') + (n.a ? slotBtn('d' + i, n.a) : '') + '</div>').join('');
-    return '<div class="dia" style="aspect-ratio:' + W + ' / ' + H + ';--ar:' + (W / H).toFixed(3) + '">' + svg + nodes + '</div>';
+    return '<div class="dia' + popC + '" style="aspect-ratio:' + W + ' / ' + H + ';--ar:' + (W / H).toFixed(3) + popS + '">' + svg + nodes + '</div>';
   }
   function placeChips(q) {
     if (!q._pc) { const set = []; placeSlots(q).forEach(s => { if (set.indexOf(s.a) < 0) set.push(s.a); }); (q.place.extra || []).forEach(x => { if (set.indexOf(x) < 0) set.push(x); }); q._pc = set; }
@@ -2066,7 +2067,7 @@
   /* ---- save code: the whole save as one long code, to move progress between devices or keep a backup ---- */
 /*@EXT@*/
 /*@MIC@*/
-  const GAME_VERSION = 154;
+  const GAME_VERSION = 155;
   const b64u = (u8) => { let s = ''; for (let i = 0; i < u8.length; i += 0x8000) s += String.fromCharCode.apply(null, u8.subarray(i, i + 0x8000)); return btoa(s).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); };
   const unb64u = (t) => { const s = atob(t.replace(/-/g, '+').replace(/_/g, '/')), u = new Uint8Array(s.length); for (let i = 0; i < s.length; i++) u[i] = s.charCodeAt(i); return u; };
   const chk = (t) => { let h = 2166136261; for (let i = 0; i < t.length; i++) { h ^= t.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36); };

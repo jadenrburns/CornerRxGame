@@ -12,22 +12,10 @@ const PLC = (cat, d, title, rows, extra, e, src, dia) => {
   Q(cat, d, title, ans.join(' | '), ["A blank is wrong", "A blank is empty", "The order is mixed up"], e, "Drag and place", src);
   BANK[BANK.length - 1].place = { rows, extra, dia };
 };
-/* ring diagram (cyclic pathway): 8 nodes clockwise from the top; inner arrows with numbered badges */
-const RING = (nodes, notes) => {
-  const W = 100, H = 104, cx = 50, cy = 52, R = 34, r = 21, rad = x => x * Math.PI / 180, out = { W, H, nodes: [], arrows: [], boxes: [] };
-  nodes.forEach((n, i) => { const t = rad(-90 + 45 * i); out.nodes.push(Object.assign({ x: cx + R * Math.cos(t), y: cy + R * Math.sin(t), w: 27 }, n)); });
-  for (let i = 0; i < 8; i++) {
-    const a1 = rad(-90 + 45 * i + 9), a2 = rad(-90 + 45 * i + 36), m = rad(-90 + 45 * i + 22.5);
-    out.arrows.push({ d: 'M' + (cx + r * Math.cos(a1)).toFixed(1) + ',' + (cy + r * Math.sin(a1)).toFixed(1) + ' A' + r + ',' + r + ' 0 0 1 ' + (cx + r * Math.cos(a2)).toFixed(1) + ',' + (cy + r * Math.sin(a2)).toFixed(1) });
-    out.nodes.push({ x: cx + 12 * Math.cos(m), y: cy + 12 * Math.sin(m), t: String(i + 1), c: 'note bdg', w: 8 });
-  }
-  out.nodes.push({ x: cx, y: cy, t: 'Citric acid cycle', c: 'note', w: 20 });
-  (notes || []).forEach(n => out.nodes.push(Object.assign({ c: 'note', al: 'l', w: 40 }, n)));
-  return out;
-};
 const CAC_ORDER = ['Oxaloacetate', 'Citrate', 'Isocitrate', 'Alpha-ketoglutarate', 'Succinyl-CoA', 'Succinate', 'Fumarate', 'Malate'];
 const CAC_ENZ = ['Citrate synthase', 'Aconitase', 'Isocitrate dehydrogenase', 'Alpha-ketoglutarate dehydrogenase', 'Succinyl-CoA synthetase', 'Succinate dehydrogenase', 'Fumarase', 'Malate dehydrogenase'];
-const CAC_RES = ['CoA is released', 'No carrier made (isomerization)', 'NADH + CO2', 'NADH + CO2', 'GTP (or ATP)', 'FADH2', 'Water is added', 'NADH'];
+const CAC_RES = ['CoA released', 'none (isomerization)', 'NADH + CO2', 'NADH + CO2', 'GTP', 'FADH2', 'H2O added', 'NADH'];
+const CAC_IN = ['+ acetyl-CoA', '', '+ NAD+', '+ NAD+ + CoA', '+ GDP + Pi', '+ FAD', '+ H2O', '+ NAD+'];
 const SH = (m) => m;
 
 /* ---------- Digestion and energy carriers ---------- */
@@ -260,23 +248,6 @@ PLC("B4PD", 3, "ATP and fast energy: fill in the numbers and molecules.", [
 ], ['-15 kJ/mol', '+30.5 kJ/mol', 'Hexokinase', 'Creatinine'], "Hydrolysis to ADP releases about 30.5 kJ/mol and to AMP about 45.6 kJ/mol. Creatine kinase moves a phosphoryl group from creatine phosphate to ADP for quick bursts.", "Digestion lecture");
 
 /* ---------- Diagram cards (v153): cyclic and ladder layouts like the lecture outlines ---------- */
-const legend = (arr) => arr.map((t, i) => [(i + 1) + "  " + t]);
-PLC("B4PC", 2, "Citric acid cycle: place the molecule at each position around the cycle. Acetyl-CoA (2C) joins at step 1.",
-  legend(CAC_ENZ.map((e, i) => e + ":  " + (i === 0 ? "top position + acetyl-CoA → next position" : i === 7 ? "last position → top position (regenerated)" : "position " + i + " → position " + (i + 1)))),
-  ['Pyruvate', 'Glutamate', 'Phosphoenolpyruvate', 'Acetyl-CoA'],
-  "Clockwise from the top: oxaloacetate, citrate, isocitrate, alpha-ketoglutarate, succinyl-CoA, succinate, fumarate, malate. Oxaloacetate is regenerated and accepts the next acetyl-CoA.", "Citric acid cycle lecture",
-  RING(CAC_ORDER.map(m => ({ a: m })), [{ x: 56, y: 3, t: 'Acetyl-CoA (2C) in at step 1' }]));
-PLC("B4PC", 2, "Citric acid cycle: place the enzyme for each numbered step.",
-  CAC_ENZ.map((e, i) => [(i + 1) + "  " + CAC_ORDER[i] + " → " + CAC_ORDER[(i + 1) % 8] + ":  ", { a: e }]),
-  ['Pyruvate dehydrogenase', 'Pyruvate carboxylase', 'Lactate dehydrogenase'],
-  "Citrate synthase condenses, aconitase isomerizes, two dehydrogenases decarboxylate (isocitrate DH, alpha-KGDH), succinyl-CoA synthetase makes GTP, succinate DH makes FADH2, fumarase hydrates and malate DH regenerates oxaloacetate.", "Citric acid cycle lecture",
-  RING(CAC_ORDER.map(m => ({ t: m })), [{ x: 56, y: 3, t: 'Acetyl-CoA (2C) in at step 1' }]));
-PLC("B4PC", 2, "Citric acid cycle: what is made or released at each numbered step?",
-  CAC_ENZ.map((e, i) => [(i + 1) + "  " + e + ":  ", { a: CAC_RES[i] }]),
-  ['FADH2 + CO2', 'ATP + NADPH', 'Water is removed', 'NAD+ is made'],
-  "Three NADH (isocitrate DH, alpha-KGDH, malate DH), one FADH2 (succinate DH), one GTP (succinyl-CoA synthetase) and two CO2 (isocitrate DH, alpha-KGDH) per turn.", "Citric acid cycle lecture",
-  RING(CAC_ORDER.map(m => ({ t: m })), []));
-
 const GLU = (mode) => {
   const dy = 5, L = 40, M = (t, a, y, x, w) => Object.assign({ x: x || L, y: y + dy, w: w || 33 }, mode === 'mol' ? { a } : { t }), E = (t, a, x, y, w, al) => Object.assign({ x, y: y + dy, w: w || 38, al: al || 'l' }, mode === 'enz' ? { a } : { t, c: 'note' });
   const ys = [8, 28, 48, 68, 88, 108, 132, 168];
@@ -318,3 +289,34 @@ PLC("B4PE", 2, "Electron transport: place each carrier and complex. Follow the a
       { x: 64, y: 50, a: 'Complex III', w: 21 }, { x: 38, y: 50, a: 'Cytochrome c', w: 21 }, { x: 12, y: 50, a: 'Complex IV', w: 19 }, { x: 12, y: 80, a: 'O2', w: 15 }, { x: 38, y: 80, a: 'H2O', w: 15 },
       { x: 20, y: 31, t: 'H+ pumped: 4', c: 'note', al: 'l', w: 20 }, { x: 70, y: 36, t: 'H+: 2', c: 'note', al: 'l', w: 12 }, { x: 14, y: 65, t: 'H+: 4', c: 'note', al: 'l', w: 14 }],
     arrows: [{ p: [[21, 18], [26.5, 18]] }, { p: [[49.5, 18], [53.5, 18]] }, { p: [[79, 18], [74.5, 18]] }, { p: [[89, 38], [89, 24]] }, { p: [[64, 24], [64, 44]] }, { p: [[53.5, 50], [48.5, 50]] }, { p: [[27.5, 50], [21.5, 50]] }, { p: [[12, 56], [12, 74]] }, { p: [[20, 80], [30, 80]] }] });
+
+/* cyclic citric acid cycle diagram: molecules on an ellipse, curved arrows, enzymes inside, results outside.
+   blank = list of 'mol' | 'enz' | 'res' kinds that are blanks; the rest are fixed labels. */
+const CYCD = (blank) => {
+  const W = 170, H = 124, cx = 85, cy = 62, Rx = 56, Ry = 44, rad = x => x * Math.PI / 180, out = { W, H, nodes: [], arrows: [] };
+  const P = (i, kx, ky, off) => [cx + kx * Math.cos(rad(-90 + 45 * i + (off || 0))), cy + ky * Math.sin(rad(-90 + 45 * i + (off || 0)))];
+  const nd = (kind, x, y, w, text, cap, cls) => { const o = { x, y, w, c: cls || kind }; if (blank.indexOf(kind) >= 0) o.a = text; else o.t = text; if (cap) { if (o.a) o.t = cap; else o.t = cap + ' ' + text; } return o; };
+  const cen = [];
+  for (let i = 0; i < 8; i++) { const p = P(i, Rx, Ry); cen.push(p); out.nodes.push(nd('mol', p[0], p[1], 13, CAC_ORDER[i], '', 'mol')); }
+  for (let i = 0; i < 8; i++) {
+    const a = cen[i], b = cen[(i + 1) % 8], vx = b[0] - a[0], vy = b[1] - a[1], hw = 12.5, hh = 5;
+    const sh = (v) => Math.min(hw / Math.max(Math.abs(vx), .01), hh / Math.max(Math.abs(vy), .01)) * 1.0 + .07;
+    const s = sh(), p1 = [a[0] + vx * s, a[1] + vy * s], p2 = [b[0] - vx * s, b[1] - vy * s];
+    const mx = (p1[0] + p2[0]) / 2, my = (p1[1] + p2[1]) / 2, ox = (mx - cx) * .22, oy = (my - cy) * .22, cxp = mx + ox, cyp = my + oy;
+    out.arrows.push({ d: 'M' + p1[0].toFixed(1) + ',' + p1[1].toFixed(1) + ' Q' + cxp.toFixed(1) + ',' + cyp.toFixed(1) + ' ' + p2[0].toFixed(1) + ',' + p2[1].toFixed(1) });
+    const q = [(p1[0] + 2 * cxp + p2[0]) / 4, (p1[1] + 2 * cyp + p2[1]) / 4];
+    const e = P(i, Rx * .66, Ry * .55, 22.5), r = P(i, Rx * 1.13, Ry * 1.22, 22.5);
+    out.nodes.push(nd('enz', e[0], e[1], 13.5, CAC_ENZ[i], '', 'enz'));
+    out.nodes.push(nd('res', r[0], r[1], 13, CAC_RES[i], CAC_IN[i], 'res'));
+    out.arrows.push({ p: [[q[0], q[1]], [q[0] + (r[0] - q[0]) * .55, q[1] + (r[1] - q[1]) * .55]], c: 'g', nm: 1 });
+    out.arrows.push({ p: [[q[0], q[1]], [q[0] + (e[0] - q[0]) * .5, q[1] + (e[1] - q[1]) * .5]], c: 'g', nm: 1 });
+  }
+  out.nodes.push({ x: cx, y: cy + 1, t: 'Citric acid cycle', c: 'note', w: 11 });
+  return out;
+};
+const CYC_EX = { mol: ['Pyruvate', 'Glutamate', 'Phosphoenolpyruvate', 'Acetyl-CoA'], enz: ['Pyruvate dehydrogenase', 'Pyruvate carboxylase', 'Lactate dehydrogenase'], res: ['FADH2 + CO2', 'ATP + NADPH', 'H2O removed', 'NAD+ made'] };
+const CYC_E = "Clockwise from the top: oxaloacetate, citrate, isocitrate, alpha-ketoglutarate, succinyl-CoA, succinate, fumarate, malate. Enzymes: citrate synthase, aconitase, isocitrate dehydrogenase, alpha-ketoglutarate dehydrogenase, succinyl-CoA synthetase, succinate dehydrogenase, fumarase, malate dehydrogenase. Per turn: 3 NADH, 1 FADH2, 1 GTP and 2 CO2.";
+PLC("B4PC", 2, "Citric acid cycle (molecules): place the molecule at each position. Acetyl-CoA joins at the first arrow, clockwise from the top.", [], CYC_EX.mol, CYC_E, "Citric acid cycle lecture", CYCD(['mol']));
+PLC("B4PC", 2, "Citric acid cycle (enzymes): place the enzyme inside each arrow.", [], CYC_EX.enz, CYC_E, "Citric acid cycle lecture", CYCD(['enz']));
+PLC("B4PC", 2, "Citric acid cycle (results): place what is made or released at each step.", [], CYC_EX.res, CYC_E, "Citric acid cycle lecture", CYCD(['res']));
+PLC("B4PC", 3, "Citric acid cycle (full diagram): place every molecule, enzyme and result. Blue blanks are molecules, purple are enzymes, green are results.", [], CYC_EX.mol.concat(CYC_EX.enz, CYC_EX.res), CYC_E, "Citric acid cycle lecture", CYCD(['mol', 'enz', 'res']));

@@ -1073,12 +1073,27 @@ body.trip .stats .stat { animation: tripbob 1.4s ease-in-out infinite; }
 .pmain, .paside { display: grid; gap: 10px; min-width: 0; align-content: start; }
 .qpanel.wide, body.fx .qpanel.wide { left: 12px; right: 12px; width: auto; max-height: none; top: calc(var(--tb, 0px) + 8px); bottom: 12px; }
 @media (min-width: 640px) {
-  .qpanel.wide .pwide { grid-template-columns: minmax(0, 1.55fr) minmax(220px, 1fr); align-items: start; }
+  .qpanel.wide .pwide { grid-template-columns: minmax(0, 2.1fr) minmax(240px, 1fr); align-items: start; }
   .qpanel.wide .paside { position: sticky; top: 4px; }
   .qpanel.wide .pbank { max-height: 60vh; overflow: auto; }
   .qpanel.wide .rx-body { max-width: none; }
-  .qpanel.wide .dia { width: min(100%, calc(64vh * var(--ar, 1))); margin: 0 auto; }
+  .qpanel.wide .dia { width: min(100%, calc(78vh * var(--ar, 1))); margin: 0 auto; }
 }
+.dia.pop { animation: diapop .6s cubic-bezier(.2,.9,.3,1.2) both; }
+.dia.pop .dn { animation: dnpop .5s ease-out both; }
+@keyframes diapop { from { opacity: 0; transform: scale(.82); } to { opacity: 1; transform: scale(1); } }
+@keyframes dnpop { from { opacity: 0; } to { opacity: 1; } }
+.dn.enz .dnt { font-style: italic; background: #f3f0ff; }
+.dn.res .dnt { background: #eef8ee; }
+.dn.res { gap: 1px; }
+.dn.res .dnt:has(+ .pslot) { background: transparent; border: 0; font-size: .85em; opacity: .75; padding: 0; }
+.dn.mol .dnt { background: #fff; font-weight: 700; }
+.dn.mol .pslot { border-color: #3b82f6; }
+.dn.enz .pslot { border-color: #8b5cf6; }
+.dn.res .pslot { border-color: #22a35a; }
+.dn .pslot.full { border-style: solid; }
+.dn .pslot.right { border-color: #2e9e4f; background: #e4f7ea; }
+.dn .pslot.wrong { border-color: #d64545; background: #fdeaea; }
 .drawbox { display: grid; gap: 8px; margin-top: 8px; }
 .cycsvg { width: 100%; max-width: 520px; height: auto; touch-action: none; cursor: crosshair; display: block; margin: 0 auto; user-select: none; -webkit-user-select: none; }
 .cybox { fill: var(--surface); stroke: var(--line); stroke-width: 1.5; }
