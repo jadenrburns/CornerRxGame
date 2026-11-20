@@ -10050,6 +10050,7 @@ const World = (function () {
     { t: 'Welcome to Corner Rx', p: 'You are the pharmacist at the counter. Each patient asks one question. Pick the right answer to earn cash and reputation, and read the explanation when you miss one. Take your time at first.' },
     { t: 'The menu', p: 'Tap the menu button in the top right.', l: [['Upgrades', 'spend your cash on the pharmacy'], ['Progress & awards', 'mastery, photos, pets and the weekly calendar'], ['Topics', 'pick courses, topics and weekly drugs; the Settings tab has mode and difficulty; add your own questions under My studies'], ['Focus mode', 'just the questions, no 3D world'], ['Drug reference', 'the weekly drug lists']] },
     { t: 'Look around', p: 'Drag to look around the pharmacy and pinch to zoom. Tap glowing spots to build upgrades. The corner button makes the game full screen, and the bar above the question card hides it so you can see the shop.' },
+    { t: 'What mastered means', p: 'A question is mastered after two correct answers in a row. One miss on a mastered question is forgiven and it comes back for a check the next day, but a second miss in a row sends it back to zero. Each topic has Bronze, Silver and Gold tiers at 30%, 60% and 90% of its questions mastered, and every tier hangs a photo on the pharmacy wall. Mastered questions fade out of the mix, so you see mostly new and missed ones.' },
     { t: 'Your progress', p: 'Everything saves in this browser. To back up or move to another device, open Progress and copy your save code. Good luck out there.' }
   ];
   function drawTour() {
@@ -11754,7 +11755,7 @@ const micLab3 = () => !!(World.ok && World.setMic);
   }
   setInterval(micTick, 25000);
 
-  const GAME_VERSION = 162;
+  const GAME_VERSION = 163;
   const b64u = (u8) => { let s = ''; for (let i = 0; i < u8.length; i += 0x8000) s += String.fromCharCode.apply(null, u8.subarray(i, i + 0x8000)); return btoa(s).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); };
   const unb64u = (t) => { const s = atob(t.replace(/-/g, '+').replace(/_/g, '/')), u = new Uint8Array(s.length); for (let i = 0; i < s.length; i++) u[i] = s.charCodeAt(i); return u; };
   const chk = (t) => { let h = 2166136261; for (let i = 0; i < t.length; i++) { h ^= t.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36); };

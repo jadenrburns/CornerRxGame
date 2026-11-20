@@ -196,3 +196,8 @@ The wide drag-and-place card (`.qpanel.wide`) now always shows the `#qgrab` bar 
 
 ## Shop price scale (v162)
 Every shop price is multiplied by `SHOP_X = 5` at display and purchase time (`shopRows` wraps `shopRows0`, `pwCost`, and the locked-list text in `gearSrcText`), so `shop.js` and `gear.js` keep their base values and free items stay free. Players who already own items keep them. Change the one number `SHOP_X` in `game.js` to tune the whole shop; tests that buy things need more cash (`te55` expects 5x prices, `te68` seeds 50000).
+
+## Tour mastery step (v163)
+The quick tour (`TOUR` in `game.js`) has a "What mastered means" step before "Your progress": two right in a row, one forgiven slip, Bronze/Silver/Gold at 30/60/90
+## Tour mastery step (v163)
+The quick tour (`TOUR` in `game.js`) has a "What mastered means" step before "Your progress": two right in a row, one forgiven slip, Bronze/Silver/Gold at 30/60/90% of a topic. Only players who have not finished the tour see it. Test: `te69`.
