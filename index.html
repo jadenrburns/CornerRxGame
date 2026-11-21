@@ -7097,6 +7097,28 @@ const World = (function () {
     try { micG.updateMatrixWorld(true); const v = new T.Vector3(); micPinMap[micZoomId].g.getWorldPosition(v); TX = v.x; TY = v.y - 0.3; TZ = v.z; gth = 0; gph = 0.7; grad = micZoomR = MICZOOM_RAD[micZoomId] || 4.5; } catch (e) { /* decor */ }
   };
   api.micMan = function (v) { micManWant = !!v; micItemsFix(); };
+  /* dev: download the lab man (upright, with organs and the open skull, no site dots) as a .glb for editing in Blender or another character editor */
+  api.exportMan = function (done) {
+    if (!api.ok || !scene) { done && done(false, 'no 3D'); return; }
+    if (!micG) buildMic();
+    const run = () => {
+      try {
+        const m = micManG, sv = { r: m.rotation.x, s: m.scale.x, vis: [] };
+        Object.keys(micPinMap).forEach(k => { const pg = micPinMap[k].g; sv.vis.push([pg, pg.visible]); pg.visible = false; });
+        m.rotation.x = 0; m.scale.set(1, 1, 1); m.updateMatrixWorld(true);
+        m.traverse(o => { if (!o.name && o.userData && o.userData.micSite) o.name = 'organ_' + o.userData.micSite; });
+        new T.GLTFExporter().parse(m, res => {
+          m.rotation.x = sv.r; m.scale.set(sv.s, sv.s, sv.s); sv.vis.forEach(v => { v[0].visible = v[1]; });
+          const blob = new Blob([res], { type: 'model/gltf-binary' }), a2 = document.createElement('a');
+          a2.href = URL.createObjectURL(blob); a2.download = 'corner-rx-lab-patient.glb'; document.body.appendChild(a2); a2.click(); setTimeout(() => { URL.revokeObjectURL(a2.href); a2.remove(); }, 1500);
+          done && done(true, Math.round(blob.size / 1024) + ' KB');
+        }, { binary: true, onlyVisible: true });
+      } catch (e) { done && done(false, String(e && e.message || e)); }
+    };
+    if (T.GLTFExporter) { run(); return; }
+    const sc = document.createElement('script'); sc.src = 'https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/exporters/GLTFExporter.js';
+    sc.onload = run; sc.onerror = () => done && done(false, 'could not load the exporter'); document.head.appendChild(sc);
+  };
   function micClearDishes() { Object.keys(micDishMap).forEach(id => { const d = micDishMap[id], i = micItems.indexOf(d.g); if (i >= 0) micItems.splice(i, 1); micBench.remove(d.g); }); micDishMap = {}; micHot = null; }
   api.micDishes = function (list) {
     if (!micG) return; micClearDishes(); list = list || []; if (!list.length) { micItemsFix(); return; }
@@ -11810,7 +11832,7 @@ const micLab3 = () => !!(World.ok && World.setMic);
   }
   setInterval(micTick, 25000);
 
-  const GAME_VERSION = 165;
+  const GAME_VERSION = 166;
   const b64u = (u8) => { let s = ''; for (let i = 0; i < u8.length; i += 0x8000) s += String.fromCharCode.apply(null, u8.subarray(i, i + 0x8000)); return btoa(s).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); };
   const unb64u = (t) => { const s = atob(t.replace(/-/g, '+').replace(/_/g, '/')), u = new Uint8Array(s.length); for (let i = 0; i < s.length; i++) u[i] = s.charCodeAt(i); return u; };
   const chk = (t) => { let h = 2166136261; for (let i = 0; i < t.length; i++) { h ^= t.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36); };
@@ -11895,6 +11917,7 @@ const micLab3 = () => !!(World.ok && World.setMic);
       case 'dev-recall': { const q = BANK.find(x => !x.ms && x.k !== lastKey); if (!q) return; S.recall = S.recall || []; if (!S.recall.some(r => r.k === q.k)) S.recall.push({ k: q.k, seed: 4321, body: 'obese', name: 'Rosa', due: 0, tries: 0, at: Date.now() - 2 * 864e5 }); forceSp = { recall: q.k, seed: 4321, body: 'obese' }; if (view === 'q') newCard(); return; }
       case 'dev-regular': { const w = WEEKS[0]; S.reg = S.reg || {}; if (!S.reg[w.n]) { S.reg[w.n] = { n: w.n, name: 'Big Mike', seed: 7000 + w.n * 137, body: 'jacked', visits: 0, ok: 0, at: Date.now() }; if (World.ok && World.setMastery) World.setMastery(masteryList()); } forceSp = { regular: w.n, seed: S.reg[w.n].seed, body: 'jacked' }; if (view === 'q') newCard(); return; }
       case 'dev-pill': { const ok = World.ok && World.devPill(); toast(ok ? 'A pill popped out. Tap it.' : 'Could not spawn one.'); return; }
+      case 'dev-exportman': { toast('Building the patient file...'); World.exportMan((ok, m) => toast(ok ? 'Downloaded corner-rx-lab-patient.glb (' + m + ')' : 'Export failed: ' + m)); return; }
       case 'dev-legcap': { S.vial = S.vial || []; S.vial.push({ k: 'c', c: '#F2A516', c2: '#F4F4F0', s: 'two', r: 'legendary' }); save(); vialSync(); toast('A legendary capsule is in the vial.'); return; }
       case 'dev-bottle': learnOff(); fp.cool = 0; return startBottles();
       case 'dev-shelve': learnOff(); return startShelve(false);
@@ -12102,7 +12125,7 @@ const micLab3 = () => !!(World.ok && World.setMic);
     const menu = $('#menu'), close = menu && menu.querySelector('.menuclose');
     if (menu && close) {
       const hr = document.createElement('hr'); menu.insertBefore(hr, close);
-      [['dev-pill', 'Test: pop a pill'], ['dev-legcap', 'Test: legendary capsule in vial'], ['flags', 'Question flags (live)'], ['dev-elder', 'Test: elder patient next'], ['dev-next', 'Test: skip to next patient'], ['dev-recall', 'Test: recall patient'], ['dev-regular', 'Test: regular patient'], ['dev-bottle', 'Test: bottle check'], ['dev-shelve', 'Test: restock'], ['dev-prior', 'Test: prior auth'], ['dev-rush', 'Test: rush hour'], ['dev-insp', 'Test: health inspector next'], ['dev-driver', 'Test: delivery next'], ['dev-sky', 'Test: sky capsule'], ['dev-him-walk', 'Test: Andy walks in next'], ['dev-him-asc', 'Test: Andy ascension'], ['dev-him-angel', 'Test: Andy angel flyover'], ['dev-him-smash', 'Test: Andy smash (skip click)'], ['dev-plant', 'Test: plant capsule'], ['dev-fast', 'Test: skip slow start']].forEach(b => {
+      [['dev-pill', 'Test: pop a pill'], ['dev-exportman', 'Export lab patient (.glb)'], ['dev-legcap', 'Test: legendary capsule in vial'], ['flags', 'Question flags (live)'], ['dev-elder', 'Test: elder patient next'], ['dev-next', 'Test: skip to next patient'], ['dev-recall', 'Test: recall patient'], ['dev-regular', 'Test: regular patient'], ['dev-bottle', 'Test: bottle check'], ['dev-shelve', 'Test: restock'], ['dev-prior', 'Test: prior auth'], ['dev-rush', 'Test: rush hour'], ['dev-insp', 'Test: health inspector next'], ['dev-driver', 'Test: delivery next'], ['dev-sky', 'Test: sky capsule'], ['dev-him-walk', 'Test: Andy walks in next'], ['dev-him-asc', 'Test: Andy ascension'], ['dev-him-angel', 'Test: Andy angel flyover'], ['dev-him-smash', 'Test: Andy smash (skip click)'], ['dev-plant', 'Test: plant capsule'], ['dev-fast', 'Test: skip slow start']].forEach(b => {
         const el = document.createElement('button'); el.type = 'button'; el.dataset.act = b[0]; el.innerHTML = '<i aria-hidden="true">\u2699</i><span>' + b[1] + '</span>'; menu.insertBefore(el, close);
       });
     }

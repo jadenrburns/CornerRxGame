@@ -209,3 +209,6 @@ The quick tour (`TOUR` in `game.js`) has a "What mastered means" step before "Yo
 ## Lab man cut open, bin bacteria on the wall only (v165)
 - The lying man's torso has a midline cut: a dark cavity from neck to hip (`cav` in `buildMic`, world.js) with two skin flaps (teal, hinged at x +-0.26, `fh` groups) folded open to each side. Organs sit lower (upper 1.36, lungs 1.17, heart 1.06, liver 0.92, gut 0.8, bladder 0.7) and the `MICPOS` pins moved down with them. Not visually checked (no real three.js in the sandbox); tune the y values if the user says they look off.
 - Trash-can bacteria (`animBin`) now only crawl up and down the can wall, each on a fixed lane around the bin (`u.a`); no floor circling or sideways drift. They turn around at the rim and at the bottom.
+
+## Export the lab patient (v166)
+Dev menu (`?dev=1`) "Export lab patient (.glb)" (`dev-exportman`) calls `World.exportMan(cb)` in world.js: builds the lab if needed, loads `GLTFExporter.js` (three r128 examples, from jsDelivr) on first use, and downloads `corner-rx-lab-patient.glb` with the man upright (organs named `organ_<site>`, site dots hidden, bed left out). Not run in the sandbox (no real three.js, CDN blocked); the user checks it. To bring an edited file back, the user attaches the .glb and it would be loaded with GLTFLoader (not built yet).

@@ -2462,6 +2462,28 @@ const World = (function () {
     try { micG.updateMatrixWorld(true); const v = new T.Vector3(); micPinMap[micZoomId].g.getWorldPosition(v); TX = v.x; TY = v.y - 0.3; TZ = v.z; gth = 0; gph = 0.7; grad = micZoomR = MICZOOM_RAD[micZoomId] || 4.5; } catch (e) { /* decor */ }
   };
   api.micMan = function (v) { micManWant = !!v; micItemsFix(); };
+  /* dev: download the lab man (upright, with organs and the open skull, no site dots) as a .glb for editing in Blender or another character editor */
+  api.exportMan = function (done) {
+    if (!api.ok || !scene) { done && done(false, 'no 3D'); return; }
+    if (!micG) buildMic();
+    const run = () => {
+      try {
+        const m = micManG, sv = { r: m.rotation.x, s: m.scale.x, vis: [] };
+        Object.keys(micPinMap).forEach(k => { const pg = micPinMap[k].g; sv.vis.push([pg, pg.visible]); pg.visible = false; });
+        m.rotation.x = 0; m.scale.set(1, 1, 1); m.updateMatrixWorld(true);
+        m.traverse(o => { if (!o.name && o.userData && o.userData.micSite) o.name = 'organ_' + o.userData.micSite; });
+        new T.GLTFExporter().parse(m, res => {
+          m.rotation.x = sv.r; m.scale.set(sv.s, sv.s, sv.s); sv.vis.forEach(v => { v[0].visible = v[1]; });
+          const blob = new Blob([res], { type: 'model/gltf-binary' }), a2 = document.createElement('a');
+          a2.href = URL.createObjectURL(blob); a2.download = 'corner-rx-lab-patient.glb'; document.body.appendChild(a2); a2.click(); setTimeout(() => { URL.revokeObjectURL(a2.href); a2.remove(); }, 1500);
+          done && done(true, Math.round(blob.size / 1024) + ' KB');
+        }, { binary: true, onlyVisible: true });
+      } catch (e) { done && done(false, String(e && e.message || e)); }
+    };
+    if (T.GLTFExporter) { run(); return; }
+    const sc = document.createElement('script'); sc.src = 'https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/exporters/GLTFExporter.js';
+    sc.onload = run; sc.onerror = () => done && done(false, 'could not load the exporter'); document.head.appendChild(sc);
+  };
   function micClearDishes() { Object.keys(micDishMap).forEach(id => { const d = micDishMap[id], i = micItems.indexOf(d.g); if (i >= 0) micItems.splice(i, 1); micBench.remove(d.g); }); micDishMap = {}; micHot = null; }
   api.micDishes = function (list) {
     if (!micG) return; micClearDishes(); list = list || []; if (!list.length) { micItemsFix(); return; }
