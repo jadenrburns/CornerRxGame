@@ -2462,6 +2462,52 @@ const World = (function () {
     try { micG.updateMatrixWorld(true); const v = new T.Vector3(); micPinMap[micZoomId].g.getWorldPosition(v); TX = v.x; TY = v.y - 0.3; TZ = v.z; gth = 0; gph = 0.7; grad = micZoomR = MICZOOM_RAD[micZoomId] || 4.5; } catch (e) { /* decor */ }
   };
   api.micMan = function (v) { micManWant = !!v; micItemsFix(); };
+  /* dev: download the lab man as a Part Maker file (.partmaker.json): every visible mesh becomes a box, cylinder, cone or sphere shape in the man's own coordinates, grouped into Torso, Head, Arm, Leg, Bone and one part per organ */
+  api.exportManJson = function () {
+    if (!api.ok || !scene) return { ok: false, msg: 'no 3D' };
+    if (!micG) buildMic();
+    const m0 = micManG, sv = { r: m0.rotation.x, s: m0.scale.x }, P = (m0.children[0] && m0.children[0].userData.P) || {};
+    m0.rotation.x = 0; m0.scale.set(1, 1, 1); m0.updateMatrixWorld(true);
+    const inv = new T.Matrix4().copy(m0.matrixWorld).invert(), SL = [{ name: 'Shirt', color: '#2bb5a5', kind: 'recolor' }, { name: 'Pants', color: '#3f5f8c', kind: 'recolor' }, { name: 'Skin', color: '#f2c9a5', kind: 'recolor' }, { name: 'Hair', color: '#6b4a2e', kind: 'recolor' }, { name: 'Shoes', color: '#2b2b2b', kind: 'recolor' }, { name: 'White', color: '#ffffff', kind: 'fixed', builtin: true }];
+    const cmap = {}, hex = c => '#' + c.getHexString(), slotFor = mt => {
+      const c = mt && mt.color ? hex(mt.color) : '#cccccc', k = c.toLowerCase(); if (cmap[k]) return cmap[k];
+      let best = null, bd = 1e9; SL.forEach(sl => { if (sl.kind !== 'recolor') return; const a2 = new T.Color(sl.color), b2 = mt.color, d2 = (a2.r - b2.r) ** 2 + (a2.g - b2.g) ** 2 + (a2.b - b2.b) ** 2; if (d2 < bd) { bd = d2; best = sl.name; } });
+      if (bd < 0.004) return (cmap[k] = best);
+      const nm = 'Color_' + k.slice(1); SL.push({ name: nm, color: k, kind: 'fixed' }); return (cmap[k] = nm);
+    };
+    const parts = {}, part = (base) => parts[base] || (parts[base] = { id: 'p' + base, base, build: 'Default', sex: 'u', scale: [1, 1, 1], shapes: [], clickable: false, hidden: false, locked: false });
+    let n = 0, approx = 0; const uid = () => 's' + (++n).toString(36) + Math.random().toString(36).slice(2, 6), rd = 180 / PI;
+    const visible = o => { for (let p = o; p && p !== m0.parent; p = p.parent) if (!p.visible) return false; return true; };
+    const baseOf = o => {
+      for (let p = o; p && p !== m0; p = p.parent) {
+        if (p.userData && p.userData.micSite && p.userData.micSite !== 'cns') return p.userData.micSite === 'bone' ? 'Bone' : 'Organ_' + p.userData.micSite;
+        if (P.head && p === P.head) return 'Head';
+        if (P.arms && P.arms.indexOf(p) >= 0) return p.position.x > 0 ? 'Arm_L' : 'Arm_R';
+        if (P.legs && P.legs.indexOf(p) >= 0) return p.position.x > 0 ? 'Leg_L' : 'Leg_R';
+      }
+      return 'Torso';
+    };
+    const M = new T.Matrix4(), pp = new T.Vector3(), qq = new T.Quaternion(), ss = new T.Vector3(), ee = new T.Euler();
+    m0.traverse(o => {
+      if (!o.isMesh || !o.geometry || !visible(o) || (o.material && o.material.visible === false) || (o.material && o.material.depthTest === false)) return;
+      const g = o.geometry, pr = g.parameters || {}, t = g.type; M.multiplyMatrices(inv, o.matrixWorld); M.decompose(pp, qq, ss); ee.setFromQuaternion(qq, 'XYZ');
+      let type, size, sides = 8, detail = 1, taper = 1, pos = [pp.x, pp.y, pp.z];
+      if (t === 'BoxGeometry') { type = 'box'; size = [pr.width * ss.x, pr.height * ss.y, pr.depth * ss.z]; }
+      else if (t === 'CylinderGeometry') { const rt = pr.radiusTop, rb = pr.radiusBottom, R = Math.max(rt, rb); type = (rt < 1e-4 || rb < 1e-4) ? 'cone' : 'cylinder'; if (rb < 1e-4 && rt > 0) { qq.multiply(new T.Quaternion().setFromAxisAngle(new T.Vector3(0, 0, 1), PI)); ee.setFromQuaternion(qq, 'XYZ'); } size = [2 * R * ss.x, pr.height * ss.y, 2 * R * ss.z]; sides = pr.radialSegments || 8; taper = R > 0 ? Math.min(rt, rb) / R : 1; }
+      else if (t === 'IcosahedronGeometry' || t === 'SphereGeometry' || t === 'OctahedronGeometry') { type = 'sphere'; size = [2 * pr.radius * ss.x, 2 * pr.radius * ss.y, 2 * pr.radius * ss.z]; detail = pr.detail != null ? pr.detail : 1; }
+      else { // anything else (organ meshes, tori, lathes, tubes): a box or sphere that fills its bounding box
+        if (!g.boundingBox) g.computeBoundingBox(); const b = g.boundingBox, c = b.getCenter(new T.Vector3()), sz = b.getSize(new T.Vector3()); if (!isFinite(sz.x)) return;
+        c.applyMatrix4(M); pos = [c.x, c.y, c.z]; size = [Math.max(0.01, sz.x * ss.x), Math.max(0.01, sz.y * ss.y), Math.max(0.01, sz.z * ss.z)]; type = /Plane|Ring|Circle/.test(t) ? 'box' : 'sphere'; approx++;
+      }
+      const R4 = v => Math.round(v * 10000) / 10000;
+      part(baseOf(o)).shapes.push({ id: uid(), type, pos: pos.map(R4), rot: [R4(ee.x * rd), R4(ee.y * rd), R4(ee.z * rd)], size: size.map(v => R4(Math.max(0.005, Math.abs(v)))), slot: slotFor(Array.isArray(o.material) ? o.material[0] : o.material), sides, detail, taper: R4(taper), tube: 0.15 });
+    });
+    m0.rotation.x = sv.r; m0.scale.set(sv.s, sv.s, sv.s); m0.updateMatrixWorld(true);
+    const out = { app: 'CornerRxPartMaker', version: 1, kind: 'character', name: 'LabPatient', autoMirror: false, slots: SL, parts: Object.keys(parts).map(k => parts[k]), pins: [], refs: [] };
+    const blob = new Blob([JSON.stringify(out)], { type: 'application/json' }), a2 = document.createElement('a');
+    a2.href = URL.createObjectURL(blob); a2.download = 'LabPatient.partmaker.json'; document.body.appendChild(a2); a2.click(); setTimeout(() => { URL.revokeObjectURL(a2.href); a2.remove(); }, 1500);
+    return { ok: true, msg: out.parts.length + ' parts, ' + n + ' shapes (' + approx + ' approximated)' };
+  };
   /* dev: download the lab man (upright, with organs and the open skull, no site dots) as a .glb for editing in Blender or another character editor */
   api.exportMan = function (done) {
     if (!api.ok || !scene) { done && done(false, 'no 3D'); return; }

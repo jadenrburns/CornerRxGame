@@ -2076,7 +2076,7 @@
   /* ---- save code: the whole save as one long code, to move progress between devices or keep a backup ---- */
 /*@EXT@*/
 /*@MIC@*/
-  const GAME_VERSION = 166;
+  const GAME_VERSION = 167;
   const b64u = (u8) => { let s = ''; for (let i = 0; i < u8.length; i += 0x8000) s += String.fromCharCode.apply(null, u8.subarray(i, i + 0x8000)); return btoa(s).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); };
   const unb64u = (t) => { const s = atob(t.replace(/-/g, '+').replace(/_/g, '/')), u = new Uint8Array(s.length); for (let i = 0; i < s.length; i++) u[i] = s.charCodeAt(i); return u; };
   const chk = (t) => { let h = 2166136261; for (let i = 0; i < t.length; i++) { h ^= t.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36); };
@@ -2161,6 +2161,7 @@
       case 'dev-recall': { const q = BANK.find(x => !x.ms && x.k !== lastKey); if (!q) return; S.recall = S.recall || []; if (!S.recall.some(r => r.k === q.k)) S.recall.push({ k: q.k, seed: 4321, body: 'obese', name: 'Rosa', due: 0, tries: 0, at: Date.now() - 2 * 864e5 }); forceSp = { recall: q.k, seed: 4321, body: 'obese' }; if (view === 'q') newCard(); return; }
       case 'dev-regular': { const w = WEEKS[0]; S.reg = S.reg || {}; if (!S.reg[w.n]) { S.reg[w.n] = { n: w.n, name: 'Big Mike', seed: 7000 + w.n * 137, body: 'jacked', visits: 0, ok: 0, at: Date.now() }; if (World.ok && World.setMastery) World.setMastery(masteryList()); } forceSp = { regular: w.n, seed: S.reg[w.n].seed, body: 'jacked' }; if (view === 'q') newCard(); return; }
       case 'dev-pill': { const ok = World.ok && World.devPill(); toast(ok ? 'A pill popped out. Tap it.' : 'Could not spawn one.'); return; }
+      case 'dev-exportjson': { const r = World.exportManJson(); toast(r.ok ? 'Downloaded LabPatient.partmaker.json: ' + r.msg : 'Export failed: ' + r.msg); return; }
       case 'dev-exportman': { toast('Building the patient file...'); World.exportMan((ok, m) => toast(ok ? 'Downloaded corner-rx-lab-patient.glb (' + m + ')' : 'Export failed: ' + m)); return; }
       case 'dev-legcap': { S.vial = S.vial || []; S.vial.push({ k: 'c', c: '#F2A516', c2: '#F4F4F0', s: 'two', r: 'legendary' }); save(); vialSync(); toast('A legendary capsule is in the vial.'); return; }
       case 'dev-bottle': learnOff(); fp.cool = 0; return startBottles();
@@ -2369,7 +2370,7 @@
     const menu = $('#menu'), close = menu && menu.querySelector('.menuclose');
     if (menu && close) {
       const hr = document.createElement('hr'); menu.insertBefore(hr, close);
-      [['dev-pill', 'Test: pop a pill'], ['dev-exportman', 'Export lab patient (.glb)'], ['dev-legcap', 'Test: legendary capsule in vial'], ['flags', 'Question flags (live)'], ['dev-elder', 'Test: elder patient next'], ['dev-next', 'Test: skip to next patient'], ['dev-recall', 'Test: recall patient'], ['dev-regular', 'Test: regular patient'], ['dev-bottle', 'Test: bottle check'], ['dev-shelve', 'Test: restock'], ['dev-prior', 'Test: prior auth'], ['dev-rush', 'Test: rush hour'], ['dev-insp', 'Test: health inspector next'], ['dev-driver', 'Test: delivery next'], ['dev-sky', 'Test: sky capsule'], ['dev-him-walk', 'Test: Andy walks in next'], ['dev-him-asc', 'Test: Andy ascension'], ['dev-him-angel', 'Test: Andy angel flyover'], ['dev-him-smash', 'Test: Andy smash (skip click)'], ['dev-plant', 'Test: plant capsule'], ['dev-fast', 'Test: skip slow start']].forEach(b => {
+      [['dev-pill', 'Test: pop a pill'], ['dev-exportman', 'Export lab patient (.glb)'], ['dev-exportjson', 'Export lab patient (Part Maker .json)'], ['dev-legcap', 'Test: legendary capsule in vial'], ['flags', 'Question flags (live)'], ['dev-elder', 'Test: elder patient next'], ['dev-next', 'Test: skip to next patient'], ['dev-recall', 'Test: recall patient'], ['dev-regular', 'Test: regular patient'], ['dev-bottle', 'Test: bottle check'], ['dev-shelve', 'Test: restock'], ['dev-prior', 'Test: prior auth'], ['dev-rush', 'Test: rush hour'], ['dev-insp', 'Test: health inspector next'], ['dev-driver', 'Test: delivery next'], ['dev-sky', 'Test: sky capsule'], ['dev-him-walk', 'Test: Andy walks in next'], ['dev-him-asc', 'Test: Andy ascension'], ['dev-him-angel', 'Test: Andy angel flyover'], ['dev-him-smash', 'Test: Andy smash (skip click)'], ['dev-plant', 'Test: plant capsule'], ['dev-fast', 'Test: skip slow start']].forEach(b => {
         const el = document.createElement('button'); el.type = 'button'; el.dataset.act = b[0]; el.innerHTML = '<i aria-hidden="true">\u2699</i><span>' + b[1] + '</span>'; menu.insertBefore(el, close);
       });
     }
