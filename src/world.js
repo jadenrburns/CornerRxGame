@@ -434,7 +434,7 @@ const World = (function () {
       for (let k = 0; k < 3; k++) [-1, 1].forEach(s => { const lg = new T.Group(); lg.position.set(s * 0.07, 0.07, (rod ? 0.1 : 0.04) - k * (rod ? 0.1 : 0.07)); const seg = new T.Mesh(new T.BoxGeometry(0.1, 0.018, 0.018), mat(col)); seg.position.x = s * 0.05; lg.add(seg); g.add(lg); legs.push({ g: lg, s, k }); });
       const tail = new T.Mesh(new T.BoxGeometry(0.02, 0.02, 0.2), mat(col)); tail.position.set(0, 0.09, rod ? -0.3 : -0.33); g.add(tail);
       g.visible = false; g.userData.bin = true; g.traverse(o => { o.userData.bin = true; });
-      g.scale.set(0.5, 0.5, 0.5); g.userData.bug = { mode: i % 2 ? 'wall' : 'floor', a: Math.random() * PI * 2, r: 0.85 + Math.random() * 0.7, y: 0.25 + Math.random() * 0.8, sp: 0.16 + Math.random() * 0.14, dir: Math.random() < 0.5 ? 1 : -1, ph: Math.random() * 6, turn: 0, legs, tail, vy: Math.random() < 0.5 ? 1 : -1 };
+      g.scale.set(0.5, 0.5, 0.5); g.userData.bug = { mode: 'wall', a: (i / 14) * PI * 2 + 0.2, r: 0.85 + Math.random() * 0.7, y: 0.25 + Math.random() * 0.8, sp: 0.16 + Math.random() * 0.14, dir: Math.random() < 0.5 ? 1 : -1, ph: Math.random() * 6, turn: 0, legs, tail, vy: Math.random() < 0.5 ? 1 : -1 };
       binG.add(g); binBugs.push(g);
     }
   }
@@ -454,9 +454,9 @@ const World = (function () {
         dx = -Math.sin(u.a) * u.dir; dz = Math.cos(u.a) * u.dir; dy = 0;
         if (Math.random() < dt * 0.06 && u.r < 0.95) { u.mode = 'wall'; u.y = 0.1; u.vy = 1; }
       } else {
-        u.y += u.vy * u.sp * dt; u.a += u.dir * Math.sin(u.ph * 0.2) * 0.04 * dt;
+        u.y += u.vy * u.sp * dt;
         const rr = R0 + (R1 - R0) * (u.y / H) + 0.035;
-        if (u.y > H - 0.05) u.vy = -1; if (u.y < 0.12 && u.vy < 0) { if (Math.random() < 0.5) { u.mode = 'floor'; u.r = 0.82; } else u.vy = 1; }
+        if (u.y > H - 0.05) u.vy = -1; if (u.y < 0.12 && u.vy < 0) u.vy = 1;
         px = Math.cos(u.a) * rr; pz = Math.sin(u.a) * rr; py = u.y;
         nx = Math.cos(u.a); ny = 0.12; nz = Math.sin(u.a); const nl = Math.hypot(nx, ny, nz); nx /= nl; ny /= nl; nz /= nl;
         dx = 0; dy = u.vy; dz = 0; const dn = dx * nx + dy * ny + dz * nz; dx -= dn * nx; dy -= dn * ny; dz -= dn * nz;
@@ -2242,7 +2242,7 @@ const World = (function () {
   /* ---- microbe lab: a separate room with a low-poly man (brain and leg bone popping out) and labeled petri dishes ---- */
   let micPaperMap = {}, micPaperG = null, micPaperHot = null, micRig = null, micLay = null, manBed = null, micV = null, micG = null, micOn = false, micHid = [], micSaved = null, micManG = null, micPinMap = {}, micDishMap = {}, micSel = null, micHoverId = null, micHot = null, micLabEl = null, micBench = null, micTt = 0;
   const micItems = [];
-  const MICPOS = { cns: [0, 2.3, 0.0], ear: [0.37, 1.86, 0.02], mouth: [0, 1.68, 0.42], upper: [0, 1.5, 0.53], lower: [-0.14, 1.37, 0.6], heart: [0.07, 1.2, 0.64], intra: [-0.1, 1.03, 0.58], gi: [0.11, 1.0, 0.5], uti: [0, 0.74, 0.5], sti: [0.17, 0.66, 0.34], skin: [0.62, 1.05, 0.12], bone: [-0.15, 0.4, 0.06] };
+  const MICPOS = { cns: [0, 2.3, 0.0], ear: [0.37, 1.86, 0.02], mouth: [0, 1.68, 0.42], upper: [0, 1.4, 0.53], lower: [-0.14, 1.23, 0.6], heart: [0.07, 1.06, 0.64], intra: [-0.1, 0.91, 0.58], gi: [0.11, 0.88, 0.5], uti: [0, 0.68, 0.5], sti: [0.17, 0.66, 0.34], skin: [0.62, 1.05, 0.12], bone: [-0.15, 0.4, 0.06] };
   function micText(txt, w, h, bg, fg) {
     const cv = document.createElement('canvas'); cv.width = w; cv.height = h; const c = cv.getContext('2d');
     if (c) { c.fillStyle = bg; const r = h / 2; c.beginPath(); c.moveTo(r, 4); c.lineTo(w - r, 4); c.arc(w - r, h / 2, h / 2 - 4, -PI / 2, PI / 2); c.lineTo(r, h - 4); c.arc(r, h / 2, h / 2 - 4, PI / 2, PI * 1.5); c.fill(); c.lineWidth = 5; c.strokeStyle = '#10292C'; c.stroke(); c.fillStyle = fg; c.textAlign = 'center'; c.textBaseline = 'middle'; let fs = h * 0.5; c.font = '800 ' + fs + 'px sans-serif'; while (c.measureText(txt).width > w - h && fs > 16) { fs -= 2; c.font = '800 ' + fs + 'px sans-serif'; } c.fillText(txt, w / 2, h / 2 + 2); }
@@ -2399,12 +2399,19 @@ const World = (function () {
     // open chest and belly: a cut window with the organs sitting in it (no genitalia); each organ is clickable for its site
     const cav = new T.Group(); cav.position.z = 0.03; micManG.add(cav);
     const cb = (w, h, d, c, x, y, z) => { const m = new T.Mesh(new T.BoxGeometry(w, h, d), mat(c)); m.position.set(x, y, z); cav.add(m); return m; };
-    cb(0.54, 0.9, 0.03, '#5A1E22', 0, 1.1, 0.305); cb(0.58, 0.04, 0.05, '#B84A44', 0, 1.56, 0.31); cb(0.58, 0.04, 0.05, '#B84A44', 0, 0.64, 0.31); cb(0.04, 0.9, 0.05, '#B84A44', -0.28, 1.1, 0.31); cb(0.04, 0.9, 0.05, '#B84A44', 0.28, 1.1, 0.31);
-    [1.46, 1.38, 1.3].forEach(y => cb(0.5, 0.022, 0.03, '#F1E8D4', 0, y, 0.325));
-    cb(0.03, 0.2, 0.03, '#F1E8D4', 0, 1.35, 0.325);
+    // a cut down the middle of the torso: the skin folds open to each side like flaps, leaving a dark cavity from the neck to the hip
+    cb(0.5, 0.94, 0.03, '#5A1E22', 0, 1.03, 0.305); cb(0.03, 0.94, 0.05, '#B84A44', 0, 1.03, 0.312);
+    cb(0.5, 0.04, 0.05, '#B84A44', 0, 1.5, 0.31); cb(0.5, 0.04, 0.05, '#B84A44', 0, 0.56, 0.31);
+    [-1, 1].forEach(sd => {
+      const fh = new T.Group(); fh.position.set(sd * 0.26, 1.03, 0.31); fh.rotation.y = -sd * 1.0; cav.add(fh);
+      const fm = new T.Mesh(new T.BoxGeometry(0.2, 0.94, 0.03), mat('#2BB5A5')); fm.position.x = sd * 0.1; fh.add(fm);
+      const fe = new T.Mesh(new T.BoxGeometry(0.02, 0.94, 0.04), mat('#B84A44')); fe.position.set(sd * 0.005, 0, 0.004); fh.add(fe);
+    });
+    [1.36, 1.28, 1.2].forEach(y => cb(0.42, 0.022, 0.03, '#F1E8D4', 0, y, 0.325));
+    cb(0.03, 0.2, 0.03, '#F1E8D4', 0, 1.25, 0.325);
     const place = (kind, id, x, y, z, sc, rz) => { const gg = new T.Group(); gg.position.set(x, y, z); gg.scale.set(sc, sc, sc * 1.1); gg.rotation.z = rz || 0; cav.add(gg); micOrganBuild(kind, gg, id, micOrg[id] = micOrg[id] || []); };
-    place('upper', 'upper', 0, 1.46, 0.36, 0.17); place('lungs', 'lower', 0, 1.31, 0.37, 0.25); place('heart', 'heart', 0.06, 1.2, 0.5, 0.25, -0.1);
-    place('gut', 'gi', 0.02, 0.9, 0.36, 0.2); place('liver', 'intra', -0.09, 1.04, 0.42, 0.19); place('urinary', 'uti', 0, 0.76, 0.46, 0.15);
+    place('upper', 'upper', 0, 1.36, 0.36, 0.17); place('lungs', 'lower', 0, 1.17, 0.37, 0.25); place('heart', 'heart', 0.06, 1.06, 0.5, 0.25, -0.1);
+    place('gut', 'gi', 0.02, 0.8, 0.36, 0.2); place('liver', 'intra', -0.09, 0.92, 0.42, 0.19); place('urinary', 'uti', 0, 0.7, 0.46, 0.15);
     // site markers, always drawn on top, with a bigger invisible touch target
     Object.keys(MICPOS).forEach(id => {
       const p = MICPOS[id], pg = new T.Group(); pg.position.set(p[0], p[1], p[2]); micManG.add(pg);

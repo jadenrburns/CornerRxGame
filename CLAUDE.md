@@ -205,3 +205,7 @@ The quick tour (`TOUR` in `game.js`) has a "What mastered means" step before "Yo
 ## Shift report topic progress, counter cylinder (v164)
 - The shift report (`shiftHTML`, `openShift` in `ext.js`) has a "Topic progress" section: one bar per topic answered during the shift (`S.shift.cs` counts by `q.c`, top 8), from the value at the end of the last shift (`S.shiftProg`, saved by `shiftSnap()`, same fraction as the Topics bars from `masteryByCat`) to now. `shiftAnim()` zooms each bar (CSS transition, staggered, number counts up, change pill `.shdl`); reduced motion jumps to the end. `shiftRes.played` keeps a re-render from replaying it. `te70.js` is the recorder used to make a preview GIF (frames to a folder), not a pass/fail test.
 - The orange six-sided cylinder that floated above the counter (left of the pharmacist) was removed from `buildScene` in `world.js`.
+
+## Lab man cut open, bin bacteria on the wall only (v165)
+- The lying man's torso has a midline cut: a dark cavity from neck to hip (`cav` in `buildMic`, world.js) with two skin flaps (teal, hinged at x +-0.26, `fh` groups) folded open to each side. Organs sit lower (upper 1.36, lungs 1.17, heart 1.06, liver 0.92, gut 0.8, bladder 0.7) and the `MICPOS` pins moved down with them. Not visually checked (no real three.js in the sandbox); tune the y values if the user says they look off.
+- Trash-can bacteria (`animBin`) now only crawl up and down the can wall, each on a fixed lane around the bin (`u.a`); no floor circling or sideways drift. They turn around at the rim and at the bottom.
