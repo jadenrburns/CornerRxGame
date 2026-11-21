@@ -201,3 +201,7 @@ Every shop price is multiplied by `SHOP_X = 5` at display and purchase time (`sh
 The quick tour (`TOUR` in `game.js`) has a "What mastered means" step before "Your progress": two right in a row, one forgiven slip, Bronze/Silver/Gold at 30/60/90
 ## Tour mastery step (v163)
 The quick tour (`TOUR` in `game.js`) has a "What mastered means" step before "Your progress": two right in a row, one forgiven slip, Bronze/Silver/Gold at 30/60/90% of a topic. Only players who have not finished the tour see it. Test: `te69`.
+
+## Shift report topic progress, counter cylinder (v164)
+- The shift report (`shiftHTML`, `openShift` in `ext.js`) has a "Topic progress" section: one bar per topic answered during the shift (`S.shift.cs` counts by `q.c`, top 8), from the value at the end of the last shift (`S.shiftProg`, saved by `shiftSnap()`, same fraction as the Topics bars from `masteryByCat`) to now. `shiftAnim()` zooms each bar (CSS transition, staggered, number counts up, change pill `.shdl`); reduced motion jumps to the end. `shiftRes.played` keeps a re-render from replaying it. `te70.js` is the recorder used to make a preview GIF (frames to a folder), not a pass/fail test.
+- The orange six-sided cylinder that floated above the counter (left of the pharmacist) was removed from `buildScene` in `world.js`.

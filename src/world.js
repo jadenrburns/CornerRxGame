@@ -524,7 +524,6 @@ const World = (function () {
     bx(c, 13.75, 0.16, 1.9, '#F4F9F9', 0, 1.18, 0);
     bx(c, 13.75, 0.1, 0.12, '#F2A516', 0, 1.2, 0.93);
     for (let i = 0; i < 11; i++) bx(c, 0.9, 0.7, 0.05, '#0E9A8E', -6 + i * 1.2, 0.55, 0.57);
-    cy(c, 0.25, 0.3, 0.5, 6, '#F2A516', cx(-2.8), 1.5, 0.1);
     // desk phone (clickable while it rings)
     phoneG = new T.Group(); phoneG.position.set(0.9, 1.26, 0.3); g.add(phoneG);
     bx(phoneG, 0.8, 0.18, 0.6, '#27384F', 0, 0.09, 0, 'phone'); bx(phoneG, 0.5, 0.04, 0.3, '#DDE8E8', 0, 0.2, 0.12, 'phone');

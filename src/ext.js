@@ -304,18 +304,53 @@
   function shiftState() { if (!S.shift) S.shift = { n: 0, ok: 0, earned: 0, best: 0 }; return S.shift; }
   function shiftNote(q, ok, pay, picked) {
     const sh = shiftState(); sh.n++; if (ok) sh.ok++; sh.earned += pay; sh.best = Math.max(sh.best, S.streak);
+    if (q && q.c && !q.gen) { sh.cs = sh.cs || {}; sh.cs[q.c] = (sh.cs[q.c] || 0) + 1; }
+    if (!S.shiftProg) shiftSnap();
     if (!ok) shiftLog.push({ q: q, picked: picked });
   }
   const shiftDue = () => shiftState().n >= SHIFT_LEN;
+  /* topic progress in the shift report: the same fraction the Topics bars show (masteryByCat), compared with where it stood at the end of the last shift (S.shiftProg) */
+  function shiftSnap() { const ms = masteryByCat(), o = {}; Object.keys(ms).forEach(c => { if (ms[c].n) o[c] = +(ms[c].s / ms[c].n).toFixed(4); }); S.shiftProg = o; return o; }
   function openShift() {
     const sh = shiftState(), acc = sh.n ? sh.ok / sh.n : 0;
     let bonus = 0;
     if (acc >= 0.8) { bonus = Math.round(sh.earned * 0.25); S.cash += bonus; S.earned += bonus; S.rep = Math.min(100, S.rep + 3); }
     S.shifts = (S.shifts || 0) + 1;
-    shiftRes = { n: sh.n, ok: sh.ok, earned: sh.earned, best: sh.best, bonus: bonus, acc: acc, miss: shiftLog.slice(), num: S.shifts };
+    const was = S.shiftProg || {}, now = shiftSnap();
+    const prog = Object.keys(sh.cs || {}).filter(c => now[c] !== undefined).sort((a, b) => sh.cs[b] - sh.cs[a]).slice(0, 8).map(c => ({ c: c, n: sh.cs[c], from: was[c] !== undefined ? was[c] : now[c], to: now[c] }));
+    shiftRes = { n: sh.n, ok: sh.ok, earned: sh.earned, best: sh.best, bonus: bonus, acc: acc, miss: shiftLog.slice(), num: S.shifts, prog: prog, played: false };
     S.shift = { n: 0, ok: 0, earned: 0, best: 0 }; shiftLog = [];
     save(); renderStats(); SFX.play('shift');
     qExpand(); view = 'shift'; renderPanel(); const p = $('#qpanel'); if (p) p.scrollTop = 0;
+    shiftAnim();
+  }
+  const shPct = f => Math.round(f * 100);
+  function shiftProgHTML(r) {
+    if (!r.prog || !r.prog.length) return '';
+    const rows = r.prog.map((p, i) => {
+      const w = r.played ? p.to : p.from, d = shPct(p.to) - shPct(p.from);
+      return '<li data-i="' + i + '"><div class="shpt"><b>' + esc(CHIP[p.c] || CATNAME[p.c] || p.c) + '</b><small>' + p.n + ' answered</small><span class="shpv"><em>' + shPct(w) + '%</em><span class="shdl ' + (d > 0 ? 'up' : d < 0 ? 'down' : 'same') + (r.played ? ' on' : '') + '">' + (d > 0 ? '+' + d : d < 0 ? d : 'no change') + (d ? '%' : '') + '</span></span></div><span class="shbar" role="img" aria-label="' + shPct(p.to) + '% progress"><i style="width:' + Math.round(w * 1000) / 10 + '%"></i><u style="left:' + Math.round(p.from * 1000) / 10 + '%"></u></span></li>';
+    }).join('');
+    return '<h4 class="shh">Topic progress</h4><ul class="shprog" id="shprog">' + rows + '</ul>';
+  }
+  /* each bar zooms from where it stood after the last shift to where it is now (staggered, fast then easing in); the numbers count along */
+  function shiftAnim() {
+    const r = shiftRes; if (!r || !r.prog || !r.prog.length || r.played) return;
+    r.played = true;
+    const reduce = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches, DUR = 1500;
+    r.prog.forEach((p, i) => {
+      const li = document.querySelector('#shprog [data-i="' + i + '"]'); if (!li) return;
+      const bar = li.querySelector('.shbar i'), em = li.querySelector('.shpv em'), pill = li.querySelector('.shdl');
+      const fin = () => { bar.style.width = Math.round(p.to * 1000) / 10 + '%'; em.textContent = shPct(p.to) + '%'; pill.classList.add('on'); };
+      if (reduce) { fin(); return; }
+      setTimeout(() => {
+        bar.style.width = Math.round(p.to * 1000) / 10 + '%'; li.classList.add('go');
+        const t0 = performance.now(), a = shPct(p.from), b = shPct(p.to);
+        const tick = (t) => { const u = Math.min(1, (t - t0) / DUR), k = 1 - Math.pow(1 - u, 4); em.textContent = Math.round(a + (b - a) * k) + '%'; if (u < 1) requestAnimationFrame(tick); };
+        requestAnimationFrame(tick);
+        setTimeout(() => { fin(); li.classList.remove('go'); }, DUR + 40);
+      }, 450 + i * 260);
+    });
   }
   function shiftHTML() {
     const r = shiftRes; if (!r) return '';
@@ -329,6 +364,7 @@
     return '<div class="pane shiftpane"><h3>Shift ' + r.num + ' report</h3><p class="sub">' + esc(grade) + '</p>' +
       '<div class="shgrid"><div><b>' + r.ok + '/' + r.n + '</b><small>correct</small></div><div><b>' + pct + '%</b><small>accuracy</small></div><div><b>' + money(r.earned) + '</b><small>earned</small></div><div><b>' + r.best + '</b><small>best streak</small></div></div>' +
       (r.bonus ? '<p class="gift"><b>Shift bonus:</b> +' + money(r.bonus) + ' for 80%+ accuracy, and reputation +3.</p>' : '<p class="gift sad">Score 80% or better next shift for a bonus.</p>') +
+      shiftProgHTML(r) +
       (r.miss.length ? '<h4 class="shh">Missed this shift</h4><ol class="shmiss">' + miss + '</ol>' : '<p class="note">Nothing missed. Keep it up!</p>') +
       '<div class="btnrow">' + (nonGen ? '<button type="button" class="btn" data-act="shift-retry">Quiz me on these soon</button>' : '') + '<button type="button" class="btn go" data-act="shift-next">Start next shift</button></div></div>';
   }

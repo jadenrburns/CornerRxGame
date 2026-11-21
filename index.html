@@ -813,6 +813,19 @@ body.fx.focus .qpanel.min #counter { display: block; }
 .shgrid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
 .shgrid div { display: grid; gap: 2px; text-align: center; padding: 10px 4px; border: 1.5px solid var(--line); border-radius: 12px; background: var(--surface); }
 .shgrid b { font: 800 20px/1 var(--f-display); } .shgrid small { font-size: 11px; color: var(--muted); }
+.shprog { margin: 0; padding: 0; list-style: none; display: grid; gap: 10px; }
+.shprog li { display: grid; gap: 6px; padding: 10px 12px; border: 1.5px solid var(--line); border-radius: 12px; background: var(--surface); }
+.shpt { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; min-width: 0; }
+.shpt b { font-size: 13.5px; min-width: 0; overflow-wrap: anywhere; } .shpt small { color: var(--muted); font-size: 11.5px; }
+.shpv { margin-left: auto; display: inline-flex; align-items: baseline; gap: 8px; }
+.shpv em { font: 800 15px/1 var(--f-mono); font-style: normal; font-variant-numeric: tabular-nums; }
+.shdl { font: 800 11px/1 var(--f-mono); padding: 3px 7px; border-radius: 99px; opacity: 0; transform: translateY(3px) scale(.9); transition: opacity .3s, transform .3s; }
+.shdl.on { opacity: 1; transform: none; }
+.shdl.up { background: rgba(47,179,107,.18); color: #1B7F49; } .shdl.down { background: rgba(224,79,58,.16); color: #B33A28; } .shdl.same { background: rgba(16,41,44,.08); color: var(--muted); }
+.shbar { position: relative; display: block; height: 12px; border-radius: 99px; background: rgba(16,41,44,.14); overflow: hidden; }
+.shbar i { position: absolute; left: 0; top: 0; bottom: 0; background: #2FB36B; border-radius: 99px; width: 0; transition: width 1.5s cubic-bezier(.16,1,.3,1); }
+.shbar u { position: absolute; top: -1px; bottom: -1px; width: 2px; margin-left: -1px; background: rgba(16,41,44,.55); z-index: 1; }
+.shprog li.go .shbar i { box-shadow: 0 0 10px 2px rgba(47,179,107,.65); }
 .shh { margin: 4px 0 0; font: 800 14px/1.2 var(--f-display); }
 .shmiss { margin: 0; padding: 0; list-style: none; display: grid; gap: 8px; }
 .shmiss li { display: grid; gap: 3px; padding: 10px 12px; border: 1.5px solid var(--line); border-radius: 12px; background: var(--surface); font-size: 13.5px; line-height: 1.4; }
@@ -5146,7 +5159,6 @@ const World = (function () {
     bx(c, 13.75, 0.16, 1.9, '#F4F9F9', 0, 1.18, 0);
     bx(c, 13.75, 0.1, 0.12, '#F2A516', 0, 1.2, 0.93);
     for (let i = 0; i < 11; i++) bx(c, 0.9, 0.7, 0.05, '#0E9A8E', -6 + i * 1.2, 0.55, 0.57);
-    cy(c, 0.25, 0.3, 0.5, 6, '#F2A516', cx(-2.8), 1.5, 0.1);
     // desk phone (clickable while it rings)
     phoneG = new T.Group(); phoneG.position.set(0.9, 1.26, 0.3); g.add(phoneG);
     bx(phoneG, 0.8, 0.18, 0.6, '#27384F', 0, 0.09, 0, 'phone'); bx(phoneG, 0.5, 0.04, 0.3, '#DDE8E8', 0, 0.2, 0.12, 'phone');
@@ -10385,18 +10397,53 @@ const World = (function () {
   function shiftState() { if (!S.shift) S.shift = { n: 0, ok: 0, earned: 0, best: 0 }; return S.shift; }
   function shiftNote(q, ok, pay, picked) {
     const sh = shiftState(); sh.n++; if (ok) sh.ok++; sh.earned += pay; sh.best = Math.max(sh.best, S.streak);
+    if (q && q.c && !q.gen) { sh.cs = sh.cs || {}; sh.cs[q.c] = (sh.cs[q.c] || 0) + 1; }
+    if (!S.shiftProg) shiftSnap();
     if (!ok) shiftLog.push({ q: q, picked: picked });
   }
   const shiftDue = () => shiftState().n >= SHIFT_LEN;
+  /* topic progress in the shift report: the same fraction the Topics bars show (masteryByCat), compared with where it stood at the end of the last shift (S.shiftProg) */
+  function shiftSnap() { const ms = masteryByCat(), o = {}; Object.keys(ms).forEach(c => { if (ms[c].n) o[c] = +(ms[c].s / ms[c].n).toFixed(4); }); S.shiftProg = o; return o; }
   function openShift() {
     const sh = shiftState(), acc = sh.n ? sh.ok / sh.n : 0;
     let bonus = 0;
     if (acc >= 0.8) { bonus = Math.round(sh.earned * 0.25); S.cash += bonus; S.earned += bonus; S.rep = Math.min(100, S.rep + 3); }
     S.shifts = (S.shifts || 0) + 1;
-    shiftRes = { n: sh.n, ok: sh.ok, earned: sh.earned, best: sh.best, bonus: bonus, acc: acc, miss: shiftLog.slice(), num: S.shifts };
+    const was = S.shiftProg || {}, now = shiftSnap();
+    const prog = Object.keys(sh.cs || {}).filter(c => now[c] !== undefined).sort((a, b) => sh.cs[b] - sh.cs[a]).slice(0, 8).map(c => ({ c: c, n: sh.cs[c], from: was[c] !== undefined ? was[c] : now[c], to: now[c] }));
+    shiftRes = { n: sh.n, ok: sh.ok, earned: sh.earned, best: sh.best, bonus: bonus, acc: acc, miss: shiftLog.slice(), num: S.shifts, prog: prog, played: false };
     S.shift = { n: 0, ok: 0, earned: 0, best: 0 }; shiftLog = [];
     save(); renderStats(); SFX.play('shift');
     qExpand(); view = 'shift'; renderPanel(); const p = $('#qpanel'); if (p) p.scrollTop = 0;
+    shiftAnim();
+  }
+  const shPct = f => Math.round(f * 100);
+  function shiftProgHTML(r) {
+    if (!r.prog || !r.prog.length) return '';
+    const rows = r.prog.map((p, i) => {
+      const w = r.played ? p.to : p.from, d = shPct(p.to) - shPct(p.from);
+      return '<li data-i="' + i + '"><div class="shpt"><b>' + esc(CHIP[p.c] || CATNAME[p.c] || p.c) + '</b><small>' + p.n + ' answered</small><span class="shpv"><em>' + shPct(w) + '%</em><span class="shdl ' + (d > 0 ? 'up' : d < 0 ? 'down' : 'same') + (r.played ? ' on' : '') + '">' + (d > 0 ? '+' + d : d < 0 ? d : 'no change') + (d ? '%' : '') + '</span></span></div><span class="shbar" role="img" aria-label="' + shPct(p.to) + '% progress"><i style="width:' + Math.round(w * 1000) / 10 + '%"></i><u style="left:' + Math.round(p.from * 1000) / 10 + '%"></u></span></li>';
+    }).join('');
+    return '<h4 class="shh">Topic progress</h4><ul class="shprog" id="shprog">' + rows + '</ul>';
+  }
+  /* each bar zooms from where it stood after the last shift to where it is now (staggered, fast then easing in); the numbers count along */
+  function shiftAnim() {
+    const r = shiftRes; if (!r || !r.prog || !r.prog.length || r.played) return;
+    r.played = true;
+    const reduce = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches, DUR = 1500;
+    r.prog.forEach((p, i) => {
+      const li = document.querySelector('#shprog [data-i="' + i + '"]'); if (!li) return;
+      const bar = li.querySelector('.shbar i'), em = li.querySelector('.shpv em'), pill = li.querySelector('.shdl');
+      const fin = () => { bar.style.width = Math.round(p.to * 1000) / 10 + '%'; em.textContent = shPct(p.to) + '%'; pill.classList.add('on'); };
+      if (reduce) { fin(); return; }
+      setTimeout(() => {
+        bar.style.width = Math.round(p.to * 1000) / 10 + '%'; li.classList.add('go');
+        const t0 = performance.now(), a = shPct(p.from), b = shPct(p.to);
+        const tick = (t) => { const u = Math.min(1, (t - t0) / DUR), k = 1 - Math.pow(1 - u, 4); em.textContent = Math.round(a + (b - a) * k) + '%'; if (u < 1) requestAnimationFrame(tick); };
+        requestAnimationFrame(tick);
+        setTimeout(() => { fin(); li.classList.remove('go'); }, DUR + 40);
+      }, 450 + i * 260);
+    });
   }
   function shiftHTML() {
     const r = shiftRes; if (!r) return '';
@@ -10410,6 +10457,7 @@ const World = (function () {
     return '<div class="pane shiftpane"><h3>Shift ' + r.num + ' report</h3><p class="sub">' + esc(grade) + '</p>' +
       '<div class="shgrid"><div><b>' + r.ok + '/' + r.n + '</b><small>correct</small></div><div><b>' + pct + '%</b><small>accuracy</small></div><div><b>' + money(r.earned) + '</b><small>earned</small></div><div><b>' + r.best + '</b><small>best streak</small></div></div>' +
       (r.bonus ? '<p class="gift"><b>Shift bonus:</b> +' + money(r.bonus) + ' for 80%+ accuracy, and reputation +3.</p>' : '<p class="gift sad">Score 80% or better next shift for a bonus.</p>') +
+      shiftProgHTML(r) +
       (r.miss.length ? '<h4 class="shh">Missed this shift</h4><ol class="shmiss">' + miss + '</ol>' : '<p class="note">Nothing missed. Keep it up!</p>') +
       '<div class="btnrow">' + (nonGen ? '<button type="button" class="btn" data-act="shift-retry">Quiz me on these soon</button>' : '') + '<button type="button" class="btn go" data-act="shift-next">Start next shift</button></div></div>';
   }
@@ -11755,7 +11803,7 @@ const micLab3 = () => !!(World.ok && World.setMic);
   }
   setInterval(micTick, 25000);
 
-  const GAME_VERSION = 163;
+  const GAME_VERSION = 164;
   const b64u = (u8) => { let s = ''; for (let i = 0; i < u8.length; i += 0x8000) s += String.fromCharCode.apply(null, u8.subarray(i, i + 0x8000)); return btoa(s).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); };
   const unb64u = (t) => { const s = atob(t.replace(/-/g, '+').replace(/_/g, '/')), u = new Uint8Array(s.length); for (let i = 0; i < s.length; i++) u[i] = s.charCodeAt(i); return u; };
   const chk = (t) => { let h = 2166136261; for (let i = 0; i < t.length; i++) { h ^= t.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36); };
@@ -12036,10 +12084,10 @@ const micLab3 = () => !!(World.ok && World.setMic);
 
   { const sc = $('#savecard'); if (sc) sc.innerHTML = saveBoxHTML(); }
   World.init({ host: $('#stage'), getS: () => S, onPetMove: (k, pos) => { S.store.petOn = S.store.petOn || {}; if (pos) S.store.petOn[k] = pos; else delete S.store.petOn[k]; save(); }, onRadio: () => MUS.tap(), onDecorMove: (id, p) => { S.store.pos = S.store.pos || {}; S.store.pos[id] = p.map(v => Math.round(v * 100) / 100); save(); }, specialRoll: specialRoll, tagInfo: tagInfo, onBuy: buyUp, onNotes: () => openView('studies'), onBin: () => { micR = null; openView('mic'); }, onMicSite: (id) => micSiteClick(id), onMicDish: (id) => micDishClick(id), onMicPaper: (id, row) => micPaperClick(id, row), notesInfo: customCount, karenRoll: karenRoll, sweatyRoll: sweatyRoll, elderRoll: elderRoll, eventRoll: eventRoll, onVisitor: visitClick, onVisitorArrive: visitArrive, capsuleOk: capsuleOk, onCapsule: onCapsule, onBrain: synEnter, onSynSite: onSynSite, onEvt: onEvt, pillOk: pillOk, onPill: onPill, pillBoost: () => gearBuff().pills, onPhone: openPhone, onPolice: policeCome, himOk: himOk, onHimSpawn: onHimSpawn, onHimAngel: himAngelOk, onHimLand: himLand, onHimBless: onHimBless, onFp: fpClick, sign: () => shopName() + '|' + tierName() + ' #' + (S.franchises + 1) });
-  window.__rxDbg = () => ({ mus: MUS, micDbg: () => ({ get R() { return micR; }, get inLab() { return micIn; }, drop: micDrop, paper: micPaperClick, part: micStartPart, startSort: micStartSort, sel: id => { micSelG = id; renderPanel(); } }), sr: srUpdate, nc: newCard, sp: specialRoll, fp: fp, S: S, view: view, rush: rush, phoneR: phone.ringing, TOPQ: TOPQ, pool: poolQs, cur: cur, synQ: () => (typeof SYN !== 'undefined' ? SYN.q : null), synTap: id => onSynSite(id), offer: k => offerEvt(k, 'test'), onEvt: onEvt, holiday: () => holNow(), holN: () => holCount(), renderStats: renderStats, passive: passive, techRate: techRate, buyUp: buyUp, openVial: openVial, tabletTake: tabletTake, capsuleOpen: capsuleOpen, buffOn: buffOn, GEAR: GEAR, gearBuff: gearBuff, gearHave: gearHave });
+  window.__rxDbg = () => ({ openShift: openShift, shiftSnap: shiftSnap, mus: MUS, micDbg: () => ({ get R() { return micR; }, get inLab() { return micIn; }, drop: micDrop, paper: micPaperClick, part: micStartPart, startSort: micStartSort, sel: id => { micSelG = id; renderPanel(); } }), sr: srUpdate, nc: newCard, sp: specialRoll, fp: fp, S: S, view: view, rush: rush, phoneR: phone.ringing, TOPQ: TOPQ, pool: poolQs, cur: cur, synQ: () => (typeof SYN !== 'undefined' ? SYN.q : null), synTap: id => onSynSite(id), offer: k => offerEvt(k, 'test'), onEvt: onEvt, holiday: () => holNow(), holN: () => holCount(), renderStats: renderStats, passive: passive, techRate: techRate, buyUp: buyUp, openVial: openVial, tabletTake: tabletTake, capsuleOpen: capsuleOpen, buffOn: buffOn, GEAR: GEAR, gearBuff: gearBuff, gearHave: gearHave });
   if (!World.ok) $('#stage').classList.add('flat');
   else { document.body.classList.add('fx'); try { World.setBin(!!S.binBug); } catch (e) { /* decor */ } World.setPharmacist(meSpec()); World.setStore(S.store); World.setStaffLook(uniSpec()); World.setAwards(S.awards); World.setCalendar(Math.min(4, S.awards.calW || 0), false, S.awards.calW || 0); }
-  applyFocus(); syncBrand(); sfxLabel(); musLabel(); MUS.arm();
+  applyFocus(); syncBrand(); sfxLabel(); musLabel(); MUS.arm(); if (S.me.done && !S.shiftProg) shiftSnap();
   /* test tools: open the game with ?dev=1 on the end of the link to get extra menu buttons for trying events quickly */
   { const bb = document.querySelector('#menu [data-act="board"]'); if (bb) bb.hidden = !Net.on(); }
   if (/[?&]flags=1/.test(location.search)) setTimeout(() => openView('flags'), 400);
