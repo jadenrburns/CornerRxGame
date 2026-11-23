@@ -30,4 +30,8 @@ import * as m_crowd from './crowd.js';
 import * as m_world from './world.js';
 // compatibility: the old scripts shared globals; tests and any inline handlers still read them from window
 Object.assign(window, m_net, m_bank, m_pt3, m_pt3b, m_pt3c, m_pt3d, m_pt4, m_pt4q, m_pt4s, m_bio1, m_bio4x, m_bio4p, m_cycle, m_mol, m_mc3, m_mc3x, m_micdata, m_th3, m_th3c, m_ger, m_th553, m_him, m_lab, m_ind, m_drugs, m_shop, m_gear, m_deck, m_crowd, m_world);
-import './game.js';
+import { init as init_core } from './core.js';
+import { init as init_ext } from './ext.js';
+import { init as init_mic } from './mic.js';
+import { init as init_boot } from './boot.js';
+init_core(); init_ext(); init_mic(); init_boot();

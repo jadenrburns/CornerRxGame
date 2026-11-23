@@ -38,8 +38,10 @@ for (const f of files) {
   fs.writeFileSync(path.join(out, f + '.js'), (imp ? imp + '\n' : '') + src[f] + exp);
   report.push(f + ': ' + decl[f].length + ' exports');
 }
-fs.writeFileSync(path.join(out, 'game.js'), imports('game') + '\n' + game);
+const split = require('./split-game.js')(owner);
+for (const k of Object.keys(split.out)) fs.writeFileSync(path.join(out, k + '.js'), split.out[k]);
+console.log('split:', JSON.stringify(split.stats));
 const main = files.map(f => "import * as m_" + f + " from './" + f + ".js';").join('\n') +
-  "\n// compatibility: the old scripts shared globals; tests and any inline handlers still read them from window\nObject.assign(window, " + files.map(f => 'm_' + f).join(', ') + ");\nimport './game.js';\n";
+  "\n// compatibility: the old scripts shared globals; tests and any inline handlers still read them from window\nObject.assign(window, " + files.map(f => 'm_' + f).join(', ') + ");\nimport { init as init_core } from './core.js';\nimport { init as init_ext } from './ext.js';\nimport { init as init_mic } from './mic.js';\nimport { init as init_boot } from './boot.js';\ninit_core(); init_ext(); init_mic(); init_boot();\n";
 fs.writeFileSync(path.join(out, 'main.js'), main);
-console.log(report.join('\n')); console.log('game imports:', imports('game').split('\n').length, 'lines');
+console.log(report.join('\n')); console.log('game imports:', ''.split('\n').length, 'lines');
